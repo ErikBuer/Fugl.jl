@@ -18,9 +18,11 @@ using TestItems
 end
 
 @testitem "Test Text" begin
+    using Element: Text
+
     function MyApp()
         Container(
-            Text("Some text", color=RGB(0.0, 0.0, 0.0), font_size=24)
+            Text("Some text")
         )
     end
 
