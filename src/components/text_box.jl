@@ -49,11 +49,19 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
     end
 end
 
-function detect_click(view::TextBoxView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32, is_focused::Ref{Bool})
-    # Check if the mouse is inside the TextBox
-    if is_mouse_inside(mouse_state, x, y, width, height) && mouse_state.button_state[LeftButton] == IsPressed
-        view.on_focus_change(true)  # Trigger focus change callback
-    elseif mouse_state.button_state[LeftButton] == IsReleased
+function detect_click(view::TextBoxView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+    if !(mouse_state.button_state[LeftButton] == IsPressed)
+        return  # Only handle clicks when the left button is pressed
+    end
+
+    if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+        if !view.is_focused
+            view.on_focus_change(true)  # Trigger focus change callback
+        end
+        return
+    end
+
+    if view.is_focused
         view.on_focus_change(false)  # Trigger focus change callback
     end
 end

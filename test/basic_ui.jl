@@ -28,7 +28,7 @@ function main()
                     IntrinsicSize(TextButton("SomeText", on_click=() -> println("Clicked"))),
                     Container(TextBox(text_state[], is_focused[];
                         on_change=(text) -> println("Text changed: $text"),
-                        on_focus_change=(focused) -> println(focused ? "Focused" : "Unfocused")),
+                        on_focus_change=(focused) -> (is_focused[] = focused))
                     )
                 ],
                 padding=0
