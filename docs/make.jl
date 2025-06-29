@@ -28,6 +28,7 @@ makedocs(
             "Components/container.md",
             "Components/layout.md",
             "Components/text.md",
+            "Components/text_box.md",
             "Components/image.md",
             "Components/slider.md",
         ],

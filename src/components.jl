@@ -17,6 +17,9 @@ export Container
 include("components/text.jl")
 export Text
 
+include("components/text_box.jl")
+export TextBox
+
 include("components/image.jl")
 export Image
 
