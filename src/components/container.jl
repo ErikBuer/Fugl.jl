@@ -29,6 +29,15 @@ function Container(child::AbstractView=EmptyView(); style=ContainerStyle(), on_c
     return ContainerView(child, style, on_click, on_mouse_down)
 end
 
+function measure(view::ContainerView)::Tuple{Float32,Float32}
+    # Measure the size of the child component
+    child_width, child_height = measure(view.child)
+
+    # Add padding
+    padding = view.style.padding_px
+    return (child_width + 2 * padding, child_height + 2 * padding)
+end
+
 function apply_layout(view::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32)
     # Extract padding from the container's layout
     padding = view.style.padding_px

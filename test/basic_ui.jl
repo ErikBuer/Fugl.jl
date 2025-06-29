@@ -20,7 +20,8 @@ function main()
             Column([
                     Container(),
                     Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),
-                    TextButton("SomeText", on_click=() -> println("Clicked"))],
+                    IntrinsicSize(TextButton("SomeText", on_click=() -> println("Clicked")))
+                ],
                 padding=0
             )
         ])
