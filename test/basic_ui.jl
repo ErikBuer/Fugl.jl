@@ -27,7 +27,7 @@ function main()
                     Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),
                     IntrinsicSize(TextButton("SomeText", on_click=() -> println("Clicked"))),
                     Container(TextBox(text_state[], is_focused[];
-                        on_change=(text) -> println("Text changed: $text"),
+                        on_change=(text) -> (text_state[] = text),
                         on_focus_change=(focused) -> (is_focused[] = focused))
                     )
                 ],

@@ -50,6 +50,11 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
 end
 
 function detect_click(view::TextBoxView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+
+    if view.is_focused
+        handle_key_input(view, mouse_state)  # Handle key input if focused
+    end
+
     if !(mouse_state.button_state[LeftButton] == IsPressed)
         return  # Only handle clicks when the left button is pressed
     end
@@ -66,16 +71,22 @@ function detect_click(view::TextBoxView, mouse_state::MouseState, x::Float32, y:
     end
 end
 
-function handle_input(view::TextBoxView, key::Char, is_focused::Bool)
-    # Update the text content if the TextBox is focused
-    if is_focused
+function handle_key_input(view::TextBoxView, mouse_state::MouseState)
+    if !view.is_focused
+        return  # Only handle key input when the TextBox is focused
+    end
+
+    text = view.text  # Start with the current text
+
+    for key in mouse_state.key_buffer
+
         if key == '\b'  # Handle backspace
-            view.text = view.text[1:end-1]
+            text = view.text[1:end-1]
         else
-            view.text *= string(key)
+            text *= string(key)
         end
 
         # Trigger the on_change callback
-        view.on_change(view.text)
+        view.on_change(text)
     end
 end

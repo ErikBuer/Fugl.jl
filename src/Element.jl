@@ -59,6 +59,7 @@ function run(ui_function::Function; title::String="Element", window_width_px::In
     # Initialize local states
     mouse_state = MouseState()
     GLFW.SetMouseButtonCallback(gl_window, (gl_window, button, action, mods) -> mouse_button_callback(gl_window, button, action, mods, mouse_state))
+    GLFW.SetKeyCallback(gl_window, (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state))
 
     projection_matrix = get_orthographic_matrix(0.0f0, Float32(window_width_px), Float32(window_height_px), 0.0f0, -1.0f0, 1.0f0)
 
@@ -88,6 +89,9 @@ function run(ui_function::Function; title::String="Element", window_width_px::In
 
         # Render the UI
         interpret_view(ui, 0.0f0, 0.0f0, Float32(width_px), Float32(height_px), projection_matrix)
+
+        # Clear the key buffer
+        empty!(mouse_state.key_buffer)
 
         # Swap buffers and poll events
         GLFW.SwapBuffers(gl_window)
