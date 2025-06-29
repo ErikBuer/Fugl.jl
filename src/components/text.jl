@@ -9,6 +9,17 @@ function Text(text::String; style=TextStyle(), horizontal_align=:center, vertica
     return TextView(text, style, horizontal_align, vertical_align)
 end
 
+function measure(view::TextView)::Tuple{Float32,Float32}
+    font = view.style.font
+    size_px = view.style.size_px
+
+    # Measure the width and height of the text
+    text_width = measure_word_width(font, view.text, size_px)
+    text_height = size_px  # Height is determined by font size
+
+    return (text_width, text_height)
+end
+
 function apply_layout(view::TextView, x::Float32, y::Float32, width::Float32, height::Float32)
     # Text layout is simple: it occupies the entire area provided
     return (x, y, width, height)

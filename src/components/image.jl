@@ -15,6 +15,17 @@ function Image(image_path::String;
     return ImageView(horizontal_align, vertical_align, width_px, height_px, texture)
 end
 
+function measure(view::ImageView)::Tuple{Float32,Float32}
+    # Get the original image size from the texture
+    texture_width_px, texture_height_px = Float32.(GLA.size(view.texture))
+
+    # Use the provided width and height if specified, otherwise use the texture dimensions
+    final_width_px = view.width_px === nothing ? texture_width_px : view.width_px
+    final_height_px = view.height_px === nothing ? texture_height_px : view.height_px
+
+    return (final_width_px, final_height_px)
+end
+
 function apply_layout(view::ImageView, x::Float32, y::Float32, width::Float32, height::Float32)
     # Get the original image size
     texture_width_px, texture_height_px = Float32.(GLA.size(view.texture))

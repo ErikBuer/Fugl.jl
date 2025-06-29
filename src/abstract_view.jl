@@ -39,3 +39,8 @@ function detect_click(root_view::AbstractView, mouse_state::MouseState, x::Abstr
         detect_click(root_view.child, mouse_state, child_x, child_y, child_width, child_height)
     end
 end
+
+function measure(view::AbstractView)::Tuple{Float32,Float32}
+    # Default implementation: components occupy the parent's size
+    return (0.0f0, 0.0f0)  # Width and height
+end
