@@ -6,6 +6,11 @@ function main()
     showImage = Ref(true)
     slider_value = Ref(0.5f0)
 
+    # External state for the TextBox
+    text_state = Ref("Enter text here...")
+    is_focused = Ref(false)
+
+
     function MyApp()
         Row([
             Container(Text("Hello World")),
@@ -20,7 +25,11 @@ function main()
             Column([
                     Container(),
                     Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),
-                    IntrinsicSize(TextButton("SomeText", on_click=() -> println("Clicked")))
+                    IntrinsicSize(TextButton("SomeText", on_click=() -> println("Clicked"))),
+                    Container(TextBox(text_state[], is_focused[];
+                        on_change=(text) -> println("Text changed: $text"),
+                        on_focus_change=(focused) -> println(focused ? "Focused" : "Unfocused")),
+                    )
                 ],
                 padding=0
             )
