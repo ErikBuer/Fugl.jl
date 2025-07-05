@@ -31,6 +31,7 @@ makedocs(
             "Components/text_box.md",
             "Components/image.md",
             "Components/slider.md",
+            "Components/text_button.md",
         ],
         "interaction.md",
         "api_reference.md",

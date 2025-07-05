@@ -14,11 +14,11 @@ screenshot(MyApp, "text.png", 400, 150);
 nothing #hide
 ```
 
+![Text](text.png)
+
 ## Wrapping
 
 The `Text` component support wrapping by default.
-
-![Text](text.png)
 
 ``` @example TextWrappingExample
 using Element
