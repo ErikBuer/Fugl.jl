@@ -10,7 +10,7 @@ using GeometryBasics, ColorTypes    # Additional rendering dependencies
 include("matrices.jl")
 
 include("shaders.jl")
-export initialize_shaders, prog
+export initialize_shaders
 
 include("mouse_state.jl")
 export MouseButton, ButtonState, IsReleased, IsPressed, MouseState, mouse_button_callback

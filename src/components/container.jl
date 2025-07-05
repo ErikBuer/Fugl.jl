@@ -3,15 +3,17 @@ mutable struct ContainerStyle
     border_color::Vec4{<:AbstractFloat} #RGBA color
     border_width_px::Float32
     padding_px::Float32
+    corner_radius_px::Float32
 end
 
 function ContainerStyle(;
     background_color=Vec4{Float32}(0.8f0, 0.8f0, 0.8f0, 1.0f0),
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
-    border_width_px=1.0f0,
-    padding_px::Float32=10f0 # Padding in pixels
+    border_width_px=4.0f0,
+    padding_px::Float32=6f0,
+    corner_radius_px::Float32=10.0f0
 )
-    return ContainerStyle(background_color, border_color, border_width_px, padding_px)
+    return ContainerStyle(background_color, border_color, border_width_px, padding_px, corner_radius_px)
 end
 
 struct ContainerView <: AbstractView
@@ -64,13 +66,10 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     bg_color = container.style.background_color
     border_color = container.style.border_color
     border_width_px = container.style.border_width_px
+    corner_radius_px = container.style.corner_radius_px
 
     vertex_positions = generate_rectangle_vertices(x, y, width, height)
-    draw_rectangle(vertex_positions, bg_color, projection_matrix)
-
-    if border_width_px > 0.0
-        draw_closed_lines(vertex_positions, border_color)
-    end
+    draw_rounded_rectangle(vertex_positions, width, height, bg_color, border_color, border_width_px, corner_radius_px, projection_matrix)
 
     # Render the child
     interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix)
