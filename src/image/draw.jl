@@ -17,10 +17,10 @@ function draw_image(texture::GLAbstraction.Texture, x_px::AbstractFloat, y_px::A
 
     # Define texture coordinates
     texturecoordinates = [
-        Vec{2,Float32}(1.0f0, 0.0f0),  # Bottom-right
-        Vec{2,Float32}(1.0f0, 1.0f0),  # Top-right
-        Vec{2,Float32}(0.0f0, 1.0f0),  # Top-left    
-        Vec{2,Float32}(0.0f0, 0.0f0),  # Bottom-left
+        Vec{2,Float32}(1, 0),  # Bottom-right
+        Vec{2,Float32}(1, 1),  # Top-right
+        Vec{2,Float32}(0, 1),  # Top-left    
+        Vec{2,Float32}(0, 0),  # Bottom-left
     ]
 
     # Define the elements (two triangles forming the rectangle)
