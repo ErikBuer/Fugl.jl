@@ -2,6 +2,9 @@
 include("components/empty.jl")
 export Empty
 
+include("components/fixed_size.jl")
+export FixedSize
+
 include("components/intrinsic_size.jl")
 export IntrinsicSize
 

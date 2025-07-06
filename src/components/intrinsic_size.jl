@@ -36,3 +36,11 @@ function detect_click(view::IntrinsicSizeView, mouse_state::MouseState, x::Float
     # Forward the click detection to the child
     detect_click(view.child, mouse_state, x, y, width, height)
 end
+
+function measure(view::IntrinsicSizeView)::Tuple{Float32,Float32}
+    return measure(view.child)
+end
+
+function preferred_size(view::IntrinsicSizeView)::Bool
+    return true
+end
