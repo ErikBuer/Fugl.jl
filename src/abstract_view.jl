@@ -42,5 +42,9 @@ end
 
 function measure(view::AbstractView)::Tuple{Float32,Float32}
     # Default implementation: components occupy the parent's size
-    return (0.0f0, 0.0f0)  # Width and height
+    return (Inf32, Inf32)  # Width and height
+end
+
+function preferred_size(view::AbstractView)::Bool
+    return false
 end

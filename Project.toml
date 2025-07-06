@@ -15,7 +15,6 @@ ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 IndirectArrays = "9b13fd28-a010-5f03-acff-a1bbcff69959"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
-OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 
 [compat]
 FreeTypeAbstraction = "0.10.6"
