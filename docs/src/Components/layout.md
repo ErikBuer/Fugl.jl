@@ -41,3 +41,22 @@ nothing #hide
 ```
 
 ![Row example](row.png)
+
+## Sizing
+
+``` @example IntrinsicSizeExample
+using Element
+
+function MyApp()
+    Column([
+        IntrinsicWidth(Container(Text("IntrinsicWidth"))),
+        IntrinsicSize(Container(Text("IntrinsicSize"))),
+        IntrinsicHeight(Container(Text("IntrinsicHeight"))),
+    ])
+end
+
+screenshot(MyApp, "intrinsic_sizing.png", 400, 300);
+nothing #hide
+```
+
+![Intrinsic sizing example](intrinsic_sizing.png)
