@@ -4,7 +4,6 @@ const GLA = GLAbstraction
 using GeometryBasics
 using FreeTypeAbstraction
 using ColorTypes
-using OffsetArrays
 
 mutable struct WindowInfo
     width_px::Integer
