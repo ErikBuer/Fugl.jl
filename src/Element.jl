@@ -66,17 +66,23 @@ function run(ui_function::Function; title::String="Element", window_width_px::In
     # Main loop
     while !GLFW.WindowShouldClose(gl_window)
         # Update window size
-        width_px, height_px = GLFW.GetFramebufferSize(gl_window)
-
-        # Update viewport and projection matrix
-        glViewport(0, 0, width_px, height_px)
-        projection_matrix = get_orthographic_matrix(0.0f0, Float32(width_px), Float32(height_px), 0.0f0, -1.0f0, 1.0f0)
-
-        # Clear the screen
-        ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
+        window_width, window_height = GLFW.GetWindowSize(gl_window)
+        fb_width, fb_height = GLFW.GetFramebufferSize(gl_window)
+        scale_x = fb_width / window_width
+        scale_y = fb_height / window_height
 
         # Poll mouse position
         mouse_state.x, mouse_state.y = Tuple(GLFW.GetCursorPos(gl_window))
+        mouse_state.x *= scale_x
+        mouse_state.y *= scale_y
+
+
+        # Update viewport and projection matrix
+        glViewport(0, 0, fb_width, fb_height)
+        projection_matrix = get_orthographic_matrix(0.0f0, Float32(fb_width), Float32(fb_height), 0.0f0, -1.0f0, 1.0f0)
+
+        # Clear the screen
+        ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
         # Lock the mouse state by creating a copy
         locked_state = collect_state!(mouse_state)
@@ -85,10 +91,10 @@ function run(ui_function::Function; title::String="Element", window_width_px::In
         ui::AbstractView = ui_function()
 
         # Detect clicks
-        detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(width_px), Float32(height_px))
+        detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
 
         # Render the UI
-        interpret_view(ui, 0.0f0, 0.0f0, Float32(width_px), Float32(height_px), projection_matrix)
+        interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
 
         # Clear the key buffer
         empty!(mouse_state.key_buffer)
