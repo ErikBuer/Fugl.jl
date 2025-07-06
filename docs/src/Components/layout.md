@@ -46,6 +46,7 @@ nothing #hide
 
 ``` @example IntrinsicSizeExample
 using Element
+using Element: Text
 
 function MyApp()
     Column([
@@ -60,3 +61,17 @@ nothing #hide
 ```
 
 ![Intrinsic sizing example](intrinsic_sizing.png)
+
+``` @example FixedSizeExample
+using Element
+using Element: Text
+
+function MyApp()
+    FixedSize(Container(Text("FixedSize")), 200, 300)
+end
+
+screenshot(MyApp, "fixed_sizing.png", 400, 300);
+nothing #hide
+```
+
+![Fixed sizing example](fixed_sizing.png)

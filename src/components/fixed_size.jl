@@ -4,8 +4,8 @@ struct FixedSizeView <: AbstractView
     height::Float32
 end
 
-function FixedSize(child::AbstractView, width::Float32, height::Float32)
-    FixedSizeView(child, width, height)
+function FixedSize(child::AbstractView, width::Real, height::Real)
+    FixedSizeView(child, Float32(width), Float32(height))
 end
 
 function interpret_view(view::FixedSizeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
