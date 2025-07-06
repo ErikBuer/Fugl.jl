@@ -23,6 +23,9 @@ export Column
 include("components/intrinsic_column.jl")
 export IntrinsicColumn
 
+include("components/intrinsic_row.jl")
+export IntrinsicRow
+
 include("components/container.jl")
 export Container
 
