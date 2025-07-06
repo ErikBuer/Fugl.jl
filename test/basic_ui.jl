@@ -22,10 +22,10 @@ function main()
                 end,
                 on_click=() -> (showImage[] = !showImage[])
             ),
-            Column([
+            IntrinsicColumn([
                     Container(),
                     Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),
-                    IntrinsicWidth(TextButton("SomeText", on_click=() -> println("Clicked"))),
+                    IntrinsicHeight(TextButton("SomeText", on_click=() -> println("Clicked"))),
                     Container(TextBox(text_state[], is_focused[];
                         on_change=(text) -> (text_state[] = text),
                         on_focus_change=(focused) -> (is_focused[] = focused))
