@@ -45,6 +45,14 @@ function measure(view::AbstractView)::Tuple{Float32,Float32}
     return (Inf32, Inf32)  # Width and height
 end
 
-function preferred_size(view::AbstractView)::Bool
+function preferred_width(view::AbstractView)::Bool
     return false
+end
+
+function preferred_height(view::AbstractView)::Bool
+    return false
+end
+
+function preferred_size(view::AbstractView)::Bool
+    return preferred_width(view) || preferred_height(view)
 end

@@ -20,6 +20,9 @@ export Row
 include("components/column.jl")
 export Column
 
+include("components/intrinsic_column.jl")
+export IntrinsicColumn
+
 include("components/container.jl")
 export Container
 

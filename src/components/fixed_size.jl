@@ -24,6 +24,10 @@ function measure(view::FixedSizeView)::Tuple{Float32,Float32}
     return (view.width, view.height)
 end
 
-function preferred_size(view::FixedSizeView)::Bool
+function preferred_width(view::FixedSizeView)::Bool
+    return true
+end
+
+function preferred_height(view::FixedSizeView)::Bool
     return true
 end

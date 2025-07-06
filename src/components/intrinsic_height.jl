@@ -36,6 +36,6 @@ function measure(view::IntrinsicHeightView)::Tuple{Float32,Float32}
     return (Inf32, child_height)
 end
 
-function preferred_size(view::IntrinsicHeightView)::Bool
+function preferred_height(view::IntrinsicHeightView)::Bool
     return true
 end

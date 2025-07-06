@@ -36,6 +36,6 @@ function measure(view::IntrinsicWidthView)::Tuple{Float32,Float32}
     return (child_width, Inf32)
 end
 
-function preferred_size(view::IntrinsicWidthView)::Bool
+function preferred_width(view::IntrinsicWidthView)::Bool
     return true
 end
