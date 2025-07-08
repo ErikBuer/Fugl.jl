@@ -1,5 +1,5 @@
 # API Reference
 
 ```@autodocs
-Modules = [Glance]
+Modules = [Fugl]
 ```

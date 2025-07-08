@@ -1,7 +1,7 @@
 # Text Buttons
 
 ``` @example TextButtonExample
-using Glance
+using Fugl
 
 function MyApp()
     Container(

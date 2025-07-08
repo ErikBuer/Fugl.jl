@@ -3,7 +3,7 @@
 The most basic UI component.
 
 ``` @example ContainerExample
-using Glance
+using Fugl
 
 function MyApp()
     Container()
@@ -18,7 +18,7 @@ nothing #hide
 You can add a child component to a cointainer, as such:
 
 ``` @example ContainerExample2
-using Glance
+using Fugl
 
 function MyApp()
     Container(

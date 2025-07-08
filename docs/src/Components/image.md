@@ -1,7 +1,7 @@
 # Image
 
 ``` @example MissingImageExample
-using Glance
+using Fugl
 
 function MyApp()
     Container(Image(""))

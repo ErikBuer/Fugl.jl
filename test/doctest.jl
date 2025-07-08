@@ -1,7 +1,7 @@
 using Documenter
-using Glance
+using Fugl
 
-# Run doctests for Glance.jl
+# Run doctests for Fugl.jl
 
-DocMeta.setdocmeta!(Glance, :DocTestSetup, :(using Glance); recursive=true)
-Documenter.doctest(Glance)
+DocMeta.setdocmeta!(Fugl, :DocTestSetup, :(using Fugl); recursive=true)
+Documenter.doctest(Fugl)

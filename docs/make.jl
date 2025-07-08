@@ -8,20 +8,20 @@ using Documenter
 const LOCAL = get(ENV, "LOCAL", "false") == "true"
 
 if LOCAL
-    include("../src/Glance.jl")
-    using .Glance
+    include("../src/Fugl.jl")
+    using .Fugl
 else
-    using Glance
+    using Fugl
     ENV["GKSwstype"] = "100"
 end
 
-DocMeta.setdocmeta!(Glance, :DocTestSetup, :(using Glance); recursive=true)
+DocMeta.setdocmeta!(Fugl, :DocTestSetup, :(using Fugl); recursive=true)
 
 
 makedocs(
-    modules=[Glance],
+    modules=[Fugl],
     format=Documenter.HTML(),
-    sitename="Glance.jl",
+    sitename="Fugl.jl",
     pages=Any[
         "index.md",
         "Components"=>Any[
@@ -40,6 +40,6 @@ makedocs(
 )
 
 deploydocs(
-    repo="github.com/ErikBuer/Glance.jl.git",
+    repo="github.com/ErikBuer/Fugl.jl.git",
     push_preview=true,
 )

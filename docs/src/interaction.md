@@ -1,7 +1,7 @@
 # User interaction
 
 ``` @example InteractionExample
-using Glance
+using Fugl
 
 function MyApp()
     Container( on_click=() -> println("Clicked") )
@@ -10,7 +10,7 @@ nothing #hide
 ```
 
 ``` @example TextButtonExample
-using Glance
+using Fugl
 
 function MyApp()
     Container(
@@ -21,7 +21,7 @@ nothing #hide
 ```
 
 ``` @example HorizontalSliderExample
-using Glance
+using Fugl
 
 # Ref for maintining the slider state
 slider_value = Ref(0.5f0)

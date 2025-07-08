@@ -1,5 +1,5 @@
-using Glance
-using Glance: Text
+using Fugl
+using Fugl: Text
 
 function main()
     # Mutable state variable
@@ -37,7 +37,7 @@ function main()
     end
 
     # Run the GUI
-    Glance.run(MyApp, title="Dynamic UI Example")
+    Fugl.run(MyApp, title="Dynamic UI Example")
     #screenshot(MyApp, "test/test_output/dynamic_ui_example.png", 1920, 1080)
 end
 

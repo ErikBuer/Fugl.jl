@@ -1,4 +1,4 @@
-module Glance
+module Fugl
 
 using ModernGL, GLAbstraction, GLFW # OpenGL dependencies
 const GLA = GLAbstraction
@@ -39,12 +39,12 @@ export screenshot
 
 
 """
-    run(ui_ref[]::AbstractView; title::String="Glance", window_width_px::Integer=1920, window_height_px::Integer=1080)
+    run(ui_ref[]::AbstractView; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080)
 
 Run the main loop for the GUI application.
 This function handles the rendering and event processing for the GUI.
 """
-function run(ui_function::Function; title::String="Glance", window_width_px::Integer=1920, window_height_px::Integer=1080)
+function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080)
     # Initialize the GLFW window
     gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
     GLA.set_context!(gl_window)

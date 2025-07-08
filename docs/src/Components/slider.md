@@ -1,7 +1,7 @@
 # Sliders
 
 ``` @example HorizontalSliderExample
-using Glance
+using Fugl
 
 # Ref for maintining the slider state
 slider_value = Ref(0.5f0)

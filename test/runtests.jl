@@ -1,5 +1,5 @@
 using Test
-using Glance
+using Fugl
 
 
 include("doctest.jl")

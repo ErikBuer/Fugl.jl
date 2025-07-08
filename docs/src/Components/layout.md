@@ -5,7 +5,7 @@
 `Column` is a component for creating linear layout.
 
 ``` @example ColumnExample
-using Glance
+using Fugl
 
 function MyApp()
     Column([
@@ -26,7 +26,7 @@ nothing #hide
 `Row` is a component for creating linear layout.
 
 ``` @example RowExample
-using Glance
+using Fugl
 
 function MyApp()
     Row([
@@ -45,8 +45,8 @@ nothing #hide
 ## Sizing
 
 ``` @example IntrinsicSizeExample
-using Glance
-using Glance: Text
+using Fugl
+using Fugl: Text
 
 function MyApp()
     Column([
@@ -63,8 +63,8 @@ nothing #hide
 ![Intrinsic sizing example](intrinsic_sizing.png)
 
 ``` @example FixedSizeExample
-using Glance
-using Glance: Text
+using Fugl
+using Fugl: Text
 
 function MyApp()
     Column([
@@ -83,8 +83,8 @@ nothing #hide
 ## IntrinsicColumn
 
 ``` @example IntrinsicColumnExample
-using Glance
-using Glance: Text
+using Fugl
+using Fugl: Text
 
 function MyApp()
     IntrinsicColumn([
@@ -103,8 +103,8 @@ nothing #hide
 ## IntrinsicRow
 
 ``` @example IntrinsicColumnExample
-using Glance
-using Glance: Text
+using Fugl
+using Fugl: Text
 
 function MyApp()
     IntrinsicRow([
