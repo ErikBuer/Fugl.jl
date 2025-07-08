@@ -1,7 +1,7 @@
 # Text Buttons
 
 ``` @example TextButtonExample
-using Element
+using Fugl
 
 function MyApp()
     Container(

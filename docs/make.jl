@@ -8,20 +8,20 @@ using Documenter
 const LOCAL = get(ENV, "LOCAL", "false") == "true"
 
 if LOCAL
-    include("../src/Element.jl")
-    using .Element
+    include("../src/Fugl.jl")
+    using .Fugl
 else
-    using Element
+    using Fugl
     ENV["GKSwstype"] = "100"
 end
 
-DocMeta.setdocmeta!(Element, :DocTestSetup, :(using Element); recursive=true)
+DocMeta.setdocmeta!(Fugl, :DocTestSetup, :(using Fugl); recursive=true)
 
 
 makedocs(
-    modules=[Element],
+    modules=[Fugl],
     format=Documenter.HTML(),
-    sitename="Element.jl",
+    sitename="Fugl.jl",
     pages=Any[
         "index.md",
         "Components"=>Any[
@@ -40,6 +40,6 @@ makedocs(
 )
 
 deploydocs(
-    repo="github.com/ErikBuer/Element.jl.git",
+    repo="github.com/ErikBuer/Fugl.jl.git",
     push_preview=true,
 )

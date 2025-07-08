@@ -1,7 +1,7 @@
 # Image
 
 ``` @example MissingImageExample
-using Element
+using Fugl
 
 function MyApp()
     Container(Image(""))

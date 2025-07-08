@@ -1,9 +1,9 @@
-# Element.jl
+# Fugl.jl
 
-[![docs badge](https://img.shields.io/badge/docs-latest-blue.svg)](https://erikbuer.github.io/Element.jl/dev/)
+[![docs badge](https://img.shields.io/badge/docs-latest-blue.svg)](https://erikbuer.github.io/Fugl.jl/dev/)
 
-`Element.jl` is a funcitonal GUI framework written in Julia using OpenGL.
+`Fugl.jl` is a funcitonal GUI library written in Julia using OpenGL.
 
-It is intended to be a simple library with few depencdencies, suitable for making scientific applications.
+It is intended to be a simple library with few depencdencies, suitable for making engineering applications.
 
 **It is very mutch a work-in-progress.**

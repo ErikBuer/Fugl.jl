@@ -1,4 +1,4 @@
-using Element
+using Fugl
 using ColorTypes
 
 using TestItems
@@ -14,11 +14,11 @@ using TestItems
     end
 
     # Save a screenshot of the UI
-    Element.screenshot(MyApp, "test_output/ui_screenshot.png", 400, 300)
+    Fugl.screenshot(MyApp, "test_output/ui_screenshot.png", 400, 300)
 end
 
 @testitem "Test Text" begin
-    using Element: Text
+    using Fugl: Text
 
     function MyApp()
         Container(
@@ -27,12 +27,12 @@ end
     end
 
     # Save a screenshot of the UI
-    Element.screenshot(MyApp, "test_output/text_screenshot.png", 400, 300)
+    Fugl.screenshot(MyApp, "test_output/text_screenshot.png", 400, 300)
 end
 
 
 @testitem "Test orthographic Projection Matrix" begin
-    projection_matrix = Element.get_orthographic_matrix(0.0, 1920.0, 1080.0, 0.0, -1.0, 1.0)
+    projection_matrix = Fugl.get_orthographic_matrix(0.0, 1920.0, 1080.0, 0.0, -1.0, 1.0)
 
     vertex1 = Float32[0.0, 0.0, 0.0, 1.0]
 

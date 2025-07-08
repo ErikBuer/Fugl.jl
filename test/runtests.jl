@@ -1,5 +1,5 @@
 using Test
-using Element
+using Fugl
 
 
 include("doctest.jl")

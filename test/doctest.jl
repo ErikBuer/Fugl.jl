@@ -1,7 +1,7 @@
 using Documenter
-using Element
+using Fugl
 
-# Run doctests for Element.jl
+# Run doctests for Fugl.jl
 
-DocMeta.setdocmeta!(Element, :DocTestSetup, :(using Element); recursive=true)
-Documenter.doctest(Element)
+DocMeta.setdocmeta!(Fugl, :DocTestSetup, :(using Fugl); recursive=true)
+Documenter.doctest(Fugl)
