@@ -1,7 +1,7 @@
 # User interaction
 
 ``` @example InteractionExample
-using Element
+using Glance
 
 function MyApp()
     Container( on_click=() -> println("Clicked") )
@@ -10,7 +10,7 @@ nothing #hide
 ```
 
 ``` @example TextButtonExample
-using Element
+using Glance
 
 function MyApp()
     Container(
@@ -21,7 +21,7 @@ nothing #hide
 ```
 
 ``` @example HorizontalSliderExample
-using Element
+using Glance
 
 # Ref for maintining the slider state
 slider_value = Ref(0.5f0)

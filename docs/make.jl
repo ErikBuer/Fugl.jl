@@ -8,20 +8,20 @@ using Documenter
 const LOCAL = get(ENV, "LOCAL", "false") == "true"
 
 if LOCAL
-    include("../src/Element.jl")
-    using .Element
+    include("../src/Glance.jl")
+    using .Glance
 else
-    using Element
+    using Glance
     ENV["GKSwstype"] = "100"
 end
 
-DocMeta.setdocmeta!(Element, :DocTestSetup, :(using Element); recursive=true)
+DocMeta.setdocmeta!(Glance, :DocTestSetup, :(using Glance); recursive=true)
 
 
 makedocs(
-    modules=[Element],
+    modules=[Glance],
     format=Documenter.HTML(),
-    sitename="Element.jl",
+    sitename="Glance.jl",
     pages=Any[
         "index.md",
         "Components"=>Any[
@@ -40,6 +40,6 @@ makedocs(
 )
 
 deploydocs(
-    repo="github.com/ErikBuer/Element.jl.git",
+    repo="github.com/ErikBuer/Glance.jl.git",
     push_preview=true,
 )

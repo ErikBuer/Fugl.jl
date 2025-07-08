@@ -1,8 +1,8 @@
 # Text
 
 ``` @example TextExample
-using Element
-using Element: Text
+using Glance
+using Glance: Text
 
 function MyApp()
     Container(
@@ -21,8 +21,8 @@ nothing #hide
 The `Text` component support wrapping by default.
 
 ``` @example TextWrappingExample
-using Element
-using Element: Text
+using Glance
+using Glance: Text
 
 function MyApp()
     Container(
@@ -39,8 +39,8 @@ nothing #hide
 ## Horizontal Alignement
 
 ``` @example TextAlignement
-using Element
-using Element: Text
+using Glance
+using Glance: Text
 
 function MyApp()
     Container(
@@ -61,8 +61,8 @@ nothing #hide
 ## Vertical Alignement
 
 ``` @example TextVerticalAlignment
-using Element
-using Element: Text
+using Glance
+using Glance: Text
 
 function MyApp()
     Container(

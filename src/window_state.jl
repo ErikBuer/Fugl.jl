@@ -51,13 +51,13 @@ function mouse_button_callback(window_state::WindowState, gl_window, button, act
 end
 
 """
-    initialize_window(root_view::AbstractView; title::String="Element", window_width_px::Integer=1920, window_height_px::Integer=1080)::WindowState
+    initialize_window(root_view::AbstractView; title::String="Glance", window_width_px::Integer=1920, window_height_px::Integer=1080)::WindowState
 
 Create and initialize a new `WindowState` instance with default values.
 
 # Arguments
 
-- `title::String`: The name of the window. Default is "Element".
+- `title::String`: The name of the window. Default is "Glance".
 - `window_width_px::Integer`: The width of the window in pixels.
 - `window_height_px::Integer`: The height of the window in pixels.
 
@@ -65,7 +65,7 @@ Create and initialize a new `WindowState` instance with default values.
 
 - `WindowState`: A new instance of `WindowState` with the specified window size and default values for other fields.
 """
-function initialize_window(root_view::AbstractView; title::String="Element", window_width_px::Integer=1920, window_height_px::Integer=1080)::WindowState
+function initialize_window(root_view::AbstractView; title::String="Glance", window_width_px::Integer=1920, window_height_px::Integer=1080)::WindowState
     gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
     GLA.set_context!(gl_window)
     GLFW.MakeContextCurrent(gl_window)
@@ -84,7 +84,7 @@ function initialize_window(root_view::AbstractView; title::String="Element", win
     )
 
     # Initialize the projection matrix
-    projection_matrix = Element.get_orthographic_matrix(
+    projection_matrix = Glance.get_orthographic_matrix(
         0.0f0, Float32(window_width_px), Float32(window_height_px), 0.0f0, -1.0f0, 1.0f0
     )
 

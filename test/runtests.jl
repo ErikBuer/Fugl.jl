@@ -1,5 +1,5 @@
 using Test
-using Element
+using Glance
 
 
 include("doctest.jl")

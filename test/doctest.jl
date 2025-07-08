@@ -1,7 +1,7 @@
 using Documenter
-using Element
+using Glance
 
-# Run doctests for Element.jl
+# Run doctests for Glance.jl
 
-DocMeta.setdocmeta!(Element, :DocTestSetup, :(using Element); recursive=true)
-Documenter.doctest(Element)
+DocMeta.setdocmeta!(Glance, :DocTestSetup, :(using Glance); recursive=true)
+Documenter.doctest(Glance)

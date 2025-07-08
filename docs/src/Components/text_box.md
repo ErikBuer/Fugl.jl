@@ -1,7 +1,7 @@
 # TextBox
 
 ``` @example TextBoxExample
-using Element
+using Glance
 
 text_state = Ref("Enter text here...")
 is_focused = Ref(false)

@@ -1,7 +1,7 @@
 # Image
 
 ``` @example MissingImageExample
-using Element
+using Glance
 
 function MyApp()
     Container(Image(""))
