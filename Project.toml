@@ -18,7 +18,7 @@ ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
 
 [compat]
 ColorTypes = "0.12.1"
-FileIO = "1.17" #.0
+FileIO = "1.17.0"
 FreeTypeAbstraction = "0.10.6"
 GLAbstraction = "0.7.0"
 GLFW = "3.4.4"
