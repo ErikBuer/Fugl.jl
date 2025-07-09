@@ -64,7 +64,7 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     total_height = length(lines) * size_px
 
     # Calculate vertical alignment offset
-    vertical_offset = calculate_vertical_offset(height, total_height, view.vertical_align)
+    vertical_offset = calculate_text_vertical_offset(height, total_height, view.vertical_align)
 
     # Render each line
     current_y = y + vertical_offset
