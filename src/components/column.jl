@@ -62,3 +62,15 @@ function detect_click(view::ColumnView, mouse_state::MouseState, x::AbstractFloa
         detect_click(child, mouse_state, child_x, child_y, child_width, child_height)
     end
 end
+
+function measure(view::ColumnView)::Tuple{Float32,Float32}
+    if isempty(view.children)
+        return (0f0, 0f0)
+    end
+    child_sizes = [measure(child) for child in view.children]
+    max_width = maximum(s[1] for s in child_sizes)
+    total_height = sum(s[2] for s in child_sizes) + (length(view.children) - 1) * view.spacing
+    max_width += 2 * view.padding
+    total_height += 2 * view.padding
+    return (max_width, total_height)
+end
