@@ -31,6 +31,42 @@ end
 end
 
 
+@testitem "Test Column Measure" begin
+    using Fugl: Text
+
+    function MyApp()
+        IntrinsicHeight(
+            Container(
+                Row([
+                    TextButton("Run", on_click=() -> println("Clicked")),
+                    Text("Top bar")
+                ])
+            )
+        )
+    end
+
+    # Save a screenshot of the UI
+    Fugl.screenshot(MyApp, "test_output/column_mesure.png", 400, 300)
+end
+
+@testitem "Test Row Measure" begin
+    using Fugl: Text
+
+    function MyApp()
+        IntrinsicWidth(
+            Container(
+                Column([
+                    TextButton("Run", on_click=() -> println("Clicked")),
+                    Text("Side bar")
+                ])
+            )
+        )
+    end
+
+    # Save a screenshot of the UI
+    Fugl.screenshot(MyApp, "test_output/row_measure.png", 400, 300)
+end
+
 @testitem "Test orthographic Projection Matrix" begin
     projection_matrix = Fugl.get_orthographic_matrix(0.0, 1920.0, 1080.0, 0.0, -1.0, 1.0)
 
