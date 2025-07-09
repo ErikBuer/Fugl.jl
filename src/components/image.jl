@@ -41,7 +41,7 @@ function apply_layout(view::ImageView, x::Float32, y::Float32, width::Float32, h
 
     # Calculate alignment offsets
     horizontal_offset = calculate_horizontal_offset(width, scaled_width_px, view.horizontal_align)
-    vertical_offset = calculate_vertical_offset(height, scaled_height_px, view.vertical_align)
+    vertical_offset = calculate_image_vertical_offset(height, scaled_height_px, view.vertical_align)
 
     # Return the calculated position and size
     return (x + horizontal_offset, y + vertical_offset, scaled_width_px, scaled_height_px)
