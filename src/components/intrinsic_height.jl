@@ -1,4 +1,4 @@
-struct IntrinsicHeightView <: AbstractView
+struct IntrinsicHeightView <: SizedView
     child::AbstractView
 end
 

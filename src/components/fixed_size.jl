@@ -1,11 +1,25 @@
-struct FixedSizeView <: AbstractView
+struct FixedSizeView <: SizedView
     child::AbstractView
     width::Float32
     height::Float32
 end
 
-function FixedSize(child::AbstractView, width::Real, height::Real)
+"""
+    FixedSize(child::AbstractView, width::Real, height::Real)
+
+Creates a view that has a fixed size, regardless of the child's intrinsic size.
+The child will be rendered at the specified width and height.
+"""
+function FixedSize(child::AbstractView, width::Real, height::Real)::FixedSizeView
     FixedSizeView(child, Float32(width), Float32(height))
+end
+
+function apply_layout(view::FixedSizeView, x::Float32, y::Float32, width::Float32, height::Float32)
+    # Use the fixed size, but constrain to available space
+    final_width = min(view.width, width)
+    final_height = min(view.height, height)
+
+    return (x, y, final_width, final_height)
 end
 
 function interpret_view(view::FixedSizeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})

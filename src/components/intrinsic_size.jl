@@ -1,4 +1,4 @@
-struct IntrinsicSizeView <: AbstractView
+struct IntrinsicSizeView <: SizedView
     child::AbstractView
 end
 

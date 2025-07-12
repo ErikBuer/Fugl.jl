@@ -1,5 +1,9 @@
 const texture_cache = IdDict{String,GLAbstraction.Texture}()
 
+function clear_texture_cache!()
+    empty!(texture_cache)
+end
+
 function load_image_texture(file_path::String)::GLAbstraction.Texture
     # Retrieve the texture directly or load it if not cached
     texture = get(texture_cache, file_path, nothing)
