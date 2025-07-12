@@ -1,7 +1,7 @@
 name = "Fugl"
 uuid = "a78eb1c3-f9be-4b1a-a708-e7053b7f16d7"
 authors = ["Erik Buer <buer94@gmail.com>"]
-version = "0.1.3"
+version = "0.1.4"
 
 [deps]
 ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
