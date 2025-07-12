@@ -41,5 +41,5 @@ export Image
 include("components/horizontal_slider.jl")
 export HorizontalSlider
 
-include("components/text_button.jl")
-export TextButton
+include("components/buttons.jl")
+export TextButton, IconButton

@@ -6,11 +6,13 @@ struct ImageView <: AbstractView
     texture::Union{Nothing,GLAbstraction.Texture}  # Texture
 end
 
-function Image(image_path::String;
+function Image(
+    image_path::String;
     horizontal_align=:center,
     vertical_align=:middle,
     width_px::Union{Nothing,Float32}=nothing,
-    height_px::Union{Nothing,Float32}=nothing)
+    height_px::Union{Nothing,Float32}=nothing
+)::ImageView
     texture = load_image_texture(image_path)
     return ImageView(horizontal_align, vertical_align, width_px, height_px, texture)
 end
