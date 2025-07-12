@@ -22,7 +22,7 @@ function main()
                 end,
                 on_click=() -> (showImage[] = !showImage[])
             ),
-            AlignHorizontal(FixedSize(IconButton("test/images/logo.png"; on_click=() -> (showImage[] = !showImage[])), 100f0, 100f0), :left),
+            AlignHorizontal(FixedSize(IconButton("test/images/logo.png"; on_click=() -> (showImage[] = !showImage[])), 100f0, 100f0), :center),
             IntrinsicColumn([
                     Container(),
                     Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),
