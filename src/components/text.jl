@@ -15,7 +15,11 @@ function measure(view::TextView)::Tuple{Float32,Float32}
 
     # Measure the width and height of the text
     text_width = measure_word_width(font, view.text, size_px)
-    text_height = size_px  # Height is determined by font size
+
+    # Add generous padding to ensure text fits properly when using IntrinsicSize
+    # Height should account for font metrics, ascenders/descenders, and container padding
+    text_height = Float32(size_px) * 1.2
+    text_width = text_width + 2 * size_px
 
     return (text_width, text_height)
 end
