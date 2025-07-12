@@ -7,7 +7,7 @@ mutable struct ContainerStyle
 end
 
 function ContainerStyle(;
-    background_color=Vec4{Float32}(0.8f0, 0.8f0, 0.8f0, 1.0f0),
+    background_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
     border_width_px=4.0f0,
     padding_px::Float32=6f0,
