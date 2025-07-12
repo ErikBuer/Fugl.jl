@@ -22,6 +22,7 @@ function main()
                 end,
                 on_click=() -> (showImage[] = !showImage[])
             ),
+            IconButton("test/images/logo.png", on_click=() -> (showImage[] = !showImage[])),
             IntrinsicColumn([
                     Container(),
                     Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),

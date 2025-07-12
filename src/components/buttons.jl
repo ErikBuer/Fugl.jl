@@ -14,5 +14,9 @@ function IconButton(
     height_px::Union{Nothing,Float32}=nothing,
     on_click::Function=() -> nothing
 )
-    return Container(Image(image_path; width_px=width_px, height_px=height_px), style=ContainerStyle(), on_click=on_click)
+    return Container(
+        Image(image_path; width_px=width_px, height_px=height_px),
+        style=ContainerStyle(background_color=Vec4{Float32}(0.0, 0.0, 0.0, 0.0), border_color=Vec4{Float32}(0.0, 0.0, 0.0, 0.0)),
+        on_click=on_click
+    )
 end
