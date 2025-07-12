@@ -28,6 +28,7 @@ include("text/draw.jl")
 
 include("image/utilities.jl")
 include("image/draw.jl")
+export clear_texture_cache!
 
 include("gui_component/utilities.jl")
 include("gui_component/draw.jl")
@@ -106,6 +107,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
     # Clean up
     GLFW.DestroyWindow(gl_window)
+    
+    # Clear texture cache to prevent stale texture references on next run
+    clear_texture_cache!()
 end
 
 end
