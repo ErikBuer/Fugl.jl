@@ -42,6 +42,9 @@ export Text
 include("components/text_box.jl")
 export TextBox
 
+include("components/code_editor.jl")
+export CodeEditor
+
 include("components/image.jl")
 export Image
 
