@@ -1,9 +1,16 @@
+export SizedView
 
 include("components/empty.jl")
 export Empty
 
 include("components/fixed_size.jl")
 export FixedSize
+
+include("components/align_vertical.jl")
+export AlignVertical
+
+include("components/align_horizontal.jl")
+export AlignHorizontal
 
 include("components/intrinsic_size.jl")
 export IntrinsicSize

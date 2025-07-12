@@ -1,6 +1,13 @@
 abstract type AbstractView end
 
 """
+Abstract type for views that have constrained/intrinsic sizing behavior.
+These views know their preferred dimensions and can be used with alignment components.
+Examples: IntrinsicSize, FixedSize, IntrinsicWidth, IntrinsicHeight, etc.
+"""
+abstract type SizedView <: AbstractView end
+
+"""
     interpret_view(component::AbstractView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
 
 Interpret the view of a GUI component.

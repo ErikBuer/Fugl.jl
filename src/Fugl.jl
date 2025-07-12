@@ -18,7 +18,7 @@ export ButtonState, IsPressed, IsReleased
 export mouse_state, mouse_button_callback, MouseState
 
 include("abstract_view.jl")
-export AbstractView
+export AbstractView, SizedView
 
 include("text/font_cache.jl")
 include("text/utilities.jl")
@@ -107,7 +107,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
     # Clean up
     GLFW.DestroyWindow(gl_window)
-    
+
     # Clear texture cache to prevent stale texture references on next run
     clear_texture_cache!()
 end
