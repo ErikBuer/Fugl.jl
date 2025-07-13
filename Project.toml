@@ -15,6 +15,7 @@ ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 IndirectArrays = "9b13fd28-a010-5f03-acff-a1bbcff69959"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
+Tokenize = "0796e94c-ce3b-5d07-9a54-7f471281c624"
 
 [compat]
 ColorTypes = "0.12.1"
@@ -28,6 +29,7 @@ ImageIO = "0.6.9"
 IndirectArrays = "1.0.0"
 LinearAlgebra = "^1.6"
 ModernGL = "1.1.8"
+Tokenize = "0.5.29"
 
 [extras]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"

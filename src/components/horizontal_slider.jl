@@ -61,7 +61,7 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
     end
 end
 
-function detect_click(view::HorizontalSliderView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     # Compute the layout for the slider
     (slider_x, slider_y, slider_width, slider_height, handle_x, handle_y, handle_width, handle_height) = apply_layout(view, x, y, width, height)
 

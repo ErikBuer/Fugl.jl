@@ -1,10 +1,8 @@
-# TextBox
-
-``` @example TextBoxExample
 using Fugl
 using Fugl: Text
 
-# Create editor states for both components
+function main()
+    # Create editor states for both components
     code_editor_state = Ref(EditorState("""function hello_world()
     println("Hello, World!")
     return 42
@@ -42,8 +40,8 @@ end"""))
         ])
     end
 
-screenshot(MyApp, "textBox.png", 600, 400);
-nothing #hide
-```
+    # Run the GUI
+    Fugl.run(MyApp, title="Text Editor Generalization Demo", window_width_px=600, window_height_px=400)
+end
 
-![Text Box](textBox.png)
+main()

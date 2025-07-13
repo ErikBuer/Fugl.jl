@@ -56,7 +56,7 @@ function interpret_view(view::IntrinsicColumnView, x::Float32, y::Float32, width
     end
 end
 
-function detect_click(view::IntrinsicColumnView, mouse_state::MouseState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+function detect_click(view::IntrinsicColumnView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
     if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
         if mouse_state.was_clicked[LeftButton]
             view.on_click()  # Call the on_click function of the clicked child

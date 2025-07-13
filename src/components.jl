@@ -34,19 +34,28 @@ include("components/intrinsic_row.jl")
 export IntrinsicRow
 
 include("components/container.jl")
-export Container
-
-include("components/text.jl")
-export Text
-
-include("components/text_box.jl")
-export TextBox
-
-include("components/image.jl")
-export Image
+export Container, ContainerStyle
 
 include("components/horizontal_slider.jl")
 export HorizontalSlider
 
-include("components/buttons.jl")
+include("components/text.jl")
+export Text, TextStyle
+
+include("text_editor/editor_action.jl")
+include("text_editor/editor_state.jl")
+include("text_editor/utilities.jl")
+include("text_editor/draw.jl")
+export EditorState
+
+include("components/text_box.jl")
+export TextBox, TextBoxStyle
+
+include("components/code_editor.jl")
+export CodeEditor, CodeEditorStyle
+
+include("components/image.jl")
+export Image
+
+include("composite_components/buttons.jl")
 export TextButton, IconButton

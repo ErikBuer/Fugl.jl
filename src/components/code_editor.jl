@@ -1,6 +1,6 @@
 using GLFW
 
-mutable struct TextBoxStyle
+mutable struct CodeEditorStyle
     text_style::TextStyle
     background_color_focused::Vec4{<:AbstractFloat}
     background_color_unfocused::Vec4{<:AbstractFloat}
@@ -11,50 +11,49 @@ mutable struct TextBoxStyle
     cursor_color::Vec4{<:AbstractFloat}
 end
 
-function TextBoxStyle(;
+function CodeEditorStyle(;
     text_style=TextStyle(),
-    background_color_focused=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),    # White when focused
-    background_color_unfocused=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0), # Light gray when not focused
-    border_color=Vec4{Float32}(0.8f0, 0.8f0, 0.8f0, 1.0f0),
+    background_color_focused=Vec4{Float32}(0.05f0, 0.05f0, 0.1f0, 1.0f0),  # Dark blue when focused
+    background_color_unfocused=Vec4{Float32}(0.1f0, 0.1f0, 0.15f0, 1.0f0), # Darker when not focused
+    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.4f0, 1.0f0),
     border_width_px=1.0f0,
     corner_radius_px=8.0f0,
     padding_px=10.0f0,
-    cursor_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.8f0)  # Black cursor for visibility on white background
+    cursor_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 0.8f0)  # White cursor for visibility on dark background
 )
-    return TextBoxStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px, cursor_color)
+    return CodeEditorStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px, cursor_color)
 end
 
-struct TextBoxView <: AbstractView
+struct CodeEditorView <: AbstractView
     state::EditorState           # Editor state containing text, cursor, etc.
-    style::TextBoxStyle          # Style for the TextBox
+    style::CodeEditorStyle       # Style for the CodeEditor
     on_change::Function          # Callback for text changes
     on_focus_change::Function    # Callback for focus changes
 end
 
-function TextBox(
+function CodeEditor(
     state::EditorState;
-    style=TextBoxStyle(),
+    style=CodeEditorStyle(),
     on_change::Function=() -> nothing,
     on_focus_change::Function=() -> nothing
-)::TextBoxView
-    return TextBoxView(state, style, on_change, on_focus_change)
+)
+    return CodeEditorView(state, style, on_change, on_focus_change)
 end
 
-function measure(view::TextBoxView)::Tuple{Float32,Float32}
-    # The TextBox fills the parent container, so it doesn't have intrinsic size
+function measure(view::CodeEditorView)::Tuple{Float32,Float32}
+    # The CodeEditor fills the parent container, so it doesn't have intrinsic size
     return (0.0f0, 0.0f0)
 end
 
-function apply_layout(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32)
-    # The TextBox occupies the entire area provided by the parent
+function apply_layout(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32)
+    # The CodeEditor occupies the entire area provided by the parent
     return (x, y, width, height)
 end
 
-function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Extract style properties
     font = view.style.text_style.font
     size_px = view.style.text_style.size_px
-    color = view.style.text_style.color
     padding = view.style.padding_px
 
     # Render the background with rounded corners
@@ -77,7 +76,7 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
     # Split the text into lines
     lines = get_lines(view.state)
 
-    # Render each line (plain text, no syntax highlighting for TextBox)
+    # Render each line with syntax highlighting
     current_y = y + size_px + padding
     line_height = Float32(size_px * 1.2)  # Add some line spacing
 
@@ -86,18 +85,20 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
             break  # Don't render lines outside the visible area
         end
 
-        # Render the line as plain text
-        draw_text(
-            font,                # Font face
-            line,                # Text string
-            x + padding,         # X position with padding
-            current_y,           # Y position
-            size_px,             # Text size
-            projection_matrix,   # Projection matrix
-            color                # Text color
+        # Ensure this line is tokenized and cached
+        line_data = ensure_line_tokenized!(view.state, line_num, line)
+
+        # Render the line using cached tokenization
+        render_line_from_cache(
+            line_data,
+            font,
+            x + padding,  # Left padding
+            current_y,
+            size_px,
+            projection_matrix
         )
 
-        # Draw cursor if it's on this line and textbox is focused
+        # Draw cursor if it's on this line and editor is focused
         if view.state.is_focused && view.state.cursor.line == line_num
             draw_cursor(
                 view.state.cursor,
@@ -116,9 +117,9 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
 end
 
 """
-Detect click events and handle focus and cursor positioning for TextBox.
+Detect click events and handle focus and cursor positioning.
 """
-function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     if view.state.is_focused
         handle_key_input(view, mouse_state)  # Handle key input if focused
     end
@@ -139,12 +140,9 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
     end
 end
 
-"""
-Handle key input for TextBox (same as CodeEditor but without syntax highlighting).
-"""
-function handle_key_input(view::TextBoxView, mouse_state::InputState)
+function handle_key_input(view::CodeEditorView, mouse_state::InputState)
     if !view.state.is_focused
-        return  # Only handle key input when the TextBox is focused
+        return  # Only handle key input when the CodeEditor is focused
     end
 
     text_changed = false

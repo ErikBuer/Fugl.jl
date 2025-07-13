@@ -12,10 +12,10 @@ include("matrices.jl")
 include("shaders.jl")
 export initialize_shaders
 
-include("mouse_state.jl")
-export MouseButton, ButtonState, IsReleased, IsPressed, MouseState, mouse_button_callback
+include("input_state.jl")
+export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, char_callback, KeyEvent
 export ButtonState, IsPressed, IsReleased
-export mouse_state, mouse_button_callback, MouseState
+export mouse_state, mouse_button_callback, InputState
 
 include("abstract_view.jl")
 export AbstractView, SizedView
@@ -58,9 +58,10 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     initialize_shaders()
 
     # Initialize local states
-    mouse_state = MouseState()
+    mouse_state = InputState()
     GLFW.SetMouseButtonCallback(gl_window, (gl_window, button, action, mods) -> mouse_button_callback(gl_window, button, action, mods, mouse_state))
     GLFW.SetKeyCallback(gl_window, (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state))
+    GLFW.SetCharCallback(gl_window, (gl_window, codepoint) -> char_callback(gl_window, codepoint, mouse_state))
 
     projection_matrix = get_orthographic_matrix(0.0f0, Float32(window_width_px), Float32(window_height_px), 0.0f0, -1.0f0, 1.0f0)
 
@@ -97,8 +98,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         # Render the UI
         interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
 
-        # Clear the key buffer
+        # Clear the key buffer and key events
         empty!(mouse_state.key_buffer)
+        empty!(mouse_state.key_events)
 
         # Swap buffers and poll events
         GLFW.SwapBuffers(gl_window)
