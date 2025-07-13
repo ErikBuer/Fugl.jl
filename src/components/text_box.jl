@@ -1,13 +1,19 @@
+using GLFW
+
 struct TextBoxView <: AbstractView
-    text::String              # Text content of the TextBox
-    is_focused::Bool          # Focus state of the TextBox
-    style::TextStyle          # Style for the TextBox
-    on_change::Function       # Callback for text changes
-    on_focus_change::Function # Callback for focus changes
+    state::EditorState           # Editor state containing text, cursor, etc.
+    style::TextStyle             # Style for the TextBox
+    on_change::Function          # Callback for text changes
+    on_focus_change::Function    # Callback for focus changes
 end
 
-function TextBox(text::String, is_focused; style=TextStyle(), on_change::Function=() -> nothing, on_focus_change::Function=() -> nothing)
-    return TextBoxView(text, is_focused, style, on_change, on_focus_change)
+function TextBox(
+    state::EditorState;
+    style=TextStyle(),
+    on_change::Function=() -> nothing,
+    on_focus_change::Function=() -> nothing
+)::TextBoxView
+    return TextBoxView(state, style, on_change, on_focus_change)
 end
 
 function measure(view::TextBoxView)::Tuple{Float32,Float32}
@@ -26,16 +32,26 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
     size_px = view.style.size_px
     color = view.style.color
 
-    # Render the background
-    bg_color = view.is_focused ? Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0) : Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)
+    # Render the background (simpler style than code editor)
+    bg_color = view.state.is_focused ?
+               Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0) :    # White when focused
+               Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0)   # Light gray when not focused
+
     draw_rectangle(generate_rectangle_vertices(x, y, width, height), bg_color, projection_matrix)
 
     # Split the text into lines
-    lines = split(view.text, "\n")
+    lines = get_lines(view.state)
 
-    # Render each line
+    # Render each line (plain text, no syntax highlighting for TextBox)
     current_y = y + view.style.size_px
-    for line in lines
+    line_height = Float32(size_px * 1.2)  # Add some line spacing
+
+    for (line_num, line) in enumerate(lines)
+        if current_y > y + height
+            break  # Don't render lines outside the visible area
+        end
+
+        # Render the line as plain text
         draw_text(
             font,                # Font face
             line,                # Text string
@@ -45,13 +61,29 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
             projection_matrix,   # Projection matrix
             color                # Text color
         )
-        current_y += size_px
+
+        # Draw cursor if it's on this line and textbox is focused
+        if view.state.is_focused && view.state.cursor.line == line_num
+            draw_cursor(
+                view.state.cursor,
+                line,
+                font,
+                x + 10.0f0,
+                current_y,
+                size_px,
+                projection_matrix
+            )
+        end
+
+        current_y += line_height
     end
 end
 
+"""
+Detect click events and handle focus and cursor positioning for TextBox.
+"""
 function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
-
-    if view.is_focused
+    if view.state.is_focused
         handle_key_input(view, mouse_state)  # Handle key input if focused
     end
 
@@ -60,33 +92,52 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
     end
 
     if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
-        if !view.is_focused
+        if !view.state.is_focused
+            view.state.is_focused = true
             view.on_focus_change(true)  # Trigger focus change callback
         end
         return
     end
 
-    if view.is_focused
+    if view.state.is_focused
+        view.state.is_focused = false
         view.on_focus_change(false)  # Trigger focus change callback
     end
 end
 
+"""
+Handle key input for TextBox (same as CodeEditor but without syntax highlighting).
+"""
 function handle_key_input(view::TextBoxView, mouse_state::InputState)
-    if !view.is_focused
+    if !view.state.is_focused
         return  # Only handle key input when the TextBox is focused
     end
 
-    text = view.text  # Start with the current text
+    text_changed = false
 
+    # Handle character input first
     for key in mouse_state.key_buffer
+        action = InsertText(string(key))
+        apply_editor_action!(view.state, action)
+        text_changed = true
+    end
 
-        if key == '\b'  # Handle backspace
-            text = view.text[1:end-1]
-        else
-            text *= string(key)
+    # Handle special key events (arrow keys, etc.)
+    for key_event in mouse_state.key_events
+        if Int(key_event.action) == Int(GLFW.PRESS) || Int(key_event.action) == Int(GLFW.REPEAT)
+            action = key_event_to_action(key_event)
+            if action !== nothing
+                apply_editor_action!(view.state, action)
+                # Only mark as text changed for actions that modify text
+                if action isa InsertText || action isa DeleteText
+                    text_changed = true
+                end
+            end
         end
+    end
 
-        # Trigger the on_change callback
-        view.on_change(text)
+    # Only trigger the on_change callback if text actually changed
+    if text_changed
+        view.on_change(view.state.text)
     end
 end

@@ -36,8 +36,17 @@ export IntrinsicRow
 include("components/container.jl")
 export Container
 
+include("components/horizontal_slider.jl")
+export HorizontalSlider
+
 include("components/text.jl")
 export Text
+
+include("text_editor/editor_action.jl")
+include("text_editor/editor_state.jl")
+include("text_editor/utilities.jl")
+include("text_editor/draw.jl")
+export EditorState
 
 include("components/text_box.jl")
 export TextBox
@@ -48,8 +57,5 @@ export CodeEditor
 include("components/image.jl")
 export Image
 
-include("components/horizontal_slider.jl")
-export HorizontalSlider
-
-include("components/buttons.jl")
+include("composite_components/buttons.jl")
 export TextButton, IconButton

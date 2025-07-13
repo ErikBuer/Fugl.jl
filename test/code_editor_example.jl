@@ -1,10 +1,9 @@
 using Fugl
-using Fugl: Text
-using Fugl: Vec4, ContainerStyle
+using Fugl: Text, EditorState, CursorPosition
 
 function main()
-    # State for the code editor
-    code_text = Ref("""function hello_world()
+    # Create editor state with initial code
+    editor_state = Ref(EditorState("""function hello_world()
     println("Hello, World!")
     x = 42  # This is a number
     name = "Julia"  # This is a string
@@ -12,20 +11,21 @@ function main()
 end
 
 # Call the function
-result = hello_world()""")
-
-    is_focused = Ref(false)
+result = hello_world()"""))
 
     function MyApp()
         IntrinsicColumn([
-            IntrinsicHeight(Container(Text("Simple Julia Code Editor"))),
+            IntrinsicHeight(Container(Text("Julia Code Editor with Cursor"))),
             Container(
                 CodeEditor(
-                    code_text[],
-                    is_focused[];
-                    language=:julia,
-                    on_change=(text) -> (code_text[] = text),
-                    on_focus_change=(focused) -> (is_focused[] = focused)
+                    editor_state[];
+                    on_change=(text) -> begin
+                        # Create a new editor state with the updated text
+                        editor_state[] = EditorState(editor_state[], text)
+                    end,
+                    on_focus_change=(focused) -> begin
+                        editor_state[].is_focused = focused
+                    end
                 )
             ),
         ])
