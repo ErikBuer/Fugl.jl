@@ -42,13 +42,38 @@ function tokenize_julia_line(line::String)
         all_tokens = []
         for token in tokens
             if token.startbyte >= 0 && token.endbyte >= token.startbyte
-                # Extract text using proper 1-based indexing
-                start_pos = token.startbyte + 1
-                end_pos = min(token.endbyte + 1, length(line))
+                # Use a safer approach: extract text directly from the line using byte ranges
+                # but be very careful about Unicode
+                try
+                    # Convert 0-based byte indices to 1-based
+                    start_byte = token.startbyte + 1
+                    end_byte = token.endbyte + 1
 
-                if start_pos <= length(line)
-                    token_text = line[start_pos:end_pos]
-                    push!(all_tokens, (start_pos, token_text, token.kind))
+                    # Get the byte array of the line
+                    line_bytes = Vector{UInt8}(line)
+
+                    # Ensure we don't exceed bounds
+                    if start_byte <= length(line_bytes) && end_byte <= length(line_bytes) && start_byte <= end_byte
+                        # Extract the bytes and convert back to string
+                        token_bytes = line_bytes[start_byte:end_byte]
+                        token_text = String(token_bytes)
+
+                        # Find character position by counting characters up to the start byte
+                        char_pos = 1
+                        byte_count = 0
+                        for (i, char) in enumerate(line)
+                            if byte_count + 1 >= start_byte
+                                char_pos = i
+                                break
+                            end
+                            byte_count += ncodeunits(char)
+                        end
+
+                        push!(all_tokens, (char_pos, token_text, token.kind))
+                    end
+                catch e
+                    # If there's any issue with byte/character conversion, skip this token
+                    continue
                 end
             end
         end
@@ -153,12 +178,12 @@ function apply_move_cursor!(state::EditorState, action::MoveCursor)
             state.cursor = CursorPosition(cursor.line, cursor.column - 1)
         elseif cursor.line > 1
             # Move to end of previous line
-            prev_line_length = length(lines[cursor.line-1])
-            state.cursor = CursorPosition(cursor.line - 1, prev_line_length + 1)
+            prev_line_char_length = length(collect(lines[cursor.line-1]))
+            state.cursor = CursorPosition(cursor.line - 1, prev_line_char_length + 1)
         end
     elseif action.direction == :right
-        current_line_length = cursor.line <= length(lines) ? length(lines[cursor.line]) : 0
-        if cursor.column <= current_line_length
+        current_line_char_length = cursor.line <= length(lines) ? length(collect(lines[cursor.line])) : 0
+        if cursor.column <= current_line_char_length
             state.cursor = CursorPosition(cursor.line, cursor.column + 1)
         elseif cursor.line < length(lines)
             # Move to beginning of next line
@@ -210,9 +235,11 @@ function apply_delete_text!(state::EditorState, action::DeleteText)
 
     if action.direction == :backspace
         if cursor.column > 1
-            # Delete character before cursor
+            # Delete character before cursor using safe Unicode indexing
             current_line = lines[cursor.line]
-            new_line = current_line[1:cursor.column-2] * current_line[cursor.column:end]
+            line_before = safe_substring(current_line, 1, cursor.column - 2)
+            line_after = safe_substring_to_end(current_line, cursor.column)
+            new_line = line_before * line_after
             lines[cursor.line] = new_line
             state.cursor = CursorPosition(cursor.line, cursor.column - 1)
         elseif cursor.line > 1
@@ -221,14 +248,31 @@ function apply_delete_text!(state::EditorState, action::DeleteText)
             current_line = lines[cursor.line]
             lines[cursor.line-1] = prev_line * current_line
             deleteat!(lines, cursor.line)
-            state.cursor = CursorPosition(cursor.line - 1, length(prev_line) + 1)
+            # Use character length, not byte length
+            prev_line_char_length = length(collect(prev_line))
+            state.cursor = CursorPosition(cursor.line - 1, prev_line_char_length + 1)
         end
     elseif action.direction == :delete
         if cursor.line <= length(lines)
             current_line = lines[cursor.line]
-            if cursor.column <= length(current_line)
-                # Delete character at cursor
-                new_line = current_line[1:cursor.column-1] * current_line[cursor.column+1:end]
+            chars = collect(current_line)
+            line_length = length(chars)
+
+            if cursor.column <= line_length
+                # Delete character at cursor using safe Unicode indexing
+                before_cursor = if cursor.column <= 1
+                    ""
+                else
+                    join(chars[1:cursor.column-1])
+                end
+
+                after_cursor = if cursor.column >= line_length
+                    ""
+                else
+                    join(chars[cursor.column+1:end])
+                end
+
+                new_line = before_cursor * after_cursor
                 lines[cursor.line] = new_line
             elseif cursor.line < length(lines)
                 # Merge with next line
@@ -326,12 +370,14 @@ function delete_range!(state::EditorState, start_cursor::CursorPosition, end_cur
     lines = get_lines(state)
 
     if start_cursor.line == end_cursor.line
-        # Same line deletion
+        # Same line deletion using safe Unicode indexing
         current_line = lines[start_cursor.line]
         start_col = min(start_cursor.column, end_cursor.column)
         end_col = max(start_cursor.column, end_cursor.column)
 
-        new_line = current_line[1:start_col-1] * current_line[end_col:end]
+        line_before = safe_substring(current_line, 1, start_col - 1)
+        line_after = safe_substring_to_end(current_line, end_col)
+        new_line = line_before * line_after
         lines[start_cursor.line] = new_line
     else
         # Multi-line deletion (for future enhancement)
@@ -419,4 +465,59 @@ function key_event_to_action(key_event::KeyEvent)
     end
 
     return nothing  # Unknown key event
+end
+
+"""
+Safely get a substring using character-based indexing instead of byte indexing.
+This handles Unicode characters correctly.
+"""
+function safe_substring(text::AbstractString, start_char::Int, end_char::Int)
+    try
+        chars = collect(text)
+        total_chars = length(chars)
+
+        # Clamp indices to valid range
+        start_idx = max(1, min(start_char, total_chars + 1))
+        end_idx = max(0, min(end_char, total_chars))
+
+        if start_idx > end_idx
+            return ""
+        else
+            return join(chars[start_idx:end_idx])
+        end
+    catch e
+        @warn "Error in safe_substring, returning empty string" exception = (e, catch_backtrace())
+        return ""
+    end
+end
+
+"""
+Safely get a substring from start to end of string using character indexing.
+"""
+function safe_substring_to_end(text::AbstractString, start_char::Int)
+    try
+        chars = collect(text)
+        total_chars = length(chars)
+        start_idx = max(1, min(start_char, total_chars + 1))
+
+        if start_idx > total_chars
+            return ""
+        else
+            return join(chars[start_idx:end])
+        end
+    catch e
+        @warn "Error in safe_substring_to_end, returning empty string" exception = (e, catch_backtrace())
+        return ""
+    end
+end
+
+"""
+Get the character length of a string (not byte length).
+"""
+function char_length(text::AbstractString)
+    try
+        return length(collect(text))
+    catch
+        return 0
+    end
 end

@@ -15,9 +15,31 @@ function draw_cursor(
     if cursor.column <= 1
         cursor_x = x
     else
-        # Measure text up to cursor position
-        text_before_cursor = line_text[1:min(cursor.column - 1, length(line_text))]
-        cursor_x = x + measure_word_width(font, text_before_cursor, size_px)
+        # Safely get text before cursor using character indexing
+        try
+            # Convert to string and use character-aware slicing
+            line_str = string(line_text)
+            char_count = min(cursor.column - 1, length(line_str))
+
+            # Use character indexing instead of byte indexing
+            if char_count <= 0
+                text_before_cursor = ""
+            else
+                # Safe character-based substring
+                chars = collect(line_str)
+                if char_count <= length(chars)
+                    text_before_cursor = join(chars[1:char_count])
+                else
+                    text_before_cursor = line_str
+                end
+            end
+
+            cursor_x = x + measure_word_width(font, text_before_cursor, size_px)
+        catch e
+            # Fallback: if character indexing fails, position cursor at start
+            @warn "Error calculating cursor position, using fallback" exception = (e, catch_backtrace())
+            cursor_x = x
+        end
     end
 
     # Draw cursor as a vertical line
