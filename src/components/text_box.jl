@@ -8,6 +8,7 @@ mutable struct TextBoxStyle
     border_width_px::Float32
     corner_radius_px::Float32
     padding_px::Float32
+    cursor_color::Vec4{<:AbstractFloat}
 end
 
 function TextBoxStyle(;
@@ -17,9 +18,10 @@ function TextBoxStyle(;
     border_color=Vec4{Float32}(0.8f0, 0.8f0, 0.8f0, 1.0f0),
     border_width_px=1.0f0,
     corner_radius_px=8.0f0,
-    padding_px=10.0f0
+    padding_px=10.0f0,
+    cursor_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.8f0)  # Black cursor for visibility on white background
 )
-    return TextBoxStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px)
+    return TextBoxStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px, cursor_color)
 end
 
 struct TextBoxView <: AbstractView
@@ -104,7 +106,8 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
                 x + padding,
                 current_y,
                 size_px,
-                projection_matrix
+                projection_matrix,
+                view.style.cursor_color  # Use the cursor color from style
             )
         end
 

@@ -8,7 +8,8 @@ function draw_cursor(
     x::Float32,
     y::Float32,
     size_px::Int,
-    projection_matrix
+    projection_matrix,
+    cursor_color::Vec4{Float32}=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 0.8f0)  # Default to white
 )
     # Calculate cursor x position
     if cursor.column <= 1
@@ -20,7 +21,6 @@ function draw_cursor(
     end
 
     # Draw cursor as a vertical line
-    cursor_color = Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 0.8f0)  # Semi-transparent white
     cursor_width = 2.0f0
     cursor_height = Float32(size_px)
 

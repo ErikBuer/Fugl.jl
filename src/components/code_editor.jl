@@ -8,6 +8,7 @@ mutable struct CodeEditorStyle
     border_width_px::Float32
     corner_radius_px::Float32
     padding_px::Float32
+    cursor_color::Vec4{<:AbstractFloat}
 end
 
 function CodeEditorStyle(;
@@ -17,9 +18,10 @@ function CodeEditorStyle(;
     border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.4f0, 1.0f0),
     border_width_px=1.0f0,
     corner_radius_px=8.0f0,
-    padding_px=10.0f0
+    padding_px=10.0f0,
+    cursor_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 0.8f0)  # White cursor for visibility on dark background
 )
-    return CodeEditorStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px)
+    return CodeEditorStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px, cursor_color)
 end
 
 struct CodeEditorView <: AbstractView
@@ -105,7 +107,8 @@ function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Flo
                 x + padding,
                 current_y,
                 size_px,
-                projection_matrix
+                projection_matrix,
+                view.style.cursor_color  # Use the cursor color from style
             )
         end
 
