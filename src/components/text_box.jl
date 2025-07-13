@@ -148,16 +148,25 @@ function handle_key_input(view::TextBoxView, mouse_state::InputState)
     end
 
     text_changed = false
+    cursor_changed = false
+    current_state = view.state
 
     # Handle special key events first (arrow keys, enter, tab, etc.)
     for key_event in mouse_state.key_events
         if Int(key_event.action) == Int(GLFW.PRESS) || Int(key_event.action) == Int(GLFW.REPEAT)
             action = key_event_to_action(key_event)
             if action !== nothing
-                apply_editor_action!(view.state, action)
-                # Only mark as text changed for actions that modify text
+                old_cursor = current_state.cursor
+                current_state = apply_editor_action(current_state, action)
+
+                # Check if text changed
                 if action isa InsertText || action isa DeleteText
                     text_changed = true
+                end
+
+                # Check if cursor changed (for any action including MoveCursor)
+                if current_state.cursor != old_cursor
+                    cursor_changed = true
                 end
             end
         end
@@ -168,13 +177,14 @@ function handle_key_input(view::TextBoxView, mouse_state::InputState)
         # Skip special characters that are handled by key events
         if key != '\n' && key != '\t' && key != '\b'  # Skip newline, tab, and backspace
             action = InsertText(string(key))
-            apply_editor_action!(view.state, action)
+            current_state = apply_editor_action(current_state, action)
             text_changed = true
+            cursor_changed = true  # Text insertion also moves cursor
         end
     end
 
-    # Only trigger the on_change callback if text actually changed
-    if text_changed
-        view.on_change(view.state.text)
+    # Trigger the callback if either text or cursor changed
+    if text_changed || cursor_changed
+        view.on_change(current_state)
     end
 end
