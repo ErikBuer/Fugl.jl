@@ -1,15 +1,37 @@
 using GLFW
 
+mutable struct CodeEditorStyle
+    text_style::TextStyle
+    background_color_focused::Vec4{<:AbstractFloat}
+    background_color_unfocused::Vec4{<:AbstractFloat}
+    border_color::Vec4{<:AbstractFloat}
+    border_width_px::Float32
+    corner_radius_px::Float32
+    padding_px::Float32
+end
+
+function CodeEditorStyle(;
+    text_style=TextStyle(),
+    background_color_focused=Vec4{Float32}(0.05f0, 0.05f0, 0.1f0, 1.0f0),  # Dark blue when focused
+    background_color_unfocused=Vec4{Float32}(0.1f0, 0.1f0, 0.15f0, 1.0f0), # Darker when not focused
+    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.4f0, 1.0f0),
+    border_width_px=1.0f0,
+    corner_radius_px=8.0f0,
+    padding_px=10.0f0
+)
+    return CodeEditorStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px)
+end
+
 struct CodeEditorView <: AbstractView
     state::EditorState           # Editor state containing text, cursor, etc.
-    style::TextStyle             # Style for the CodeEditor
+    style::CodeEditorStyle       # Style for the CodeEditor
     on_change::Function          # Callback for text changes
     on_focus_change::Function    # Callback for focus changes
 end
 
 function CodeEditor(
     state::EditorState;
-    style=TextStyle(),
+    style=CodeEditorStyle(),
     on_change::Function=() -> nothing,
     on_focus_change::Function=() -> nothing
 )
@@ -28,25 +50,36 @@ end
 
 function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Extract style properties
-    font = view.style.font
-    size_px = view.style.size_px
+    font = view.style.text_style.font
+    size_px = view.style.text_style.size_px
+    padding = view.style.padding_px
 
-    # Render the background
+    # Render the background with rounded corners
     bg_color = view.state.is_focused ?
-               Vec4{Float32}(0.05f0, 0.05f0, 0.1f0, 1.0f0) :  # Dark blue when focused
-               Vec4{Float32}(0.1f0, 0.1f0, 0.15f0, 1.0f0)     # Darker when not focused
+               view.style.background_color_focused :
+               view.style.background_color_unfocused
 
-    draw_rectangle(generate_rectangle_vertices(x, y, width, height), bg_color, projection_matrix)
+    vertex_positions = generate_rectangle_vertices(x, y, width, height)
+    draw_rounded_rectangle(
+        vertex_positions,
+        width,
+        height,
+        bg_color,
+        view.style.border_color,
+        view.style.border_width_px,
+        view.style.corner_radius_px,
+        projection_matrix
+    )
 
     # Split the text into lines
     lines = get_lines(view.state)
 
     # Render each line with syntax highlighting
-    current_y = y + view.style.size_px
+    current_y = y + size_px + padding
     line_height = Float32(size_px * 1.2)  # Add some line spacing
 
     for (line_num, line) in enumerate(lines)
-        if current_y > y + height
+        if current_y > y + height - padding
             break  # Don't render lines outside the visible area
         end
 
@@ -57,7 +90,7 @@ function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Flo
         render_line_from_cache(
             line_data,
             font,
-            x + 10.0f0,  # Left padding
+            x + padding,  # Left padding
             current_y,
             size_px,
             projection_matrix
@@ -69,7 +102,7 @@ function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Flo
                 view.state.cursor,
                 line,
                 font,
-                x + 10.0f0,
+                x + padding,
                 current_y,
                 size_px,
                 projection_matrix

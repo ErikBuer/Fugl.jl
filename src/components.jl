@@ -34,13 +34,13 @@ include("components/intrinsic_row.jl")
 export IntrinsicRow
 
 include("components/container.jl")
-export Container
+export Container, ContainerStyle
 
 include("components/horizontal_slider.jl")
 export HorizontalSlider
 
 include("components/text.jl")
-export Text
+export Text, TextStyle
 
 include("text_editor/editor_action.jl")
 include("text_editor/editor_state.jl")
@@ -49,10 +49,10 @@ include("text_editor/draw.jl")
 export EditorState
 
 include("components/text_box.jl")
-export TextBox
+export TextBox, TextBoxStyle
 
 include("components/code_editor.jl")
-export CodeEditor
+export CodeEditor, CodeEditorStyle
 
 include("components/image.jl")
 export Image
