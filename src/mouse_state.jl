@@ -30,7 +30,7 @@ struct KeyEvent
     mods::Int32
 end
 
-mutable struct MouseState
+mutable struct InputState
     button_state::Dict{MouseButton,ButtonState}  # Current button state
     was_clicked::Dict{MouseButton,Bool}          # Tracks if the button was clicked
     x::Float64                                   # Current mouse X position
@@ -41,8 +41,8 @@ mutable struct MouseState
     key_events::Vector{KeyEvent}                 # Buffer for key events
 end
 
-function MouseState()
-    return MouseState(
+function InputState()
+    return InputState(
         Dict(LeftButton => IsReleased, RightButton => IsReleased, MiddleButton => IsReleased),
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),
         0.0,
@@ -54,7 +54,7 @@ function MouseState()
     )
 end
 
-function mouse_button_callback(gl_window, button, action, mods, mouse_state::MouseState)
+function mouse_button_callback(gl_window, button, action, mods, mouse_state::InputState)
     mapped_button = if button == GLFW.MOUSE_BUTTON_LEFT
         LeftButton
     elseif button == GLFW.MOUSE_BUTTON_RIGHT
@@ -73,7 +73,7 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Mou
     end
 end
 
-function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Action, mods::Int32, mouse_state::MouseState)
+function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Action, mods::Int32, mouse_state::InputState)
     if action == GLFW.PRESS || action == GLFW.REPEAT
         # Store raw key events for navigation and shortcuts
         key_event = KeyEvent(Int32(key), scancode, Int32(action), mods)
@@ -94,7 +94,7 @@ end
 New character callback for proper text input
 This function handles character input from the keyboard, converting Unicode codepoints to characters.
 """
-function char_callback(gl_window, codepoint::UInt32, mouse_state::MouseState)
+function char_callback(gl_window, codepoint::UInt32, mouse_state::InputState)
     # Convert Unicode codepoint to character and add to buffer
     char = Char(codepoint)
     push!(mouse_state.key_buffer, char)
@@ -104,14 +104,14 @@ end
 Alternative signature in case GLFW passes Char directly
 This function adds a character directly to the key buffer.
 """
-function char_callback(gl_window, char::Char, mouse_state::MouseState)
+function char_callback(gl_window, char::Char, mouse_state::InputState)
     # Add character directly to buffer
     push!(mouse_state.key_buffer, char)
 end
 
-function collect_state!(mouse_state::MouseState)::MouseState
-    # Create a copy of the MouseState
-    locked_state = MouseState(
+function collect_state!(mouse_state::InputState)::InputState
+    # Create a copy of the InputState
+    locked_state = InputState(
         deepcopy(mouse_state.button_state),
         deepcopy(mouse_state.was_clicked),
         mouse_state.x,

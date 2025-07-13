@@ -208,7 +208,7 @@ function render_julia_syntax_highlighting(
     end
 end
 
-function detect_click(view::CodeEditorView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     if view.is_focused
         handle_key_input(view, mouse_state)  # Handle key input if focused
     end
@@ -229,7 +229,7 @@ function detect_click(view::CodeEditorView, mouse_state::MouseState, x::Float32,
     end
 end
 
-function handle_key_input(view::CodeEditorView, mouse_state::MouseState)
+function handle_key_input(view::CodeEditorView, mouse_state::InputState)
     if !view.is_focused
         return  # Only handle key input when the CodeEditor is focused
     end

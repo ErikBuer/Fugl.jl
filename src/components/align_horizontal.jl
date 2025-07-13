@@ -61,7 +61,7 @@ function interpret_view(view::AlignHorizontalView, x::Float32, y::Float32, width
     interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix)
 end
 
-function detect_click(view::AlignHorizontalView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::AlignHorizontalView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     # Get the child's layout and forward click detection
     child_x, child_y, child_width, child_height = apply_layout(view, x, y, width, height)
     detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)

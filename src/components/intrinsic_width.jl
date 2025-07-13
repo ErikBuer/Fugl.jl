@@ -26,7 +26,7 @@ function interpret_view(view::IntrinsicWidthView, x::Float32, y::Float32, width:
     interpret_view(view.child, x, y, final_width, final_height, projection_matrix)
 end
 
-function detect_click(view::IntrinsicWidthView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::IntrinsicWidthView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     # Forward the click detection to the child
     detect_click(view.child, mouse_state, x, y, width, height)
 end

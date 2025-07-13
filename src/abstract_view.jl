@@ -28,7 +28,7 @@ function apply_layout(component::AbstractView)
     error("apply_layout is not implemented for $(typeof(component))")
 end
 
-function detect_click(root_view::AbstractView, mouse_state::MouseState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+function detect_click(root_view::AbstractView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
     # Traverse the UI hierarchy
     if root_view isa ContainerView
         (child_x, child_y, child_width, child_height) = apply_layout(root_view, x, y, width, height)

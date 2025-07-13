@@ -49,7 +49,7 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
     end
 end
 
-function detect_click(view::TextBoxView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
 
     if view.is_focused
         handle_key_input(view, mouse_state)  # Handle key input if focused
@@ -71,7 +71,7 @@ function detect_click(view::TextBoxView, mouse_state::MouseState, x::Float32, y:
     end
 end
 
-function handle_key_input(view::TextBoxView, mouse_state::MouseState)
+function handle_key_input(view::TextBoxView, mouse_state::InputState)
     if !view.is_focused
         return  # Only handle key input when the TextBox is focused
     end

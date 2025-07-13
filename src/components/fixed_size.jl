@@ -29,7 +29,7 @@ function interpret_view(view::FixedSizeView, x::Float32, y::Float32, width::Floa
     interpret_view(view.child, x, y, final_width, final_height, projection_matrix)
 end
 
-function detect_click(view::FixedSizeView, mouse_state::MouseState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::FixedSizeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     # Forward the click detection to the child
     final_width = min(view.width, width)
     final_height = min(view.height, height)

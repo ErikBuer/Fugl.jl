@@ -13,9 +13,9 @@ include("shaders.jl")
 export initialize_shaders
 
 include("mouse_state.jl")
-export MouseButton, ButtonState, IsReleased, IsPressed, MouseState, mouse_button_callback, char_callback, KeyEvent
+export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, char_callback, KeyEvent
 export ButtonState, IsPressed, IsReleased
-export mouse_state, mouse_button_callback, MouseState
+export mouse_state, mouse_button_callback, InputState
 
 include("abstract_view.jl")
 export AbstractView, SizedView
@@ -58,7 +58,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     initialize_shaders()
 
     # Initialize local states
-    mouse_state = MouseState()
+    mouse_state = InputState()
     GLFW.SetMouseButtonCallback(gl_window, (gl_window, button, action, mods) -> mouse_button_callback(gl_window, button, action, mods, mouse_state))
     GLFW.SetKeyCallback(gl_window, (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state))
     GLFW.SetCharCallback(gl_window, (gl_window, codepoint) -> char_callback(gl_window, codepoint, mouse_state))
