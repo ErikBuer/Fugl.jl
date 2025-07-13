@@ -149,14 +149,7 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState)
 
     text_changed = false
 
-    # Handle character input first
-    for key in mouse_state.key_buffer
-        action = InsertText(string(key))
-        apply_editor_action!(view.state, action)
-        text_changed = true
-    end
-
-    # Handle special key events (arrow keys, etc.)
+    # Handle special key events first (arrow keys, enter, tab, etc.)
     for key_event in mouse_state.key_events
         if Int(key_event.action) == Int(GLFW.PRESS) || Int(key_event.action) == Int(GLFW.REPEAT)
             action = key_event_to_action(key_event)
@@ -167,6 +160,16 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState)
                     text_changed = true
                 end
             end
+        end
+    end
+
+    # Handle regular character input (but skip special characters that are handled above)
+    for key in mouse_state.key_buffer
+        # Skip special characters that are handled by key events
+        if key != '\n' && key != '\t' && key != '\b'  # Skip newline, tab, and backspace
+            action = InsertText(string(key))
+            apply_editor_action!(view.state, action)
+            text_changed = true
         end
     end
 
