@@ -12,7 +12,7 @@ include("matrices.jl")
 include("shaders.jl")
 export initialize_shaders
 
-include("mouse_state.jl")
+include("input_state.jl")
 export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, char_callback, KeyEvent
 export ButtonState, IsPressed, IsReleased
 export mouse_state, mouse_button_callback, InputState
