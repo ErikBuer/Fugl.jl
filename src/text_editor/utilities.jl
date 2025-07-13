@@ -6,6 +6,23 @@ Tokenize a Julia line and return tokens with color data.
 Returns (tokens, token_data) where token_data is [(position, text, color), ...]
 """
 function tokenize_julia_line(line::String)
+    # Performance guards
+    MAX_LINE_LENGTH = 1000  # Skip tokenization for very long lines
+    MAX_PROCESSING_TIME = 0.005  # 5ms timeout - very conservative
+
+    # Default neutral color
+    default_color = Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)  # Default white
+
+    # Skip tokenization for very long lines to prevent freezing
+    if length(line) > MAX_LINE_LENGTH
+        return ([], [(1, line, default_color)])
+    end
+
+    # Skip tokenization for empty lines
+    if isempty(strip(line))
+        return ([], [(1, line, default_color)])
+    end
+
     # Define colors for different token types
     colors = Dict{Tokenize.Tokens.Kind,Vec4{Float32}}(
         Tokenize.Tokens.FUNCTION => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),    # Purple for keywords
@@ -29,84 +46,49 @@ function tokenize_julia_line(line::String)
 
     # Color for function calls
     function_call_color = Vec4{Float32}(1.0f0, 1.0f0, 0.4f0, 1.0f0)  # Yellow for function calls
-    default_color = Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)  # Default white
 
     try
-        # Tokenize the line
+        # Start timing for timeout protection
+        start_time = time()
+
+        # Tokenize the line with timeout protection
         tokens = collect(tokenize(line))
 
-        # Build a list of (position, text, color) tuples
+        # Check if we're taking too long - if so, use neutral color
+        if time() - start_time > MAX_PROCESSING_TIME
+            return ([], [(1, line, default_color)])
+        end
+
+        # Process tokens quickly and simply
         token_data = []
+        char_pos = 1
 
-        # First pass: collect all tokens
-        all_tokens = []
         for token in tokens
+            # Check timeout periodically
+            if time() - start_time > MAX_PROCESSING_TIME
+                return ([], [(1, line, default_color)])
+            end
+
             if token.startbyte >= 0 && token.endbyte >= token.startbyte
-                # Use a safer approach: extract text directly from the line using byte ranges
-                # but be very careful about Unicode
                 try
-                    # Convert 0-based byte indices to 1-based
-                    start_byte = token.startbyte + 1
-                    end_byte = token.endbyte + 1
+                    # Simple token text extraction - if it fails, skip
+                    token_text = String(line[max(1, token.startbyte + 1):min(length(line), token.endbyte + 1)])
 
-                    # Get the byte array of the line
-                    line_bytes = Vector{UInt8}(line)
+                    # Simple color assignment
+                    color = get(colors, token.kind, default_color)
 
-                    # Ensure we don't exceed bounds
-                    if start_byte <= length(line_bytes) && end_byte <= length(line_bytes) && start_byte <= end_byte
-                        # Extract the bytes and convert back to string
-                        token_bytes = line_bytes[start_byte:end_byte]
-                        token_text = String(token_bytes)
-
-                        # Find character position by counting characters up to the start byte
-                        char_pos = 1
-                        byte_count = 0
-                        for (i, char) in enumerate(line)
-                            if byte_count + 1 >= start_byte
-                                char_pos = i
-                                break
-                            end
-                            byte_count += ncodeunits(char)
-                        end
-
-                        push!(all_tokens, (char_pos, token_text, token.kind))
-                    end
-                catch e
-                    # If there's any issue with byte/character conversion, skip this token
+                    push!(token_data, (char_pos, token_text, color))
+                    char_pos += length(collect(token_text))
+                catch
+                    # If any error occurs, just skip this token
                     continue
                 end
             end
         end
 
-        # Second pass: determine colors, checking for function calls
-        for i in 1:length(all_tokens)
-            pos, text, kind = all_tokens[i]
-
-            # Check if this identifier is followed by a left parenthesis (function call)
-            if kind == Tokenize.Tokens.IDENTIFIER && i < length(all_tokens)
-                # Look for the next non-whitespace token
-                next_idx = i + 1
-                while next_idx <= length(all_tokens) && all_tokens[next_idx][3] == Tokenize.Tokens.WHITESPACE
-                    next_idx += 1
-                end
-
-                # If next token is LPAREN, this is a function call
-                if next_idx <= length(all_tokens) && all_tokens[next_idx][3] == Tokenize.Tokens.LPAREN
-                    color = function_call_color
-                else
-                    color = get(colors, kind, default_color)
-                end
-            else
-                color = get(colors, kind, default_color)
-            end
-
-            push!(token_data, (pos, text, color))
-        end
-
         return (tokens, token_data)
     catch e
-        # If tokenization fails, render as plain text
-        @warn "Failed to tokenize line: $line" exception = e
+        # If tokenization fails completely, just use neutral color
         return ([], [(1, line, default_color)])
     end
 end
