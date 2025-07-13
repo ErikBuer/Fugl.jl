@@ -1,5 +1,5 @@
 using Fugl
-using Fugl: Text, EditorState, CursorPosition
+using Fugl: Text
 
 function main()
     # Create editor states for both components
@@ -23,7 +23,7 @@ end"""))
                         code_editor_state[] = EditorState(code_editor_state[], text)
                     end,
                     on_focus_change=(focused) -> begin
-                        code_editor_state[].is_focused = focused
+                        code_editor_state[] = EditorState(code_editor_state[]; is_focused=focused)
                     end
                 )
             ),
@@ -33,19 +33,15 @@ end"""))
             Container(
                 TextBox(
                     text_box_state[];
-                    on_change=(text) -> begin
-                        text_box_state[] = EditorState(text_box_state[], text)
-                    end,
-                    on_focus_change=(focused) -> begin
-                        text_box_state[].is_focused = focused
-                    end
+                    on_change=(text) -> text_box_state[] = EditorState(text_box_state[], text),
+                    on_focus_change=(focused) -> text_box_state[] = EditorState(text_box_state[]; is_focused=focused)
                 )
             ),
         ])
     end
 
     # Run the GUI
-    Fugl.run(MyApp, title="Text Editor Generalization Demo", window_width_px=1000, window_height_px=700)
+    Fugl.run(MyApp, title="Text Editor Generalization Demo", window_width_px=600, window_height_px=400)
 end
 
 main()

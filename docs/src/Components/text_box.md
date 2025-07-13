@@ -2,20 +2,47 @@
 
 ``` @example TextBoxExample
 using Fugl
+using Fugl: Text
 
-text_state = Ref("Enter text here...")
-is_focused = Ref(false)
+# Create editor states for both components
+    code_editor_state = Ref(EditorState("""function hello_world()
+    println("Hello, World!")
+    return 42
+end"""))
 
-function MyApp()
-    Container(
-        TextBox(text_state[], is_focused[];
-            on_change=(text) -> (text_state[] = text),
-            on_focus_change=(focused) -> (is_focused[] = focused)
-        )
-    )
-end
+    text_box_state = Ref(EditorState("Enter your text here..."))
 
-screenshot(MyApp, "textBox.png", 400, 150);
+    function MyApp()
+        IntrinsicColumn([
+            IntrinsicHeight(Container(Text("Text Editor Generalization Demo"))),
+
+            # Code Editor Section
+            IntrinsicHeight(Container(Text("Code Editor with Syntax Highlighting:"))),
+            Container(
+                CodeEditor(
+                    code_editor_state[];
+                    on_change=(text) -> begin
+                        code_editor_state[] = EditorState(code_editor_state[], text)
+                    end,
+                    on_focus_change=(focused) -> begin
+                        code_editor_state[] = EditorState(code_editor_state[]; is_focused=focused)
+                    end
+                )
+            ),
+
+            # Text Box Section
+            IntrinsicHeight(Container(Text("Plain Text Box:"))),
+            Container(
+                TextBox(
+                    text_box_state[];
+                    on_change=(text) -> text_box_state[] = EditorState(text_box_state[], text),
+                    on_focus_change=(focused) -> text_box_state[] = EditorState(text_box_state[]; is_focused=focused)
+                )
+            ),
+        ])
+    end
+
+screenshot(MyApp, "textBox.png", 600, 400);
 nothing #hide
 ```
 

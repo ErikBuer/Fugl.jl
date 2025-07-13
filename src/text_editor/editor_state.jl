@@ -65,6 +65,19 @@ function EditorState(old_state::EditorState, new_text::String)
 end
 
 """
+Create a new EditorState with updated focus state, preserving text and cursor from the old state.
+"""
+function EditorState(old_state::EditorState; is_focused::Bool)
+    new_state = EditorState(old_state.text)
+    new_state.cursor = old_state.cursor
+    new_state.is_focused = is_focused
+    # Copy the cache since text hasn't changed
+    new_state.cached_lines = copy(old_state.cached_lines)
+    new_state.text_hash = old_state.text_hash
+    return new_state
+end
+
+"""
 Update the text in the editor state and invalidate caches if needed.
 """
 function update_text!(state::EditorState, new_text::String)

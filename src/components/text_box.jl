@@ -129,15 +129,13 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
 
     if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
         if !view.state.is_focused
-            view.state.is_focused = true
-            view.on_focus_change(true)  # Trigger focus change callback
+            view.on_focus_change(true)  # Trigger focus change callback to update state immutably
         end
         return
     end
 
     if view.state.is_focused
-        view.state.is_focused = false
-        view.on_focus_change(false)  # Trigger focus change callback
+        view.on_focus_change(false)  # Trigger focus change callback to update state immutably
     end
 end
 
