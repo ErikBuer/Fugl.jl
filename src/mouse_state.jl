@@ -15,14 +15,30 @@ Enum representing the state of a mouse button.
 """
 @enum ButtonState IsReleased IsPressed
 
+"""
+Struct representing a keyboard event.
+
+- `key`: GLFW key code (e.g., GLFW.KEY_A, GLFW.KEY_ENTER)
+- `scancode`: Hardware-specific scancode
+- `action`: GLFW action (GLFW.PRESS, GLFW.RELEASE, GLFW.REPEAT)
+- `mods`: Modifier key flags (GLFW.MOD_SHIFT, GLFW.MOD_CONTROL, etc.)
+"""
+struct KeyEvent
+    key::Int32
+    scancode::Int32
+    action::Int32
+    mods::Int32
+end
+
 mutable struct MouseState
     button_state::Dict{MouseButton,ButtonState}  # Current button state
-    was_clicked::Dict{MouseButton,Bool}         # Tracks if the button was clicked
+    was_clicked::Dict{MouseButton,Bool}          # Tracks if the button was clicked
     x::Float64                                   # Current mouse X position
     y::Float64                                   # Current mouse Y position
     last_click_time::Float64                     # Time of the last click
-    last_click_position::Tuple{Float64,Float64} # Position of the last click
-    key_buffer::Vector{Char}                     # Buffer for key presses
+    last_click_position::Tuple{Float64,Float64}  # Position of the last click
+    key_buffer::Vector{Char}                     # Buffer for character input
+    key_events::Vector{KeyEvent}                 # Buffer for key events
 end
 
 function MouseState()
@@ -33,7 +49,8 @@ function MouseState()
         0.0,
         0.0,
         (0.0, 0.0),
-        Char[]  # Initialize an empty key buffer
+        Char[],     # Initialize an empty key buffer
+        KeyEvent[]  # Initialize empty key events buffer
     )
 end
 
@@ -57,26 +74,39 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Mou
 end
 
 function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Action, mods::Int32, mouse_state::MouseState)
-    if action == GLFW.PRESS
-        # Use GLFW.GetKeyName to get the string representation of the key
-        key_name = GLFW.GetKeyName(key, scancode)
-        if key_name !== nothing
-            for char in key_name
-                push!(mouse_state.key_buffer, char)  # Add printable characters to the buffer
-            end
-        else
-            # Handle non-printable keys explicitly
-            if key == GLFW.KEY_ENTER
-                push!(mouse_state.key_buffer, '\n')  # Add newline for Enter key
-            elseif key == GLFW.KEY_BACKSPACE
-                push!(mouse_state.key_buffer, '\b')  # Add backspace character
-            elseif key == GLFW.KEY_TAB
-                push!(mouse_state.key_buffer, '\t')  # Add tab character
-            elseif key == GLFW.KEY_ESCAPE
-                push!(mouse_state.key_buffer, '\e')  # Add escape character
-            end
+    if action == GLFW.PRESS || action == GLFW.REPEAT
+        # Store raw key events for navigation and shortcuts
+        key_event = KeyEvent(Int32(key), scancode, Int32(action), mods)
+        push!(mouse_state.key_events, key_event)
+
+        # Handle special keys that produce characters
+        if key == GLFW.KEY_ENTER
+            push!(mouse_state.key_buffer, '\n')
+        elseif key == GLFW.KEY_BACKSPACE
+            push!(mouse_state.key_buffer, '\b')
+        elseif key == GLFW.KEY_TAB
+            push!(mouse_state.key_buffer, '\t')
         end
     end
+end
+
+"""
+New character callback for proper text input
+This function handles character input from the keyboard, converting Unicode codepoints to characters.
+"""
+function char_callback(gl_window, codepoint::UInt32, mouse_state::MouseState)
+    # Convert Unicode codepoint to character and add to buffer
+    char = Char(codepoint)
+    push!(mouse_state.key_buffer, char)
+end
+
+"""
+Alternative signature in case GLFW passes Char directly
+This function adds a character directly to the key buffer.
+"""
+function char_callback(gl_window, char::Char, mouse_state::MouseState)
+    # Add character directly to buffer
+    push!(mouse_state.key_buffer, char)
 end
 
 function collect_state!(mouse_state::MouseState)::MouseState
@@ -89,6 +119,7 @@ function collect_state!(mouse_state::MouseState)::MouseState
         mouse_state.last_click_time,
         mouse_state.last_click_position,
         deepcopy(mouse_state.key_buffer),
+        deepcopy(mouse_state.key_events),
     )
 
     # Reset `was_clicked` in the original state
