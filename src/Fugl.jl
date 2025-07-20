@@ -24,7 +24,9 @@ include("text/font_cache.jl")
 include("text/utilities.jl")
 include("text/text_style.jl")
 export TextStyle
+include("text/glyph_atlas.jl")
 include("text/draw.jl")
+export draw_text, clear_glyph_atlas!
 
 include("image/utilities.jl")
 include("image/draw.jl")
@@ -176,10 +178,11 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         end
     finally
         # Clean up - destroy window first to release OpenGL context
-        GLFW.DestroyWindow(gl_window)
-
-        # Clear texture cache to prevent stale texture references on next run
+        GLFW.DestroyWindow(gl_window)        # Clear texture cache to prevent stale texture references on next run
         clear_texture_cache!()
+
+        # Clear glyph atlas to prevent memory leaks
+        clear_glyph_atlas!()
 
         # Clear UI reference
         last_ui = nothing
