@@ -7,9 +7,7 @@ function main()
     slider_value = Ref(0.5f0)
 
     # External state for the TextBox
-    text_state = Ref("Enter text here...")
-    is_focused = Ref(false)
-
+    text_box_state = Ref(EditorState("Enter text here..."))
 
     function MyApp()
         Row([
@@ -27,9 +25,12 @@ function main()
                     Container(),
                     Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),
                     IntrinsicHeight(TextButton("SomeText", on_click=() -> println("Clicked"))),
-                    Container(TextBox(text_state[], is_focused[];
-                        on_change=(text) -> (text_state[] = text),
-                        on_focus_change=(focused) -> (is_focused[] = focused))
+                    Container(
+                        TextBox(
+                            text_box_state[];
+                            on_change=(new_state) -> text_box_state[] = new_state,
+                            on_focus_change=(focused) -> text_box_state[] = EditorState(text_box_state[]; is_focused=focused)
+                        )
                     )
                 ],
                 padding=0

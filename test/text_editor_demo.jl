@@ -19,12 +19,8 @@ end"""))
             Container(
                 CodeEditor(
                     code_editor_state[];
-                    on_change=(text) -> begin
-                        code_editor_state[] = EditorState(code_editor_state[], text)
-                    end,
-                    on_focus_change=(focused) -> begin
-                        code_editor_state[] = EditorState(code_editor_state[]; is_focused=focused)
-                    end
+                    on_change=(new_state) -> code_editor_state[] = new_state,
+                    on_focus_change=(focused) -> code_editor_state[] = EditorState(code_editor_state[]; is_focused=focused),
                 )
             ),
 
@@ -33,7 +29,7 @@ end"""))
             Container(
                 TextBox(
                     text_box_state[];
-                    on_change=(text) -> text_box_state[] = EditorState(text_box_state[], text),
+                    on_change=(new_state) -> text_box_state[] = new_state,
                     on_focus_change=(focused) -> text_box_state[] = EditorState(text_box_state[]; is_focused=focused)
                 )
             ),

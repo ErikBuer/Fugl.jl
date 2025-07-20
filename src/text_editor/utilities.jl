@@ -6,6 +6,23 @@ Tokenize a Julia line and return tokens with color data.
 Returns (tokens, token_data) where token_data is [(position, text, color), ...]
 """
 function tokenize_julia_line(line::String)
+    # Performance guards
+    MAX_LINE_LENGTH = 1000  # Skip tokenization for very long lines
+    MAX_PROCESSING_TIME = 0.005  # 5ms timeout - very conservative
+
+    # Default neutral color
+    default_color = Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)  # Default white
+
+    # Skip tokenization for very long lines to prevent freezing
+    if length(line) > MAX_LINE_LENGTH
+        return ([], [(1, line, default_color)])
+    end
+
+    # Skip tokenization for empty lines
+    if isempty(strip(line))
+        return ([], [(1, line, default_color)])
+    end
+
     # Define colors for different token types
     colors = Dict{Tokenize.Tokens.Kind,Vec4{Float32}}(
         Tokenize.Tokens.FUNCTION => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),    # Purple for keywords
@@ -29,59 +46,49 @@ function tokenize_julia_line(line::String)
 
     # Color for function calls
     function_call_color = Vec4{Float32}(1.0f0, 1.0f0, 0.4f0, 1.0f0)  # Yellow for function calls
-    default_color = Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)  # Default white
 
     try
-        # Tokenize the line
+        # Start timing for timeout protection
+        start_time = time()
+
+        # Tokenize the line with timeout protection
         tokens = collect(tokenize(line))
 
-        # Build a list of (position, text, color) tuples
-        token_data = []
-
-        # First pass: collect all tokens
-        all_tokens = []
-        for token in tokens
-            if token.startbyte >= 0 && token.endbyte >= token.startbyte
-                # Extract text using proper 1-based indexing
-                start_pos = token.startbyte + 1
-                end_pos = min(token.endbyte + 1, length(line))
-
-                if start_pos <= length(line)
-                    token_text = line[start_pos:end_pos]
-                    push!(all_tokens, (start_pos, token_text, token.kind))
-                end
-            end
+        # Check if we're taking too long - if so, use neutral color
+        if time() - start_time > MAX_PROCESSING_TIME
+            return ([], [(1, line, default_color)])
         end
 
-        # Second pass: determine colors, checking for function calls
-        for i in 1:length(all_tokens)
-            pos, text, kind = all_tokens[i]
+        # Process tokens quickly and simply
+        token_data = []
+        char_pos = 1
 
-            # Check if this identifier is followed by a left parenthesis (function call)
-            if kind == Tokenize.Tokens.IDENTIFIER && i < length(all_tokens)
-                # Look for the next non-whitespace token
-                next_idx = i + 1
-                while next_idx <= length(all_tokens) && all_tokens[next_idx][3] == Tokenize.Tokens.WHITESPACE
-                    next_idx += 1
-                end
-
-                # If next token is LPAREN, this is a function call
-                if next_idx <= length(all_tokens) && all_tokens[next_idx][3] == Tokenize.Tokens.LPAREN
-                    color = function_call_color
-                else
-                    color = get(colors, kind, default_color)
-                end
-            else
-                color = get(colors, kind, default_color)
+        for token in tokens
+            # Check timeout periodically
+            if time() - start_time > MAX_PROCESSING_TIME
+                return ([], [(1, line, default_color)])
             end
 
-            push!(token_data, (pos, text, color))
+            if token.startbyte >= 0 && token.endbyte >= token.startbyte
+                try
+                    # Simple token text extraction - if it fails, skip
+                    token_text = String(line[max(1, token.startbyte + 1):min(length(line), token.endbyte + 1)])
+
+                    # Simple color assignment
+                    color = get(colors, token.kind, default_color)
+
+                    push!(token_data, (char_pos, token_text, color))
+                    char_pos += length(collect(token_text))
+                catch
+                    # If any error occurs, just skip this token
+                    continue
+                end
+            end
         end
 
         return (tokens, token_data)
     catch e
-        # If tokenization fails, render as plain text
-        @warn "Failed to tokenize line: $line" exception = e
+        # If tokenization fails completely, just use neutral color
         return ([], [(1, line, default_color)])
     end
 end
@@ -153,12 +160,12 @@ function apply_move_cursor!(state::EditorState, action::MoveCursor)
             state.cursor = CursorPosition(cursor.line, cursor.column - 1)
         elseif cursor.line > 1
             # Move to end of previous line
-            prev_line_length = length(lines[cursor.line-1])
-            state.cursor = CursorPosition(cursor.line - 1, prev_line_length + 1)
+            prev_line_char_length = length(collect(lines[cursor.line-1]))
+            state.cursor = CursorPosition(cursor.line - 1, prev_line_char_length + 1)
         end
     elseif action.direction == :right
-        current_line_length = cursor.line <= length(lines) ? length(lines[cursor.line]) : 0
-        if cursor.column <= current_line_length
+        current_line_char_length = cursor.line <= length(lines) ? length(collect(lines[cursor.line])) : 0
+        if cursor.column <= current_line_char_length
             state.cursor = CursorPosition(cursor.line, cursor.column + 1)
         elseif cursor.line < length(lines)
             # Move to beginning of next line
@@ -210,9 +217,11 @@ function apply_delete_text!(state::EditorState, action::DeleteText)
 
     if action.direction == :backspace
         if cursor.column > 1
-            # Delete character before cursor
+            # Delete character before cursor using safe Unicode indexing
             current_line = lines[cursor.line]
-            new_line = current_line[1:cursor.column-2] * current_line[cursor.column:end]
+            line_before = safe_substring(current_line, 1, cursor.column - 2)
+            line_after = safe_substring_to_end(current_line, cursor.column)
+            new_line = line_before * line_after
             lines[cursor.line] = new_line
             state.cursor = CursorPosition(cursor.line, cursor.column - 1)
         elseif cursor.line > 1
@@ -221,14 +230,31 @@ function apply_delete_text!(state::EditorState, action::DeleteText)
             current_line = lines[cursor.line]
             lines[cursor.line-1] = prev_line * current_line
             deleteat!(lines, cursor.line)
-            state.cursor = CursorPosition(cursor.line - 1, length(prev_line) + 1)
+            # Use character length, not byte length
+            prev_line_char_length = length(collect(prev_line))
+            state.cursor = CursorPosition(cursor.line - 1, prev_line_char_length + 1)
         end
     elseif action.direction == :delete
         if cursor.line <= length(lines)
             current_line = lines[cursor.line]
-            if cursor.column <= length(current_line)
-                # Delete character at cursor
-                new_line = current_line[1:cursor.column-1] * current_line[cursor.column+1:end]
+            chars = collect(current_line)
+            line_length = length(chars)
+
+            if cursor.column <= line_length
+                # Delete character at cursor using safe Unicode indexing
+                before_cursor = if cursor.column <= 1
+                    ""
+                else
+                    join(chars[1:cursor.column-1])
+                end
+
+                after_cursor = if cursor.column >= line_length
+                    ""
+                else
+                    join(chars[cursor.column+1:end])
+                end
+
+                new_line = before_cursor * after_cursor
                 lines[cursor.line] = new_line
             elseif cursor.line < length(lines)
                 # Merge with next line
@@ -326,12 +352,14 @@ function delete_range!(state::EditorState, start_cursor::CursorPosition, end_cur
     lines = get_lines(state)
 
     if start_cursor.line == end_cursor.line
-        # Same line deletion
+        # Same line deletion using safe Unicode indexing
         current_line = lines[start_cursor.line]
         start_col = min(start_cursor.column, end_cursor.column)
         end_col = max(start_cursor.column, end_cursor.column)
 
-        new_line = current_line[1:start_col-1] * current_line[end_col:end]
+        line_before = safe_substring(current_line, 1, start_col - 1)
+        line_after = safe_substring_to_end(current_line, end_col)
+        new_line = line_before * line_after
         lines[start_cursor.line] = new_line
     else
         # Multi-line deletion (for future enhancement)
@@ -419,4 +447,59 @@ function key_event_to_action(key_event::KeyEvent)
     end
 
     return nothing  # Unknown key event
+end
+
+"""
+Safely get a substring using character-based indexing instead of byte indexing.
+This handles Unicode characters correctly.
+"""
+function safe_substring(text::AbstractString, start_char::Int, end_char::Int)
+    try
+        chars = collect(text)
+        total_chars = length(chars)
+
+        # Clamp indices to valid range
+        start_idx = max(1, min(start_char, total_chars + 1))
+        end_idx = max(0, min(end_char, total_chars))
+
+        if start_idx > end_idx
+            return ""
+        else
+            return join(chars[start_idx:end_idx])
+        end
+    catch e
+        @warn "Error in safe_substring, returning empty string" exception = (e, catch_backtrace())
+        return ""
+    end
+end
+
+"""
+Safely get a substring from start to end of string using character indexing.
+"""
+function safe_substring_to_end(text::AbstractString, start_char::Int)
+    try
+        chars = collect(text)
+        total_chars = length(chars)
+        start_idx = max(1, min(start_char, total_chars + 1))
+
+        if start_idx > total_chars
+            return ""
+        else
+            return join(chars[start_idx:end])
+        end
+    catch e
+        @warn "Error in safe_substring_to_end, returning empty string" exception = (e, catch_backtrace())
+        return ""
+    end
+end
+
+"""
+Get the character length of a string (not byte length).
+"""
+function char_length(text::AbstractString)
+    try
+        return length(collect(text))
+    catch
+        return 0
+    end
 end
