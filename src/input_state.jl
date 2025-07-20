@@ -94,19 +94,24 @@ end
 New character callback for proper text input
 This function handles character input from the keyboard, converting Unicode codepoints to characters.
 """
-function char_callback(gl_window, codepoint::UInt32, mouse_state::InputState)
-    # Convert Unicode codepoint to character and add to buffer
-    char = Char(codepoint)
-    push!(mouse_state.key_buffer, char)
+function char_callback(gl_window, codepoint, mouse_state::InputState)
+    # Drop input if buffer is too large
+    if length(mouse_state.key_buffer) >= 50  # Reasonable limit
+        return  # Silently drop excess input
+    end
+    push!(mouse_state.key_buffer, Char(codepoint))
 end
 
 """
 Alternative signature in case GLFW passes Char directly
 This function adds a character directly to the key buffer.
 """
-function char_callback(gl_window, char::Char, mouse_state::InputState)
-    # Add character directly to buffer
-    push!(mouse_state.key_buffer, char)
+function key_callback(gl_window, key, scancode, action, mods, mouse_state::InputState)
+    # Drop input if buffer is too large  
+    if length(mouse_state.key_events) >= 50  # Reasonable limit
+        return  # Silently drop excess input
+    end
+    push!(mouse_state.key_events, KeyEvent(key, scancode, action, mods))
 end
 
 function collect_state!(mouse_state::InputState)::InputState
