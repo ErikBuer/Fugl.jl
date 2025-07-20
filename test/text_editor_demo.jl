@@ -19,12 +19,8 @@ end"""))
             Container(
                 CodeEditor(
                     code_editor_state[];
-                    on_change=(new_state) -> begin
-                        code_editor_state[] = new_state
-                    end,
-                    on_focus_change=(focused) -> begin
-                        code_editor_state[] = EditorState(code_editor_state[]; is_focused=focused)
-                    end
+                    on_change=(new_state) -> code_editor_state[] = new_state,
+                    on_focus_change=(focused) -> code_editor_state[] = EditorState(code_editor_state[]; is_focused=focused),
                 )
             ),
 
