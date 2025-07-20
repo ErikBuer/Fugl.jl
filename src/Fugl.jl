@@ -2,10 +2,10 @@ module Fugl
 
 using ModernGL, GLAbstraction, GLFW # OpenGL dependencies
 const GLA = GLAbstraction
-
 using FreeTypeAbstraction # Font rendering dependencies
-
 using GeometryBasics, ColorTypes    # Additional rendering dependencies
+
+const OPENGL_LOCK = ReentrantLock()
 
 include("matrices.jl")
 
@@ -95,56 +95,59 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
             glViewport(0, 0, fb_width, fb_height)
             projection_matrix = get_orthographic_matrix(0.0f0, Float32(fb_width), Float32(fb_height), 0.0f0, -1.0f0, 1.0f0)
 
-            # Clear the screen
-            ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
+            lock(OPENGL_LOCK) do
+                # Clear the screen
+                ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
-            # Lock the mouse state by creating a copy
-            locked_state = collect_state!(mouse_state)
+                # Lock the mouse state by creating a copy
+                locked_state = collect_state!(mouse_state)
 
-            # Generate the UI dynamically with error handling
-            try
-                ui::AbstractView = ui_function()
-                last_ui = ui  # Keep reference to prevent GC during this frame
-
-                # Detect clicks with error handling
+                # Generate the UI dynamically with error handling
                 try
-                    detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
-                catch e
-                    @warn "Error in click detection" exception = (e, catch_backtrace())
-                end
+                    ui::AbstractView = ui_function()
+                    last_ui = ui  # Keep reference to prevent GC during this frame
 
-                # Render the UI with error handling
-                try
-                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
-                catch e
-                    @warn "Error rendering UI" exception = (e, catch_backtrace())
-                    # Continue to next frame instead of crashing
-                end
-
-            catch e
-                @error "Error generating UI" exception = (e, catch_backtrace())
-                # Keep the last working UI alive
-                if last_ui !== nothing
+                    # Detect clicks with error handling
                     try
-                        interpret_view(last_ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
-                    catch
-                        # If even the last UI fails, just continue
+                        detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
+                    catch e
+                        @warn "Error in click detection" exception = (e, catch_backtrace())
+                    end
+
+                    # Render the UI with error handling
+                    try
+                        interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
+                    catch e
+                        @warn "Error rendering UI" exception = (e, catch_backtrace())
+                        # Continue to next frame instead of crashing
+                    end
+
+                catch e
+                    @error "Error generating UI" exception = (e, catch_backtrace())
+                    # Keep the last working UI alive
+                    if last_ui !== nothing
+                        try
+                            interpret_view(last_ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
+                        catch
+                            # If even the last UI fails, just continue
+                        end
                     end
                 end
+
+                # Clear the key buffer and key events
+                empty!(mouse_state.key_buffer)
+                empty!(mouse_state.key_events)
+
+                # Periodic GC management (every 5 seconds at 60fps)
+                if frame_count % 300 == 0
+                    # Force a gentle GC between frames to prevent buildup
+                    GC.gc(false)
+                end
+
+                # Swap buffers and poll events
+                GLFW.SwapBuffers(gl_window)
             end
 
-            # Clear the key buffer and key events
-            empty!(mouse_state.key_buffer)
-            empty!(mouse_state.key_events)
-
-            # Periodic GC management (every 5 seconds at 60fps)
-            if frame_count % 300 == 0
-                # Force a gentle GC between frames to prevent buildup
-                GC.gc(false)
-            end
-
-            # Swap buffers and poll events
-            GLFW.SwapBuffers(gl_window)
             GLFW.PollEvents()
         end
     finally
