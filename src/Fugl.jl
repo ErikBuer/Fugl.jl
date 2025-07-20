@@ -74,11 +74,25 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     # Track frame count for GC management
     frame_count = 0
     last_ui = nothing  # Keep reference to prevent premature GC
+    last_frame_time = time()  # Track frame timing for freeze detection
 
     try
         # Main loop
         while !GLFW.WindowShouldClose(gl_window)
+            frame_start_time = time()
             frame_count += 1
+
+            # Detect if previous frame took too long (freeze detection)
+            frame_duration = frame_start_time - last_frame_time
+            if frame_duration > 1.0  # More than 1 second for a frame
+                @warn "Slow frame detected: $(round(frame_duration, digits=2))s - possible freeze recovery"
+                # Force garbage collection to free any leaked resources
+                GC.gc(true)
+                # Clear any accumulated input to prevent further overflow
+                empty!(mouse_state.key_buffer)
+                empty!(mouse_state.key_events)
+            end
+            last_frame_time = frame_start_time
 
             # Update window size
             window_width, window_height = GLFW.GetWindowSize(gl_window)
@@ -86,7 +100,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
             scale_x = fb_width / window_width
             scale_y = fb_height / window_height
 
-            # Poll mouse position
+            # Poll mouse position  
             mouse_state.x, mouse_state.y = Tuple(GLFW.GetCursorPos(gl_window))
             mouse_state.x *= scale_x
             mouse_state.y *= scale_y
@@ -99,8 +113,16 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                 # Clear the screen
                 ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
-                # Lock the mouse state by creating a copy
+                # IMPORTANT: Copy the input state immediately under lock protection
+                # This prevents GLFW callbacks from modifying buffers while we're reading them
                 locked_state = collect_state!(mouse_state)
+                empty!(mouse_state.key_buffer)
+                empty!(mouse_state.key_events)
+
+                # Reset click flags
+                for button in keys(mouse_state.was_clicked)
+                    mouse_state.was_clicked[button] = false
+                end
 
                 # Generate the UI dynamically with error handling
                 try
@@ -134,10 +156,6 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     end
                 end
 
-                # Clear the key buffer and key events
-                empty!(mouse_state.key_buffer)
-                empty!(mouse_state.key_events)
-
                 # Periodic GC management (every 5 seconds at 60fps)
                 if frame_count % 300 == 0
                     # Force a gentle GC between frames to prevent buildup
@@ -146,6 +164,12 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
                 # Swap buffers and poll events
                 GLFW.SwapBuffers(gl_window)
+            end
+
+            # Yield control periodically to prevent task starvation
+            # This replaces the accidental timing fix from debug printing
+            if frame_count % 10 == 0
+                yield()  # Allow other Julia tasks to run
             end
 
             GLFW.PollEvents()
