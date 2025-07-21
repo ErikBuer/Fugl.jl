@@ -96,17 +96,7 @@ end
 Get a unique hash for a font face.
 """
 function get_font_hash(font::FreeTypeAbstraction.FTFont)
-    # Use a more stable identifier based on the font file path and face properties
-    # This should be consistent across font cache retrievals
-    font_path = ""
-    try
-        # Try to get the font file path if available
-        font_path = font.face.family_name * "_" * font.face.style_name
-    catch
-        # Fallback to pointer-based hash if face info is not available
-        font_path = string(font.ft_ptr)
-    end
-    return hash((font_path, font.face_index))
+    return hash((font.family_name, font.style_name))
 end
 
 """
