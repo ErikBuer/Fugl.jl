@@ -55,9 +55,11 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
             current_line = word
             current_width = word_width
         else
-            # Add the word to the current line
-            current_line *= " " * word
-            current_width += word_width + space_width
+            if current_line == ""
+                current_line = word
+            else
+                current_line *= " " * word
+            end
         end
     end
 
