@@ -217,7 +217,7 @@ function draw_glyph_atlas_debug(
         Point2f(x_px, y_px),                          # Bottom-left
     ]
 
-    # Use full texture coordinates (entire atlas)
+    # Define texture coordinates to show the entire atlas
     texturecoordinates = [
         Vec{2,Float32}(0.0f0, 1.0f0),  # Top-left
         Vec{2,Float32}(1.0f0, 1.0f0),  # Top-right
@@ -248,13 +248,13 @@ function draw_glyph_atlas_debug(
     GLA.gluniform(glyph_prog[], :use_texture, true)
     GLA.gluniform(glyph_prog[], :image, 0, atlas.texture)
     GLA.gluniform(glyph_prog[], :projection, projection_matrix)
-    GLA.gluniform(glyph_prog[], :text_color, Vec4{Float32}(1.0, 1.0, 1.0, 1.0))
+    GLA.gluniform(glyph_prog[], :text_color, Vec4f(1.0, 1.0, 1.0, 1.0))  # White color
 
-    # Bind the VAO and draw the rectangle
+    # Bind the VAO and draw
     GLA.bind(vao)
     GLA.draw(vao)
 
-    # Unbind the VAO and shader program
+    # Unbind
     GLA.unbind(vao)
     GLA.unbind(glyph_prog[])
 end

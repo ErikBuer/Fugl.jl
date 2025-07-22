@@ -178,10 +178,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         end
     finally
         # Clean up - destroy window first to release OpenGL context
-        GLFW.DestroyWindow(gl_window)        # Clear texture cache to prevent stale texture references on next run
+        GLFW.DestroyWindow(gl_window)
         clear_texture_cache!()
-
-        # Clear glyph atlas to prevent memory leaks
+        clear_font_cache!()
         clear_glyph_atlas!()
 
         # Clear UI reference
