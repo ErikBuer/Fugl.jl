@@ -38,3 +38,8 @@ function get_font_by_name(font_name::String)::FreeTypeAbstraction.FTFont
     font_cache[font_name] = font
     return font
 end
+
+function clear_font_cache!()
+    # Clear the font cache
+    empty!(font_cache)
+end

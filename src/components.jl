@@ -59,3 +59,5 @@ export Image
 
 include("composite_components/buttons.jl")
 export TextButton, IconButton
+
+include("components/atlas_debug.jl")
