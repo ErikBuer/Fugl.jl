@@ -102,7 +102,7 @@ function tokenize_line_with_colors(line::String)
 end
 
 """
-Render a line using cached tokenization data.
+Render a line using cached tokenization data with optimized batched rendering.
 """
 function render_line_from_cache(
     line_data::LineTokenData,

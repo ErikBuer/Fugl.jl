@@ -11,7 +11,7 @@ function ContainerStyle(;
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
     border_width_px=4.0f0,
     padding_px::Float32=6f0,
-    corner_radius_px::Float32=10.0f0
+    corner_radius_px::Float32=5.0f0
 )
     return ContainerStyle(background_color, border_color, border_width_px, padding_px, corner_radius_px)
 end

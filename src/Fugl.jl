@@ -25,8 +25,8 @@ include("text/utilities.jl")
 include("text/text_style.jl")
 export TextStyle
 include("text/glyph_atlas.jl")
+include("text/glyph_batch.jl")
 include("text/draw.jl")
-export draw_text, clear_glyph_atlas!
 
 include("image/utilities.jl")
 include("image/draw.jl")
@@ -211,6 +211,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         clear_texture_cache!()
         clear_font_cache!()
         clear_glyph_atlas!()
+        clear_text_batch!()
 
         # Clear UI reference
         last_ui = nothing

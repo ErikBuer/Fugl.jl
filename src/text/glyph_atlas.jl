@@ -61,12 +61,13 @@ function get_glyph_atlas()
 end
 
 """
-    create_glyph_atlas(width=2048, height=2048) -> GlyphAtlas
+    create_glyph_atlas(width=4096, height=4096) -> GlyphAtlas
 
-Create a new glyph atlas texture.
+Create a new glyph atlas texture with larger size for better performance.
+Inspired by Makie.jl's approach with larger atlases to reduce cache misses.
 """
-function create_glyph_atlas(width::Int=2048, height::Int=2048)
-    # Create empty texture data
+function create_glyph_atlas(width::Int=4096, height::Int=4096)
+    # Create empty texture data with larger default size
     atlas_data = zeros(Float32, width, height)
 
     # Create OpenGL texture
@@ -224,7 +225,7 @@ end
 """
     clear_glyph_atlas!()
 
-Clear the global glyph atlas cache.
+Clear the global glyph atlas cache and any associated batches.
 """
 function clear_glyph_atlas!()
     GLYPH_ATLAS[] = nothing
