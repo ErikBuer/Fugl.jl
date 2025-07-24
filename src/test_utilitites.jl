@@ -78,7 +78,7 @@ function render_debug_overlay(frame_count::Int, fps::Float64, screen_width::Floa
     text_height = Float32(debug_style.size_px)
 
     # Position in upper right corner with some  padding
-    padding = 10.0f0
+    padding = 0.0f0
     x = screen_width - text_width - padding
     y = padding + text_height  # Add text height because text is drawn from baseline
 

@@ -157,24 +157,14 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     ui::AbstractView = ui_function()
                     last_ui = ui  # Keep reference to prevent GC during this frame
 
-                    # Detect clicks with error handling
-                    try
-                        detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
-                    catch e
-                        @warn "Error in click detection" exception = (e, catch_backtrace())
+                    detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
+                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
+
+                    # Render debug overlay if enabled
+                    if debug_overlay
+                        render_debug_overlay(frame_count, debug_fps, Float32(fb_width), Float32(fb_height), projection_matrix)
                     end
 
-                    # Render the UI with error handling
-                    try
-                        interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
-
-                        # Render debug overlay if enabled
-                        if debug_overlay
-                            render_debug_overlay(frame_count, debug_fps, Float32(fb_width), Float32(fb_height), projection_matrix)
-                        end
-                    catch e
-                        @warn "Error rendering UI" exception = (e, catch_backtrace())
-                    end
 
                 catch e
                     @error "Error generating UI" exception = (e, catch_backtrace())
