@@ -25,8 +25,8 @@ include("text/utilities.jl")
 include("text/text_style.jl")
 export TextStyle
 include("text/glyph_atlas.jl")
+include("text/glyph_batch.jl")
 include("text/draw.jl")
-export draw_text, clear_glyph_atlas!
 
 include("image/utilities.jl")
 include("image/draw.jl")
@@ -40,14 +40,20 @@ include("components.jl")
 include("test_utilitites.jl")
 export screenshot
 
-
 """
-    run(ui_ref[]::AbstractView; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080)
+    run(ui_ref[]::AbstractView; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, debug_overlay::Bool=false)
 
 Run the main loop for the GUI application.
 This function handles the rendering and event processing for the GUI.
+
+# Arguments
+- `ui_function::Function`: Function that returns an AbstractView for the UI
+- `title::String="Fugl"`: Window title
+- `window_width_px::Integer=1920`: Initial window width
+- `window_height_px::Integer=1080`: Initial window height
+- `debug_overlay::Bool=false`: Show frame count and FPS in upper right corner
 """
-function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080)
+function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, debug_overlay::Bool=false)
     # Initialize the GLFW window
     gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
     GLA.set_context!(gl_window)
@@ -73,16 +79,36 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
     projection_matrix = get_orthographic_matrix(0.0f0, Float32(window_width_px), Float32(window_height_px), 0.0f0, -1.0f0, 1.0f0)
 
-    # Track frame count for GC management
+    # Track frame count for GC management and debug overlay
     frame_count = 0
     last_ui = nothing  # Keep reference to prevent premature GC
     last_frame_time = time()  # Track frame timing for freeze detection
+
+    # Debug overlay timing variables
+    debug_frame_count = 0
+    debug_last_time = time()
+    debug_fps = 0.0
+    debug_fps_update_interval = 0.5  # Update FPS every 0.5 seconds
 
     try
         # Main loop
         while !GLFW.WindowShouldClose(gl_window)
             frame_start_time = time()
             frame_count += 1
+
+            # Update debug overlay stats if enabled
+            if debug_overlay
+                debug_frame_count += 1
+                current_time = frame_start_time
+
+                # Update FPS every interval
+                if current_time - debug_last_time >= debug_fps_update_interval
+                    elapsed = current_time - debug_last_time
+                    debug_fps = debug_frame_count / elapsed
+                    debug_frame_count = 0
+                    debug_last_time = current_time
+                end
+            end
 
             # Detect if previous frame took too long (freeze detection)
             frame_duration = frame_start_time - last_frame_time
@@ -131,20 +157,14 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     ui::AbstractView = ui_function()
                     last_ui = ui  # Keep reference to prevent GC during this frame
 
-                    # Detect clicks with error handling
-                    try
-                        detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
-                    catch e
-                        @warn "Error in click detection" exception = (e, catch_backtrace())
+                    detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
+                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
+
+                    # Render debug overlay if enabled
+                    if debug_overlay
+                        render_debug_overlay(frame_count, debug_fps, Float32(fb_width), Float32(fb_height), projection_matrix)
                     end
 
-                    # Render the UI with error handling
-                    try
-                        interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
-                    catch e
-                        @warn "Error rendering UI" exception = (e, catch_backtrace())
-                        # Continue to next frame instead of crashing
-                    end
 
                 catch e
                     @error "Error generating UI" exception = (e, catch_backtrace())
@@ -158,9 +178,8 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     end
                 end
 
-                # Periodic GC management (every 5 seconds at 60fps)
+                # Periodic GC management
                 if frame_count % 300 == 0
-                    # Force a gentle GC between frames to prevent buildup
                     GC.gc(false)
                 end
 
@@ -182,6 +201,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         clear_texture_cache!()
         clear_font_cache!()
         clear_glyph_atlas!()
+        clear_text_batch!()
 
         # Clear UI reference
         last_ui = nothing

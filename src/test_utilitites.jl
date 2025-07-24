@@ -57,3 +57,54 @@ function screenshot(ui_funciton::Function, output_file::String, width::Int, heig
     ModernGL.glDeleteTextures(1, Ref(texture))
     GLFW.DestroyWindow(gl_window)
 end
+
+"""
+    render_debug_overlay(frame_count, fps, screen_width, screen_height, projection_matrix)
+
+Render debug overlay showing frame count and FPS in the upper right corner.
+"""
+function render_debug_overlay(frame_count::Int, fps::Float64, screen_width::Float32, screen_height::Float32, projection_matrix)
+    # Format debug text
+    debug_text = "Frame: $frame_count | FPS: $(round(fps, digits=1))"
+
+    # Create text style for debug overlay
+    debug_style = TextStyle(
+        size_px=14,
+        color=Vec4f(1.0, 1.0, 1.0, 0.8)  # Light gray text
+    )
+
+    # Measure text to position it correctly
+    text_width = measure_word_width(debug_style.font, debug_text, debug_style.size_px)
+    text_height = Float32(debug_style.size_px)
+
+    # Position in upper right corner with some  padding
+    padding = 0.0f0
+    x = screen_width - text_width - padding
+    y = padding + text_height  # Add text height because text is drawn from baseline
+
+    # Draw background rectangle first
+    bg_padding = 5.0f0
+    bg_x = x - bg_padding
+    bg_y = padding
+    bg_width = text_width + 2 * bg_padding
+    bg_height = text_height + 2 * bg_padding
+
+    # Create vertices for background rectangle
+    bg_vertices = [
+        Point2f(bg_x, bg_y),                    # Top-left
+        Point2f(bg_x, bg_y + bg_height),        # Bottom-left  
+        Point2f(bg_x + bg_width, bg_y + bg_height),  # Bottom-right
+        Point2f(bg_x + bg_width, bg_y),         # Top-right
+    ]
+
+    try
+        # Draw semi-transparent background rectangle
+        draw_rectangle(bg_vertices, Vec4f(0.0, 0.0, 0.0, 0.7), projection_matrix)
+
+        # Draw the debug text on top
+        draw_text(debug_style.font, debug_text, x, y, debug_style.size_px, projection_matrix, debug_style.color)
+    catch e
+        # If drawing fails, silently ignore to avoid breaking the main UI
+        # This can happen during startup when shaders aren't ready
+    end
+end

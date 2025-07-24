@@ -39,7 +39,7 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     words = split(view.text, " ")
 
     # Calculate line breaks
-    lines = []
+    lines = String[]
     current_line = ""
     current_width = 0.0f0
 
@@ -57,8 +57,10 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         else
             if current_line == ""
                 current_line = word
+                current_width = word_width
             else
                 current_line *= " " * word
+                current_width += space_width + word_width
             end
         end
     end
@@ -72,25 +74,32 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     # Calculate vertical alignment offset
     vertical_offset = calculate_text_vertical_offset(height, total_height, view.vertical_align)
 
-    # Render each line
+    # Collect positions for all lines for batched rendering
+    x_positions = Float32[]
+    y_positions = Float32[]
+
     current_y = y + vertical_offset
     for line in lines
         # Calculate horizontal alignment offset
         line_width = measure_word_width(font, line, size_px)
         horizontal_offset = calculate_horizontal_offset(width, line_width, view.horizontal_align)
 
-        # Render the line
-        draw_text(
-            font,                # Font face
-            line,                # Text string
-            x + horizontal_offset, # X position
-            current_y,           # Y position
-            size_px,             # Text size
-            projection_matrix,   # Projection matrix
-            color                # Text color
-        )
+        push!(x_positions, x + horizontal_offset)
+        push!(y_positions, current_y)
 
         # Move to the next line
         current_y += size_px
     end
+
+    # Render all lines in a single batched call for maximum performance
+    # This replaces individual draw_text calls with one optimized batch
+    draw_multiline_text_batched(
+        font,                # Font face
+        lines,               # All lines of text
+        x_positions,         # X positions for each line
+        y_positions,         # Y positions for each line
+        size_px,             # Text size
+        projection_matrix,   # Projection matrix
+        color                # Text color
+    )
 end
