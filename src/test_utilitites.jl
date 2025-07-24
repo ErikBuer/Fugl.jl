@@ -28,7 +28,6 @@ function screenshot(ui_funciton::Function, output_file::String, width::Int, heig
     GLA.set_context!(gl_window)
     GLFW.MakeContextCurrent(gl_window)
 
-
     ModernGL.glEnable(ModernGL.GL_BLEND)
     ModernGL.glBlendFunc(ModernGL.GL_SRC_ALPHA, ModernGL.GL_ONE_MINUS_SRC_ALPHA)
 
@@ -56,6 +55,11 @@ function screenshot(ui_funciton::Function, output_file::String, width::Int, heig
     ModernGL.glDeleteFramebuffers(1, Ref(framebuffer))
     ModernGL.glDeleteTextures(1, Ref(texture))
     GLFW.DestroyWindow(gl_window)
+
+    clear_texture_cache!()
+    clear_font_cache!()
+    clear_glyph_atlas!()
+    clear_text_batch!()
 end
 
 """
