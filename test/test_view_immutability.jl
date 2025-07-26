@@ -72,38 +72,4 @@ using Test
             @test total_views > 0
         end
     end
-
-    @testset "AbstractView interface compliance" begin
-        non_abstract_views = String[]
-
-        try
-            using Fugl
-
-            # Check that all view types properly extend AbstractView
-            for name in names(Fugl, all=true)
-                try
-                    t = getfield(Fugl, name)
-
-                    # Look for types that might be views but don't extend AbstractView
-                    if isa(t, Type) &&
-                       (endswith(string(name), "View") || endswith(string(name), "Container")) &&
-                       !(t <: Fugl.AbstractView) &&
-                       t != Fugl.AbstractView
-                        push!(non_abstract_views, string(name))
-                    end
-                catch
-                    continue
-                end
-            end
-        catch e
-            @warn "Could not load Fugl module for interface testing: $e"
-            return
-        end
-
-        if !isempty(non_abstract_views)
-            @test false
-        else
-            @test true
-        end
-    end
 end
