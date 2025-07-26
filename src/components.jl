@@ -63,4 +63,7 @@ export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 include("composite_components/buttons.jl")
 export TextButton, IconButton
 
+include("composite_components/number_field.jl")
+export NumberField, NumberFieldState, NumberFieldOptions, NumberFieldStyle, get_numeric_value, get_text_value, is_valid_number
+
 include("components/atlas_debug.jl")
