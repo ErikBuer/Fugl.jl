@@ -61,7 +61,7 @@ function main()
     end
 
     # Run the GUI - SplitDemo function will be called each frame
-    Fugl.run(SplitDemo, title="Split Container Demo - Immutable", window_width_px=1200, window_height_px=800)
+    Fugl.run(SplitDemo, title="Split Container Demo - Immutable", window_width_px=1200, window_height_px=800, debug_overlay=true)
 end
 
 main()
