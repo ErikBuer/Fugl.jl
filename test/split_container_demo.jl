@@ -1,5 +1,5 @@
 using Fugl
-using Fugl: Text, SplitContainerState
+using Fugl: Text, SplitContainerState, SplitContainerStyle
 
 function main()
     # Create state refs for split containers
@@ -9,7 +9,7 @@ function main()
     function SplitDemo()
         # Create some simple content for the splits
         left_content = Container(
-            Text("Left Panel\nClick and drag\nthe gray bar\nto resize!"),
+            Text("Click and drag the gray bar to resize!"),
             style=ContainerStyle(
                 background_color=Vec4f(0.9, 0.9, 1.0, 1.0),  # Light blue
                 padding_px=20.0f0
@@ -17,7 +17,7 @@ function main()
         )
 
         right_content = Container(
-            Text("Right Panel\nThis side can\nbe resized by\ndragging the\nsplitter handle."),
+            Text("This side can be resized by dragging the splitter handle."),
             style=ContainerStyle(
                 background_color=Vec4f(1.0, 0.9, 0.9, 1.0),  # Light red
                 padding_px=20.0f0
@@ -28,17 +28,14 @@ function main()
         horizontal_split = HorizontalSplitContainer(
             left_content,
             right_content,
-            min_size=100.0f0,
-            handle_thickness=6.0f0,
-            handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
-            handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+            style=SplitContainerStyle(),
             state=horizontal_split_state[],
             on_state_change=(new_state) -> horizontal_split_state[] = new_state
         )
 
         # Create some content for vertical split
         top_content = Container(
-            Text("Top Panel\nThis demonstrates\nvertical splitting"),
+            Text("This demonstrates vertical splitting"),
             style=ContainerStyle(
                 background_color=Vec4f(0.9, 1.0, 0.9, 1.0),  # Light green
                 padding_px=20.0f0
@@ -49,10 +46,7 @@ function main()
         main_split = VerticalSplitContainer(
             top_content,
             horizontal_split,
-            min_size=80.0f0,
-            handle_thickness=6.0f0,
-            handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
-            handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+            style=SplitContainerStyle(),
             state=vertical_split_state[],
             on_state_change=(new_state) -> vertical_split_state[] = new_state
         )
