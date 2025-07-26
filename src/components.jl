@@ -58,7 +58,7 @@ include("components/image.jl")
 export Image
 
 include("components/split_container.jl")
-export HorizontalSplitContainer, VerticalSplitContainer
+export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 
 include("composite_components/buttons.jl")
 export TextButton, IconButton
