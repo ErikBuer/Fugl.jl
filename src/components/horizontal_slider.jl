@@ -14,7 +14,7 @@ function SliderStyle(;
     return SliderStyle(background_color, handle_color, border_color, border_width_px)
 end
 
-mutable struct HorizontalSliderView <: AbstractView
+struct HorizontalSliderView <: AbstractView
     min_value::Float32          # Minimum value of the slider
     max_value::Float32          # Maximum value of the slider
     current_value::Float32      # Current value of the slider
@@ -69,11 +69,11 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
     if mouse_state.x >= slider_x && mouse_state.x <= slider_x + slider_width &&
        mouse_state.y >= slider_y && mouse_state.y <= slider_y + slider_height &&
        mouse_state.button_state[LeftButton] == IsPressed
-        # Update the slider value based on the mouse position
+        # Calculate the new slider value based on the mouse position
         relative_x = clamp(mouse_state.x - slider_x, 0.0f0, slider_width)
-        view.current_value = view.min_value + relative_x / slider_width * (view.max_value - view.min_value)
+        new_value = view.min_value + relative_x / slider_width * (view.max_value - view.min_value)
 
-        # Trigger the on_change callback
-        view.on_change(view.current_value)
+        # Trigger the on_change callback with the new value (functional approach)
+        view.on_change(new_value)
     end
 end

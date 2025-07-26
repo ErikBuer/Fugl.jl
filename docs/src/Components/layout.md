@@ -163,3 +163,77 @@ nothing #hide
 ```
 
 ![Vertical alignment example](vertical_alignment.png)
+
+## Split Containers
+
+Split containers allow you to create resizable panels that users can adjust by dragging a handle between them. Fugl.jl provides both horizontal and vertical split containers with external state management for a clean, functional UI paradigm.
+
+``` @example SplitContainerExample
+using Fugl
+using Fugl: Text, SplitContainerState
+
+function MyApp()
+    # Create state refs for split containers
+    horizontal_split_state = Ref(SplitContainerState(split_position=0.3f0))  # Start with 30% for left panel
+    vertical_split_state = Ref(SplitContainerState(split_position=0.4f0))    # Start with 40% for top panel
+
+    # Create some simple content for the splits
+    left_content = Container(
+        Text("Left Panel\nClick and drag\nthe gray bar\nto resize!"),
+        style=ContainerStyle(
+            background_color=Vec4f(0.9, 0.9, 1.0, 1.0),  # Light blue
+            padding_px=20.0f0
+        )
+    )
+
+    right_content = Container(
+        Text("Right Panel This side can be resized by dragging the splitter handle."),
+        style=ContainerStyle(
+            background_color=Vec4f(1.0, 0.9, 0.9, 1.0),  # Light red
+            padding_px=20.0f0
+        )
+    )
+
+    # Create horizontal split container - recreated each frame with current state
+    horizontal_split = HorizontalSplitContainer(
+        left_content,
+        right_content,
+        min_size=100.0f0,
+        handle_thickness=6.0f0,
+        handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
+        handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+        state=horizontal_split_state[],
+        on_state_change=(new_state) -> horizontal_split_state[] = new_state
+    )
+
+    # Create some content for vertical split
+    top_content = Container(
+        Text("Top Panel This demonstrates vertical splitting"),
+        style=ContainerStyle(
+            background_color=Vec4f(0.9, 1.0, 0.9, 1.0),  # Light green
+            padding_px=20.0f0
+        )
+    )
+
+    # Create main vertical split with horizontal split in bottom - recreated each frame with current state
+    main_split = VerticalSplitContainer(
+        top_content,
+        horizontal_split,
+        min_size=80.0f0,
+        handle_thickness=6.0f0,
+        handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
+        handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+        state=vertical_split_state[],
+        on_state_change=(new_state) -> vertical_split_state[] = new_state
+    )
+
+    return main_split
+end
+
+screenshot(MyApp, "split_containers.png", 800, 600);
+nothing #hide
+```
+
+![Split container example](split_containers.png)
+
+Split containers follow Fugl.jl's functional UI paradigm by keeping all mutable state external to the view components. The `SplitContainerState` struct holds the split position and interaction state, while the `on_state_change` callback updates the external state reference when users drag the handle.
