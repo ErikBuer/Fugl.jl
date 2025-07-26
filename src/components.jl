@@ -57,6 +57,9 @@ export CodeEditor, CodeEditorStyle
 include("components/image.jl")
 export Image
 
+include("components/split_container.jl")
+export HorizontalSplitContainer, VerticalSplitContainer
+
 include("composite_components/buttons.jl")
 export TextButton, IconButton
 
