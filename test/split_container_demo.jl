@@ -1,5 +1,5 @@
 using Fugl
-using Fugl: Text, SplitContainerState
+using Fugl: Text, SplitContainerState, SplitContainerStyle
 
 function main()
     # Create state refs for split containers
@@ -28,10 +28,7 @@ function main()
         horizontal_split = HorizontalSplitContainer(
             left_content,
             right_content,
-            min_size=100.0f0,
-            handle_thickness=6.0f0,
-            handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
-            handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+            style=SplitContainerStyle(),
             state=horizontal_split_state[],
             on_state_change=(new_state) -> horizontal_split_state[] = new_state
         )
@@ -49,10 +46,7 @@ function main()
         main_split = VerticalSplitContainer(
             top_content,
             horizontal_split,
-            min_size=80.0f0,
-            handle_thickness=6.0f0,
-            handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
-            handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+            style=SplitContainerStyle(),
             state=vertical_split_state[],
             on_state_change=(new_state) -> vertical_split_state[] = new_state
         )

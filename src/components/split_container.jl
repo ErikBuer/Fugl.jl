@@ -1,3 +1,20 @@
+# Style for split container appearance
+mutable struct SplitContainerStyle
+    handle_thickness::Float32   # Thickness of the resize handle in pixels
+    handle_color::Vec4f         # Color of the resize handle
+    handle_hover_color::Vec4f   # Color when hovering over handle
+    min_size::Float32           # Minimum size for resizable panels
+end
+
+function SplitContainerStyle(;
+    handle_thickness::Float32=4.0f0,
+    handle_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0),
+    handle_hover_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0),
+    min_size::Float32=50.0f0
+)
+    return SplitContainerStyle(handle_thickness, handle_color, handle_hover_color, min_size)
+end
+
 # State for managing split container interactions (external to the view)
 struct SplitContainerState
     split_position::Float32     # (0.0 to 1.0 ratio or 1.0)
@@ -24,10 +41,7 @@ Optimized version with no runtime direction checks for better performance.
 struct HorizontalSplitContainerView <: AbstractView
     left::AbstractView
     right::AbstractView
-    min_size::Float32           # Minimum size for resizable panels
-    handle_thickness::Float32   # Thickness of the resize handle in pixels
-    handle_color::Vec4f         # Color of the resize handle
-    handle_hover_color::Vec4f   # Color when hovering over handle
+    style::SplitContainerStyle  # Style configuration
     state::SplitContainerState  # External state for interactions (includes split_position)
     on_state_change::Function   # Callback for state changes (including split position)
 end
@@ -39,10 +53,7 @@ Optimized version with no runtime direction checks for better performance.
 struct VerticalSplitContainerView <: AbstractView
     top::AbstractView
     bottom::AbstractView
-    min_size::Float32           # Minimum size for resizable panels
-    handle_thickness::Float32   # Thickness of the resize handle in pixels
-    handle_color::Vec4f         # Color of the resize handle
-    handle_hover_color::Vec4f   # Color when hovering over handle
+    style::SplitContainerStyle  # Style configuration
     state::SplitContainerState  # External state for interactions (includes split_position)
     on_state_change::Function   # Callback for state changes (including split position)
 end
@@ -55,27 +66,18 @@ Create a horizontal split container with left and right child components.
 # Arguments
 - `left::AbstractView`: Left child component
 - `right::AbstractView`: Right child component
-- `min_size::Float32=50.0f0`: Minimum size for resizable panels
-- `handle_thickness::Float32=4.0f0`: Thickness of the resize handle
-- `handle_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0)`: Color of the resize handle
-- `handle_hover_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0)`: Color when hovering
+- `style::SplitContainerStyle=SplitContainerStyle()`: Style configuration
 - `state::SplitContainerState=SplitContainerState()`: State including split position and interactions
 - `on_state_change::Function=() -> nothing`: Callback for state changes (including split position)
 """
 function HorizontalSplitContainer(
     left::AbstractView,
     right::AbstractView;
-    min_size::Float32=50.0f0,
-    handle_thickness::Float32=4.0f0,
-    handle_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0),
-    handle_hover_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0),
+    style::SplitContainerStyle=SplitContainerStyle(),
     state::SplitContainerState=SplitContainerState(),
     on_state_change::Function=() -> nothing
 )
-    return HorizontalSplitContainerView(
-        left, right, min_size, handle_thickness,
-        handle_color, handle_hover_color, state, on_state_change
-    )
+    return HorizontalSplitContainerView(left, right, style, state, on_state_change)
 end
 
 """
@@ -86,27 +88,18 @@ Create a vertical split container with top and bottom child components.
 # Arguments
 - `top::AbstractView`: Top child component
 - `bottom::AbstractView`: Bottom child component
-- `min_size::Float32=50.0f0`: Minimum size for resizable panels
-- `handle_thickness::Float32=4.0f0`: Thickness of the resize handle
-- `handle_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0)`: Color of the resize handle
-- `handle_hover_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0)`: Color when hovering
+- `style::SplitContainerStyle=SplitContainerStyle()`: Style configuration
 - `state::SplitContainerState=SplitContainerState()`: State including split position and interactions
 - `on_state_change::Function=() -> nothing`: Callback for state changes (including split position)
 """
 function VerticalSplitContainer(
     top::AbstractView,
     bottom::AbstractView;
-    min_size::Float32=50.0f0,
-    handle_thickness::Float32=4.0f0,
-    handle_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0),
-    handle_hover_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0),
+    style::SplitContainerStyle=SplitContainerStyle(),
     state::SplitContainerState=SplitContainerState(),
     on_state_change::Function=() -> nothing
 )
-    return VerticalSplitContainerView(
-        top, bottom, min_size, handle_thickness,
-        handle_color, handle_hover_color, state, on_state_change
-    )
+    return VerticalSplitContainerView(top, bottom, style, state, on_state_change)
 end
 
 # Measure functions - both containers take all available space
@@ -125,12 +118,12 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
     # Calculate split position in pixels
     split_pixel = container.state.split_position <= 1.0f0 ? # TODO either 0-1 or pixel handling. dont need both
                   container.state.split_position * width :
-                  min(container.state.split_position, width - container.handle_thickness)
+                  min(container.state.split_position, width - container.style.handle_thickness)
 
     # Check if mouse is over the vertical handle
     handle_x = split_pixel
     is_over_handle = (mouse_x >= handle_x &&
-                      mouse_x <= handle_x + container.handle_thickness &&
+                      mouse_x <= handle_x + container.style.handle_thickness &&
                       mouse_y >= 0.0f0 && mouse_y <= height)
 
     # Update hover state if it changed
@@ -164,12 +157,12 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
         delta = mouse_x - container.state.drag_start_pos        # Calculate new split position
         if container.state.split_position <= 1.0f0  # Ratio mode
             new_split = container.state.drag_start_split + delta / width
-            new_split = clamp(new_split, container.min_size / width,
-                1.0f0 - (container.min_size + container.handle_thickness) / width)
+            new_split = clamp(new_split, container.style.min_size / width,
+                1.0f0 - (container.style.min_size + container.style.handle_thickness) / width)
         else  # Fixed pixel mode
             new_split = container.state.drag_start_split + delta
-            new_split = clamp(new_split, container.min_size,
-                width - container.min_size - container.handle_thickness)
+            new_split = clamp(new_split, container.style.min_size,
+                width - container.style.min_size - container.style.handle_thickness)
         end
 
         # Update state with new split position
@@ -200,7 +193,7 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
     if !is_over_handle && !container.state.is_dragging
         # Calculate child bounds
         left_width = split_pixel
-        right_x = split_pixel + container.handle_thickness
+        right_x = split_pixel + container.style.handle_thickness
         right_width = width - right_x
 
         # Check left child
@@ -222,12 +215,12 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
     # Calculate split position in pixels
     split_pixel = container.state.split_position <= 1.0f0 ?
                   container.state.split_position * height :
-                  min(container.state.split_position, height - container.handle_thickness)
+                  min(container.state.split_position, height - container.style.handle_thickness)
 
     # Check if mouse is over the horizontal handle
     handle_y = split_pixel
     is_over_handle = (mouse_y >= handle_y &&
-                      mouse_y <= handle_y + container.handle_thickness &&
+                      mouse_y <= handle_y + container.style.handle_thickness &&
                       mouse_x >= 0.0f0 && mouse_x <= width)
 
     # Update hover state if it changed
@@ -263,12 +256,12 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
         # Calculate new split position
         if container.state.split_position <= 1.0f0  # Ratio mode
             new_split = container.state.drag_start_split + delta / height
-            new_split = clamp(new_split, container.min_size / height,
-                1.0f0 - (container.min_size + container.handle_thickness) / height)
+            new_split = clamp(new_split, container.style.min_size / height,
+                1.0f0 - (container.style.min_size + container.style.handle_thickness) / height)
         else  # Fixed pixel mode
             new_split = container.state.drag_start_split + delta
-            new_split = clamp(new_split, container.min_size,
-                height - container.min_size - container.handle_thickness)
+            new_split = clamp(new_split, container.style.min_size,
+                height - container.style.min_size - container.style.handle_thickness)
         end
 
         # Update state with new split position
@@ -299,7 +292,7 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
     if !is_over_handle && !container.state.is_dragging
         # Calculate child bounds
         top_height = split_pixel
-        bottom_y = split_pixel + container.handle_thickness
+        bottom_y = split_pixel + container.style.handle_thickness
         bottom_height = height - bottom_y
 
         # Check top child
@@ -319,11 +312,11 @@ function interpret_view(container::HorizontalSplitContainerView, x_offset::Float
     # Calculate split position in pixels
     split_pixel = container.state.split_position <= 1.0f0 ?
                   container.state.split_position * width :
-                  min(container.state.split_position, width - container.handle_thickness)
+                  min(container.state.split_position, width - container.style.handle_thickness)
 
     # Calculate child bounds
     left_width = split_pixel
-    right_x = split_pixel + container.handle_thickness
+    right_x = split_pixel + container.style.handle_thickness
     right_width = width - right_x
 
     # Render children
@@ -336,12 +329,12 @@ function interpret_view(container::HorizontalSplitContainerView, x_offset::Float
     end
 
     # Render the vertical handle
-    color = container.state.is_hovering ? container.handle_hover_color : container.handle_color
+    color = container.state.is_hovering ? container.style.handle_hover_color : container.style.handle_color
     handle_vertices = [
         Point2f(x_offset + split_pixel, y_offset),
         Point2f(x_offset + split_pixel, y_offset + height),
-        Point2f(x_offset + split_pixel + container.handle_thickness, y_offset + height),
-        Point2f(x_offset + split_pixel + container.handle_thickness, y_offset),
+        Point2f(x_offset + split_pixel + container.style.handle_thickness, y_offset + height),
+        Point2f(x_offset + split_pixel + container.style.handle_thickness, y_offset),
     ]
     draw_rectangle(handle_vertices, color, projection_matrix)
 end
@@ -350,11 +343,11 @@ function interpret_view(container::VerticalSplitContainerView, x_offset::Float32
     # Calculate split position in pixels
     split_pixel = container.state.split_position <= 1.0f0 ?
                   container.state.split_position * height :
-                  min(container.state.split_position, height - container.handle_thickness)
+                  min(container.state.split_position, height - container.style.handle_thickness)
 
     # Calculate child bounds
     top_height = split_pixel
-    bottom_y = split_pixel + container.handle_thickness
+    bottom_y = split_pixel + container.style.handle_thickness
     bottom_height = height - bottom_y
 
     # Render children
@@ -367,11 +360,11 @@ function interpret_view(container::VerticalSplitContainerView, x_offset::Float32
     end
 
     # Render the horizontal handle
-    color = container.state.is_hovering ? container.handle_hover_color : container.handle_color
+    color = container.state.is_hovering ? container.style.handle_hover_color : container.style.handle_color
     handle_vertices = [
         Point2f(x_offset, y_offset + split_pixel),
-        Point2f(x_offset, y_offset + split_pixel + container.handle_thickness),
-        Point2f(x_offset + width, y_offset + split_pixel + container.handle_thickness),
+        Point2f(x_offset, y_offset + split_pixel + container.style.handle_thickness),
+        Point2f(x_offset + width, y_offset + split_pixel + container.style.handle_thickness),
         Point2f(x_offset + width, y_offset + split_pixel),
     ]
     draw_rectangle(handle_vertices, color, projection_matrix)
