@@ -18,52 +18,45 @@ function NumberFieldOptions(::Type{T}=Float64;
 end
 
 """
-State for NumberField with simplified validation.
+State for NumberField - always contains a valid numeric value.
 """
 struct NumberFieldState{T<:Real}
     editor_state::EditorState
     options::NumberFieldOptions{T}
-    current_value::Union{Nothing,T}  # The parsed numeric value
-    is_valid::Bool                    # Whether current input is valid
+    current_value::T  # Always valid - no Union{Nothing,T}
 end
 
 function NumberFieldState(
-    initial_value::Union{String,Number}="";
-    options::NumberFieldOptions{T}=NumberFieldOptions()
+    initial_value::Union{String,Number}=0.0;
+    options::NumberFieldOptions{T}=NumberFieldOptions(Float64)
 ) where T<:Real
-    # Convert initial value to string for the editor
-    display_text = string(initial_value)
+    # Try to cast to target type - force validity
+    numeric_value = try
+        if initial_value isa String
+            isempty(initial_value) ? zero(T) : T(parse(Float64, initial_value))
+        else
+            T(initial_value)
+        end
+    catch
+        zero(T)  # Default to zero if casting fails
+    end
 
-    # Try to parse the value
-    parsed_value, is_valid = try_parse_and_validate(display_text, options)
+    # Apply constraints
+    if options.min_value !== nothing
+        numeric_value = max(numeric_value, options.min_value)
+    end
+    if options.max_value !== nothing
+        numeric_value = min(numeric_value, options.max_value)
+    end
 
-    # Create editor state
+    # Create editor state with the valid string representation
+    display_text = string(numeric_value)
     editor_state = EditorState(display_text)
 
-    return NumberFieldState{T}(editor_state, options, parsed_value, is_valid)
+    return NumberFieldState{T}(editor_state, options, numeric_value)
 end
 
-"""
-Simple character filter - only allow digits, decimal point, minus sign, and plus sign.
-"""
-function is_valid_numeric_char(char::Char, options::NumberFieldOptions)::Bool
-    # Always allow digits
-    if isdigit(char)
-        return true
-    end
 
-    # Allow decimal point for floating point types
-    if char == '.' && (options.number_type <: AbstractFloat)
-        return true
-    end
-
-    # Allow minus/plus signs if negative numbers are allowed
-    if (char == '-' || char == '+') && options.allow_negative
-        return true
-    end
-
-    return false
-end
 
 """
 Filter input text to only allow valid numeric characters.
@@ -73,10 +66,10 @@ function filter_numeric_input(text::String, options::NumberFieldOptions)::String
         return text
     end
 
-    # Simple filter: remove any non-numeric characters
-    filtered_chars = filter(char -> is_valid_numeric_char(char, options), collect(text))
+    # Simple filter: remove letters and newlines
+    filtered_chars = filter(char -> !isletter(char) && char != '\n', collect(text))
 
-    # Additional validation: ensure only one decimal point and sign at beginning
+    # Additional validation for floating point and signs
     result = Char[]
     has_decimal = false
 
@@ -91,8 +84,7 @@ function filter_numeric_input(text::String, options::NumberFieldOptions)::String
             if i == 1 && options.allow_negative
                 push!(result, char)
             end
-        else
-            # Regular digit
+        elseif isdigit(char)
             push!(result, char)
         end
     end
@@ -101,63 +93,70 @@ function filter_numeric_input(text::String, options::NumberFieldOptions)::String
 end
 
 """
-Try to parse and validate the text as the configured numeric type.
+Try to update the numeric value through casting.
+Returns updated state if successful, original state if casting fails.
 """
-function try_parse_and_validate(text::String, options::NumberFieldOptions{T})::Tuple{Union{Nothing,T},Bool} where T<:Real
-    if isempty(text) || text == "-" || text == "+"
-        return nothing, true  # Empty input is valid
+function try_update_numeric_value(state::NumberFieldState{T}, new_text::String)::NumberFieldState{T} where T<:Real
+    # Handle empty or incomplete input
+    if isempty(new_text) || new_text == "-" || new_text == "+"
+        # Keep the current value, just update the display text
+        new_editor_state = EditorState(state.editor_state, new_text)
+        return NumberFieldState{T}(new_editor_state, state.options, state.current_value)
     end
 
-    # Try to parse as the target type
+    # Try to cast to target type
     try
-        value = parse(T, text)
+        new_value = T(parse(Float64, new_text))
 
-        # Check constraints
-        if options.min_value !== nothing && value < options.min_value
-            return value, false
+        # Apply constraints
+        if state.options.min_value !== nothing && new_value < state.options.min_value
+            new_value = state.options.min_value
+        end
+        if state.options.max_value !== nothing && new_value > state.options.max_value
+            new_value = state.options.max_value
         end
 
-        if options.max_value !== nothing && value > options.max_value
-            return value, false
-        end
+        # Update both display text and numeric value
+        final_text = string(new_value)
+        new_editor_state = EditorState(state.editor_state, final_text)
+        return NumberFieldState{T}(new_editor_state, state.options, new_value)
 
-        return value, true
     catch
-        return nothing, false
+        # Casting failed - keep original state
+        return state
     end
 end
 
 """
-Apply editor action with simplified numeric filtering.
+Apply editor action with numeric filtering and casting.
 """
 function apply_number_editor_action(state::NumberFieldState{T}, action::EditorAction)::NumberFieldState{T} where T<:Real
     # For insert text actions, filter the input
     if action isa InsertText
-        # Remove any letters or invalid characters
-        if any(isletter, action.text) || action.text == "\n"  # Block letters and newlines
-            return state  # Don't insert anything
+        # Block letters and newlines immediately
+        if any(isletter, action.text) || action.text == "\n"
+            return state
         end
 
-        # Filter the text through our numeric filter
+        # Filter the text
         filtered_text = filter_numeric_input(action.text, state.options)
-
-        # If the filtered text is empty, don't insert anything
         if isempty(filtered_text)
             return state
         end
 
-        # Apply the filtered text insertion
-        new_editor_state = apply_editor_action(state.editor_state, InsertText(filtered_text))
+        # Apply the filtered insertion to get intermediate text
+        temp_editor_state = apply_editor_action(state.editor_state, InsertText(filtered_text))
+        intermediate_text = temp_editor_state.text
+
+        # Try to update the numeric value
+        return try_update_numeric_value(state, intermediate_text)
     else
         # For non-insert actions (cursor movement, deletion), apply directly
         new_editor_state = apply_editor_action(state.editor_state, action)
+
+        # Try to update the numeric value with the new text
+        return try_update_numeric_value(state, new_editor_state.text)
     end
-
-    # Parse and validate the new text
-    new_text = new_editor_state.text
-    parsed_value, is_valid = try_parse_and_validate(new_text, state.options)
-
-    return NumberFieldState{T}(new_editor_state, state.options, parsed_value, is_valid)
 end
 
 """
@@ -165,16 +164,12 @@ Style configuration for NumberField appearance.
 """
 struct NumberFieldStyle
     text_box_style::TextBoxStyle
-    invalid_border_color::Vec4{<:AbstractFloat}
-    invalid_background_color::Vec4{<:AbstractFloat}
 end
 
 function NumberFieldStyle(;
-    text_box_style::TextBoxStyle=TextBoxStyle(),
-    invalid_border_color::Vec4{<:AbstractFloat}=Vec4{Float32}(1.0f0, 0.2f0, 0.2f0, 1.0f0),  # Red border for invalid
-    invalid_background_color::Vec4{<:AbstractFloat}=Vec4{Float32}(1.0f0, 0.95f0, 0.95f0, 1.0f0)  # Light red background for invalid
+    text_box_style::TextBoxStyle=TextBoxStyle()
 )
-    return NumberFieldStyle(text_box_style, invalid_border_color, invalid_background_color)
+    return NumberFieldStyle(text_box_style)
 end
 
 """
@@ -215,45 +210,29 @@ function apply_layout(view::NumberFieldView{T}, x::Float32, y::Float32, width::F
 end
 
 """
-Render the NumberField using TextBox with validation-aware styling.
+Render the NumberField using TextBox.
 """
 function interpret_view(view::NumberFieldView{T}, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}) where T<:Real
-    # Create appropriate style based on validation state
-    text_box_style = if view.state.is_valid
-        view.style.text_box_style
-    else
-        # Use invalid styling
-        TextBoxStyle(
-            text_style=view.style.text_box_style.text_style,
-            background_color_focused=view.style.invalid_background_color,
-            background_color_unfocused=view.style.invalid_background_color,
-            border_color=view.style.invalid_border_color,
-            border_width_px=view.style.text_box_style.border_width_px,
-            corner_radius_px=view.style.text_box_style.corner_radius_px,
-            padding_px=view.style.text_box_style.padding_px,
-            cursor_color=view.style.text_box_style.cursor_color
-        )
-    end
-
     # Create a TextBox with our custom change handler
     text_box = TextBox(
         view.state.editor_state;
-        style=text_box_style,
+        style=view.style.text_box_style,
         on_state_change=(new_editor_state) -> begin
-            # Parse and validate the new text
-            new_text = new_editor_state.text
-            parsed_value, is_valid = try_parse_and_validate(new_text, view.state.options)
+            # Try to update numeric value through casting
+            new_number_state = try_update_numeric_value(view.state, new_editor_state.text)
 
-            new_number_state = NumberFieldState{T}(
-                new_editor_state,
-                view.state.options,
-                parsed_value,
-                is_valid
+            # Update the editor state (focus, cursor position, etc.)
+            final_state = NumberFieldState{T}(
+                EditorState(new_number_state.editor_state;
+                    is_focused=new_editor_state.is_focused,
+                    cursor=new_editor_state.cursor),
+                new_number_state.options,
+                new_number_state.current_value
             )
-            view.on_state_change(new_number_state)
+
+            view.on_state_change(final_state)
         end,
         on_change=(new_text) -> begin
-            # Call the optional text change callback
             view.on_change(new_text)
         end
     )
@@ -263,15 +242,15 @@ function interpret_view(view::NumberFieldView{T}, x::Float32, y::Float32, width:
 end
 
 """
-Handle click detection for NumberField with simplified numeric input filtering.
+Handle click detection for NumberField.
 """
 function detect_click(view::NumberFieldView{T}, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32) where T<:Real
     if view.state.editor_state.is_focused
-        handle_number_key_input(view, mouse_state)  # Handle key input if focused
+        handle_number_key_input(view, mouse_state)
     end
 
     if !(mouse_state.button_state[LeftButton] == IsPressed)
-        return  # Only handle clicks when the left button is pressed
+        return
     end
 
     if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
@@ -280,8 +259,7 @@ function detect_click(view::NumberFieldView{T}, mouse_state::InputState, x::Floa
             new_number_state = NumberFieldState{T}(
                 new_editor_state,
                 view.state.options,
-                view.state.current_value,
-                view.state.is_valid
+                view.state.current_value
             )
             view.on_state_change(new_number_state)
         end
@@ -293,26 +271,25 @@ function detect_click(view::NumberFieldView{T}, mouse_state::InputState, x::Floa
         new_number_state = NumberFieldState{T}(
             new_editor_state,
             view.state.options,
-            view.state.current_value,
-            view.state.is_valid
+            view.state.current_value
         )
         view.on_state_change(new_number_state)
     end
 end
 
 """
-Handle key input for NumberField with simple letter filtering.
+Handle key input for NumberField with casting-based validation.
 """
 function handle_number_key_input(view::NumberFieldView{T}, mouse_state::InputState) where T<:Real
     if !view.state.editor_state.is_focused
-        return  # Only handle key input when the NumberField is focused
+        return
     end
 
     text_changed = false
     cursor_changed = false
     current_state = view.state
 
-    # Handle special key events first (arrow keys, delete, etc.)
+    # Handle special key events (arrow keys, delete, etc.)
     for key_event in mouse_state.key_events
         if Int(key_event.action) == Int(GLFW.PRESS) || Int(key_event.action) == Int(GLFW.REPEAT)
             action = key_event_to_action(key_event)
@@ -320,15 +297,12 @@ function handle_number_key_input(view::NumberFieldView{T}, mouse_state::InputSta
                 old_cursor = current_state.editor_state.cursor
                 old_text = current_state.editor_state.text
 
-                # Apply the action with numeric filtering
                 current_state = apply_number_editor_action(current_state, action)
 
-                # Check if text changed
                 if action isa InsertText || action isa DeleteText
                     text_changed = true
                 end
 
-                # Check if cursor changed
                 if current_state.editor_state.cursor != old_cursor
                     cursor_changed = true
                 end
@@ -336,52 +310,25 @@ function handle_number_key_input(view::NumberFieldView{T}, mouse_state::InputSta
         end
     end
 
-    # Handle regular character input with simple filtering
+    # Handle regular character input
     for key in mouse_state.key_buffer
-        # Skip special characters that are handled by key events
-        if key != '\n' && key != '\t' && key != '\b'  # Skip newline, tab, and backspace
-            # Simple check: reject letters, allow numbers and basic symbols
+        if key != '\n' && key != '\t' && key != '\b'
             if !isletter(key)
-                old_text = current_state.editor_state.text
                 action = InsertText(string(key))
                 current_state = apply_number_editor_action(current_state, action)
                 text_changed = true
                 cursor_changed = true
             end
-            # If it's a letter, just ignore it (don't insert)
         end
     end
 
-    # Trigger callbacks if either text or cursor changed
+    # Trigger callbacks
     if text_changed || cursor_changed
-        # Always call the state change callback
         view.on_state_change(current_state)
-
-        # Additionally call the text change callback if text actually changed
         if text_changed
             view.on_change(current_state.editor_state.text)
         end
     end
 end
 
-"""
-Get the numeric value from a NumberFieldState.
-Returns the parsed value or nothing if invalid/empty.
-"""
-function get_numeric_value(state::NumberFieldState{T})::Union{Nothing,T} where T<:Real
-    return state.current_value
-end
 
-"""
-Get the raw text value from a NumberFieldState.
-"""
-function get_text_value(state::NumberFieldState{T})::String where T<:Real
-    return state.editor_state.text
-end
-
-"""
-Check if the current value in a NumberFieldState is valid.
-"""
-function is_valid_number(state::NumberFieldState{T})::Bool where T<:Real
-    return state.is_valid
-end
