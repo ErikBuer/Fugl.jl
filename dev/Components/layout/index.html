@@ -86,7 +86,7 @@ function MyApp()
 end
 
 screenshot(MyApp, &quot;vertical_alignment.png&quot;, 400, 300);</code></pre><p><img src="../vertical_alignment.png" alt="Vertical alignment example"/></p><h2 id="Split-Containers"><a class="docs-heading-anchor" href="#Split-Containers">Split Containers</a><a id="Split-Containers-1"></a><a class="docs-heading-anchor-permalink" href="#Split-Containers" title="Permalink"></a></h2><p>Split containers allow you to create resizable panels that users can adjust by dragging a handle between them. Fugl.jl provides both horizontal and vertical split containers with external state management for a clean, functional UI paradigm.</p><pre><code class="language-julia hljs">using Fugl
-using Fugl: Text, SplitContainerState
+using Fugl: Text, SplitContainerState, SplitContainerStyle
 
 function MyApp()
     # Create state refs for split containers
@@ -95,7 +95,7 @@ function MyApp()
 
     # Create some simple content for the splits
     left_content = Container(
-        Text(&quot;Left Panel\nClick and drag\nthe gray bar\nto resize!&quot;),
+        Text(&quot;Click and drag the gray bar to resize!&quot;),
         style=ContainerStyle(
             background_color=Vec4f(0.9, 0.9, 1.0, 1.0),  # Light blue
             padding_px=20.0f0
@@ -103,7 +103,7 @@ function MyApp()
     )
 
     right_content = Container(
-        Text(&quot;Right Panel This side can be resized by dragging the splitter handle.&quot;),
+        Text(&quot;This side can be resized by dragging the splitter handle.&quot;),
         style=ContainerStyle(
             background_color=Vec4f(1.0, 0.9, 0.9, 1.0),  # Light red
             padding_px=20.0f0
@@ -114,17 +114,14 @@ function MyApp()
     horizontal_split = HorizontalSplitContainer(
         left_content,
         right_content,
-        min_size=100.0f0,
-        handle_thickness=6.0f0,
-        handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
-        handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+        style=SplitContainerStyle(),
         state=horizontal_split_state[],
         on_state_change=(new_state) -&gt; horizontal_split_state[] = new_state
     )
 
     # Create some content for vertical split
     top_content = Container(
-        Text(&quot;Top Panel This demonstrates vertical splitting&quot;),
+        Text(&quot;This demonstrates vertical splitting&quot;),
         style=ContainerStyle(
             background_color=Vec4f(0.9, 1.0, 0.9, 1.0),  # Light green
             padding_px=20.0f0
@@ -135,10 +132,7 @@ function MyApp()
     main_split = VerticalSplitContainer(
         top_content,
         horizontal_split,
-        min_size=80.0f0,
-        handle_thickness=6.0f0,
-        handle_color=Vec4f(0.6, 0.6, 0.6, 1.0),
-        handle_hover_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+        style=SplitContainerStyle(),
         state=vertical_split_state[],
         on_state_change=(new_state) -&gt; vertical_split_state[] = new_state
     )
@@ -146,4 +140,4 @@ function MyApp()
     return main_split
 end
 
-screenshot(MyApp, &quot;split_containers.png&quot;, 800, 600);</code></pre><p><img src="../split_containers.png" alt="Split container example"/></p><p>Split containers follow Fugl.jl&#39;s functional UI paradigm by keeping all mutable state external to the view components. The <code>SplitContainerState</code> struct holds the split position and interaction state, while the <code>on_state_change</code> callback updates the external state reference when users drag the handle.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../container/">« Container</a><a class="docs-footer-nextpage" href="../text/">Text »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Saturday 26 July 2025 11:51">Saturday 26 July 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+screenshot(MyApp, &quot;split_containers.png&quot;, 800, 600);</code></pre><p><img src="../split_containers.png" alt="Split container example"/></p><p>Split containers follow Fugl.jl&#39;s functional UI paradigm by keeping all mutable state external to the view components. The <code>SplitContainerState</code> struct holds the split position and interaction state, while the <code>on_state_change</code> callback updates the external state reference when users drag the handle.</p><p>The <code>SplitContainerStyle</code> struct encapsulates visual appearance settings like handle thickness, colors, and minimum panel sizes, making it easy to create reusable style configurations across your application.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../container/">« Container</a><a class="docs-footer-nextpage" href="../text/">Text »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Saturday 26 July 2025 13:26">Saturday 26 July 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
