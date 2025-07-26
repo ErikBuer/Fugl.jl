@@ -1,5 +1,3 @@
-using GLFW
-
 mutable struct TextBoxStyle
     text_style::TextStyle
     background_color_focused::Vec4{<:AbstractFloat}
@@ -27,17 +25,17 @@ end
 struct TextBoxView <: AbstractView
     state::EditorState           # Editor state containing text, cursor, etc.
     style::TextBoxStyle          # Style for the TextBox
-    on_change::Function          # Callback for text changes
-    on_focus_change::Function    # Callback for focus changes
+    on_state_change::Function    # Callback for all state changes (focus, text, cursor)
+    on_change::Function          # Optional callback for text changes only
 end
 
 function TextBox(
     state::EditorState;
     style=TextBoxStyle(),
-    on_change::Function=() -> nothing,
-    on_focus_change::Function=() -> nothing
+    on_state_change::Function=(new_state) -> nothing,
+    on_change::Function=(new_text) -> nothing
 )::TextBoxView
-    return TextBoxView(state, style, on_change, on_focus_change)
+    return TextBoxView(state, style, on_state_change, on_change)
 end
 
 function measure(view::TextBoxView)::Tuple{Float32,Float32}
@@ -129,13 +127,17 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
 
     if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
         if !view.state.is_focused
-            view.on_focus_change(true)  # Trigger focus change callback to update state immutably
+            # Focus change - create new state with focus=true
+            new_state = EditorState(view.state; is_focused=true)
+            view.on_state_change(new_state)
         end
         return
     end
 
     if view.state.is_focused
-        view.on_focus_change(false)  # Trigger focus change callback to update state immutably
+        # Focus change - create new state with focus=false
+        new_state = EditorState(view.state; is_focused=false)
+        view.on_state_change(new_state)
     end
 end
 
@@ -157,6 +159,7 @@ function handle_key_input(view::TextBoxView, mouse_state::InputState)
             action = key_event_to_action(key_event)
             if action !== nothing
                 old_cursor = current_state.cursor
+                old_text = current_state.text
                 current_state = apply_editor_action(current_state, action)
 
                 # Check if text changed
@@ -176,6 +179,7 @@ function handle_key_input(view::TextBoxView, mouse_state::InputState)
     for key in mouse_state.key_buffer
         # Skip special characters that are handled by key events
         if key != '\n' && key != '\t' && key != '\b'  # Skip newline, tab, and backspace
+            old_text = current_state.text
             action = InsertText(string(key))
             current_state = apply_editor_action(current_state, action)
             text_changed = true
@@ -183,8 +187,14 @@ function handle_key_input(view::TextBoxView, mouse_state::InputState)
         end
     end
 
-    # Trigger the callback if either text or cursor changed
+    # Trigger callbacks if either text or cursor changed
     if text_changed || cursor_changed
-        view.on_change(current_state)
+        # Always call the state change callback
+        view.on_state_change(current_state)
+
+        # Additionally call the text change callback if text actually changed
+        if text_changed
+            view.on_change(current_state.text)
+        end
     end
 end
