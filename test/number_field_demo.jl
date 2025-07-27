@@ -2,44 +2,40 @@ using Fugl
 using Fugl: Text
 
 function main()
-    # Create different number field states with type safety
-    int_state = Ref(NumberFieldState(42; options=NumberFieldOptions(Int)))
-    float_state = Ref(NumberFieldState(123.45; options=NumberFieldOptions(Float64; min_value=0.0, max_value=1000.0)))
+    # Store EditorState instead of values
+    int_state = Ref(EditorState("42"))
+    float_state = Ref(EditorState("123.45"))
 
     function MyApp()
         IntrinsicColumn([
-            IntrinsicHeight(Container(Text("Number Field Demo - Always Valid Values"))),
+            IntrinsicHeight(Container(Text("Number Field Demo - Type Casting"))),
 
             # Integer field
             IntrinsicHeight(Container(Text("Integer Field:"))),
             Container(
                 NumberField(
                     int_state[];
-                    on_state_change=(new_state) -> begin
-                        int_state[] = new_state
-                        println("Integer value: ", new_state.current_value, " (type: ", typeof(new_state.current_value), ")")
-                    end,
-                    on_change=(new_text) -> println("Integer text changed: ", new_text)
+                    type=Int,
+                    on_state_change=(new_state) -> int_state[] = new_state,
+                    on_change=(new_value) -> println("Integer changed to: ", new_value, " (type: ", typeof(new_value), ")")
                 )
             ),
 
-            # Float field with constraints
-            IntrinsicHeight(Container(Text("Float64 Field (0-1000):"))),
+            # Float32 field
+            IntrinsicHeight(Container(Text("Float32 Field:"))),
             Container(
                 NumberField(
                     float_state[];
-                    on_state_change=(new_state) -> begin
-                        float_state[] = new_state
-                        println("Float64 value: ", new_state.current_value, " (type: ", typeof(new_state.current_value), ")")
-                    end,
-                    on_change=(new_text) -> println("Float64 text changed: ", new_text)
+                    type=Float32,
+                    on_state_change=(new_state) -> float_state[] = new_state,
+                    on_change=(new_value) -> println("Float32 changed to: ", new_value, " (type: ", typeof(new_value), ")")
                 )
             ),
 
-            # Display current values - direct access, no getters!
+            # Display current values - display the state text and parsed values
             IntrinsicHeight(Container(Text("Current Values:"))),
-            IntrinsicHeight(Container(Text("Integer: $(int_state[].current_value)"))),
-            IntrinsicHeight(Container(Text("Float64: $(float_state[].current_value)"))),
+            IntrinsicHeight(Container(Text("Integer: $(int_state[].text)"))),
+            IntrinsicHeight(Container(Text("Float32: $(float_state[].text)"))),
         ])
     end
 
