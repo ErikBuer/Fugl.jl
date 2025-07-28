@@ -4,7 +4,7 @@ include("components/empty.jl")
 export Empty
 
 include("components/fixed_size.jl")
-export FixedSize
+export FixedSize, FixedWidth, FixedHeight
 
 include("components/align_vertical.jl")
 export AlignVertical

@@ -41,28 +41,32 @@ function NumberField(
     state::EditorState=EditorState();
     type::Type=Float64,
     style::TextBoxStyle=TextBoxStyle(),
-    form_height::Float32=Inf32,
     on_state_change::Function=(new_state::EditorState) -> nothing,
     on_change::Function=(new_text) -> nothing
 )
-    return TextBox(
-        state,
-        style=style,
-        on_state_change=(new_state) -> begin
-            text = new_state.text
-            text = replace(text, ',' => '.')
-            # Remove all non-numeric characters except for decimal point and sign and e.
-            text = replace(text, r"[^0-9\.\-e]" => "")
-            cleaned_State = EditorState(new_state, text)
+    height = style.text_style.size_px + 2 * style.padding_px + 1
 
-            if !(state.is_focused && !new_state.is_focused)
-                return on_state_change(cleaned_State)
-            end
+    return (
+        FixedHeight(
+        TextBox(
+            state,
+            style=style,
+            on_state_change=(new_state) -> begin
+                text = new_state.text
+                text = replace(text, ',' => '.')
+                # Remove all non-numeric characters except for decimal point and sign and a single "e".
+                text = replace(text, r"[^0-9\.\-e]" => "")
+                cleaned_State = EditorState(new_state, text)
 
-            (filtered_state, parsed_value) = filter_input(cleaned_State, type)
-            on_state_change(filtered_state)
-            on_change(parsed_value)
-        end,
-        on_change=(new_text) -> nothing
+                if !(state.is_focused && !new_state.is_focused)
+                    return on_state_change(cleaned_State)
+                end
+
+                (filtered_state, parsed_value) = filter_input(cleaned_State, type)
+                on_state_change(filtered_state)
+                on_change(parsed_value)
+            end,
+            on_change=(new_text) -> nothing
+        ), height)
     )
 end
