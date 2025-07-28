@@ -103,7 +103,7 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
 
     # Draw background
     bg_vertices = generate_rectangle_vertices(x, y, width, height)
-    draw_filled_rectangle(bg_vertices, style.background_color, projection_matrix)
+    draw_rectangle(bg_vertices, style.background_color, projection_matrix)
 
     # Calculate plot area (subtract padding)
     plot_x = x + style.padding_px

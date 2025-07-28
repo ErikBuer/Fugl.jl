@@ -1,4 +1,5 @@
 using Fugl
+using Fugl: Text
 
 function main()
     # Simple streaming data simulation
