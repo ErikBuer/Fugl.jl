@@ -21,7 +21,15 @@ function filter_input(new_state::EditorState, type::Type)
     end
 end
 
+"""
+Form field for entering numbers. New values are parsed on focus loss.
 
+## Arguments
+- `state::EditorState`: Initial state of the text box.
+- `type::Type`: The numeric type to parse the input as (default is `Float64`).
+- `on_state_change::Function`: Callback for when the state changes. Must update a state ref or similar.
+- `on_change::Function`: Optional callback for when the text changes. Passes the new value in specified type.
+"""
 function NumberField(
     state::EditorState=EditorState();
     type::Type=Float64,
