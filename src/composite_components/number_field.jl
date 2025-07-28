@@ -22,6 +22,13 @@ function filter_input(new_state::EditorState, type::Type)
 end
 
 """
+    NumberField(
+        state::EditorState=EditorState();
+        type::Type=Float64,
+        on_state_change::Function=(new_state::EditorState) -> nothing,
+        on_change::Function=(new_text) -> nothing
+    )
+
 Form field for entering numbers. New values are parsed on focus loss.
 
 ## Arguments
