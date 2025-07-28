@@ -19,8 +19,8 @@ end"""))
                 Container(
                     CodeEditor(
                         code_editor_state[];
-                        on_change=(new_state) -> code_editor_state[] = new_state,
-                        on_focus_change=(focused) -> code_editor_state[] = EditorState(code_editor_state[]; is_focused=focused),
+                        on_state_change=(new_state) -> code_editor_state[] = new_state,
+                        on_change=(new_text) -> println("Code changed to: ", new_text[1:min(20, length(new_text))], "...")
                     )
                 ),
 
@@ -29,8 +29,8 @@ end"""))
                 Container(
                     TextBox(
                         text_box_state[];
-                        on_change=(new_state) -> text_box_state[] = new_state,
-                        on_focus_change=(focused) -> text_box_state[] = EditorState(text_box_state[]; is_focused=focused)
+                        on_state_change=(new_state) -> text_box_state[] = new_state,
+                        on_change=(new_text) -> println("Text changed to: ", new_text[1:min(20, length(new_text))], "...")
                     )
                 ),
             ],

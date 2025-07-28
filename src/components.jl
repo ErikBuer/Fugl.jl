@@ -4,7 +4,7 @@ include("components/empty.jl")
 export Empty
 
 include("components/fixed_size.jl")
-export FixedSize
+export FixedSize, FixedWidth, FixedHeight
 
 include("components/align_vertical.jl")
 export AlignVertical
@@ -62,5 +62,8 @@ export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 
 include("composite_components/buttons.jl")
 export TextButton, IconButton
+
+include("composite_components/number_field.jl")
+export NumberField, NumberFieldState, NumberFieldOptions, NumberFieldStyle
 
 include("components/atlas_debug.jl")
