@@ -67,3 +67,10 @@ include("composite_components/number_field.jl")
 export NumberField, NumberFieldState, NumberFieldOptions, NumberFieldStyle
 
 include("components/atlas_debug.jl")
+
+
+include("plot/rec2f.jl")
+include("plot/draw.jl")
+
+include("composite_components/line_plot.jl")
+export LinePlot, LinePlotState, LinePlotStyle
