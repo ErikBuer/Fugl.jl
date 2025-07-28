@@ -39,8 +39,7 @@ function TextBox(
 end
 
 function measure(view::TextBoxView)::Tuple{Float32,Float32}
-    # The TextBox fills the parent container, so it doesn't have intrinsic size
-    return (0.0f0, 0.0f0)
+    return (Inf32, Inf32)
 end
 
 function apply_layout(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32)
