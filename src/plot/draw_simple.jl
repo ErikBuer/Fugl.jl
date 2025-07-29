@@ -138,62 +138,37 @@ function draw_lines_simple(batch::LineBatch, projection_matrix::Mat4{Float32})
     GLA.unbind(simple_line_prog[])
 end
 
-# Generate line geometry with proper joins to eliminate cracks
+# Generate simple line geometry - just line segment quads
 function generate_simple_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32)
-    if length(points) < 2
-        return Point2f[], Point2f[], Float32[], Vec4{Float32}[], Float32[]
-    end
-
     positions = Vector{Point2f}()
     directions = Vector{Point2f}()
     widths = Vector{Float32}()
     colors = Vector{Vec4{Float32}}()
     vertex_types = Vector{Float32}()
 
-    # Generate geometry for each line segment with proper overlaps
+    if length(points) < 2
+        return positions, directions, widths, colors, vertex_types
+    end
+
+    # For each line segment, generate a quad
     for i in 1:(length(points)-1)
         start_point = points[i]
         end_point = points[i+1]
 
-        # Calculate direction vector for current segment
+        # Calculate direction vector
         direction_vec = Point2f(end_point[1] - start_point[1], end_point[2] - start_point[2])
-
-        # Extend segments slightly to create overlaps that eliminate cracks
-        actual_start = start_point
-        actual_end = end_point
-
-        if i > 1
-            # Extend backwards to overlap with previous segment
-            if norm(direction_vec) > 0
-                dir_norm = direction_vec / norm(direction_vec)
-                actual_start = Point2f(start_point[1] - dir_norm[1] * width * 0.2f0,
-                    start_point[2] - dir_norm[2] * width * 0.2f0)
-            end
-        end
-
-        if i < length(points) - 1
-            # Extend forwards to overlap with next segment
-            if norm(direction_vec) > 0
-                dir_norm = direction_vec / norm(direction_vec)
-                actual_end = Point2f(end_point[1] + dir_norm[1] * width * 0.2f0,
-                    end_point[2] + dir_norm[2] * width * 0.2f0)
-            end
-        end
-
-        # Recalculate direction with adjusted endpoints
-        adjusted_direction = Point2f(actual_end[1] - actual_start[1], actual_end[2] - actual_start[2])
 
         # Generate quad vertices (2 triangles = 6 vertices)
         # Triangle 1: bottom-left, bottom-right, top-left
-        push!(positions, actual_start, actual_start, actual_start)
-        push!(directions, adjusted_direction, adjusted_direction, adjusted_direction)
+        push!(positions, start_point, start_point, start_point)
+        push!(directions, direction_vec, direction_vec, direction_vec)
         push!(widths, width, width, width)
         push!(colors, color, color, color)
         push!(vertex_types, 0.0f0, 1.0f0, 2.0f0)  # bottom-left, bottom-right, top-left
 
         # Triangle 2: bottom-right, top-right, top-left
-        push!(positions, actual_start, actual_start, actual_start)
-        push!(directions, adjusted_direction, adjusted_direction, adjusted_direction)
+        push!(positions, start_point, start_point, start_point)
+        push!(directions, direction_vec, direction_vec, direction_vec)
         push!(widths, width, width, width)
         push!(colors, color, color, color)
         push!(vertex_types, 1.0f0, 3.0f0, 2.0f0)  # bottom-right, top-right, top-left

@@ -15,7 +15,7 @@ function LinePlotStyle(;
     background_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),  # White background
     grid_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),  # Light gray grid
     axis_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),  # Black axes
-    padding_px=20.0f0,
+    padding_px=10.0f0,
     show_grid=true,
     show_axes=true
 )

@@ -10,19 +10,6 @@ function main()
     frame_count = Ref(0)
 
     function MyApp()
-        # Add new data point
-        new_time = time_data[][end] + 0.1
-        new_y = sin(new_time)
-
-        # Keep only last 100 points (rolling window)
-        if length(time_data[]) >= 100
-            time_data[] = [time_data[][2:end]; new_time]
-            y_data[] = [y_data[][2:end]; new_y]
-        else
-            time_data[] = [time_data[]; new_time]
-            y_data[] = [y_data[]; new_y]
-        end
-
 
         IntrinsicColumn([
             IntrinsicHeight(Container(Text("Real-time Line Plot Demo"))),
@@ -34,7 +21,7 @@ function main()
                     x_data=time_data[],
                     style=LinePlotStyle(
                         line_color=Vec4{Float32}(0.0, 0.8, 0.2, 1.0),  # Green
-                        line_width=3.0f0,
+                        line_width=8.0f0,
                         show_grid=true
                     )
                 )
