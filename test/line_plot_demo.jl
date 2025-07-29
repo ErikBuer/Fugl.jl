@@ -10,22 +10,19 @@ function main()
     frame_count = Ref(0)
 
     function MyApp()
-        # Update data every few frames (simulate streaming)
-        frame_count[] += 1
-        if frame_count[] % 10 == 0  # Update every 10 frames
-            # Add new data point
-            new_time = time_data[][end] + 0.1
-            new_y = sin(new_time)
+        # Add new data point
+        new_time = time_data[][end] + 0.1
+        new_y = sin(new_time)
 
-            # Keep only last 100 points (rolling window)
-            if length(time_data[]) >= 100
-                time_data[] = [time_data[][2:end]; new_time]
-                y_data[] = [y_data[][2:end]; new_y]
-            else
-                time_data[] = [time_data[]; new_time]
-                y_data[] = [y_data[]; new_y]
-            end
+        # Keep only last 100 points (rolling window)
+        if length(time_data[]) >= 100
+            time_data[] = [time_data[][2:end]; new_time]
+            y_data[] = [y_data[][2:end]; new_y]
+        else
+            time_data[] = [time_data[]; new_time]
+            y_data[] = [y_data[]; new_y]
         end
+
 
         IntrinsicColumn([
             IntrinsicHeight(Container(Text("Real-time Line Plot Demo"))),
@@ -57,7 +54,7 @@ function main()
         ])
     end
 
-    Fugl.run(MyApp, title="Line Plot Demo", window_width_px=800, window_height_px=600)
+    Fugl.run(MyApp, title="Line Plot Demo", window_width_px=800, window_height_px=600, debug_overlay=true)
 end
 
 main()
