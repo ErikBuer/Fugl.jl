@@ -66,6 +66,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     initialize_shaders()
+    initialize_plot_shaders()
 
     # Initialize local states
     mouse_state = InputState()

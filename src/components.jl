@@ -70,6 +70,7 @@ include("components/atlas_debug.jl")
 
 
 include("plot/rec2f.jl")
+include("plot/shaders.jl")
 include("plot/draw.jl")
 
 include("composite_components/line_plot.jl")
