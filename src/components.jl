@@ -74,4 +74,4 @@ include("plot/shaders.jl")
 include("plot/draw.jl")
 
 include("composite_components/line_plot.jl")
-export LinePlot, LinePlotState, LinePlotStyle
+export LinePlot, LinePlotState, LinePlotStyle, LinePlotTrace

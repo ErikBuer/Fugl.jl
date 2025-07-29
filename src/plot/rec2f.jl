@@ -6,8 +6,8 @@ struct Rect2f
     height::Float32
 end
 
-# Constructor convenience functions
-Rect2f(x, y, width, height) = Rect2f(Float32(x), Float32(y), Float32(width), Float32(height))
+# Constructor convenience function for different numeric types
+Rect2f(x::Real, y::Real, width::Real, height::Real) = Rect2f(Float32(x), Float32(y), Float32(width), Float32(height))
 
 # Utility functions for Rect2f
 function min_corner(rect::Rect2f)::Tuple{Float32,Float32}

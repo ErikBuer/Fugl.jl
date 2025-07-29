@@ -139,18 +139,19 @@ function draw_lines_simple(batch::LineBatch, projection_matrix::Mat4{Float32})
 end
 
 # Generate line geometry with proper joins to eliminate cracks
+# Generate simple line geometry - quad-based with proper joins to eliminate cracks
 function generate_simple_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32)
-    if length(points) < 2
-        return Point2f[], Point2f[], Float32[], Vec4{Float32}[], Float32[]
-    end
-
     positions = Vector{Point2f}()
     directions = Vector{Point2f}()
     widths = Vector{Float32}()
     colors = Vector{Vec4{Float32}}()
     vertex_types = Vector{Float32}()
 
-    # Generate geometry for each line segment with proper overlaps
+    if length(points) < 2
+        return positions, directions, widths, colors, vertex_types
+    end
+
+    # For each line segment, generate geometry with slight overlaps to eliminate cracks
     for i in 1:(length(points)-1)
         start_point = points[i]
         end_point = points[i+1]
@@ -158,25 +159,25 @@ function generate_simple_line_geometry(points::Vector{Point2f}, color::Vec4{Floa
         # Calculate direction vector for current segment
         direction_vec = Point2f(end_point[1] - start_point[1], end_point[2] - start_point[2])
 
-        # Extend segments slightly to create overlaps that eliminate cracks
+        # Slight overlap for crack elimination
         actual_start = start_point
         actual_end = end_point
 
         if i > 1
-            # Extend backwards to overlap with previous segment
+            # Extend start point slightly backwards
             if norm(direction_vec) > 0
                 dir_norm = direction_vec / norm(direction_vec)
-                actual_start = Point2f(start_point[1] - dir_norm[1] * width * 0.2f0,
-                    start_point[2] - dir_norm[2] * width * 0.2f0)
+                actual_start = Point2f(start_point[1] - dir_norm[1] * width * 0.1f0,
+                    start_point[2] - dir_norm[2] * width * 0.1f0)
             end
         end
 
         if i < length(points) - 1
-            # Extend forwards to overlap with next segment
+            # Extend end point slightly forward
             if norm(direction_vec) > 0
                 dir_norm = direction_vec / norm(direction_vec)
-                actual_end = Point2f(end_point[1] + dir_norm[1] * width * 0.2f0,
-                    end_point[2] + dir_norm[2] * width * 0.2f0)
+                actual_end = Point2f(end_point[1] + dir_norm[1] * width * 0.1f0,
+                    end_point[2] + dir_norm[2] * width * 0.1f0)
             end
         end
 

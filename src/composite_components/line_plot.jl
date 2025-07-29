@@ -22,18 +22,20 @@ function LinePlotStyle(;
     return LinePlotStyle(line_color, line_width, background_color, grid_color, axis_color, padding_px, show_grid, show_axes)
 end
 
-struct LinePlotState
+struct LinePlotTrace
     x_data::Vector{Float32}
     y_data::Vector{Float32}
-    bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
-    auto_scale::Bool
+    color::Vec4{Float32}
+    width::Float32
+    label::String
 end
 
-function LinePlotState(
+function LinePlotTrace(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
-    bounds::Union{Rect2f,Nothing}=nothing,
-    auto_scale::Bool=true
+    color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.6f0, 0.8f0, 1.0f0),
+    width::Float32=2.0f0,
+    label::String=""
 )
     # Convert to Float32
     y_f32 = Float32.(y_data)
@@ -45,29 +47,69 @@ function LinePlotState(
         x_f32 = Float32.(x_data)
     end
 
+    return LinePlotTrace(x_f32, y_f32, color, width, label)
+end
+
+struct LinePlotState
+    traces::Vector{LinePlotTrace}
+    bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
+    auto_scale::Bool
+end
+
+function LinePlotState(
+    traces::Vector{LinePlotTrace};
+    bounds::Union{Rect2f,Nothing}=nothing,
+    auto_scale::Bool=true
+)
     # Auto-calculate bounds if not provided and auto_scale is true
-    if bounds === nothing && auto_scale && !isempty(x_f32) && !isempty(y_f32)
-        min_x, max_x = extrema(x_f32)
-        min_y, max_y = extrema(y_f32)
+    if bounds === nothing && auto_scale && !isempty(traces)
+        # Find overall bounds across all traces
+        all_x = Float32[]
+        all_y = Float32[]
 
-        # Add 5% padding
-        x_range = max_x - min_x
-        y_range = max_y - min_y
+        for trace in traces
+            if !isempty(trace.x_data) && !isempty(trace.y_data)
+                append!(all_x, trace.x_data)
+                append!(all_y, trace.y_data)
+            end
+        end
 
-        x_padding = x_range * 0.05f0
-        y_padding = y_range * 0.05f0
+        if !isempty(all_x) && !isempty(all_y)
+            min_x, max_x = extrema(all_x)
+            min_y, max_y = extrema(all_y)
 
-        bounds = Rect2f(
-            min_x - x_padding,
-            min_y - y_padding,
-            x_range + 2 * x_padding,
-            y_range + 2 * y_padding
-        )
+            # Add 5% padding
+            x_range = max_x - min_x
+            y_range = max_y - min_y
+
+            x_padding = x_range * 0.05f0
+            y_padding = y_range * 0.05f0
+
+            bounds = Rect2f(
+                min_x - x_padding,
+                min_y - y_padding,
+                x_range + 2 * x_padding,
+                y_range + 2 * y_padding
+            )
+        else
+            bounds = Rect2f(0, 0, 1, 1)  # Default bounds
+        end
     elseif bounds === nothing
         bounds = Rect2f(0, 0, 1, 1)  # Default bounds
     end
 
-    return LinePlotState(x_f32, y_f32, bounds, auto_scale)
+    return LinePlotState(traces, bounds, auto_scale)
+end
+
+# Convenience constructor for single trace (backward compatibility)
+function LinePlotState(
+    y_data::Vector{<:Real};
+    x_data::Union{Vector{<:Real},Nothing}=nothing,
+    bounds::Union{Rect2f,Nothing}=nothing,
+    auto_scale::Bool=true
+)
+    trace = LinePlotTrace(y_data; x_data=x_data)
+    return LinePlotState([trace]; bounds=bounds, auto_scale=auto_scale)
 end
 
 struct LinePlotView <: AbstractView
@@ -87,6 +129,30 @@ function LinePlot(
         state = LinePlotState(y_data; x_data=x_data)
     end
     return LinePlotView(state, style, on_state_change)
+end
+
+# Multi-trace constructor
+function LinePlot(
+    traces::Vector{LinePlotTrace};
+    state::Union{LinePlotState,Nothing}=nothing,
+    style::LinePlotStyle=LinePlotStyle(),
+    on_state_change::Function=(new_state) -> nothing
+)::LinePlotView
+    if state === nothing
+        state = LinePlotState(traces)
+    end
+    return LinePlotView(state, style, on_state_change)
+end
+
+# Convenience constructors for common multi-trace scenarios
+function LinePlot(
+    traces_data::Vector{Tuple{Vector{<:Real},Vec4{Float32}}};  # (y_data, color) pairs
+    x_data::Union{Vector{<:Real},Nothing}=nothing,
+    style::LinePlotStyle=LinePlotStyle(),
+    on_state_change::Function=(new_state) -> nothing
+)::LinePlotView
+    traces = [LinePlotTrace(y_data; x_data=x_data, color=color) for (y_data, color) in traces_data]
+    return LinePlot(traces; style=style, on_state_change=on_state_change)
 end
 
 function measure(view::LinePlotView)::Tuple{Float32,Float32}
@@ -111,7 +177,7 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
     plot_width = width - 2 * style.padding_px
     plot_height = height - 2 * style.padding_px
 
-    if plot_width <= 0 || plot_height <= 0 || isempty(state.x_data) || isempty(state.y_data)
+    if plot_width <= 0 || plot_height <= 0 || isempty(state.traces)
         return  # Not enough space or no data to draw
     end
 
@@ -139,16 +205,18 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
         # TODO: Implement axis drawing
     end
 
-    # Draw the line plot
-    if length(state.x_data) >= 2 && length(state.y_data) >= 2
-        draw_line_plot(
-            state.x_data,
-            state.y_data,
-            data_to_screen,
-            style.line_color,
-            style.line_width,
-            projection_matrix
-        )
+    # Draw all traces
+    for trace in state.traces
+        if length(trace.x_data) >= 2 && length(trace.y_data) >= 2
+            draw_line_plot(
+                trace.x_data,
+                trace.y_data,
+                data_to_screen,
+                trace.color,
+                trace.width,
+                projection_matrix
+            )
+        end
     end
 end
 
