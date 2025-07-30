@@ -22,11 +22,20 @@ function LinePlotStyle(;
     return LinePlotStyle(line_color, line_width, background_color, grid_color, axis_color, padding_px, show_grid, show_axes)
 end
 
+# Line style enumeration
+@enum LineStyle begin
+    SOLID = 0
+    DASH = 1
+    DOT = 2
+    DASHDOT = 3
+end
+
 struct LinePlotTrace
     x_data::Vector{Float32}
     y_data::Vector{Float32}
     color::Vec4{Float32}
     width::Float32
+    line_style::LineStyle
     label::String
 end
 
@@ -35,6 +44,7 @@ function LinePlotTrace(
     x_data::Union{Vector{<:Real},Nothing}=nothing,
     color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.6f0, 0.8f0, 1.0f0),
     width::Float32=2.0f0,
+    line_style::LineStyle=SOLID,
     label::String=""
 )
     # Convert to Float32
@@ -47,7 +57,7 @@ function LinePlotTrace(
         x_f32 = Float32.(x_data)
     end
 
-    return LinePlotTrace(x_f32, y_f32, color, width, label)
+    return LinePlotTrace(x_f32, y_f32, color, width, line_style, label)
 end
 
 struct LinePlotState
@@ -196,13 +206,31 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
 
     # Draw grid if enabled
     if style.show_grid
-        # TODO: Implement grid drawing
-        # This would require additional drawing functions for lines
+        # Generate reasonable tick positions
+        x_ticks = generate_tick_positions(state.bounds.x, state.bounds.x + state.bounds.width)
+        y_ticks = generate_tick_positions(state.bounds.y, state.bounds.y + state.bounds.height)
+
+        draw_grid(
+            state.bounds,
+            x_ticks,
+            y_ticks,
+            data_to_screen,
+            style.grid_color,
+            1.0f0,  # Grid line width
+            2.0f0,  # DOT line style for grid
+            projection_matrix
+        )
     end
 
     # Draw axes if enabled
     if style.show_axes
-        # TODO: Implement axis drawing
+        draw_axes(
+            state.bounds,
+            data_to_screen,
+            style.axis_color,
+            2.0f0,  # Axis line width
+            projection_matrix
+        )
     end
 
     # Draw all traces
@@ -214,6 +242,7 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
                 data_to_screen,
                 trace.color,
                 trace.width,
+                Float32(Int(trace.line_style)),  # Convert enum to float
                 projection_matrix
             )
         end
