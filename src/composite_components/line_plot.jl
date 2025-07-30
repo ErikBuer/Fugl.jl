@@ -15,7 +15,7 @@ function LinePlotStyle(;
     background_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),  # White background
     grid_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),  # Light gray grid
     axis_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),  # Black axes
-    padding_px=10.0f0,
+    padding_px=40.0f0,  # More padding to accommodate axis labels outside plot area
     show_grid=true,
     show_axes=true
 )
@@ -210,26 +210,45 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
         x_ticks = generate_tick_positions(state.bounds.x, state.bounds.x + state.bounds.width)
         y_ticks = generate_tick_positions(state.bounds.y, state.bounds.y + state.bounds.height)
 
-        draw_grid(
+        # Calculate screen bounds for label positioning
+        screen_bounds = Rect2f(x, y, width, height)
+
+        draw_grid_with_labels(
             state.bounds,
             x_ticks,
             y_ticks,
             data_to_screen,
+            screen_bounds,
             style.grid_color,
             1.0f0,  # Grid line width
             2.0f0,  # DOT line style for grid
-            projection_matrix
+            projection_matrix;
+            axis_color=style.axis_color  # Pass axis color to grid function
         )
     end
 
-    # Draw axes if enabled
+    # Draw axes if enabled (this will always draw labels and tick marks when axes are shown)
     if style.show_axes
-        draw_axes(
+        # Generate reasonable tick positions for axes labels
+        x_ticks = generate_tick_positions(state.bounds.x, state.bounds.x + state.bounds.width)
+        y_ticks = generate_tick_positions(state.bounds.y, state.bounds.y + state.bounds.height)
+
+        # Calculate screen bounds for label positioning
+        screen_bounds = Rect2f(x, y, width, height)
+
+        draw_axes_with_labels(
             state.bounds,
+            x_ticks,
+            y_ticks,
             data_to_screen,
+            screen_bounds,
             style.axis_color,
-            2.0f0,  # Axis line width
-            projection_matrix
+            4.0f0,  # Axis line width
+            projection_matrix;
+            label_color=style.axis_color,  # Use axis color for labels
+            axis_color=style.axis_color,   # Axis lines and tick marks color
+            label_offset_px=5.0f0,         # Spacing between tick marks and labels
+            tick_length_px=8.0f0           # Length of tick marks
         )
     end
 
