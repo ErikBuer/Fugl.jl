@@ -32,6 +32,7 @@ function screenshot(ui_funciton::Function, output_file::String, width::Int, heig
     ModernGL.glBlendFunc(ModernGL.GL_SRC_ALPHA, ModernGL.GL_ONE_MINUS_SRC_ALPHA)
 
     initialize_shaders()
+    initialize_plot_shaders()
 
     root_view::AbstractView = ui_funciton()
 
