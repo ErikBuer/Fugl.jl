@@ -79,3 +79,30 @@ nothing #hide
 ```
 
 ![Text vertical alignment](text_vertical_align.png)
+
+## Text Style
+
+Style is handeled by the `TextStyle` struct.
+
+``` @example TextVerticalAlignment
+using Fugl
+using Fugl: Text
+
+my_style = TextStyle(
+    # font_path="SomeFont.ttf",
+    size_px=32,
+    color=Vec4f(0.1, 0.7, 0.7, 1.0), # RGBA
+)
+
+
+function MyApp()
+    Container(
+        Text("Some text"; style=my_style)
+    )
+end
+
+screenshot(MyApp, "text_style.png", 400, 150);
+nothing #hide
+```
+
+![Text Style Example](text_style.png)

@@ -35,7 +35,7 @@ function MyApp()
                 on_change=(new_text) -> println("Optional hook. Text is now: ", new_text[1:min(20, length(new_text))], "...")
             )
         ),
-    ])
+    ], padding=0.0, spacing=0.0)
 end
 
 screenshot(MyApp, "textBox.png", 600, 400);

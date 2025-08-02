@@ -64,11 +64,11 @@ function screenshot(ui_funciton::Function, output_file::String, width::Int, heig
 end
 
 """
-    render_debug_overlay(frame_count, fps, screen_width, screen_height, projection_matrix)
+    render_fps_overlay(frame_count, fps, screen_width, screen_height, projection_matrix)
 
 Render debug overlay showing frame count and FPS in the upper right corner.
 """
-function render_debug_overlay(frame_count::Int, fps::Float64, screen_width::Float32, screen_height::Float32, projection_matrix)
+function render_fps_overlay(frame_count::Int, fps::Float64, screen_width::Float32, screen_height::Float32, projection_matrix)
     # Format debug text
     debug_text = "Frame: $frame_count | FPS: $(round(fps, digits=1))"
 
