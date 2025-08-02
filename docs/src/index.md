@@ -4,7 +4,9 @@
 
 It is intended to be a simple library with few depencdencies, suitable for making scientific applications.
 
-**It is very much a work-in-progress.**
+`Fugl.jl` has a short distance from component to shader, enabling fast and intuitive user interfaces.
+
+## Example
 
 ``` @example PlotExample
 using Fugl
