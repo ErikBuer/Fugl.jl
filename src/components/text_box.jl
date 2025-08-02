@@ -13,7 +13,7 @@ function TextBoxStyle(;
     text_style=TextStyle(),
     background_color_focused=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),    # White when focused
     background_color_unfocused=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0), # Light gray when not focused
-    border_color=Vec4{Float32}(0.8f0, 0.8f0, 0.8f0, 1.0f0),
+    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
     border_width_px=1.0f0,
     corner_radius_px=8.0f0,
     padding_px=10.0f0,
