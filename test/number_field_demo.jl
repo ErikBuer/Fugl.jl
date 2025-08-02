@@ -39,7 +39,7 @@ function main()
         ])
     end
 
-    Fugl.run(MyApp, title="Number Field Demo", window_width_px=600, window_height_px=400, debug_overlay=true)
+    Fugl.run(MyApp, title="Number Field Demo", window_width_px=600, window_height_px=400, fps_overlay=true)
 end
 
 main()

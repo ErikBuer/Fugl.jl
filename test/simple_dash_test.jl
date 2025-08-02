@@ -35,7 +35,7 @@ function main()
         ])
     end
 
-    Fugl.run(MyApp, title="Dashed Line Test", window_width_px=800, window_height_px=600, debug_overlay=true)
+    Fugl.run(MyApp, title="Dashed Line Test", window_width_px=800, window_height_px=600, fps_overlay=true)
 end
 
 main()

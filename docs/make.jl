@@ -29,6 +29,7 @@ makedocs(
             "Components/layout.md",
             "Components/text.md",
             "Components/text_box.md",
+            "Components/dropdown.md",
             "Components/image.md",
             "Components/slider.md",
             "Components/number_field.md",

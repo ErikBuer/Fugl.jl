@@ -63,7 +63,7 @@ function main()
         ])
     end
 
-    Fugl.run(MyApp, title="User-Managed Multi-Trace Plot", window_width_px=1000, window_height_px=700, debug_overlay=true)
+    Fugl.run(MyApp, title="User-Managed Multi-Trace Plot", window_width_px=1000, window_height_px=700, fps_overlay=true)
 end
 
 main()

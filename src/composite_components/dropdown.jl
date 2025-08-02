@@ -32,7 +32,7 @@ function DropdownStyle(;
     )
 end
 
-mutable struct DropdownState
+struct DropdownState
     options::Vector{String}      # Available options
     selected_index::Int          # Currently selected option (1-based, 0 = none selected)
     is_open::Bool               # Whether dropdown is expanded
@@ -50,7 +50,7 @@ function DropdownState(
     return DropdownState(options, selected_index, is_open, hover_index, is_hovered)
 end
 
-# Constructor to copy state with changes
+# Constructor to copy state with changes (like EditorState)
 function DropdownState(state::DropdownState;
     options=state.options,
     selected_index=state.selected_index,
@@ -238,8 +238,7 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
     mouse_x, mouse_y = mouse_state.x, mouse_state.y
 
     # Check if mouse is over the dropdown button
-    button_hovered = (mouse_x >= x && mouse_x <= x + width &&
-                      mouse_y >= y && mouse_y <= y + button_height)
+    button_hovered = inside_component(view, x, y, width, button_height, mouse_x, mouse_y)
 
     # Update hover state for button
     if view.state.is_hovered != button_hovered
@@ -247,8 +246,8 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
         view.on_state_change(new_state)
     end
 
-    # Handle click events
-    if mouse_state.button_state[LeftButton] == IsPressed
+    # Handle click events - use was_clicked for better click detection
+    if mouse_state.was_clicked[LeftButton]
         if button_hovered
             # Toggle dropdown open/closed
             new_state = DropdownState(view.state; is_open=!view.state.is_open, hover_index=0)

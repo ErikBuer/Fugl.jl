@@ -39,7 +39,7 @@ end"""))
     end
 
     # Run the GUI
-    Fugl.run(MyApp, title="Text Editor Generalization Demo", window_width_px=800, window_height_px=600, debug_overlay=true)
+    Fugl.run(MyApp, title="Text Editor Generalization Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
 end
 
 main()

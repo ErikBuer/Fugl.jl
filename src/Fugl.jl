@@ -43,7 +43,7 @@ include("test_utilitites.jl")
 export screenshot
 
 """
-    run(ui_ref[]::AbstractView; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, debug_overlay::Bool=false)
+    run(ui_ref[]::AbstractView; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false)
 
 Run the main loop for the GUI application.
 This function handles the rendering and event processing for the GUI.
@@ -53,9 +53,9 @@ This function handles the rendering and event processing for the GUI.
 - `title::String="Fugl"`: Window title
 - `window_width_px::Integer=1920`: Initial window width
 - `window_height_px::Integer=1080`: Initial window height
-- `debug_overlay::Bool=false`: Show frame count and FPS in upper right corner
+- `fps_overlay::Bool=false`: Show frame count and FPS in upper right corner
 """
-function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, debug_overlay::Bool=false)
+function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false)
     # Initialize the GLFW window
     gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
     GLA.set_context!(gl_window)
@@ -100,7 +100,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
             frame_count += 1
 
             # Update debug overlay stats if enabled
-            if debug_overlay
+            if fps_overlay
                 debug_frame_count += 1
                 current_time = frame_start_time
 
@@ -164,8 +164,8 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
 
                     # Render debug overlay if enabled
-                    if debug_overlay
-                        render_debug_overlay(frame_count, debug_fps, Float32(fb_width), Float32(fb_height), projection_matrix)
+                    if fps_overlay
+                        render_fps_overlay(frame_count, debug_fps, Float32(fb_width), Float32(fb_height), projection_matrix)
                     end
 
 
