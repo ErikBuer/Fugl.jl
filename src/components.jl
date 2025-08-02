@@ -66,6 +66,9 @@ export TextButton, IconButton
 include("composite_components/number_field.jl")
 export NumberField, NumberFieldState, NumberFieldOptions, NumberFieldStyle
 
+include("composite_components/dropdown.jl")
+export Dropdown, DropdownState, DropdownStyle
+
 include("components/atlas_debug.jl")
 
 
