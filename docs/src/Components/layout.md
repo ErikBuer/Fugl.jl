@@ -8,11 +8,13 @@
 using Fugl
 
 function MyApp()
-    Column([
-        Container(),
-        Container(),
-        Container(),
-    ])
+    Container(
+        Column([
+            Container(),
+            Container(),
+            Container(),
+        ])
+    )
 end
 
 screenshot(MyApp, "column.png", 400, 300);
@@ -29,11 +31,13 @@ nothing #hide
 using Fugl
 
 function MyApp()
-    Row([
-        Container(),
-        Container(),
-        Container(),
-    ])
+    Container(
+        Row([
+            Container(),
+            Container(),
+            Container(),
+        ])
+    )
 end
 
 screenshot(MyApp, "row.png", 400, 300);
@@ -49,11 +53,13 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Column([
-        IntrinsicWidth(Container(Text("IntrinsicWidth"))),
-        IntrinsicSize(Container(Text("IntrinsicSize"))),
-        IntrinsicHeight(Container(Text("IntrinsicHeight"))),
-    ])
+    Container(
+        Column([
+            IntrinsicWidth(Container(Text("IntrinsicWidth"))),
+            IntrinsicSize(Container(Text("IntrinsicSize"))),
+            IntrinsicHeight(Container(Text("IntrinsicHeight"))),
+        ])
+    )
 end
 
 screenshot(MyApp, "intrinsic_sizing.png", 400, 300);
@@ -67,11 +73,13 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Column([
-        FixedSize(Container(), 400, 50),
-        FixedSize(Container(), 400, 50),
-        FixedSize(Container(), 400, 50),
-    ])
+    Container(
+        Column([
+            FixedSize(Container(), 400, 50),
+            FixedSize(Container(), 400, 50),
+            FixedSize(Container(), 400, 50),
+        ])
+    )
 end
 
 screenshot(MyApp, "fixed_sizing.png", 400, 300);
@@ -87,11 +95,13 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    IntrinsicColumn([
-        FixedSize(Container(Text("Clipping width")), 800, 50),
-        FixedSize(Container(), 400, 50),
-        FixedSize(Container(), 200, 50),
-    ])
+    Container(
+        IntrinsicColumn([
+            FixedSize(Container(Text("Clipping width")), 800, 50),
+            FixedSize(Container(), 400, 50),
+            FixedSize(Container(), 200, 50),
+        ])
+    )
 end
 
 screenshot(MyApp, "intrinsic_column.png", 400, 300);
@@ -107,11 +117,13 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    IntrinsicRow([
-        FixedSize(Container(Text("Clipping Height")), 50, 800),
-        FixedSize(Container(), 50, 400),
-        FixedSize(Container(), 50, 200),
-    ])
+    Container(
+        IntrinsicRow([
+            FixedSize(Container(Text("Clipping Height")), 50, 800),
+            FixedSize(Container(), 50, 400),
+            FixedSize(Container(), 50, 200),
+        ])
+    )
 end
 
 screenshot(MyApp, "intrinsic_row.png", 400, 300);
@@ -131,11 +143,13 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Column([
-        AlignHorizontal(FixedSize(Container(Text("Left")), 100, 50), :left),
-        AlignHorizontal(FixedSize(Container(Text("Center")), 100, 50), :center),
-        AlignHorizontal(FixedSize(Container(Text("Right")), 100, 50), :right),
-    ])
+    Container(
+        Column([
+            AlignHorizontal(FixedSize(Container(Text("Left")), 100, 50), :left),
+            AlignHorizontal(FixedSize(Container(Text("Center")), 100, 50), :center),
+            AlignHorizontal(FixedSize(Container(Text("Right")), 100, 50), :right),
+        ])
+    )
 end
 
 screenshot(MyApp, "horizontal_alignment.png", 400, 300);
@@ -151,11 +165,13 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Row([
-        AlignVertical(IntrinsicSize(Container(Text("Top"))), :top),
-        AlignVertical(IntrinsicSize(Container(Text("Center"))), :center),
-        AlignVertical(IntrinsicSize(Container(Text("Bottom"))), :bottom),
-    ])
+    Container(
+        Row([
+            AlignVertical(IntrinsicSize(Container(Text("Top"))), :top),
+            AlignVertical(IntrinsicSize(Container(Text("Center"))), :center),
+            AlignVertical(IntrinsicSize(Container(Text("Bottom"))), :bottom),
+        ])
+    )
 end
 
 screenshot(MyApp, "vertical_alignment.png", 400, 300);
@@ -179,19 +195,11 @@ function MyApp()
 
     # Create some simple content for the splits
     left_content = Container(
-        Text("Click and drag the gray bar to resize!"),
-        style=ContainerStyle(
-            background_color=Vec4f(0.9, 0.9, 1.0, 1.0),  # Light blue
-            padding_px=20.0f0
-        )
+        Text("Click and drag the gray bar to resize!")
     )
 
     right_content = Container(
-        Text("This side can be resized by dragging the splitter handle."),
-        style=ContainerStyle(
-            background_color=Vec4f(1.0, 0.9, 0.9, 1.0),  # Light red
-            padding_px=20.0f0
-        )
+        Text("This side can be resized by dragging the splitter handle.")
     )
 
     # Create horizontal split container - recreated each frame with current state
@@ -205,11 +213,7 @@ function MyApp()
 
     # Create some content for vertical split
     top_content = Container(
-        Text("This demonstrates vertical splitting"),
-        style=ContainerStyle(
-            background_color=Vec4f(0.9, 1.0, 0.9, 1.0),  # Light green
-            padding_px=20.0f0
-        )
+        Text("This demonstrates vertical splitting")
     )
 
     # Create main vertical split with horizontal split in bottom - recreated each frame with current state
