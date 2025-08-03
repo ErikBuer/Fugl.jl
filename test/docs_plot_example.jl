@@ -1,14 +1,3 @@
-# Fugl.jl
-
-`Fugl.jl` is a functional GUI library written in Julia using OpenGL.
-
-It is intended to be a simple library with few depencdencies, suitable for making scientific applications.
-
-`Fugl.jl` has a short distance from component to shader, enabling fast and intuitive user interfaces.
-
-## Example
-
-``` @example PlotExample
 using Fugl
 using Fugl: Text
 
@@ -56,8 +45,4 @@ function MyApp()
         ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "linePlot.png", 600, 400);
-nothing #hide
-```
-
-![Line Plot](linePlot.png)
+Fugl.run(MyApp, title="Documentation Plot Example", window_width_px=600, window_height_px=400, fps_overlay=false)
