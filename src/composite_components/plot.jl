@@ -7,6 +7,13 @@ abstract type AbstractPlotElement end
     MATRIX_PLOT = 3
 end
 
+@enum LineStyle begin
+    SOLID = 0
+    DASH = 1
+    DOT = 2
+    DASHDOT = 3
+end
+
 struct PlotState
     elements::Vector{AbstractPlotElement}
     bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
@@ -27,9 +34,11 @@ end
 struct ScatterPlotElement <: AbstractPlotElement
     x_data::Vector{Float32}
     y_data::Vector{Float32}
-    color::Vec4{Float32}
+    fill_color::Vec4{Float32}
+    border_color::Vec4{Float32}
     marker_size::Float32
-    marker_shape::Symbol  # :circle, :square, :triangle, etc.
+    border_width::Float32
+    marker_type::MarkerType
     label::String
 end
 
@@ -37,9 +46,13 @@ end
 struct StemPlotElement <: AbstractPlotElement
     x_data::Vector{Float32}
     y_data::Vector{Float32}
-    color::Vec4{Float32}
-    width::Float32
+    line_color::Vec4{Float32}
+    fill_color::Vec4{Float32}
+    border_color::Vec4{Float32}
+    line_width::Float32
     marker_size::Float32
+    border_width::Float32
+    marker_type::MarkerType
     baseline::Float32  # Y value for stem baseline
     label::String
 end
@@ -70,28 +83,34 @@ end
 function ScatterPlotElement(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
-    color::Vec4{Float32}=Vec4{Float32}(0.8f0, 0.2f0, 0.2f0, 1.0f0),
-    marker_size::Float32=5.0f0,
-    marker_shape::Symbol=:circle,
+    fill_color::Vec4{Float32}=Vec4{Float32}(0.8f0, 0.2f0, 0.2f0, 1.0f0),
+    border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0),
+    marker_size::Float32=6.0f0,
+    border_width::Float32=0.0f0,
+    marker_type::MarkerType=CIRCLE,
     label::String=""
 )
     y_f32 = Float32.(y_data)
     x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return ScatterPlotElement(x_f32, y_f32, color, marker_size, marker_shape, label)
+    return ScatterPlotElement(x_f32, y_f32, fill_color, border_color, marker_size, border_width, marker_type, label)
 end
 
 function StemPlotElement(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
-    color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.8f0, 0.2f0, 1.0f0),
-    width::Float32=2.0f0,
+    line_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.8f0, 0.2f0, 1.0f0),
+    fill_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.8f0, 0.2f0, 1.0f0),
+    border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
+    line_width::Float32=2.0f0,
     marker_size::Float32=5.0f0,
+    border_width::Float32=1.0f0,
+    marker_type::MarkerType=CIRCLE,
     baseline::Float32=0.0f0,
     label::String=""
 )
     y_f32 = Float32.(y_data)
     x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return StemPlotElement(x_f32, y_f32, color, width, marker_size, baseline, label)
+    return StemPlotElement(x_f32, y_f32, line_color, fill_color, border_color, line_width, marker_size, border_width, marker_type, baseline, label)
 end
 
 function ImagePlotElement(
@@ -464,12 +483,12 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
 
     # Draw all plot elements
     for element in state.elements
-        draw_plot_element(element, data_to_screen, projection_matrix, style)
+        draw_plot_element(element, data_to_screen, projection_matrix, style, state.bounds)
     end
 end
 
 # Drawing functions for different plot element types
-function draw_plot_element(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
+function draw_plot_element(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
     if length(element.x_data) >= 2 && length(element.y_data) >= 2
         draw_line_plot(
             element.x_data,
@@ -484,46 +503,74 @@ function draw_plot_element(element::LinePlotElement, data_to_screen::Function, p
     end
 end
 
-function draw_plot_element(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
-    # TODO: Implement scatter plot drawing
-    # For now, draw as points using the existing line plot infrastructure
+function draw_plot_element(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
-        # Draw each point as a small circle/marker
-        for i in 1:length(element.x_data)
-            screen_x, screen_y = data_to_screen(element.x_data[i], element.y_data[i])
-            # TODO: Replace with proper marker drawing when implemented
-            # For now, use a simple point representation
-        end
+        draw_scatter_plot(
+            element.x_data,
+            element.y_data,
+            data_to_screen,
+            element.fill_color,
+            element.border_color,
+            element.marker_size,
+            element.border_width,
+            element.marker_type,
+            projection_matrix;
+            anti_aliasing_width=style.anti_aliasing_width
+        )
     end
 end
 
-function draw_plot_element(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
-    # TODO: Implement stem plot drawing
-    # For now, draw vertical lines from baseline to each data point
+function draw_plot_element(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
+        # Calculate the visible Y bounds
+        min_y_visible = bounds.y
+        max_y_visible = bounds.y + bounds.height
+
+        # Draw vertical lines from baseline (clipped to visible area) to each data point
         for i in 1:length(element.x_data)
             x_val = element.x_data[i]
             y_val = element.y_data[i]
 
-            # Draw vertical line from baseline to data point
-            stem_x_data = [x_val, x_val]
-            stem_y_data = [element.baseline, y_val]
+            # Clip the baseline to the visible plot area
+            # If baseline is below the visible area, start from the bottom edge
+            # If baseline is above the visible area, start from the top edge
+            clipped_baseline = clamp(element.baseline, min_y_visible, max_y_visible)
 
-            draw_line_plot(
-                stem_x_data,
-                stem_y_data,
-                data_to_screen,
-                element.color,
-                element.width,
-                0.0f0,  # SOLID line style
-                projection_matrix;
-                anti_aliasing_width=style.anti_aliasing_width
-            )
+            # Only draw the stem if the data point and clipped baseline are different
+            if abs(clipped_baseline - y_val) > 1e-6  # Avoid drawing zero-length lines
+                stem_x_data = [x_val, x_val]
+                stem_y_data = [clipped_baseline, y_val]
+
+                draw_line_plot(
+                    stem_x_data,
+                    stem_y_data,
+                    data_to_screen,
+                    element.line_color,
+                    element.line_width,
+                    0.0f0,  # SOLID line style
+                    projection_matrix;
+                    anti_aliasing_width=style.anti_aliasing_width
+                )
+            end
         end
+
+        # Draw markers at data points
+        draw_scatter_plot(
+            element.x_data,
+            element.y_data,
+            data_to_screen,
+            element.fill_color,
+            element.border_color,
+            element.marker_size,
+            element.border_width,
+            element.marker_type,
+            projection_matrix;
+            anti_aliasing_width=style.anti_aliasing_width
+        )
     end
 end
 
-function draw_plot_element(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
+function draw_plot_element(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
     # TODO: Implement image/matrix plot drawing
     # This will require texture mapping and colormap support
     println("ImagePlot drawing not yet implemented")

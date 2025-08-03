@@ -1,11 +1,3 @@
-# Line style enumeration  
-@enum LineStyle begin
-    SOLID = 0
-    DASH = 1
-    DOT = 2
-    DASHDOT = 3
-end
-
 mutable struct PlotStyle
     background_color::Vec4{Float32}
     grid_color::Vec4{Float32}
@@ -25,7 +17,7 @@ function PlotStyle(;
     show_grid=true,
     show_axes=true,
     show_legend=false,
-    anti_aliasing_width=1.5f0  # Anti-aliasing transition width in pixels (0.0 = sharp edges)
+    anti_aliasing_width=2.0f0  # Anti-aliasing transition width in pixels (0.0 = sharp edges)
 )
     return PlotStyle(background_color, grid_color, axis_color, padding_px, show_grid, show_axes, show_legend, anti_aliasing_width)
 end

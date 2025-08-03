@@ -59,7 +59,7 @@ function main()
             ScatterPlotElement(
                 random_data[];
                 x_data=discrete_x[],
-                color=Vec4{Float32}(0.8, 0.6, 0.2, 1.0),
+                fill_color=Vec4{Float32}(0.8, 0.6, 0.2, 1.0),
                 marker_size=8.0f0,
                 label="Random Scatter"
             )
@@ -70,8 +70,8 @@ function main()
             StemPlotElement(
                 weights[];
                 x_data=discrete_x[],
-                color=Vec4{Float32}(0.2, 0.8, 0.2, 1.0),
-                width=3.0f0,
+                line_color=Vec4{Float32}(0.2, 0.8, 0.2, 1.0),
+                line_width=3.0f0,
                 baseline=0.0f0,
                 label="Ones - Stem"
             )
