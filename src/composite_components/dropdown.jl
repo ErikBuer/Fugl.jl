@@ -65,30 +65,23 @@ struct DropdownView <: AbstractView
     style::DropdownStyle
     on_state_change::Function    # Callback for state changes
     on_select::Function          # Callback when an option is selected
+    placeholder_text::String
 end
 
 function Dropdown(
     state::DropdownState;
     style=DropdownStyle(),
     on_state_change::Function=(new_state) -> nothing,
-    on_select::Function=(selected_value, selected_index) -> nothing
+    on_select::Function=(selected_value, selected_index) -> nothing,
+    placeholder_text="Select option..."
 )::DropdownView
-    return DropdownView(state, style, on_state_change, on_select)
+    return DropdownView(state, style, on_state_change, on_select, placeholder_text)
 end
 
 function measure(view::DropdownView)::Tuple{Float32,Float32}
-    # Base height is just the dropdown button
+    # Always return just the button height - dropdown list overlays outside bounds
     button_height = view.style.text_style.size_px + 2 * view.style.padding_px
-
-    if view.state.is_open
-        # When open, add height for visible items
-        visible_items = min(length(view.state.options), view.style.max_visible_items)
-        dropdown_height = visible_items * view.style.item_height_px
-        total_height = button_height + dropdown_height
-        return (Inf32, total_height)
-    else
-        return (Inf32, button_height)
-    end
+    return (Inf32, button_height)
 end
 
 function apply_layout(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -138,7 +131,7 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
     display_text = if view.state.selected_index > 0 && view.state.selected_index <= length(view.state.options)
         view.state.options[view.state.selected_index]
     else
-        "Select option..."
+        placeholder_text
     end
 
     text_component = Text(
@@ -148,11 +141,13 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
         vertical_align=:middle
     )
 
-    text_width, text_height = measure(text_component)
+    # Position text with proper vertical centering
     text_x = x + view.style.padding_px
-    text_y = y + (height - text_height) / 2.0f0
+    text_y = y + view.style.padding_px
+    available_text_width = width - 2 * view.style.padding_px - 20.0f0  # Reserve space for arrow
+    text_height = height - 2 * view.style.padding_px
 
-    interpret_view(text_component, text_x, text_y, text_width, text_height, projection_matrix)
+    interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix)
 
     # Draw dropdown arrow
     draw_dropdown_arrow(view, x + width - view.style.padding_px - 10.0f0, y + height / 2.0f0, projection_matrix)
@@ -207,11 +202,13 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
             vertical_align=:middle
         )
 
-        text_width, text_height = measure(text_component)
+        # Position text with proper vertical centering
         text_x = x + view.style.padding_px
-        text_y = item_y + (item_height - text_height) / 2.0f0
+        text_y = item_y
+        available_text_width = width - 2 * view.style.padding_px
+        text_height = item_height
 
-        interpret_view(text_component, text_x, text_y, text_width, text_height, projection_matrix)
+        interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix)
     end
 end
 
@@ -226,11 +223,12 @@ function draw_dropdown_arrow(view::DropdownView, x::Float32, y::Float32, project
         vertical_align=:middle
     )
 
-    arrow_width, arrow_height = measure(arrow_component)
-    arrow_x = x - arrow_width / 2.0f0
-    arrow_y = y - arrow_height / 2.0f0
+    # Give the arrow a small area to center within
+    arrow_size = 16.0f0  # Fixed size for arrow area
+    arrow_x = x - arrow_size / 2.0f0
+    arrow_y = y - arrow_size / 2.0f0
 
-    interpret_view(arrow_component, arrow_x, arrow_y, arrow_width, arrow_height, projection_matrix)
+    interpret_view(arrow_component, arrow_x, arrow_y, arrow_size, arrow_size, projection_matrix)
 end
 
 function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
