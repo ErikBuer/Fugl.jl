@@ -76,7 +76,7 @@ include("plot/rec2f.jl")
 include("plot/shaders.jl")
 include("plot/draw.jl")
 
-include("composite_components/line_plot.jl")
+include("composite_components/plot.jl")
 export Plot, PlotView, PlotState, PlotStyle
 export LinePlot, ScatterPlot, StemPlot  # Convenience constructors
 export LinePlotElement, ScatterPlotElement, StemPlotElement, ImagePlotElement
