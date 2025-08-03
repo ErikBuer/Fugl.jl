@@ -88,10 +88,34 @@ function LinePlotState(
             min_x, max_x = extrema(all_x)
             min_y, max_y = extrema(all_y)
 
-            # Add 5% padding
+            # Calculate ranges
             x_range = max_x - min_x
             y_range = max_y - min_y
 
+            # Handle constant data by providing minimum range
+            min_range = 1.0f0
+            if x_range < min_range
+                x_range = min_range
+                x_center = (max_x + min_x) / 2
+                min_x = x_center - x_range / 2
+                max_x = x_center + x_range / 2
+            end
+            if y_range < min_range
+                # For constant y values, scale from 0 to the constant value
+                constant_value = min_y  # min_y == max_y for constant data
+                if constant_value >= 0
+                    # Positive constant: scale from 0 to constant + 5%
+                    min_y = 0.0f0
+                    max_y = constant_value * 1.05f0
+                else
+                    # Negative constant: scale from constant - 5% to 0
+                    min_y = constant_value * 1.05f0  # This makes it more negative
+                    max_y = 0.0f0
+                end
+                y_range = max_y - min_y
+            end
+
+            # Add 5% padding
             x_padding = x_range * 0.05f0
             y_padding = y_range * 0.05f0
 

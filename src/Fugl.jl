@@ -5,7 +5,6 @@ const GLA = GLAbstraction
 using FreeTypeAbstraction # Font rendering dependencies
 using GeometryBasics
 export Vec4f, Vec4
-using ColorTypes    # Additional rendering dependencies
 
 const OPENGL_LOCK = ReentrantLock()
 

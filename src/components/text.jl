@@ -9,17 +9,18 @@ function Text(text::String; style=TextStyle(), horizontal_align=:center, vertica
     return TextView(text, style, horizontal_align, vertical_align)
 end
 
+"""
+    measure(view::TextView)::Tuple{Float32,Float32}
+
+Assumes all text is rendered in a single line.
+"""
 function measure(view::TextView)::Tuple{Float32,Float32}
     font = view.style.font
     size_px = view.style.size_px
 
-    # Measure the width and height of the text
     text_width = measure_word_width(font, view.text, size_px)
-
-    # Add generous padding to ensure text fits properly when using IntrinsicSize
-    # Height should account for font metrics, ascenders/descenders, and container padding
-    text_height = Float32(size_px) * 1.2
-    text_width = text_width + 2 * size_px
+    text_height = Float32(size_px) + 2.0
+    text_width = text_width + 2.0
 
     return (text_width, text_height)
 end

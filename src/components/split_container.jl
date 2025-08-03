@@ -102,15 +102,6 @@ function VerticalSplitContainer(
     return VerticalSplitContainerView(top, bottom, style, state, on_state_change)
 end
 
-# Measure functions - both containers take all available space
-function measure(container::HorizontalSplitContainerView, available_width::Float32, available_height::Float32)
-    return SizedView(container, available_width, available_height)
-end
-
-function measure(container::VerticalSplitContainerView, available_width::Float32, available_height::Float32)
-    return SizedView(container, available_width, available_height)
-end
-
 function detect_click(container::HorizontalSplitContainerView, input_state::InputState, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32)
     mouse_x = Float32(input_state.x) - x_offset
     mouse_y = Float32(input_state.y) - y_offset
