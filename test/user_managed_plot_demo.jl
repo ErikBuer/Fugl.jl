@@ -7,6 +7,9 @@ function main()
     sin_data = Ref(sin.(time_data[]))
     cos_data = Ref(cos.(time_data[]))
 
+    element_count = Ref(501)
+    weights = Ref(ones(element_count[]))
+
     frame_count = Ref(0)
 
     function MyApp()
@@ -37,11 +40,10 @@ function main()
                 label="sin(x)"
             ),
             LinePlotTrace(
-                cos_data[];
-                x_data=time_data[],
+                weights[];
                 color=Vec4{Float32}(0.2, 1.0, 0.2, 1.0),
                 width=2.0f0,
-                label="cos(x)"
+                label="ones"
             )
         ]
 
