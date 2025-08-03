@@ -75,10 +75,10 @@ include("components/atlas_debug.jl")
 include("plot/rec2f.jl")
 include("plot/shaders.jl")
 include("plot/draw.jl")
-
+include("plot/plot_style.jl")
 include("composite_components/plot.jl")
 export Plot, PlotView, PlotState, PlotStyle
 export LinePlot, ScatterPlot, StemPlot  # Convenience constructors
 export LinePlotElement, ScatterPlotElement, StemPlotElement, ImagePlotElement
-export AbstractPlotElement, PlotType, LINE_PLOT, SCATTER_PLOT, STEM_PLOT, IMAGE_PLOT
+export AbstractPlotElement, PlotType, LINE_PLOT, SCATTER_PLOT, STEM_PLOT, MATRIX_PLOT
 export LineStyle, SOLID, DASH, DOT, DASHDOT

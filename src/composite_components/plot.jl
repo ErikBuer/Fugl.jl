@@ -1,42 +1,10 @@
-# Base trait for all plot elements - must be defined first
 abstract type AbstractPlotElement end
 
-# Plot type enumeration
 @enum PlotType begin
     LINE_PLOT = 0
     SCATTER_PLOT = 1
     STEM_PLOT = 2
-    IMAGE_PLOT = 3
-end
-
-# Line style enumeration  
-@enum LineStyle begin
-    SOLID = 0
-    DASH = 1
-    DOT = 2
-    DASHDOT = 3
-end
-
-mutable struct PlotStyle
-    background_color::Vec4{Float32}
-    grid_color::Vec4{Float32}
-    axis_color::Vec4{Float32}
-    padding_px::Float32
-    show_grid::Bool
-    show_axes::Bool
-    show_legend::Bool
-end
-
-function PlotStyle(;
-    background_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),  # White background
-    grid_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),  # Light gray grid
-    axis_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),  # Black axes
-    padding_px=40.0f0,  # More padding to accommodate axis labels outside plot area
-    show_grid=true,
-    show_axes=true,
-    show_legend=false
-)
-    return PlotStyle(background_color, grid_color, axis_color, padding_px, show_grid, show_axes, show_legend)
+    MATRIX_PLOT = 3
 end
 
 struct PlotState
@@ -155,6 +123,9 @@ function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32
     return (0.0f0, 1.0f0, 0.0f0, 1.0f0)  # Default bounds
 end
 
+"""
+Convenience constructor for PlotState with auto-calculated bounds
+"""
 function PlotState(
     elements::Vector{AbstractPlotElement};
     bounds::Union{Rect2f,Nothing}=nothing,
@@ -220,7 +191,9 @@ function PlotState(
     return PlotState(elements, bounds, auto_scale)
 end
 
-# Convenience constructors for backward compatibility and single elements
+"""
+Convenience constructors for backward compatibility and single elements
+"""
 function PlotState(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
@@ -286,7 +259,9 @@ struct PlotView <: AbstractView
     on_state_change::Function
 end
 
-# Main Plot constructor - supports multiple elements
+"""
+Plot component.
+"""
 function Plot(
     elements::Vector{<:AbstractPlotElement},
     state::Union{PlotState,Nothing},
@@ -353,7 +328,7 @@ end
 Plot(elements::Vector{<:AbstractPlotElement}) = Plot(elements, nothing, PlotStyle(), (new_state) -> nothing)
 Plot(elements::Vector{<:AbstractPlotElement}, style::PlotStyle) = Plot(elements, nothing, style, (new_state) -> nothing)
 Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState) = Plot(elements, state, PlotStyle(), (new_state) -> nothing)
-Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState, style::PlotStyle) = Plot(elements, state, style, (new_state) -> nothing)# Convenience constructor for single y_data (backward compatibility)
+Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState, style::PlotStyle) = Plot(elements, state, style, (new_state) -> nothing)
 function Plot(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
@@ -378,6 +353,14 @@ function LinePlot(
     return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=LINE_PLOT)
 end
 
+function LinePlot(
+    elements::Vector{LinePlotElement};
+    style::PlotStyle=PlotStyle(),
+    on_state_change::Function=(new_state) -> nothing
+)::PlotView
+    return Plot(Vector{AbstractPlotElement}(elements); style=style, on_state_change=on_state_change)
+end
+
 function ScatterPlot(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
@@ -394,15 +377,6 @@ function StemPlot(
     on_state_change::Function=(new_state) -> nothing
 )::PlotView
     return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=STEM_PLOT)
-end
-
-# Multi-element constructors for specific types
-function LinePlot(
-    elements::Vector{LinePlotElement};
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::PlotView
-    return Plot(Vector{AbstractPlotElement}(elements); style=style, on_state_change=on_state_change)
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}
@@ -556,4 +530,3 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
     # Could add zoom/pan functionality later
     return
 end
-
