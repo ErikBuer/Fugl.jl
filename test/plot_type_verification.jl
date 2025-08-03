@@ -25,9 +25,6 @@ function main()
         push!(sin_data[], sin(new_time))
         push!(cos_data[], cos(new_time))
 
-        # Update random data for scatter plot
-        random_data[] = rand(element_count[]) .* 2 .- 1
-
         # User controls window size (keep last 200 points)
         max_points = 200
         if length(time_data[]) > max_points
@@ -57,11 +54,9 @@ function main()
         # Create scatter plot elements
         scatter_elements = [
             ScatterPlotElement(
-                random_data[];
-                x_data=discrete_x[],
-                fill_color=Vec4{Float32}(0.8, 0.6, 0.2, 1.0),
-                marker_size=8.0f0,
-                label="Random Scatter"
+                sin_data[];
+                marker_size=5.0f0,
+                label="Sin Scatter"
             )
         ]
 
@@ -70,20 +65,7 @@ function main()
             StemPlotElement(
                 weights[];
                 x_data=discrete_x[],
-                line_color=Vec4{Float32}(0.2, 0.8, 0.2, 1.0),
-                line_width=3.0f0,
-                baseline=0.0f0,
                 label="Ones - Stem"
-            )
-        ]
-
-        # Single line plot for comparison
-        simple_line = [
-            LinePlotElement(
-                [1, 2, 3, 2, 1];
-                color=Vec4{Float32}(0.6, 0.2, 0.8, 1.0),
-                width=4.0f0,
-                label="Simple Line"
             )
         ]
 
