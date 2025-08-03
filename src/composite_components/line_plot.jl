@@ -203,15 +203,12 @@ function PlotState(
                 y_range = max_y - min_y
             end
 
-            # Add 5% padding
-            x_padding = x_range * 0.05f0
-            y_padding = y_range * 0.05f0
-
+            # No padding - traces extend to axis edges
             bounds = Rect2f(
-                min_x - x_padding,
-                min_y - y_padding,
-                x_range + 2 * x_padding,
-                y_range + 2 * y_padding
+                min_x,
+                min_y,
+                x_range,
+                y_range
             )
         else
             bounds = Rect2f(0, 0, 1, 1)  # Default bounds
@@ -268,15 +265,11 @@ function PlotState(
             max_y = y_center + y_range / 2
         end
 
-        # Add 10% padding
-        x_padding = x_range * 0.1f0
-        y_padding = y_range * 0.1f0
-
         calculated_bounds = Rect2f(
-            min_x - x_padding,
-            min_y - y_padding,
-            (max_x - min_x) + 2 * x_padding,
-            (max_y - min_y) + 2 * y_padding
+            min_x,
+            min_y,
+            (max_x - min_x),
+            (max_y - min_y)
         )
     elseif bounds !== nothing
         calculated_bounds = bounds
@@ -338,15 +331,11 @@ function Plot(
                     max_y = y_center + y_range / 2
                 end
 
-                # Add 10% padding
-                x_padding = x_range * 0.1f0
-                y_padding = y_range * 0.1f0
-
                 bounds = Rect2f(
-                    min_x - x_padding,
-                    min_y - y_padding,
-                    (max_x - min_x) + 2 * x_padding,
-                    (max_y - min_y) + 2 * y_padding
+                    min_x,
+                    min_y,
+                    (max_x - min_x),
+                    (max_y - min_y)
                 )
             else
                 bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
