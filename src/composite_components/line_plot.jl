@@ -1,28 +1,15 @@
-mutable struct LinePlotStyle
-    line_color::Vec4{Float32}
-    line_width::Float32
-    background_color::Vec4{Float32}
-    grid_color::Vec4{Float32}
-    axis_color::Vec4{Float32}
-    padding_px::Float32
-    show_grid::Bool
-    show_axes::Bool
+# Base trait for all plot elements - must be defined first
+abstract type AbstractPlotElement end
+
+# Plot type enumeration
+@enum PlotType begin
+    LINE_PLOT = 0
+    SCATTER_PLOT = 1
+    STEM_PLOT = 2
+    IMAGE_PLOT = 3
 end
 
-function LinePlotStyle(;
-    line_color=Vec4{Float32}(0.2f0, 0.6f0, 0.8f0, 1.0f0),  # Blue line
-    line_width=2.0f0,
-    background_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),  # White background
-    grid_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),  # Light gray grid
-    axis_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),  # Black axes
-    padding_px=40.0f0,  # More padding to accommodate axis labels outside plot area
-    show_grid=true,
-    show_axes=true
-)
-    return LinePlotStyle(line_color, line_width, background_color, grid_color, axis_color, padding_px, show_grid, show_axes)
-end
-
-# Line style enumeration
+# Line style enumeration  
 @enum LineStyle begin
     SOLID = 0
     DASH = 1
@@ -30,7 +17,36 @@ end
     DASHDOT = 3
 end
 
-struct LinePlotTrace
+mutable struct PlotStyle
+    background_color::Vec4{Float32}
+    grid_color::Vec4{Float32}
+    axis_color::Vec4{Float32}
+    padding_px::Float32
+    show_grid::Bool
+    show_axes::Bool
+    show_legend::Bool
+end
+
+function PlotStyle(;
+    background_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),  # White background
+    grid_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),  # Light gray grid
+    axis_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),  # Black axes
+    padding_px=40.0f0,  # More padding to accommodate axis labels outside plot area
+    show_grid=true,
+    show_axes=true,
+    show_legend=false
+)
+    return PlotStyle(background_color, grid_color, axis_color, padding_px, show_grid, show_axes, show_legend)
+end
+
+struct PlotState
+    elements::Vector{AbstractPlotElement}
+    bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
+    auto_scale::Bool
+end
+
+# Line plot element
+struct LinePlotElement <: AbstractPlotElement
     x_data::Vector{Float32}
     y_data::Vector{Float32}
     color::Vec4{Float32}
@@ -39,7 +55,38 @@ struct LinePlotTrace
     label::String
 end
 
-function LinePlotTrace(
+# Scatter plot element
+struct ScatterPlotElement <: AbstractPlotElement
+    x_data::Vector{Float32}
+    y_data::Vector{Float32}
+    color::Vec4{Float32}
+    marker_size::Float32
+    marker_shape::Symbol  # :circle, :square, :triangle, etc.
+    label::String
+end
+
+# Stem plot element
+struct StemPlotElement <: AbstractPlotElement
+    x_data::Vector{Float32}
+    y_data::Vector{Float32}
+    color::Vec4{Float32}
+    width::Float32
+    marker_size::Float32
+    baseline::Float32  # Y value for stem baseline
+    label::String
+end
+
+# Image/Matrix plot element
+struct ImagePlotElement <: AbstractPlotElement
+    data::Matrix{Float32}
+    x_range::Tuple{Float32,Float32}  # (min_x, max_x)
+    y_range::Tuple{Float32,Float32}  # (min_y, max_y)
+    colormap::Symbol  # :viridis, :plasma, :grayscale, etc.
+    label::String
+end
+
+# Convenience constructors for plot elements
+function LinePlotElement(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
     color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.6f0, 0.8f0, 1.0f0),
@@ -47,41 +94,82 @@ function LinePlotTrace(
     line_style::LineStyle=SOLID,
     label::String=""
 )
-    # Convert to Float32
     y_f32 = Float32.(y_data)
+    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
+    return LinePlotElement(x_f32, y_f32, color, width, line_style, label)
+end
 
-    # Generate x_data if not provided
-    if x_data === nothing
-        x_f32 = Float32.(1:length(y_data))
-    else
-        x_f32 = Float32.(x_data)
+function ScatterPlotElement(
+    y_data::Vector{<:Real};
+    x_data::Union{Vector{<:Real},Nothing}=nothing,
+    color::Vec4{Float32}=Vec4{Float32}(0.8f0, 0.2f0, 0.2f0, 1.0f0),
+    marker_size::Float32=5.0f0,
+    marker_shape::Symbol=:circle,
+    label::String=""
+)
+    y_f32 = Float32.(y_data)
+    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
+    return ScatterPlotElement(x_f32, y_f32, color, marker_size, marker_shape, label)
+end
+
+function StemPlotElement(
+    y_data::Vector{<:Real};
+    x_data::Union{Vector{<:Real},Nothing}=nothing,
+    color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.8f0, 0.2f0, 1.0f0),
+    width::Float32=2.0f0,
+    marker_size::Float32=5.0f0,
+    baseline::Float32=0.0f0,
+    label::String=""
+)
+    y_f32 = Float32.(y_data)
+    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
+    return StemPlotElement(x_f32, y_f32, color, width, marker_size, baseline, label)
+end
+
+function ImagePlotElement(
+    data::Matrix{<:Real};
+    x_range::Tuple{Real,Real}=(1, size(data, 2)),
+    y_range::Tuple{Real,Real}=(1, size(data, 1)),
+    colormap::Symbol=:viridis,
+    label::String=""
+)
+    data_f32 = Float32.(data)
+    x_range_f32 = (Float32(x_range[1]), Float32(x_range[2]))
+    y_range_f32 = (Float32(y_range[1]), Float32(y_range[2]))
+    return ImagePlotElement(data_f32, x_range_f32, y_range_f32, colormap, label)
+end
+
+# Helper function to extract data bounds from any plot element
+function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32,Float32,Float32}
+    if element isa LinePlotElement || element isa ScatterPlotElement || element isa StemPlotElement
+        if !isempty(element.x_data) && !isempty(element.y_data)
+            min_x, max_x = extrema(element.x_data)
+            min_y, max_y = extrema(element.y_data)
+            return (min_x, max_x, min_y, max_y)
+        end
+    elseif element isa ImagePlotElement
+        min_x, max_x = element.x_range
+        min_y, max_y = element.y_range
+        return (min_x, max_x, min_y, max_y)
     end
-
-    return LinePlotTrace(x_f32, y_f32, color, width, line_style, label)
+    return (0.0f0, 1.0f0, 0.0f0, 1.0f0)  # Default bounds
 end
 
-struct LinePlotState
-    traces::Vector{LinePlotTrace}
-    bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
-    auto_scale::Bool
-end
-
-function LinePlotState(
-    traces::Vector{LinePlotTrace};
+function PlotState(
+    elements::Vector{AbstractPlotElement};
     bounds::Union{Rect2f,Nothing}=nothing,
     auto_scale::Bool=true
 )
     # Auto-calculate bounds if not provided and auto_scale is true
-    if bounds === nothing && auto_scale && !isempty(traces)
-        # Find overall bounds across all traces
+    if bounds === nothing && auto_scale && !isempty(elements)
+        # Find overall bounds across all elements
         all_x = Float32[]
         all_y = Float32[]
 
-        for trace in traces
-            if !isempty(trace.x_data) && !isempty(trace.y_data)
-                append!(all_x, trace.x_data)
-                append!(all_y, trace.y_data)
-            end
+        for element in elements
+            min_x, max_x, min_y, max_y = get_element_bounds(element)
+            push!(all_x, min_x, max_x)
+            push!(all_y, min_y, max_y)
         end
 
         if !isempty(all_x) && !isempty(all_y)
@@ -132,72 +220,211 @@ function LinePlotState(
         bounds = Rect2f(0, 0, 1, 1)  # Default bounds
     end
 
-    return LinePlotState(traces, bounds, auto_scale)
+    return PlotState(elements, bounds, auto_scale)
 end
 
-# Convenience constructor for single trace (backward compatibility)
-function LinePlotState(
+# Convenience constructors for backward compatibility and single elements
+function PlotState(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
     bounds::Union{Rect2f,Nothing}=nothing,
-    auto_scale::Bool=true
+    auto_scale::Bool=true,
+    plot_type::PlotType=LINE_PLOT
 )
-    trace = LinePlotTrace(y_data; x_data=x_data)
-    return LinePlotState([trace]; bounds=bounds, auto_scale=auto_scale)
+    element = if plot_type == LINE_PLOT
+        LinePlotElement(y_data; x_data=x_data)
+    elseif plot_type == SCATTER_PLOT
+        ScatterPlotElement(y_data; x_data=x_data)
+    elseif plot_type == STEM_PLOT
+        StemPlotElement(y_data; x_data=x_data)
+    else
+        LinePlotElement(y_data; x_data=x_data)  # Default to line plot
+    end
+
+    elements = [element]
+
+    # Use direct constructor to avoid kwcall issues
+    if bounds === nothing && auto_scale && !isempty(elements)
+        # Find bounds from the single element
+        min_x, max_x, min_y, max_y = get_element_bounds(element)
+
+        # Calculate ranges
+        x_range = max_x - min_x
+        y_range = max_y - min_y
+
+        # Handle constant data by providing minimum range
+        min_range = 1.0f0
+        if x_range < min_range
+            x_range = min_range
+            x_center = (max_x + min_x) / 2
+            min_x = x_center - x_range / 2
+            max_x = x_center + x_range / 2
+        end
+
+        if y_range < min_range
+            y_range = min_range
+            y_center = (max_y + min_y) / 2
+            min_y = y_center - y_range / 2
+            max_y = y_center + y_range / 2
+        end
+
+        # Add 10% padding
+        x_padding = x_range * 0.1f0
+        y_padding = y_range * 0.1f0
+
+        calculated_bounds = Rect2f(
+            min_x - x_padding,
+            min_y - y_padding,
+            (max_x - min_x) + 2 * x_padding,
+            (max_y - min_y) + 2 * y_padding
+        )
+    elseif bounds !== nothing
+        calculated_bounds = bounds
+    else
+        calculated_bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
+    end
+
+    return PlotState(elements, calculated_bounds, auto_scale)
 end
 
-struct LinePlotView <: AbstractView
-    state::LinePlotState
-    style::LinePlotStyle
+struct PlotView <: AbstractView
+    state::PlotState
+    style::PlotStyle
     on_state_change::Function
 end
 
+# Main Plot constructor - supports multiple elements
+function Plot(
+    elements::Vector{<:AbstractPlotElement},
+    state::Union{PlotState,Nothing},
+    style::PlotStyle,
+    on_state_change::Function
+)::PlotView
+    if state === nothing
+        # Use direct constructor to avoid kwcall issues
+        # Auto-calculate bounds if not provided and auto_scale is true
+        if !isempty(elements)
+            # Find overall bounds across all elements
+            all_x = Float32[]
+            all_y = Float32[]
+
+            for element in elements
+                min_x, max_x, min_y, max_y = get_element_bounds(element)
+                push!(all_x, min_x, max_x)
+                push!(all_y, min_y, max_y)
+            end
+
+            if !isempty(all_x) && !isempty(all_y)
+                min_x, max_x = extrema(all_x)
+                min_y, max_y = extrema(all_y)
+
+                # Calculate ranges
+                x_range = max_x - min_x
+                y_range = max_y - min_y
+
+                # Handle constant data by providing minimum range
+                min_range = 1.0f0
+                if x_range < min_range
+                    x_range = min_range
+                    x_center = (max_x + min_x) / 2
+                    min_x = x_center - x_range / 2
+                    max_x = x_center + x_range / 2
+                end
+
+                if y_range < min_range
+                    y_range = min_range
+                    y_center = (max_y + min_y) / 2
+                    min_y = y_center - y_range / 2
+                    max_y = y_center + y_range / 2
+                end
+
+                # Add 10% padding
+                x_padding = x_range * 0.1f0
+                y_padding = y_range * 0.1f0
+
+                bounds = Rect2f(
+                    min_x - x_padding,
+                    min_y - y_padding,
+                    (max_x - min_x) + 2 * x_padding,
+                    (max_y - min_y) + 2 * y_padding
+                )
+            else
+                bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
+            end
+        else
+            bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds for empty elements
+        end
+
+        state = PlotState(elements, bounds, true)
+    end
+    return PlotView(state, style, on_state_change)
+end
+
+# Convenience overloads
+Plot(elements::Vector{<:AbstractPlotElement}) = Plot(elements, nothing, PlotStyle(), (new_state) -> nothing)
+Plot(elements::Vector{<:AbstractPlotElement}, style::PlotStyle) = Plot(elements, nothing, style, (new_state) -> nothing)
+Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState) = Plot(elements, state, PlotStyle(), (new_state) -> nothing)
+Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState, style::PlotStyle) = Plot(elements, state, style, (new_state) -> nothing)# Convenience constructor for single y_data (backward compatibility)
+function Plot(
+    y_data::Vector{<:Real};
+    x_data::Union{Vector{<:Real},Nothing}=nothing,
+    state::Union{PlotState,Nothing}=nothing,
+    style::PlotStyle=PlotStyle(),
+    on_state_change::Function=(new_state) -> nothing,
+    plot_type::PlotType=LINE_PLOT
+)::PlotView
+    if state === nothing
+        state = PlotState(y_data; x_data=x_data, plot_type=plot_type)
+    end
+    return PlotView(state, style, on_state_change)
+end
+
+# Convenience constructors for specific plot types
 function LinePlot(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
-    state::Union{LinePlotState,Nothing}=nothing,
-    style::LinePlotStyle=LinePlotStyle(),
+    style::PlotStyle=PlotStyle(),
     on_state_change::Function=(new_state) -> nothing
-)::LinePlotView
-    if state === nothing
-        state = LinePlotState(y_data; x_data=x_data)
-    end
-    return LinePlotView(state, style, on_state_change)
+)::PlotView
+    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=LINE_PLOT)
 end
 
-# Multi-trace constructor
-function LinePlot(
-    traces::Vector{LinePlotTrace};
-    state::Union{LinePlotState,Nothing}=nothing,
-    style::LinePlotStyle=LinePlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::LinePlotView
-    if state === nothing
-        state = LinePlotState(traces)
-    end
-    return LinePlotView(state, style, on_state_change)
-end
-
-# Convenience constructors for common multi-trace scenarios
-function LinePlot(
-    traces_data::Vector{Tuple{Vector{<:Real},Vec4{Float32}}};  # (y_data, color) pairs
+function ScatterPlot(
+    y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
-    style::LinePlotStyle=LinePlotStyle(),
+    style::PlotStyle=PlotStyle(),
     on_state_change::Function=(new_state) -> nothing
-)::LinePlotView
-    traces = [LinePlotTrace(y_data; x_data=x_data, color=color) for (y_data, color) in traces_data]
-    return LinePlot(traces; style=style, on_state_change=on_state_change)
+)::PlotView
+    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=SCATTER_PLOT)
 end
 
-function measure(view::LinePlotView)::Tuple{Float32,Float32}
+function StemPlot(
+    y_data::Vector{<:Real};
+    x_data::Union{Vector{<:Real},Nothing}=nothing,
+    style::PlotStyle=PlotStyle(),
+    on_state_change::Function=(new_state) -> nothing
+)::PlotView
+    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=STEM_PLOT)
+end
+
+# Multi-element constructors for specific types
+function LinePlot(
+    elements::Vector{LinePlotElement};
+    style::PlotStyle=PlotStyle(),
+    on_state_change::Function=(new_state) -> nothing
+)::PlotView
+    return Plot(Vector{AbstractPlotElement}(elements); style=style, on_state_change=on_state_change)
+end
+
+function measure(view::PlotView)::Tuple{Float32,Float32}
     return (Inf32, Inf32)  # Take all available space
 end
 
-function apply_layout(view::LinePlotView, x::Float32, y::Float32, width::Float32, height::Float32)
+function apply_layout(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32)
     return (x, y, width, height)
 end
 
-function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     state = view.state
     style = view.style
 
@@ -211,7 +438,7 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
     plot_width = width - 2 * style.padding_px
     plot_height = height - 2 * style.padding_px
 
-    if plot_width <= 0 || plot_height <= 0 || isempty(state.traces)
+    if plot_width <= 0 || plot_height <= 0 || isempty(state.elements)
         return  # Not enough space or no data to draw
     end
 
@@ -230,11 +457,8 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
 
     # Draw grid if enabled
     if style.show_grid
-        # Generate reasonable tick positions
         x_ticks = generate_tick_positions(state.bounds.x, state.bounds.x + state.bounds.width)
         y_ticks = generate_tick_positions(state.bounds.y, state.bounds.y + state.bounds.height)
-
-        # Calculate screen bounds for label positioning
         screen_bounds = Rect2f(x, y, width, height)
 
         draw_grid_with_labels(
@@ -247,17 +471,14 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
             1.0f0,  # Grid line width
             2.0f0,  # DOT line style for grid
             projection_matrix;
-            axis_color=style.axis_color  # Pass axis color to grid function
+            axis_color=style.axis_color
         )
     end
 
-    # Draw axes if enabled (this will always draw labels and tick marks when axes are shown)
+    # Draw axes if enabled
     if style.show_axes
-        # Generate reasonable tick positions for axes labels
         x_ticks = generate_tick_positions(state.bounds.x, state.bounds.x + state.bounds.width)
         y_ticks = generate_tick_positions(state.bounds.y, state.bounds.y + state.bounds.height)
-
-        # Calculate screen bounds for label positioning
         screen_bounds = Rect2f(x, y, width, height)
 
         draw_axes_with_labels(
@@ -269,30 +490,79 @@ function interpret_view(view::LinePlotView, x::Float32, y::Float32, width::Float
             style.axis_color,
             4.0f0,  # Axis line width
             projection_matrix;
-            label_color=style.axis_color,  # Use axis color for labels
-            axis_color=style.axis_color,   # Axis lines and tick marks color
-            label_offset_px=5.0f0,         # Spacing between tick marks and labels
-            tick_length_px=8.0f0           # Length of tick marks
+            label_color=style.axis_color,
+            axis_color=style.axis_color,
+            label_offset_px=5.0f0,
+            tick_length_px=8.0f0
         )
     end
 
-    # Draw all traces
-    for trace in state.traces
-        if length(trace.x_data) >= 2 && length(trace.y_data) >= 2
+    # Draw all plot elements
+    for element in state.elements
+        draw_plot_element(element, data_to_screen, projection_matrix)
+    end
+end
+
+# Drawing functions for different plot element types
+function draw_plot_element(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+    if length(element.x_data) >= 2 && length(element.y_data) >= 2
+        draw_line_plot(
+            element.x_data,
+            element.y_data,
+            data_to_screen,
+            element.color,
+            element.width,
+            Float32(Int(element.line_style)),
+            projection_matrix
+        )
+    end
+end
+
+function draw_plot_element(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+    # TODO: Implement scatter plot drawing
+    # For now, draw as points using the existing line plot infrastructure
+    if length(element.x_data) >= 1 && length(element.y_data) >= 1
+        # Draw each point as a small circle/marker
+        for i in 1:length(element.x_data)
+            screen_x, screen_y = data_to_screen(element.x_data[i], element.y_data[i])
+            # TODO: Replace with proper marker drawing when implemented
+            # For now, use a simple point representation
+        end
+    end
+end
+
+function draw_plot_element(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+    # TODO: Implement stem plot drawing
+    # For now, draw vertical lines from baseline to each data point
+    if length(element.x_data) >= 1 && length(element.y_data) >= 1
+        for i in 1:length(element.x_data)
+            x_val = element.x_data[i]
+            y_val = element.y_data[i]
+
+            # Draw vertical line from baseline to data point
+            stem_x_data = [x_val, x_val]
+            stem_y_data = [element.baseline, y_val]
+
             draw_line_plot(
-                trace.x_data,
-                trace.y_data,
+                stem_x_data,
+                stem_y_data,
                 data_to_screen,
-                trace.color,
-                trace.width,
-                Float32(Int(trace.line_style)),  # Convert enum to float
+                element.color,
+                element.width,
+                0.0f0,  # SOLID line style
                 projection_matrix
             )
         end
     end
 end
 
-function detect_click(view::LinePlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function draw_plot_element(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+    # TODO: Implement image/matrix plot drawing
+    # This will require texture mapping and colormap support
+    println("ImagePlot drawing not yet implemented")
+end
+
+function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     # For now, plots don't handle clicks
     # Could add zoom/pan functionality later
     return
