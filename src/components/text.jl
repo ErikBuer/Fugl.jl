@@ -44,19 +44,26 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     current_line = ""
     current_width = 0.0f0
 
-    for word in words
-        # Measure the width of the word, including a space
-        word_width = measure_word_width(font, word, size_px)
-        space_width = measure_word_width(font, " ", size_px)
+    space_width = measure_word_width(font, " ", size_px)
 
-        # Check if the word fits in the current line
-        if current_width + word_width + space_width > width
-            # Move to a new line
-            push!(lines, current_line)
-            current_line = word
-            current_width = word_width
+    for word in words
+        # Measure the width of the word
+        word_width = measure_word_width(font, word, size_px)
+
+        if current_line == ""
+            if word_width > width
+                # Word too long for any line, but we have to place it
+                current_line = word
+                current_width = word_width
+            else
+                current_line = word
+                current_width = word_width
+            end
         else
-            if current_line == ""
+            # Check if word + space fits on current line
+            if current_width + space_width + word_width > width
+                # Move to a new line
+                push!(lines, current_line)
                 current_line = word
                 current_width = word_width
             else
