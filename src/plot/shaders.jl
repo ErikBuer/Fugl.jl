@@ -5,7 +5,7 @@ layout (location = 1) in vec2 direction;
 layout (location = 2) in float width;
 layout (location = 3) in vec4 color;
 layout (location = 4) in float vertex_type;
-layout (location = 5) in float line_style;   // 0=solid, 1=dash, 2=dot, 3=dashdot
+layout (location = 5) in float line_style;    // 0=solid, 1=dash, 2=dot, 3=dashdot
 layout (location = 6) in float line_progress; // Progress along the line (for pattern calculation)
 
 uniform mat4 projection;
@@ -67,6 +67,8 @@ in float v_line_style;
 in float v_line_progress;
 in float v_line_width;
 
+uniform float anti_aliasing_width;
+
 out vec4 FragColor;
 
 float dash_pattern(float progress, int style, float line_width) {
@@ -90,7 +92,7 @@ float dash_pattern(float progress, int style, float line_width) {
     } else if (style == 3) {
         // Dash-dot pattern: dash(8), gap(2), dot(2), gap(4)
         float cycle = mod(scaled_progress, 16.0);
-        if (cycle < 8.0) return 1.0;      // dash
+        if (cycle < 8.0) return 1.0;       // dash
         else if (cycle < 10.0) return 0.0; // gap
         else if (cycle < 12.0) return 1.0; // dot
         else return 0.0;                   // gap
@@ -99,9 +101,12 @@ float dash_pattern(float progress, int style, float line_width) {
 }
 
 void main() {
-    // Anti-aliased edge based on distance from center line
+    // Distance from center line along the width
     float dist = abs(v_local_pos.y);
-    float edge_alpha = 1.0 - smoothstep(0.8, 1.0, dist);
+    
+    // Configurable anti-aliasing - when anti_aliasing_width is 0.0, this becomes sharp
+    float aa_width = max(0.001, anti_aliasing_width / v_line_width); // Normalize to line width, minimum to avoid division issues
+    float edge_alpha = 1.0 - smoothstep(1.0 - aa_width, 1.0, dist);
     
     // Calculate line style pattern with improved scaling
     int style = int(v_line_style + 0.5); // Round to nearest integer

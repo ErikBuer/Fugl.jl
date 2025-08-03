@@ -434,7 +434,8 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
             1.0f0,  # Grid line width
             2.0f0,  # DOT line style for grid
             projection_matrix;
-            axis_color=style.axis_color
+            axis_color=style.axis_color,
+            anti_aliasing_width=style.anti_aliasing_width
         )
     end
 
@@ -456,18 +457,19 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
             label_color=style.axis_color,
             axis_color=style.axis_color,
             label_offset_px=5.0f0,
-            tick_length_px=8.0f0
+            tick_length_px=8.0f0,
+            anti_aliasing_width=style.anti_aliasing_width
         )
     end
 
     # Draw all plot elements
     for element in state.elements
-        draw_plot_element(element, data_to_screen, projection_matrix)
+        draw_plot_element(element, data_to_screen, projection_matrix, style)
     end
 end
 
 # Drawing functions for different plot element types
-function draw_plot_element(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+function draw_plot_element(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
     if length(element.x_data) >= 2 && length(element.y_data) >= 2
         draw_line_plot(
             element.x_data,
@@ -476,12 +478,13 @@ function draw_plot_element(element::LinePlotElement, data_to_screen::Function, p
             element.color,
             element.width,
             Float32(Int(element.line_style)),
-            projection_matrix
+            projection_matrix;
+            anti_aliasing_width=style.anti_aliasing_width
         )
     end
 end
 
-function draw_plot_element(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+function draw_plot_element(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
     # TODO: Implement scatter plot drawing
     # For now, draw as points using the existing line plot infrastructure
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
@@ -494,7 +497,7 @@ function draw_plot_element(element::ScatterPlotElement, data_to_screen::Function
     end
 end
 
-function draw_plot_element(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+function draw_plot_element(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
     # TODO: Implement stem plot drawing
     # For now, draw vertical lines from baseline to each data point
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
@@ -513,13 +516,14 @@ function draw_plot_element(element::StemPlotElement, data_to_screen::Function, p
                 element.color,
                 element.width,
                 0.0f0,  # SOLID line style
-                projection_matrix
+                projection_matrix;
+                anti_aliasing_width=style.anti_aliasing_width
             )
         end
     end
 end
 
-function draw_plot_element(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32})
+function draw_plot_element(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle)
     # TODO: Implement image/matrix plot drawing
     # This will require texture mapping and colormap support
     println("ImagePlot drawing not yet implemented")

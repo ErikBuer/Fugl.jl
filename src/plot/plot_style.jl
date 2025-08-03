@@ -1,5 +1,3 @@
-
-
 # Line style enumeration  
 @enum LineStyle begin
     SOLID = 0
@@ -16,6 +14,7 @@ mutable struct PlotStyle
     show_grid::Bool
     show_axes::Bool
     show_legend::Bool
+    anti_aliasing_width::Float32  # Width of anti-aliasing transition in pixels (0.0 = disabled)
 end
 
 function PlotStyle(;
@@ -25,7 +24,8 @@ function PlotStyle(;
     padding_px=40.0f0,  # More padding to accommodate axis labels outside plot area
     show_grid=true,
     show_axes=true,
-    show_legend=false
+    show_legend=false,
+    anti_aliasing_width=1.5f0  # Anti-aliasing transition width in pixels (0.0 = sharp edges)
 )
-    return PlotStyle(background_color, grid_color, axis_color, padding_px, show_grid, show_axes, show_legend)
+    return PlotStyle(background_color, grid_color, axis_color, padding_px, show_grid, show_axes, show_legend, anti_aliasing_width)
 end

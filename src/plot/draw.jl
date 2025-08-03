@@ -71,7 +71,8 @@ function draw_line_plot(
     color::Vec4{Float32},
     width::Float32,
     line_style::Float32,
-    projection_matrix::Mat4{Float32}
+    projection_matrix::Mat4{Float32};
+    anti_aliasing_width::Float32=1.5f0
 )
     if length(x_data) != length(y_data) || length(x_data) < 2
         return
@@ -91,11 +92,11 @@ function draw_line_plot(
     add_line!(batch, screen_points, color, width, line_style)
 
     # Draw the batch
-    draw_lines_enhanced(batch, projection_matrix)
+    draw_lines_enhanced(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
 
 # Enhanced line drawing using efficient method (keeping old interface but with optimizations)
-function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32})
+function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_aliasing_width::Float32=1.5f0)
     if isempty(batch.points)
         return
     end
@@ -105,6 +106,7 @@ function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32})
 
     # Set uniforms
     GLA.gluniform(line_prog[], :projection, projection_matrix)
+    GLA.gluniform(line_prog[], :anti_aliasing_width, anti_aliasing_width)
 
     # Use the much more efficient approach: fewer triangles, batch processing
     all_positions = Vector{Point2f}()
@@ -394,7 +396,8 @@ function draw_grid(
     color::Vec4{Float32},
     width::Float32,
     line_style::Float32,
-    projection_matrix::Mat4{Float32}
+    projection_matrix::Mat4{Float32};
+    anti_aliasing_width::Float32=1.5f0
 )
     batch = LineBatch()
 
@@ -423,7 +426,7 @@ function draw_grid(
     end
 
     # Draw all grid lines
-    draw_lines_enhanced(batch, projection_matrix)
+    draw_lines_enhanced(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
 
 """
@@ -520,10 +523,11 @@ function draw_grid_with_labels(
     label_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
     label_offset_px::Float32=5.0f0,
     axis_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
-    axis_width::Float32=2.0f0
+    axis_width::Float32=2.0f0,
+    anti_aliasing_width::Float32=1.5f0
 )
     # Draw the grid lines (including x=0, y=0 if in bounds)
-    draw_grid(plot_bounds, x_ticks, y_ticks, transform_func, color, width, line_style, projection_matrix)
+    draw_grid(plot_bounds, x_ticks, y_ticks, transform_func, color, width, line_style, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 
     # Draw axis lines at plot edges (left and bottom edges) - no labels, those are handled by draw_axes_with_labels
     axis_batch = LineBatch()
@@ -543,7 +547,7 @@ function draw_grid_with_labels(
     add_line!(axis_batch, left_axis_points, axis_color, axis_width, 0.0f0)  # Solid line
 
     # Draw the axis lines only (no labels - those are handled by draw_axes_with_labels)
-    draw_lines_enhanced(axis_batch, projection_matrix)
+    draw_lines_enhanced(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
 
 """
@@ -564,7 +568,8 @@ function draw_axes_with_labels(
     label_offset_px::Float32=5.0f0,
     axis_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
     axis_width::Float32=2.0f0,
-    tick_length_px::Float32=8.0f0
+    tick_length_px::Float32=8.0f0,
+    anti_aliasing_width::Float32=1.5f0
 )
     # Draw axis lines and tick marks at plot edges (left and bottom edges)
     axis_batch = LineBatch()
@@ -612,7 +617,7 @@ function draw_axes_with_labels(
     end
 
     # Draw the axis lines and tick marks
-    draw_lines_enhanced(axis_batch, projection_matrix)
+    draw_lines_enhanced(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 
     # Create text style for labels
     text_style = TextStyle(size_px=label_size_px, color=label_color)
