@@ -210,18 +210,6 @@ float triangle_sdf(vec2 p) {
     return -length(p)*sign(p.y);
 }
 
-// Distance function for 5-pointed star
-float star_sdf(vec2 p) {
-    const float k1 = 0.809016994374947424;
-    const float k2 = 0.587785252292473129;
-    p.x = abs(p.x);
-    p.y -= 0.2;
-    if (p.y*k1 + p.x*k2 > k1) p = vec2(k1*p.x - k2*p.y, k2*p.x + k1*p.y);
-    if (p.y*k1 - p.x*k2 > k1) p = vec2(k1*p.x + k2*p.y, -k2*p.x + k1*p.y);
-    p.x -= clamp(p.x, 0.0, 0.95);
-    return length(p) * sign(p.y);
-}
-
 void main() {
     vec2 p = v_local_pos;
     float dist;
@@ -237,9 +225,6 @@ void main() {
     } else if (marker_type == 2) {
         // Rectangle
         dist = rect_sdf(p);
-    } else if (marker_type == 3) {
-        // Star
-        dist = star_sdf(p);
     } else {
         // Default to circle
         dist = circle_sdf(p);

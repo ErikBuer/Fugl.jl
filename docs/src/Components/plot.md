@@ -132,9 +132,6 @@ function MyApp()
     # Create stem plot elements
     elements = [
         StemPlotElement(y1_data; x_data=x_data,
-                       line_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),     # Gray stems
-                       fill_color=Vec4{Float32}(0.8, 0.3, 0.3, 1.0),     # Red markers
-                       border_color=Vec4{Float32}(0.2, 0.0, 0.0, 1.0),   # Dark red border
                        line_width=3.0f0,
                        marker_size=6.0f0,
                        border_width=1.5f0,
