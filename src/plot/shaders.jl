@@ -72,32 +72,38 @@ uniform float anti_aliasing_width;
 out vec4 FragColor;
 
 float dash_pattern(float progress, int style, float line_width) {
-    if (style == 0) {
-        // Solid line
-        return 1.0;
-    }
-    
     // Scale pattern based on line width for consistent appearance
     float pattern_scale = max(1.0, line_width * 0.5);
     float scaled_progress = progress / pattern_scale;
     
-    if (style == 1) {
-        // Dash pattern: on for 8 units, off for 4 units
-        float cycle = mod(scaled_progress, 12.0);
-        return cycle < 8.0 ? 1.0 : 0.0;
-    } else if (style == 2) {
-        // Dot pattern: on for 2 units, off for 4 units  
-        float cycle = mod(scaled_progress, 6.0);
-        return cycle < 2.0 ? 1.0 : 0.0;
-    } else if (style == 3) {
-        // Dash-dot pattern: dash(8), gap(2), dot(2), gap(4)
-        float cycle = mod(scaled_progress, 16.0);
-        if (cycle < 8.0) return 1.0;       // dash
-        else if (cycle < 10.0) return 0.0; // gap
-        else if (cycle < 12.0) return 1.0; // dot
-        else return 0.0;                   // gap
-    }
-    return 1.0; // fallback to solid
+    // Calculate all pattern types (branchless)
+    float solid_pattern = 1.0;
+    
+    // Dash pattern: on for 8 units, off for 4 units
+    float dash_cycle = mod(scaled_progress, 12.0);
+    float dash_pattern = float(dash_cycle < 8.0);
+    
+    // Dot pattern: on for 2 units, off for 4 units  
+    float dot_cycle = mod(scaled_progress, 6.0);
+    float dot_pattern = float(dot_cycle < 2.0);
+    
+    // Dash-dot pattern: dash(8), gap(2), dot(2), gap(4)
+    float dashdot_cycle = mod(scaled_progress, 16.0);
+    float dashdot_pattern = float(dashdot_cycle < 8.0) * float(dashdot_cycle >= 0.0) +  // dash
+                           float(dashdot_cycle >= 10.0) * float(dashdot_cycle < 12.0);  // dot
+    
+    // Create weights for each style (exactly one will be 1.0, others 0.0)
+    float solid_weight = float(style == 0);
+    float dash_weight = float(style == 1);
+    float dot_weight = float(style == 2);
+    float dashdot_weight = float(style == 3);
+    
+    // Blend patterns using weights (branchless selection)
+    return solid_pattern * solid_weight +
+           dash_pattern * dash_weight +
+           dot_pattern * dot_weight +
+           dashdot_pattern * dashdot_weight +
+           solid_pattern * (1.0 - solid_weight - dash_weight - dot_weight - dashdot_weight); // fallback to solid
 }
 
 void main() {
@@ -211,22 +217,22 @@ float triangle_sdf(vec2 p) {
 
 void main() {
     vec2 p = v_local_pos;
-    float dist;
     
-    // Get distance to shape based on marker type
-    if (v_marker_type == 0) {
-        // Circle
-        dist = circle_sdf(p);
-    } else if (v_marker_type == 1) {
-        // Triangle
-        dist = triangle_sdf(p);
-    } else if (v_marker_type == 2) {
-        // Rectangle
-        dist = rect_sdf(p);
-    } else {
-        // Default to circle
-        dist = circle_sdf(p);
-    }
+    // Calculate all distance functions (no branching)
+    float circle_dist = circle_sdf(p);
+    float triangle_dist = triangle_sdf(p);
+    float rect_dist = rect_sdf(p);
+    
+    // Create weights for each marker type (exactly one will be 1.0, others 0.0)
+    float circle_weight = float(v_marker_type == 0);
+    float triangle_weight = float(v_marker_type == 1);
+    float rect_weight = float(v_marker_type == 2);
+    
+    // Blend distances using weights (branchless selection)
+    float dist = circle_dist * circle_weight + 
+                 triangle_dist * triangle_weight + 
+                 rect_dist * rect_weight +
+                 circle_dist * (1.0 - circle_weight - triangle_weight - rect_weight); // fallback to circle
     
     // Calculate anti-aliasing width in local coordinates
     float aa_width = max(0.001, anti_aliasing_width / v_size);

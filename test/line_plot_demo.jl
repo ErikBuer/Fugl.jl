@@ -12,33 +12,50 @@ function main()
     function MyApp()
 
         IntrinsicColumn([
-            IntrinsicHeight(Container(Text("Real-time Line Plot Demo"))),
+                IntrinsicHeight(Container(Text("Real-time Line Plot Demo"))),
 
-            # Line plot with both x and y data
-            Container(
-                LinePlot(
-                    y_data[];
-                    x_data=time_data[],
-                    style=LinePlotStyle(
-                        line_color=Vec4{Float32}(0.0, 0.8, 0.2, 1.0),  # Green
-                        line_width=8.0f0,
-                        show_grid=true
-                    )
-                )
-            ),
+                # Line plot using LinePlotElement with different line styles
+                Container(
+                    Plot([
+                            LinePlotElement(
+                                y_data[];
+                                x_data=time_data[],
+                                color=Vec4{Float32}(0.0, 0.8, 0.2, 1.0),  # Green
+                                width=4.0f0,
+                                line_style=SOLID,
+                                label="Sine Wave"
+                            ),
+                            LinePlotElement(
+                                cos.(time_data[]);
+                                x_data=time_data[],
+                                color=Vec4{Float32}(0.8, 0.2, 0.0, 1.0),  # Red
+                                width=3.0f0,
+                                line_style=DASH,
+                                label="Cosine Wave"
+                            )
+                        ], PlotStyle(show_grid=true, show_legend=true))
+                ),
 
-            # Simple plot with auto-generated x values (1, 2, 3, ...)
-            Container(
-                LinePlot(
-                    [1.0, 4.0, 2.0, 8.0, 5.0, 7.0];  # Just y values
-                    style=LinePlotStyle(
-                        line_color=Vec4{Float32}(0.8, 0.2, 0.0, 1.0),  # Red
-                        line_width=2.0f0
-                    )
-                )
-            ), IntrinsicHeight(Container(Text("Points: $(length(y_data[]))"))),
-            IntrinsicHeight(Container(Text("Latest: $(round(y_data[][end], digits=3))"))),
-        ])
+                # Simple plot with different line styles
+                Container(
+                    Plot([
+                            LinePlotElement(
+                                [1.0, 4.0, 2.0, 8.0, 5.0, 7.0];  # Just y values
+                                color=Vec4{Float32}(0.8, 0.2, 0.0, 1.0),  # Red
+                                width=3.0f0,
+                                line_style=DOT,
+                                label="Dotted Line"
+                            ),
+                            LinePlotElement(
+                                [0.5, 3.5, 1.5, 7.5, 4.5, 6.5];  # Offset data
+                                color=Vec4{Float32}(0.2, 0.2, 0.8, 1.0),  # Blue
+                                width=2.5f0,
+                                line_style=DASHDOT,
+                                label="Dash-Dot Line"
+                            )
+                        ], PlotStyle(show_grid=true, show_legend=true))
+                ),
+            ], padding=0.0, spacing=0.0)
     end
 
     Fugl.run(MyApp, title="Line Plot Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
