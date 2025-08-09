@@ -1,19 +1,5 @@
 abstract type AbstractPlotElement end
 
-@enum PlotType begin
-    LINE_PLOT = 0
-    SCATTER_PLOT = 1
-    STEM_PLOT = 2
-    MATRIX_PLOT = 3
-end
-
-@enum LineStyle begin
-    SOLID = 0
-    DASH = 1
-    DOT = 2
-    DASHDOT = 3
-end
-
 struct PlotState
     elements::Vector{AbstractPlotElement}
     bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
@@ -451,7 +437,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
             screen_bounds,
             style.grid_color,
             1.0f0,  # Grid line width
-            2.0f0,  # DOT line style for grid
+            DOT,  # DOT line style for grid
             projection_matrix;
             axis_color=style.axis_color,
             anti_aliasing_width=style.anti_aliasing_width
@@ -496,7 +482,7 @@ function draw_plot_element(element::LinePlotElement, data_to_screen::Function, p
             data_to_screen,
             element.color,
             element.width,
-            Float32(Int(element.line_style)),
+            element.line_style,
             projection_matrix;
             anti_aliasing_width=style.anti_aliasing_width
         )
@@ -547,7 +533,7 @@ function draw_plot_element(element::StemPlotElement, data_to_screen::Function, p
                     data_to_screen,
                     element.line_color,
                     element.line_width,
-                    0.0f0,  # SOLID line style
+                    SOLID,  # SOLID line style
                     projection_matrix;
                     anti_aliasing_width=style.anti_aliasing_width
                 )

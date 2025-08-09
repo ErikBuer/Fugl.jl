@@ -1,3 +1,10 @@
+@enum PlotType begin
+    LINE_PLOT = 0
+    SCATTER_PLOT = 1
+    STEM_PLOT = 2
+    MATRIX_PLOT = 3
+end
+
 mutable struct PlotStyle
     background_color::Vec4{Float32}
     grid_color::Vec4{Float32}

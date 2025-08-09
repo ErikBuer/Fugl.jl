@@ -5,14 +5,14 @@ layout (location = 1) in vec2 direction;
 layout (location = 2) in float width;
 layout (location = 3) in vec4 color;
 layout (location = 4) in float vertex_type;
-layout (location = 5) in float line_style;    // 0=solid, 1=dash, 2=dot, 3=dashdot
+layout (location = 5) in int line_style;      // 0=solid, 1=dash, 2=dot, 3=dashdot
 layout (location = 6) in float line_progress; // Progress along the line (for pattern calculation)
 
 uniform mat4 projection;
 
 out vec4 v_color;
 out vec2 v_local_pos;
-out float v_line_style;
+flat out int v_line_style;
 out float v_line_progress;
 out float v_line_width;
 
@@ -63,7 +63,7 @@ const line_fragment_shader = GLA.frag"""
 #version 330 core
 in vec4 v_color;
 in vec2 v_local_pos;
-in float v_line_style;
+flat in int v_line_style;
 in float v_line_progress;
 in float v_line_width;
 
@@ -108,9 +108,8 @@ void main() {
     float aa_width = max(0.001, anti_aliasing_width / v_line_width); // Normalize to line width, minimum to avoid division issues
     float edge_alpha = 1.0 - smoothstep(1.0 - aa_width, 1.0, dist);
     
-    // Calculate line style pattern with improved scaling
-    int style = int(v_line_style + 0.5); // Round to nearest integer
-    float pattern_alpha = dash_pattern(v_line_progress, style, v_line_width);
+    // Calculate line style pattern - no conversion needed now
+    float pattern_alpha = dash_pattern(v_line_progress, v_line_style, v_line_width);
     
     // Combine edge anti-aliasing with pattern
     float final_alpha = v_color.a * edge_alpha * pattern_alpha;
@@ -130,7 +129,7 @@ layout (location = 1) in float size;         // Size of marker (radius/half-widt
 layout (location = 2) in vec4 fill_color;    // Fill color
 layout (location = 3) in vec4 border_color;  // Border color
 layout (location = 4) in float border_width; // Border width in pixels
-layout (location = 5) in float marker_type;  // 0=circle, 1=triangle, 2=rectangle, 3=star
+layout (location = 5) in int marker_type;    // 0=circle, 1=triangle, 2=rectangle
 layout (location = 6) in float vertex_id;    // Vertex ID for quad (0,1,2,3)
 
 uniform mat4 projection;
@@ -138,7 +137,7 @@ uniform mat4 projection;
 out vec4 v_fill_color;
 out vec4 v_border_color;
 out float v_border_width;
-out float v_marker_type;
+flat out int v_marker_type;
 out float v_size;
 out vec2 v_local_pos;  // Local position within marker quad (-1 to 1)
 
@@ -181,7 +180,7 @@ const marker_fragment_shader = GLA.frag"""
 in vec4 v_fill_color;
 in vec4 v_border_color;
 in float v_border_width;
-in float v_marker_type;
+flat in int v_marker_type;
 in float v_size;
 in vec2 v_local_pos;  // Local position within marker quad (-1 to 1)
 
@@ -215,14 +214,13 @@ void main() {
     float dist;
     
     // Get distance to shape based on marker type
-    int marker_type = int(v_marker_type + 0.5);
-    if (marker_type == 0) {
+    if (v_marker_type == 0) {
         // Circle
         dist = circle_sdf(p);
-    } else if (marker_type == 1) {
+    } else if (v_marker_type == 1) {
         // Triangle
         dist = triangle_sdf(p);
-    } else if (marker_type == 2) {
+    } else if (v_marker_type == 2) {
         // Rectangle
         dist = rect_sdf(p);
     } else {
