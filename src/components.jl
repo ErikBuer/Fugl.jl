@@ -1,4 +1,5 @@
-export SizedView
+include("components/common/utilities.jl")
+include("components/common/draw.jl")
 
 include("components/Empty.jl")
 export Empty
@@ -49,7 +50,6 @@ export EditorState
 include("components/text_editor/CodeEditor.jl")
 export CodeEditor, CodeEditorStyle
 
-
 include("components/image/Image.jl")
 export Image
 export clear_texture_cache!
@@ -67,7 +67,6 @@ include("composite_components/Dropdown.jl")
 export Dropdown, DropdownState, DropdownStyle
 
 include("components/AtlasDebug.jl")
-
 
 include("composite_components/plot/plot.jl")
 export Plot, PlotView, PlotState, PlotStyle

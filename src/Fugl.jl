@@ -21,9 +21,6 @@ export mouse_state, mouse_button_callback, InputState
 include("abstract_view.jl")
 export AbstractView, SizedView
 
-include("gui_component/utilities.jl")
-include("gui_component/draw.jl")
-
 include("components.jl")
 
 include("test_utilitites.jl")
@@ -178,7 +175,6 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
             end
 
             # Yield control periodically to prevent task starvation
-            # This replaces the accidental timing fix from debug printing
             if frame_count % 10 == 0
                 yield()  # Allow other Julia tasks to run
             end
