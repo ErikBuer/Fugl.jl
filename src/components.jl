@@ -39,7 +39,7 @@ export Container, ContainerStyle
 include("components/horizontal_slider.jl")
 export HorizontalSlider
 
-include("components/text.jl")
+include("components/text/text.jl")
 export Text, TextStyle
 
 include("text_editor/editor_action.jl")

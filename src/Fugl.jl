@@ -21,14 +21,6 @@ export mouse_state, mouse_button_callback, InputState
 include("abstract_view.jl")
 export AbstractView, SizedView
 
-include("text/font_cache.jl")
-include("text/utilities.jl")
-include("text/text_style.jl")
-export TextStyle
-include("text/glyph_atlas.jl")
-include("text/glyph_batch.jl")
-include("text/draw.jl")
-
 include("image/utilities.jl")
 include("image/draw.jl")
 export clear_texture_cache!

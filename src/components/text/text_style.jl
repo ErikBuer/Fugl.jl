@@ -5,7 +5,7 @@ mutable struct TextStyle
 end
 
 function TextStyle(;
-    font_path::String=joinpath(@__DIR__, "../../assets/fonts/FragmentMono-Regular.ttf"),
+    font_path::String=joinpath(@__DIR__, "../../../assets/fonts/FragmentMono-Regular.ttf"),
     size_px=16,
     color=Vec{4,Float32}(0.0, 0.0, 0.0, 1.0),
 )

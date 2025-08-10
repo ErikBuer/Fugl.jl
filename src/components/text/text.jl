@@ -1,3 +1,10 @@
+include("font_cache.jl")
+include("utilities.jl")
+include("text_style.jl")
+include("glyph_atlas.jl")
+include("glyph_batch.jl")
+include("draw.jl")
+
 struct TextView <: AbstractView
     text::String
     style::TextStyle
