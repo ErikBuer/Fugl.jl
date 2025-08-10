@@ -1,5 +1,4 @@
 struct PlotState
-    elements::Vector{AbstractPlotElement}
     bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
     auto_scale::Bool
     # Current zoom/view bounds (for user-controlled zooming)
@@ -10,7 +9,7 @@ struct PlotState
 end
 
 """
-Convenience constructor for PlotState with auto-calculated bounds
+Convenience constructor for PlotState with auto-calculated bounds from elements
 """
 function PlotState(
     elements::Vector{AbstractPlotElement};
@@ -45,36 +44,35 @@ function PlotState(
                 min_x = x_center - x_range / 2
                 max_x = x_center + x_range / 2
             end
+
             if y_range < min_range
-                # For constant y values, scale from 0 to the constant value
-                constant_value = min_y  # min_y == max_y for constant data
-                if constant_value >= 0
-                    # Positive constant: scale from 0 to constant + 5%
-                    min_y = 0.0f0
-                    max_y = constant_value * 1.05f0
-                else
-                    # Negative constant: scale from constant - 5% to 0
-                    min_y = constant_value * 1.05f0  # This makes it more negative
-                    max_y = 0.0f0
-                end
-                y_range = max_y - min_y
+                y_range = min_range
+                y_center = (max_y + min_y) / 2
+                min_y = y_center - y_range / 2
+                max_y = y_center + y_range / 2
             end
 
-            # No padding - traces extend to axis edges
-            bounds = Rect2f(
+            calculated_bounds = Rect2f(
                 min_x,
                 min_y,
-                x_range,
-                y_range
+                (max_x - min_x),
+                (max_y - min_y)
             )
         else
-            bounds = Rect2f(0, 0, 1, 1)  # Default bounds
+            calculated_bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
         end
-    elseif bounds === nothing
-        bounds = Rect2f(0, 0, 1, 1)  # Default bounds
+    else
+        calculated_bounds = bounds !== nothing ? bounds : Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)
     end
 
-    return PlotState(elements, bounds, auto_scale, nothing, nothing, nothing, nothing)
+    return PlotState(calculated_bounds, auto_scale, nothing, nothing, nothing, nothing)
+end
+
+"""
+Create PlotState with explicit bounds
+"""
+function PlotState(bounds::Rect2f; auto_scale::Bool=false)
+    return PlotState(bounds, auto_scale, nothing, nothing, nothing, nothing)
 end
 
 """

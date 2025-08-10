@@ -236,14 +236,17 @@ function MyApp()
     x_data = collect(0.0:0.2:10.0)
     y_data = sin.(x_data)
 
-    # Create plot state reference for user-managed state
-    plot_state = Ref(PlotState(AbstractPlotElement[
+    # Create plot elements (stored in view, not state)
+    elements = AbstractPlotElement[
         LinePlotElement(y_data; x_data=x_data,
             color=Vec4{Float32}(0.8, 0.2, 0.6, 1.0),
             width=3.0f0,
             line_style=SOLID,
             label="sine wave")
-    ]))
+    ]
+
+    # Create plot state reference for zoom control only (much simpler!)
+    plot_state = Ref(PlotState(elements))
 
     # Define plot style with initial view
     plot_style = PlotStyle(
@@ -262,11 +265,11 @@ function MyApp()
     IntrinsicColumn([
         IntrinsicHeight(Container(Text("State Management Example"))),
         
-        # Plot with user-managed state
+        # Plot with user-managed state - elements passed directly, state only for zoom
         Container(
             Plot(
-                plot_state[].elements,
-                plot_state[],
+                elements,              # Elements are in the view now
+                plot_state[],         # State only contains bounds and zoom info
                 plot_style,
                 (new_state) -> plot_state[] = new_state
             )
@@ -288,9 +291,8 @@ function MyApp()
                         new_y_min = y_center - y_range / 2
                         new_y_max = y_center + y_range / 2
                         
-                        # Create new state with updated bounds
+                        # Create new state with updated bounds (no elements needed!)
                         plot_state[] = PlotState(
-                            current_state.elements,
                             current_state.bounds,
                             current_state.auto_scale,
                             current_state.current_x_min,
@@ -305,7 +307,6 @@ function MyApp()
                         current_state = plot_state[]
                         # Reset to initial view bounds
                         plot_state[] = PlotState(
-                            current_state.elements,
                             current_state.bounds,
                             current_state.auto_scale,
                             plot_style.initial_x_min,

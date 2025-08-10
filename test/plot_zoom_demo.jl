@@ -6,8 +6,8 @@ function plot_zoom_demo()
     time_data = collect(0.0:0.1:10.0)
     y_data = sin.(time_data)
 
-    # Create plot state with initial zoom bounds set via PlotStyle
-    plot_state = Ref(PlotState(AbstractPlotElement[
+    # Create plot elements
+    elements = AbstractPlotElement[
         LinePlotElement(
         y_data;
         x_data=time_data,
@@ -16,7 +16,10 @@ function plot_zoom_demo()
         line_style=SOLID,
         label="Sine Wave"
     )
-    ]))
+    ]
+
+    # Create plot state for zoom control
+    plot_state = Ref(PlotState(elements))
 
     # Define initial view bounds in the style (for reset functionality)
     plot_style = PlotStyle(
@@ -33,11 +36,11 @@ function plot_zoom_demo()
         IntrinsicColumn([
                 IntrinsicHeight(Container(Text("Plot Zoom Demo"))),
 
-                # Plot with user-managed state
+                # Plot with user-managed state - much simpler!
                 Container(
                     Plot(
-                        plot_state[].elements,
-                        plot_state[],
+                        elements,               # Elements are passed directly
+                        plot_state[],          # State only contains bounds and zoom
                         plot_style,
                         (new_state) -> plot_state[] = new_state
                     )
@@ -60,7 +63,6 @@ function plot_zoom_demo()
                                     new_y_max = y_center + y_range / 2
 
                                     plot_state[] = PlotState(
-                                        current_state.elements,
                                         current_state.bounds,
                                         current_state.auto_scale,
                                         current_state.current_x_min,
@@ -81,7 +83,6 @@ function plot_zoom_demo()
                                     new_y_max = y_center + y_range / 2
 
                                     plot_state[] = PlotState(
-                                        current_state.elements,
                                         current_state.bounds,
                                         current_state.auto_scale,
                                         current_state.current_x_min,
@@ -95,7 +96,6 @@ function plot_zoom_demo()
                                     current_state = plot_state[]
                                     # Reset to initial view bounds from style
                                     plot_state[] = PlotState(
-                                        current_state.elements,
                                         current_state.bounds,
                                         current_state.auto_scale,
                                         plot_style.initial_x_min,

@@ -133,6 +133,7 @@ function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32
 end
 
 struct PlotView <: AbstractView
+    elements::Vector{AbstractPlotElement}
     state::PlotState
     style::PlotStyle
     on_state_change::Function
@@ -148,8 +149,7 @@ function Plot(
     on_state_change::Function
 )::PlotView
     if state === nothing
-        # Use direct constructor to avoid kwcall issues
-        # Auto-calculate bounds if not provided and auto_scale is true
+        # Auto-calculate bounds from elements if not provided
         if !isempty(elements)
             # Find overall bounds across all elements
             all_x = Float32[]
@@ -198,9 +198,9 @@ function Plot(
             bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds for empty elements
         end
 
-        state = PlotState(elements, bounds, true, nothing, nothing, nothing, nothing)
+        state = PlotState(bounds, true, nothing, nothing, nothing, nothing)
     end
-    return PlotView(state, style, on_state_change)
+    return PlotView(elements, state, style, on_state_change)
 end
 
 # Convenience overloads
@@ -208,54 +208,14 @@ Plot(elements::Vector{<:AbstractPlotElement}) = Plot(elements, nothing, PlotStyl
 Plot(elements::Vector{<:AbstractPlotElement}, style::PlotStyle) = Plot(elements, nothing, style, (new_state) -> nothing)
 Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState) = Plot(elements, state, PlotStyle(), (new_state) -> nothing)
 Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState, style::PlotStyle) = Plot(elements, state, style, (new_state) -> nothing)
-function Plot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    state::Union{PlotState,Nothing}=nothing,
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing,
-    plot_type::PlotType=LINE_PLOT
-)::PlotView
-    if state === nothing
-        state = PlotState(y_data; x_data=x_data, plot_type=plot_type)
-    end
-    return PlotView(state, style, on_state_change)
-end
 
 # Convenience constructors for specific plot types
-function LinePlot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::PlotView
-    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=LINE_PLOT)
-end
-
 function LinePlot(
     elements::Vector{LinePlotElement};
     style::PlotStyle=PlotStyle(),
     on_state_change::Function=(new_state) -> nothing
 )::PlotView
-    return Plot(Vector{AbstractPlotElement}(elements); style=style, on_state_change=on_state_change)
-end
-
-function ScatterPlot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::PlotView
-    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=SCATTER_PLOT)
-end
-
-function StemPlot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::PlotView
-    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=STEM_PLOT)
+    return Plot(Vector{AbstractPlotElement}(elements), nothing, style, on_state_change)
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}
@@ -269,6 +229,7 @@ end
 function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     state = view.state
     style = view.style
+    elements = view.elements
 
     # Draw background
     bg_vertices = generate_rectangle_vertices(x, y, width, height)
@@ -280,7 +241,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     plot_width = width - 2 * style.padding_px
     plot_height = height - 2 * style.padding_px
 
-    if plot_width <= 0 || plot_height <= 0 || isempty(state.elements)
+    if plot_width <= 0 || plot_height <= 0 || isempty(elements)
         return  # Not enough space or no data to draw
     end
 
@@ -361,7 +322,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
 
     # Draw plot elements (will be clipped to scissor rectangle)
-    for element in state.elements
+    for element in elements
         draw_plot_element(element, data_to_screen, projection_matrix, style, state.bounds)
     end
 
