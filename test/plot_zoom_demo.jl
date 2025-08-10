@@ -18,18 +18,19 @@ function plot_zoom_demo()
     )
     ]
 
-    # Create plot state for zoom control - now much simpler!
-    plot_state = Ref(PlotState())
-
-    # Define initial view bounds in the style (for reset functionality)
-    plot_style = PlotStyle(
-        show_grid=true,
-        show_axes=true,
-        show_legend=true,
+    # Create plot state for zoom control with initial view bounds
+    plot_state = Ref(PlotState(
         initial_x_min=2.0f0,      # Start zoomed in on x-axis
         initial_x_max=8.0f0,      # End zoomed in on x-axis  
         initial_y_min=-0.5f0,     # Start zoomed in on y-axis
         initial_y_max=0.5f0       # End zoomed in on y-axis
+    ))
+
+    # Define plot style (visual appearance only)
+    plot_style = PlotStyle(
+        show_grid=true,
+        show_axes=true,
+        show_legend=true
     )
 
     function MyApp()
@@ -40,8 +41,8 @@ function plot_zoom_demo()
                 Container(
                     Plot(
                         elements,               # Elements are passed directly
-                        plot_style,
-                        plot_state[],           # State only contains bounds and zoom
+                        plot_style,             # Style for visual appearance
+                        plot_state[],          # State only contains bounds and zoom
                         (new_state) -> plot_state[] = new_state
                     )
                 ),
@@ -55,8 +56,8 @@ function plot_zoom_demo()
                                 on_click=() -> begin
                                     current_state = plot_state[]
                                     # Create new state with tighter Y bounds
-                                    y_min = something(current_state.current_y_min, plot_style.initial_y_min, -1.0f0)
-                                    y_max = something(current_state.current_y_max, plot_style.initial_y_max, 1.0f0)
+                                    y_min = something(current_state.current_y_min, current_state.initial_y_min, -1.0f0)
+                                    y_max = something(current_state.current_y_max, current_state.initial_y_max, 1.0f0)
                                     y_center = (y_min + y_max) / 2
                                     y_range = (y_max - y_min) * 0.7f0  # Zoom in by 30%
                                     new_y_min = y_center - y_range / 2
@@ -65,6 +66,10 @@ function plot_zoom_demo()
                                     plot_state[] = PlotState(
                                         current_state.bounds,
                                         current_state.auto_scale,
+                                        current_state.initial_x_min,
+                                        current_state.initial_x_max,
+                                        current_state.initial_y_min,
+                                        current_state.initial_y_max,
                                         current_state.current_x_min,
                                         current_state.current_x_max,
                                         new_y_min,
@@ -75,8 +80,8 @@ function plot_zoom_demo()
                                 on_click=() -> begin
                                     current_state = plot_state[]
                                     # Create new state with wider Y bounds
-                                    y_min = something(current_state.current_y_min, plot_style.initial_y_min, -1.0f0)
-                                    y_max = something(current_state.current_y_max, plot_style.initial_y_max, 1.0f0)
+                                    y_min = something(current_state.current_y_min, current_state.initial_y_min, -1.0f0)
+                                    y_max = something(current_state.current_y_max, current_state.initial_y_max, 1.0f0)
                                     y_center = (y_min + y_max) / 2
                                     y_range = (y_max - y_min) * 1.4f0  # Zoom out by 40%
                                     new_y_min = y_center - y_range / 2
@@ -85,6 +90,10 @@ function plot_zoom_demo()
                                     plot_state[] = PlotState(
                                         current_state.bounds,
                                         current_state.auto_scale,
+                                        current_state.initial_x_min,
+                                        current_state.initial_x_max,
+                                        current_state.initial_y_min,
+                                        current_state.initial_y_max,
                                         current_state.current_x_min,
                                         current_state.current_x_max,
                                         new_y_min,
@@ -94,21 +103,25 @@ function plot_zoom_demo()
                                 "Reset View";
                                 on_click=() -> begin
                                     current_state = plot_state[]
-                                    # Reset to initial view bounds from style
+                                    # Reset to initial view bounds from state
                                     plot_state[] = PlotState(
                                         current_state.bounds,
                                         current_state.auto_scale,
-                                        plot_style.initial_x_min,
-                                        plot_style.initial_x_max,
-                                        plot_style.initial_y_min,
-                                        plot_style.initial_y_max
+                                        current_state.initial_x_min,
+                                        current_state.initial_x_max,
+                                        current_state.initial_y_min,
+                                        current_state.initial_y_max,
+                                        current_state.initial_x_min,
+                                        current_state.initial_x_max,
+                                        current_state.initial_y_min,
+                                        current_state.initial_y_max
                                     )
                                 end
                             )
                         ], padding=0.0, spacing=0.0)
                 ),            # Display current zoom bounds
                 IntrinsicHeight(Container(Text("Current Bounds:"))),
-                IntrinsicHeight(Container(Text("X: $(something(plot_state[].current_x_min, plot_style.initial_x_min, "auto")) to $(something(plot_state[].current_x_max, plot_style.initial_x_max, "auto"))"))),
+                IntrinsicHeight(Container(Text("X: $(something(plot_state[].current_x_min, plot_state[].initial_x_min, "auto")) to $(something(plot_state[].current_x_max, plot_state[].initial_x_max, "auto"))"))),
             ], padding=0.0, spacing=0.0)
     end
 
