@@ -1,8 +1,10 @@
+
+
 struct LineBatch
     points::Vector{Point2f}        # All line points
     colors::Vector{Vec4{Float32}}   # Color per point (for gradients)
     widths::Vector{Float32}        # Width per point (for variable thickness)
-    line_styles::Vector{Float32}   # Line style per point (0=solid, 1=dash, 2=dot, 3=dashdot)
+    line_styles::Vector{Int32}     # Line style per point (enum as Int32)
     line_progresses::Vector{Float32} # Cumulative distance along line for dash patterns
     segment_starts::Vector{Int32}  # Start indices for each line segment
     segment_lengths::Vector{Int32} # Length of each line segment
@@ -13,7 +15,7 @@ function LineBatch()
         Point2f[],
         Vec4{Float32}[],
         Float32[],
-        Float32[],
+        Int32[],
         Float32[],
         Int32[],
         Int32[]
@@ -37,7 +39,7 @@ function calculate_line_progress(points::Vector{Point2f})::Vector{Float32}
 end
 
 # Add a complete line (series of connected points) to the batch
-function add_line!(batch::LineBatch, points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::Float32=0.0f0)
+function add_line!(batch::LineBatch, points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::LineStyle=SOLID)
     if length(points) < 2
         return  # Need at least 2 points for a line
     end
@@ -51,10 +53,12 @@ function add_line!(batch::LineBatch, points::Vector{Point2f}, color::Vec4{Float3
     append!(batch.points, points)
 
     # Add color, width, line style, and progress for each point
+    # Convert enum to Int32 for shader
+    line_style_i32 = Int32(line_style)
     for i in 1:length(points)
         push!(batch.colors, color)
         push!(batch.widths, width)
-        push!(batch.line_styles, line_style)
+        push!(batch.line_styles, line_style_i32)
         push!(batch.line_progresses, line_progress[i])
     end
 
@@ -70,7 +74,7 @@ function draw_line_plot(
     transform_func::Function,
     color::Vec4{Float32},
     width::Float32,
-    line_style::Float32,
+    line_style::LineStyle,
     projection_matrix::Mat4{Float32};
     anti_aliasing_width::Float32=1.5f0
 )
@@ -114,7 +118,7 @@ function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32};
     all_widths = Vector{Float32}()
     all_colors = Vector{Vec4{Float32}}()
     all_vertex_types = Vector{Float32}()
-    all_line_styles = Vector{Float32}()
+    all_line_styles = Vector{Int32}()
     all_line_progresses = Vector{Float32}()
 
     # Process all segments in one go (more efficient)
@@ -130,7 +134,8 @@ function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32};
         line_points = batch.points[start_idx:end_idx]
         line_color = batch.colors[start_idx]
         line_width = batch.widths[start_idx]
-        line_style = batch.line_styles[start_idx]
+        line_style_i32 = batch.line_styles[start_idx]
+        line_style = LineStyle(line_style_i32)  # Convert back to enum for function call
         line_progresses = batch.line_progresses[start_idx:end_idx]
 
         # Generate efficient line geometry (minimal triangles)
@@ -175,18 +180,21 @@ function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32};
 end
 
 # Generate efficient line geometry - minimal triangles, optimized for performance
-function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::Float32, line_progresses::Vector{Float32})
+function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::LineStyle, line_progresses::Vector{Float32})
     positions = Vector{Point2f}()
     directions = Vector{Point2f}()
     widths = Vector{Float32}()
     colors = Vector{Vec4{Float32}}()
     vertex_types = Vector{Float32}()
-    line_styles = Vector{Float32}()
+    line_styles = Vector{Int32}()
     line_progresses_out = Vector{Float32}()
 
     if length(points) < 2 || length(line_progresses) != length(points)
         return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out
     end
+
+    # Convert enum to Int32 for shader compatibility
+    line_style_i32 = Int32(line_style)
 
     # Pre-allocate for efficiency (2 triangles = 6 vertices per segment)
     num_segments = length(points) - 1
@@ -215,7 +223,7 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
         append!(widths, [width, width, width])
         append!(colors, [color, color, color])
         append!(vertex_types, [0.0f0, 1.0f0, 2.0f0])  # bottom-left, bottom-right, top-left
-        append!(line_styles, [line_style, line_style, line_style])
+        append!(line_styles, [line_style_i32, line_style_i32, line_style_i32])
         append!(line_progresses_out, [start_progress, end_progress, start_progress])
 
         # Triangle 2: bottom-right, top-right, top-left
@@ -224,7 +232,7 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
         append!(widths, [width, width, width])
         append!(colors, [color, color, color])
         append!(vertex_types, [1.0f0, 3.0f0, 2.0f0])  # bottom-right, top-right, top-left
-        append!(line_styles, [line_style, line_style, line_style])
+        append!(line_styles, [line_style_i32, line_style_i32, line_style_i32])
         append!(line_progresses_out, [end_progress, end_progress, start_progress])
     end
 
@@ -395,7 +403,7 @@ function draw_grid(
     transform_func::Function,
     color::Vec4{Float32},
     width::Float32,
-    line_style::Float32,
+    line_style::LineStyle,
     projection_matrix::Mat4{Float32};
     anti_aliasing_width::Float32=1.5f0
 )
@@ -447,7 +455,7 @@ function draw_axes(
         end_screen_x, end_screen_y = transform_func(plot_bounds.x + plot_bounds.width, 0.0f0)
 
         x_axis_points = [Point2f(start_screen_x, start_screen_y), Point2f(end_screen_x, end_screen_y)]
-        add_line!(batch, x_axis_points, color, width, 0.0f0)  # Solid line for axes
+        add_line!(batch, x_axis_points, color, width, SOLID)  # Solid line for axes
     end
 
     # Y-axis (x = 0, if 0 is within bounds)
@@ -456,7 +464,7 @@ function draw_axes(
         end_screen_x, end_screen_y = transform_func(0.0f0, plot_bounds.y + plot_bounds.height)
 
         y_axis_points = [Point2f(start_screen_x, start_screen_y), Point2f(end_screen_x, end_screen_y)]
-        add_line!(batch, y_axis_points, color, width, 0.0f0)  # Solid line for axes
+        add_line!(batch, y_axis_points, color, width, SOLID)  # Solid line for axes
     end
 
     # Draw all axis lines
@@ -517,7 +525,7 @@ function draw_grid_with_labels(
     screen_bounds::Rect2f,
     color::Vec4{Float32},
     width::Float32,
-    line_style::Float32,
+    line_style::LineStyle,
     projection_matrix::Mat4{Float32};
     label_size_px::Int=12,
     label_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
@@ -537,14 +545,14 @@ function draw_grid_with_labels(
     bottom_start_x, bottom_start_y = transform_func(plot_bounds.x, bottom_y)
     bottom_end_x, bottom_end_y = transform_func(plot_bounds.x + plot_bounds.width, bottom_y)
     bottom_axis_points = [Point2f(bottom_start_x, bottom_start_y), Point2f(bottom_end_x, bottom_end_y)]
-    add_line!(axis_batch, bottom_axis_points, axis_color, axis_width, 0.0f0)  # Solid line
+    add_line!(axis_batch, bottom_axis_points, axis_color, axis_width, SOLID)  # Solid line
 
     # Left edge axis line (vertical line at left of plot)
     left_x = plot_bounds.x
     left_start_x, left_start_y = transform_func(left_x, plot_bounds.y)
     left_end_x, left_end_y = transform_func(left_x, plot_bounds.y + plot_bounds.height)
     left_axis_points = [Point2f(left_start_x, left_start_y), Point2f(left_end_x, left_end_y)]
-    add_line!(axis_batch, left_axis_points, axis_color, axis_width, 0.0f0)  # Solid line
+    add_line!(axis_batch, left_axis_points, axis_color, axis_width, SOLID)  # Solid line
 
     # Draw the axis lines only (no labels - those are handled by draw_axes_with_labels)
     draw_lines_enhanced(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
@@ -579,14 +587,14 @@ function draw_axes_with_labels(
     bottom_start_x, bottom_start_y = transform_func(plot_bounds.x, bottom_y)
     bottom_end_x, bottom_end_y = transform_func(plot_bounds.x + plot_bounds.width, bottom_y)
     bottom_axis_points = [Point2f(bottom_start_x, bottom_start_y), Point2f(bottom_end_x, bottom_end_y)]
-    add_line!(axis_batch, bottom_axis_points, axis_color, axis_width, 0.0f0)  # Solid line
+    add_line!(axis_batch, bottom_axis_points, axis_color, axis_width, SOLID)  # Solid line
 
     # Left edge axis line (vertical line at left of plot)
     left_x = plot_bounds.x
     left_start_x, left_start_y = transform_func(left_x, plot_bounds.y)
     left_end_x, left_end_y = transform_func(left_x, plot_bounds.y + plot_bounds.height)
     left_axis_points = [Point2f(left_start_x, left_start_y), Point2f(left_end_x, left_end_y)]
-    add_line!(axis_batch, left_axis_points, axis_color, axis_width, 0.0f0)  # Solid line
+    add_line!(axis_batch, left_axis_points, axis_color, axis_width, SOLID)  # Solid line
 
     # Add tick marks for x-axis
     for x_tick in x_ticks
@@ -598,7 +606,7 @@ function draw_axes_with_labels(
             tick_start = Point2f(tick_screen_x, tick_screen_y)
             tick_end = Point2f(tick_screen_x, tick_screen_y - tick_length_px)
             tick_points = [tick_start, tick_end]
-            add_line!(axis_batch, tick_points, axis_color, axis_width, 0.0f0)
+            add_line!(axis_batch, tick_points, axis_color, axis_width, SOLID)
         end
     end
 
@@ -612,7 +620,7 @@ function draw_axes_with_labels(
             tick_start = Point2f(tick_screen_x, tick_screen_y)
             tick_end = Point2f(tick_screen_x + tick_length_px, tick_screen_y)
             tick_points = [tick_start, tick_end]
-            add_line!(axis_batch, tick_points, axis_color, axis_width, 0.0f0)
+            add_line!(axis_batch, tick_points, axis_color, axis_width, SOLID)
         end
     end
 

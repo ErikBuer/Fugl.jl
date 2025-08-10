@@ -1,24 +1,14 @@
 abstract type AbstractPlotElement end
 
-@enum PlotType begin
-    LINE_PLOT = 0
-    SCATTER_PLOT = 1
-    STEM_PLOT = 2
-    MATRIX_PLOT = 3
-end
+using ModernGL  # For scissor testing to clip plot traces
 
-@enum LineStyle begin
-    SOLID = 0
-    DASH = 1
-    DOT = 2
-    DASHDOT = 3
-end
-
-struct PlotState
-    elements::Vector{AbstractPlotElement}
-    bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
-    auto_scale::Bool
-end
+include("rec2f.jl")
+include("line_style.jl")
+include("plot_style.jl")
+include("shaders.jl")
+include("line_draw.jl")
+include("marker_draw.jl")
+include("plot_state.jl")
 
 # Line plot element
 struct LinePlotElement <: AbstractPlotElement
@@ -142,137 +132,8 @@ function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32
     return (0.0f0, 1.0f0, 0.0f0, 1.0f0)  # Default bounds
 end
 
-"""
-Convenience constructor for PlotState with auto-calculated bounds
-"""
-function PlotState(
-    elements::Vector{AbstractPlotElement};
-    bounds::Union{Rect2f,Nothing}=nothing,
-    auto_scale::Bool=true
-)
-    # Auto-calculate bounds if not provided and auto_scale is true
-    if bounds === nothing && auto_scale && !isempty(elements)
-        # Find overall bounds across all elements
-        all_x = Float32[]
-        all_y = Float32[]
-
-        for element in elements
-            min_x, max_x, min_y, max_y = get_element_bounds(element)
-            push!(all_x, min_x, max_x)
-            push!(all_y, min_y, max_y)
-        end
-
-        if !isempty(all_x) && !isempty(all_y)
-            min_x, max_x = extrema(all_x)
-            min_y, max_y = extrema(all_y)
-
-            # Calculate ranges
-            x_range = max_x - min_x
-            y_range = max_y - min_y
-
-            # Handle constant data by providing minimum range
-            min_range = 1.0f0
-            if x_range < min_range
-                x_range = min_range
-                x_center = (max_x + min_x) / 2
-                min_x = x_center - x_range / 2
-                max_x = x_center + x_range / 2
-            end
-            if y_range < min_range
-                # For constant y values, scale from 0 to the constant value
-                constant_value = min_y  # min_y == max_y for constant data
-                if constant_value >= 0
-                    # Positive constant: scale from 0 to constant + 5%
-                    min_y = 0.0f0
-                    max_y = constant_value * 1.05f0
-                else
-                    # Negative constant: scale from constant - 5% to 0
-                    min_y = constant_value * 1.05f0  # This makes it more negative
-                    max_y = 0.0f0
-                end
-                y_range = max_y - min_y
-            end
-
-            # No padding - traces extend to axis edges
-            bounds = Rect2f(
-                min_x,
-                min_y,
-                x_range,
-                y_range
-            )
-        else
-            bounds = Rect2f(0, 0, 1, 1)  # Default bounds
-        end
-    elseif bounds === nothing
-        bounds = Rect2f(0, 0, 1, 1)  # Default bounds
-    end
-
-    return PlotState(elements, bounds, auto_scale)
-end
-
-"""
-Convenience constructors for backward compatibility and single elements
-"""
-function PlotState(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    bounds::Union{Rect2f,Nothing}=nothing,
-    auto_scale::Bool=true,
-    plot_type::PlotType=LINE_PLOT
-)
-    element = if plot_type == LINE_PLOT
-        LinePlotElement(y_data; x_data=x_data)
-    elseif plot_type == SCATTER_PLOT
-        ScatterPlotElement(y_data; x_data=x_data)
-    elseif plot_type == STEM_PLOT
-        StemPlotElement(y_data; x_data=x_data)
-    else
-        LinePlotElement(y_data; x_data=x_data)  # Default to line plot
-    end
-
-    elements = [element]
-
-    # Use direct constructor to avoid kwcall issues
-    if bounds === nothing && auto_scale && !isempty(elements)
-        # Find bounds from the single element
-        min_x, max_x, min_y, max_y = get_element_bounds(element)
-
-        # Calculate ranges
-        x_range = max_x - min_x
-        y_range = max_y - min_y
-
-        # Handle constant data by providing minimum range
-        min_range = 1.0f0
-        if x_range < min_range
-            x_range = min_range
-            x_center = (max_x + min_x) / 2
-            min_x = x_center - x_range / 2
-            max_x = x_center + x_range / 2
-        end
-
-        if y_range < min_range
-            y_range = min_range
-            y_center = (max_y + min_y) / 2
-            min_y = y_center - y_range / 2
-            max_y = y_center + y_range / 2
-        end
-
-        calculated_bounds = Rect2f(
-            min_x,
-            min_y,
-            (max_x - min_x),
-            (max_y - min_y)
-        )
-    elseif bounds !== nothing
-        calculated_bounds = bounds
-    else
-        calculated_bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
-    end
-
-    return PlotState(elements, calculated_bounds, auto_scale)
-end
-
 struct PlotView <: AbstractView
+    elements::Vector{AbstractPlotElement}
     state::PlotState
     style::PlotStyle
     on_state_change::Function
@@ -283,119 +144,24 @@ Plot component.
 """
 function Plot(
     elements::Vector{<:AbstractPlotElement},
-    state::Union{PlotState,Nothing},
-    style::PlotStyle,
-    on_state_change::Function
-)::PlotView
-    if state === nothing
-        # Use direct constructor to avoid kwcall issues
-        # Auto-calculate bounds if not provided and auto_scale is true
-        if !isempty(elements)
-            # Find overall bounds across all elements
-            all_x = Float32[]
-            all_y = Float32[]
-
-            for element in elements
-                min_x, max_x, min_y, max_y = get_element_bounds(element)
-                push!(all_x, min_x, max_x)
-                push!(all_y, min_y, max_y)
-            end
-
-            if !isempty(all_x) && !isempty(all_y)
-                min_x, max_x = extrema(all_x)
-                min_y, max_y = extrema(all_y)
-
-                # Calculate ranges
-                x_range = max_x - min_x
-                y_range = max_y - min_y
-
-                # Handle constant data by providing minimum range
-                min_range = 1.0f0
-                if x_range < min_range
-                    x_range = min_range
-                    x_center = (max_x + min_x) / 2
-                    min_x = x_center - x_range / 2
-                    max_x = x_center + x_range / 2
-                end
-
-                if y_range < min_range
-                    y_range = min_range
-                    y_center = (max_y + min_y) / 2
-                    min_y = y_center - y_range / 2
-                    max_y = y_center + y_range / 2
-                end
-
-                bounds = Rect2f(
-                    min_x,
-                    min_y,
-                    (max_x - min_x),
-                    (max_y - min_y)
-                )
-            else
-                bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
-            end
-        else
-            bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds for empty elements
-        end
-
-        state = PlotState(elements, bounds, true)
-    end
-    return PlotView(state, style, on_state_change)
-end
-
-# Convenience overloads
-Plot(elements::Vector{<:AbstractPlotElement}) = Plot(elements, nothing, PlotStyle(), (new_state) -> nothing)
-Plot(elements::Vector{<:AbstractPlotElement}, style::PlotStyle) = Plot(elements, nothing, style, (new_state) -> nothing)
-Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState) = Plot(elements, state, PlotStyle(), (new_state) -> nothing)
-Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState, style::PlotStyle) = Plot(elements, state, style, (new_state) -> nothing)
-function Plot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    state::Union{PlotState,Nothing}=nothing,
     style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing,
-    plot_type::PlotType=LINE_PLOT
-)::PlotView
-    if state === nothing
-        state = PlotState(y_data; x_data=x_data, plot_type=plot_type)
-    end
-    return PlotView(state, style, on_state_change)
-end
-
-# Convenience constructors for specific plot types
-function LinePlot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    style::PlotStyle=PlotStyle(),
+    state::PlotState=PlotState(),
     on_state_change::Function=(new_state) -> nothing
 )::PlotView
-    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=LINE_PLOT)
+    # If state has default bounds and auto_scale is true, calculate bounds from elements
+    if state.bounds == Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0) && state.auto_scale && !isempty(elements)
+        calculated_bounds = calculate_bounds_from_elements(Vector{AbstractPlotElement}(elements))
+        state = PlotState(calculated_bounds, state.auto_scale, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max)
+    end
+    return PlotView(elements, state, style, on_state_change)
 end
-
+# Convenience constructors for specific plot types
 function LinePlot(
     elements::Vector{LinePlotElement};
     style::PlotStyle=PlotStyle(),
     on_state_change::Function=(new_state) -> nothing
 )::PlotView
-    return Plot(Vector{AbstractPlotElement}(elements); style=style, on_state_change=on_state_change)
-end
-
-function ScatterPlot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::PlotView
-    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=SCATTER_PLOT)
-end
-
-function StemPlot(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::PlotView
-    return Plot(y_data; x_data=x_data, style=style, on_state_change=on_state_change, plot_type=STEM_PLOT)
+    return Plot(Vector{AbstractPlotElement}(elements), PlotState(), style, on_state_change)
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}
@@ -409,6 +175,7 @@ end
 function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     state = view.state
     style = view.style
+    elements = view.elements
 
     # Draw background
     bg_vertices = generate_rectangle_vertices(x, y, width, height)
@@ -420,16 +187,16 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     plot_width = width - 2 * style.padding_px
     plot_height = height - 2 * style.padding_px
 
-    if plot_width <= 0 || plot_height <= 0 || isempty(state.elements)
+    if plot_width <= 0 || plot_height <= 0 || isempty(elements)
         return  # Not enough space or no data to draw
     end
 
     # Transform data coordinates to screen coordinates
     function data_to_screen(data_x::Float32, data_y::Float32)::Tuple{Float32,Float32}
-        # Map from data bounds to plot area
-        bounds = state.bounds
-        norm_x = (data_x - bounds.x) / bounds.width
-        norm_y = (data_y - bounds.y) / bounds.height
+        # Map from effective bounds (considering zoom state) to plot area
+        effective_bounds = get_effective_bounds(state, style)
+        norm_x = (data_x - effective_bounds.x) / effective_bounds.width
+        norm_y = (data_y - effective_bounds.y) / effective_bounds.height
 
         screen_x = plot_x + norm_x * plot_width
         screen_y = plot_y + (1.0f0 - norm_y) * plot_height  # Flip Y axis
@@ -439,19 +206,20 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
 
     # Draw grid if enabled
     if style.show_grid
-        x_ticks = generate_tick_positions(state.bounds.x, state.bounds.x + state.bounds.width)
-        y_ticks = generate_tick_positions(state.bounds.y, state.bounds.y + state.bounds.height)
+        effective_bounds = get_effective_bounds(state, style)
+        x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
+        y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
         screen_bounds = Rect2f(x, y, width, height)
 
         draw_grid_with_labels(
-            state.bounds,
+            effective_bounds,
             x_ticks,
             y_ticks,
             data_to_screen,
             screen_bounds,
             style.grid_color,
             1.0f0,  # Grid line width
-            2.0f0,  # DOT line style for grid
+            DOT,  # DOT line style for grid
             projection_matrix;
             axis_color=style.axis_color,
             anti_aliasing_width=style.anti_aliasing_width
@@ -460,12 +228,13 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
 
     # Draw axes if enabled
     if style.show_axes
-        x_ticks = generate_tick_positions(state.bounds.x, state.bounds.x + state.bounds.width)
-        y_ticks = generate_tick_positions(state.bounds.y, state.bounds.y + state.bounds.height)
+        effective_bounds = get_effective_bounds(state, style)
+        x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
+        y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
         screen_bounds = Rect2f(x, y, width, height)
 
         draw_axes_with_labels(
-            state.bounds,
+            effective_bounds,
             x_ticks,
             y_ticks,
             data_to_screen,
@@ -481,10 +250,30 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
         )
     end
 
-    # Draw all plot elements
-    for element in state.elements
+    # Draw all plot elements with clipping enabled
+    # Enable scissor testing to clip drawing to plot area
+    ModernGL.glEnable(ModernGL.GL_SCISSOR_TEST)
+
+    # Get current viewport to properly convert coordinates
+    viewport = Vector{Int32}(undef, 4)
+    ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport)
+    viewport_height = viewport[4]
+
+    # Set scissor rectangle to plot area
+    # Convert from top-left coordinates (Fugl) to bottom-left coordinates (OpenGL)
+    scissor_x = Int32(round(plot_x))
+    scissor_y = Int32(viewport_height - round(plot_y + plot_height))
+    scissor_width = Int32(round(plot_width))
+    scissor_height = Int32(round(plot_height))
+    ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
+
+    # Draw plot elements (will be clipped to scissor rectangle)
+    for element in elements
         draw_plot_element(element, data_to_screen, projection_matrix, style, state.bounds)
     end
+
+    # Disable scissor testing
+    ModernGL.glDisable(ModernGL.GL_SCISSOR_TEST)
 end
 
 # Drawing functions for different plot element types
@@ -496,7 +285,7 @@ function draw_plot_element(element::LinePlotElement, data_to_screen::Function, p
             data_to_screen,
             element.color,
             element.width,
-            Float32(Int(element.line_style)),
+            element.line_style,
             projection_matrix;
             anti_aliasing_width=style.anti_aliasing_width
         )
@@ -547,7 +336,7 @@ function draw_plot_element(element::StemPlotElement, data_to_screen::Function, p
                     data_to_screen,
                     element.line_color,
                     element.line_width,
-                    0.0f0,  # SOLID line style
+                    SOLID,  # SOLID line style
                     projection_matrix;
                     anti_aliasing_width=style.anti_aliasing_width
                 )

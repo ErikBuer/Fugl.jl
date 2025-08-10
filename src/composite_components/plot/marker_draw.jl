@@ -1,8 +1,11 @@
-# Marker types enumeration
 @enum MarkerType begin
     CIRCLE = 0
     TRIANGLE = 1
     RECTANGLE = 2
+end
+
+function Float32(arg::Fugl.MarkerType)
+    return Float32(Int(arg))
 end
 
 struct MarkerBatch
@@ -11,7 +14,7 @@ struct MarkerBatch
     fill_colors::Vector{Vec4{Float32}}   # Fill color per marker
     border_colors::Vector{Vec4{Float32}} # Border color per marker
     border_widths::Vector{Float32}   # Border width per marker
-    marker_types::Vector{Float32}    # Marker type per marker (0=circle, 1=triangle, etc.)
+    marker_types::Vector{Int32}      # Marker type per marker (enum as Int32)
 end
 
 function MarkerBatch()
@@ -21,7 +24,7 @@ function MarkerBatch()
         Vec4{Float32}[],
         Vec4{Float32}[],
         Float32[],
-        Float32[]
+        Int32[]
     )
 end
 
@@ -40,7 +43,7 @@ function add_marker!(
     push!(batch.fill_colors, fill_color)
     push!(batch.border_colors, border_color)
     push!(batch.border_widths, border_width)
-    push!(batch.marker_types, Float32(Int(marker_type)))
+    push!(batch.marker_types, Int32(marker_type))
 end
 
 # Draw a batch of markers using the marker shader
@@ -71,7 +74,7 @@ function draw_markers(batch::MarkerBatch, projection_matrix::Mat4{Float32}; anti
     all_fill_colors = Vector{Vec4{Float32}}()
     all_border_colors = Vector{Vec4{Float32}}()
     all_border_widths = Vector{Float32}()
-    all_marker_types = Vector{Float32}()
+    all_marker_types = Vector{Int32}()
     all_vertex_ids = Vector{Float32}()
 
     for i in 1:length(batch.positions)

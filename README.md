@@ -58,8 +58,7 @@ function MyApp()
         ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "linePlot.png", 600, 400);
-nothing #hide
+Fugl.run(MyApp, title="Line Plot")
 ```
 
 ![Line Plot](docs/src/assets/linePlot.png)

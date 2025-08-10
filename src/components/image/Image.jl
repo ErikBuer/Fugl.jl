@@ -1,3 +1,6 @@
+include("utilities.jl")
+include("draw.jl")
+
 struct ImageView <: AbstractView
     horizontal_align::Symbol  # :left, :center, :right
     vertical_align::Symbol    # :top, :middle, :bottom

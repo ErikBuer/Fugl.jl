@@ -5,14 +5,14 @@ layout (location = 1) in vec2 direction;
 layout (location = 2) in float width;
 layout (location = 3) in vec4 color;
 layout (location = 4) in float vertex_type;
-layout (location = 5) in float line_style;    // 0=solid, 1=dash, 2=dot, 3=dashdot
+layout (location = 5) in int line_style;      // 0=solid, 1=dash, 2=dot, 3=dashdot
 layout (location = 6) in float line_progress; // Progress along the line (for pattern calculation)
 
 uniform mat4 projection;
 
 out vec4 v_color;
 out vec2 v_local_pos;
-out float v_line_style;
+flat out int v_line_style;
 out float v_line_progress;
 out float v_line_width;
 
@@ -63,7 +63,7 @@ const line_fragment_shader = GLA.frag"""
 #version 330 core
 in vec4 v_color;
 in vec2 v_local_pos;
-in float v_line_style;
+flat in int v_line_style;
 in float v_line_progress;
 in float v_line_width;
 
@@ -72,32 +72,38 @@ uniform float anti_aliasing_width;
 out vec4 FragColor;
 
 float dash_pattern(float progress, int style, float line_width) {
-    if (style == 0) {
-        // Solid line
-        return 1.0;
-    }
-    
     // Scale pattern based on line width for consistent appearance
     float pattern_scale = max(1.0, line_width * 0.5);
     float scaled_progress = progress / pattern_scale;
     
-    if (style == 1) {
-        // Dash pattern: on for 8 units, off for 4 units
-        float cycle = mod(scaled_progress, 12.0);
-        return cycle < 8.0 ? 1.0 : 0.0;
-    } else if (style == 2) {
-        // Dot pattern: on for 2 units, off for 4 units  
-        float cycle = mod(scaled_progress, 6.0);
-        return cycle < 2.0 ? 1.0 : 0.0;
-    } else if (style == 3) {
-        // Dash-dot pattern: dash(8), gap(2), dot(2), gap(4)
-        float cycle = mod(scaled_progress, 16.0);
-        if (cycle < 8.0) return 1.0;       // dash
-        else if (cycle < 10.0) return 0.0; // gap
-        else if (cycle < 12.0) return 1.0; // dot
-        else return 0.0;                   // gap
-    }
-    return 1.0; // fallback to solid
+    // Calculate all pattern types (branchless)
+    float solid_pattern = 1.0;
+    
+    // Dash pattern: on for 8 units, off for 4 units
+    float dash_cycle = mod(scaled_progress, 12.0);
+    float dash_pattern = float(dash_cycle < 8.0);
+    
+    // Dot pattern: on for 2 units, off for 4 units  
+    float dot_cycle = mod(scaled_progress, 6.0);
+    float dot_pattern = float(dot_cycle < 2.0);
+    
+    // Dash-dot pattern: dash(8), gap(2), dot(2), gap(4)
+    float dashdot_cycle = mod(scaled_progress, 16.0);
+    float dashdot_pattern = float(dashdot_cycle < 8.0) * float(dashdot_cycle >= 0.0) +  // dash
+                           float(dashdot_cycle >= 10.0) * float(dashdot_cycle < 12.0);  // dot
+    
+    // Create weights for each style (exactly one will be 1.0, others 0.0)
+    float solid_weight = float(style == 0);
+    float dash_weight = float(style == 1);
+    float dot_weight = float(style == 2);
+    float dashdot_weight = float(style == 3);
+    
+    // Blend patterns using weights (branchless selection)
+    return solid_pattern * solid_weight +
+           dash_pattern * dash_weight +
+           dot_pattern * dot_weight +
+           dashdot_pattern * dashdot_weight +
+           solid_pattern * (1.0 - solid_weight - dash_weight - dot_weight - dashdot_weight); // fallback to solid
 }
 
 void main() {
@@ -108,9 +114,8 @@ void main() {
     float aa_width = max(0.001, anti_aliasing_width / v_line_width); // Normalize to line width, minimum to avoid division issues
     float edge_alpha = 1.0 - smoothstep(1.0 - aa_width, 1.0, dist);
     
-    // Calculate line style pattern with improved scaling
-    int style = int(v_line_style + 0.5); // Round to nearest integer
-    float pattern_alpha = dash_pattern(v_line_progress, style, v_line_width);
+    // Calculate line style pattern - no conversion needed now
+    float pattern_alpha = dash_pattern(v_line_progress, v_line_style, v_line_width);
     
     // Combine edge anti-aliasing with pattern
     float final_alpha = v_color.a * edge_alpha * pattern_alpha;
@@ -130,7 +135,7 @@ layout (location = 1) in float size;         // Size of marker (radius/half-widt
 layout (location = 2) in vec4 fill_color;    // Fill color
 layout (location = 3) in vec4 border_color;  // Border color
 layout (location = 4) in float border_width; // Border width in pixels
-layout (location = 5) in float marker_type;  // 0=circle, 1=triangle, 2=rectangle, 3=star
+layout (location = 5) in int marker_type;    // 0=circle, 1=triangle, 2=rectangle
 layout (location = 6) in float vertex_id;    // Vertex ID for quad (0,1,2,3)
 
 uniform mat4 projection;
@@ -138,7 +143,7 @@ uniform mat4 projection;
 out vec4 v_fill_color;
 out vec4 v_border_color;
 out float v_border_width;
-out float v_marker_type;
+flat out int v_marker_type;
 out float v_size;
 out vec2 v_local_pos;  // Local position within marker quad (-1 to 1)
 
@@ -181,7 +186,7 @@ const marker_fragment_shader = GLA.frag"""
 in vec4 v_fill_color;
 in vec4 v_border_color;
 in float v_border_width;
-in float v_marker_type;
+flat in int v_marker_type;
 in float v_size;
 in vec2 v_local_pos;  // Local position within marker quad (-1 to 1)
 
@@ -210,40 +215,24 @@ float triangle_sdf(vec2 p) {
     return -length(p)*sign(p.y);
 }
 
-// Distance function for 5-pointed star
-float star_sdf(vec2 p) {
-    const float k1 = 0.809016994374947424;
-    const float k2 = 0.587785252292473129;
-    p.x = abs(p.x);
-    p.y -= 0.2;
-    if (p.y*k1 + p.x*k2 > k1) p = vec2(k1*p.x - k2*p.y, k2*p.x + k1*p.y);
-    if (p.y*k1 - p.x*k2 > k1) p = vec2(k1*p.x + k2*p.y, -k2*p.x + k1*p.y);
-    p.x -= clamp(p.x, 0.0, 0.95);
-    return length(p) * sign(p.y);
-}
-
 void main() {
     vec2 p = v_local_pos;
-    float dist;
     
-    // Get distance to shape based on marker type
-    int marker_type = int(v_marker_type + 0.5);
-    if (marker_type == 0) {
-        // Circle
-        dist = circle_sdf(p);
-    } else if (marker_type == 1) {
-        // Triangle
-        dist = triangle_sdf(p);
-    } else if (marker_type == 2) {
-        // Rectangle
-        dist = rect_sdf(p);
-    } else if (marker_type == 3) {
-        // Star
-        dist = star_sdf(p);
-    } else {
-        // Default to circle
-        dist = circle_sdf(p);
-    }
+    // Calculate all distance functions (no branching)
+    float circle_dist = circle_sdf(p);
+    float triangle_dist = triangle_sdf(p);
+    float rect_dist = rect_sdf(p);
+    
+    // Create weights for each marker type (exactly one will be 1.0, others 0.0)
+    float circle_weight = float(v_marker_type == 0);
+    float triangle_weight = float(v_marker_type == 1);
+    float rect_weight = float(v_marker_type == 2);
+    
+    // Blend distances using weights (branchless selection)
+    float dist = circle_dist * circle_weight + 
+                 triangle_dist * triangle_weight + 
+                 rect_dist * rect_weight +
+                 circle_dist * (1.0 - circle_weight - triangle_weight - rect_weight); // fallback to circle
     
     // Calculate anti-aliasing width in local coordinates
     float aa_width = max(0.001, anti_aliasing_width / v_size);

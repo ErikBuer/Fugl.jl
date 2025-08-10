@@ -1,6 +1,3 @@
-using IndirectArrays
-
-
 """
     generate_rectangle_vertices(x, y, width, height)
 

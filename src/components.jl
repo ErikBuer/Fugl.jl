@@ -1,83 +1,74 @@
-export SizedView
+include("components/common/utilities.jl")
+include("components/common/draw.jl")
 
-include("components/empty.jl")
+include("components/Empty.jl")
 export Empty
 
-include("components/fixed_size.jl")
+include("components/FixedSize.jl")
 export FixedSize, FixedWidth, FixedHeight
 
-include("components/align_vertical.jl")
+include("components/AlignVertical.jl")
 export AlignVertical
 
-include("components/align_horizontal.jl")
+include("components/AlignHorizontal.jl")
 export AlignHorizontal
 
-include("components/intrinsic_size.jl")
+include("components/IntrinsicSize.jl")
 export IntrinsicSize
 
-include("components/intrinsic_height.jl")
+include("components/IntrinsicHeight.jl")
 export IntrinsicHeight
 
-include("components/intrinsic_width.jl")
+include("components/IntrinsicWidth.jl")
 export IntrinsicWidth
 
-include("components/row.jl")
+include("components/Row.jl")
 export Row
 
-include("components/column.jl")
+include("components/Column.jl")
 export Column
 
-include("components/intrinsic_column.jl")
+include("components/IntrinsicColumn.jl")
 export IntrinsicColumn
 
-include("components/intrinsic_row.jl")
+include("components/IntrinsicRow.jl")
 export IntrinsicRow
 
-include("components/container.jl")
+include("components/Container.jl")
 export Container, ContainerStyle
 
-include("components/horizontal_slider.jl")
+include("components/HorizontalSlider.jl")
 export HorizontalSlider
 
-include("components/text.jl")
+include("components/text/Text.jl")
 export Text, TextStyle
 
-include("text_editor/editor_action.jl")
-include("text_editor/editor_state.jl")
-include("text_editor/utilities.jl")
-include("text_editor/draw.jl")
+include("components/text_editor/TextBox.jl")
+export TextBox, TextBoxStyle
 export EditorState
 
-include("components/text_box.jl")
-export TextBox, TextBoxStyle
-
-include("components/code_editor.jl")
+include("components/text_editor/CodeEditor.jl")
 export CodeEditor, CodeEditorStyle
 
-include("components/image.jl")
+include("components/image/Image.jl")
 export Image
+export clear_texture_cache!
 
-include("components/split_container.jl")
+include("components/SplitContainer.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 
 include("composite_components/buttons.jl")
 export TextButton, IconButton
 
-include("composite_components/number_field.jl")
+include("composite_components/NumberField.jl")
 export NumberField, NumberFieldState, NumberFieldOptions, NumberFieldStyle
 
-include("composite_components/dropdown.jl")
+include("composite_components/Dropdown.jl")
 export Dropdown, DropdownState, DropdownStyle
 
-include("components/atlas_debug.jl")
+include("components/AtlasDebug.jl")
 
-
-include("plot/rec2f.jl")
-include("plot/shaders.jl")
-include("plot/line_draw.jl")
-include("plot/marker_draw.jl")
-include("plot/plot_style.jl")
-include("composite_components/plot.jl")
+include("composite_components/plot/plot.jl")
 export Plot, PlotView, PlotState, PlotStyle
 export LinePlot, ScatterPlot, StemPlot  # Convenience constructors
 export LinePlotElement, ScatterPlotElement, StemPlotElement, ImagePlotElement
