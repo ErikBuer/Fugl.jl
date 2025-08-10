@@ -151,7 +151,7 @@ function Plot(
     # If state has default bounds and auto_scale is true, calculate bounds from elements
     if state.bounds == Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0) && state.auto_scale && !isempty(elements)
         calculated_bounds = calculate_bounds_from_elements(Vector{AbstractPlotElement}(elements))
-        state = PlotState(calculated_bounds, state.auto_scale, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max)
+        state = PlotState(calculated_bounds, state.auto_scale, state.initial_x_min, state.initial_x_max, state.initial_y_min, state.initial_y_max, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max)
     end
     return PlotView(elements, state, style, on_state_change)
 end

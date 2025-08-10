@@ -1,6 +1,11 @@
 struct PlotState
     bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
     auto_scale::Bool
+    # Initial view bounds (for reset functionality and fixed bounds)
+    initial_x_min::Union{Float32,Nothing}
+    initial_x_max::Union{Float32,Nothing}
+    initial_y_min::Union{Float32,Nothing}
+    initial_y_max::Union{Float32,Nothing}
     # Current zoom/view bounds (for user-controlled zooming)
     current_x_min::Union{Float32,Nothing}
     current_x_max::Union{Float32,Nothing}
@@ -12,14 +17,31 @@ end
 Default constructor for PlotState with sensible defaults
 """
 function PlotState()
-    return PlotState(Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0), true, nothing, nothing, nothing, nothing)
+    return PlotState(Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0), true, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
 end
 
 """
 Create PlotState with explicit bounds
 """
 function PlotState(bounds::Rect2f; auto_scale::Bool=false)
-    return PlotState(bounds, auto_scale, nothing, nothing, nothing, nothing)
+    return PlotState(bounds, auto_scale, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
+end
+
+"""
+Create PlotState with initial view bounds (for fixed bounds or reset functionality)
+"""
+function PlotState(;
+    bounds::Union{Rect2f,Nothing}=nothing,
+    auto_scale::Bool=true,
+    initial_x_min::Union{Float32,Nothing}=nothing,
+    initial_x_max::Union{Float32,Nothing}=nothing,
+    initial_y_min::Union{Float32,Nothing}=nothing,
+    initial_y_max::Union{Float32,Nothing}=nothing
+)
+    if bounds === nothing
+        bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
+    end
+    return PlotState(bounds, auto_scale, initial_x_min, initial_x_max, initial_y_min, initial_y_max, nothing, nothing, nothing, nothing)
 end
 
 """
@@ -79,11 +101,11 @@ end
 Get effective bounds for plotting (considering zoom state)
 """
 function get_effective_bounds(state::PlotState, style::PlotStyle)
-    # Use current zoom bounds if set, otherwise fall back to initial bounds from style, then auto-calculated bounds
-    x_min = something(state.current_x_min, style.initial_x_min, state.bounds.x)
-    x_max = something(state.current_x_max, style.initial_x_max, state.bounds.x + state.bounds.width)
-    y_min = something(state.current_y_min, style.initial_y_min, state.bounds.y)
-    y_max = something(state.current_y_max, style.initial_y_max, state.bounds.y + state.bounds.height)
+    # Use current zoom bounds if set, otherwise fall back to initial bounds from state, then auto-calculated bounds
+    x_min = something(state.current_x_min, state.initial_x_min, state.bounds.x)
+    x_max = something(state.current_x_max, state.initial_x_max, state.bounds.x + state.bounds.width)
+    y_min = something(state.current_y_min, state.initial_y_min, state.bounds.y)
+    y_max = something(state.current_y_max, state.initial_y_max, state.bounds.y + state.bounds.height)
 
     return Rect2f(x_min, y_min, x_max - x_min, y_max - y_min)
 end
