@@ -18,8 +18,8 @@ function plot_zoom_demo()
     )
     ]
 
-    # Create plot state for zoom control
-    plot_state = Ref(PlotState(elements))
+    # Create plot state for zoom control - now much simpler!
+    plot_state = Ref(PlotState())
 
     # Define initial view bounds in the style (for reset functionality)
     plot_style = PlotStyle(
@@ -40,8 +40,8 @@ function plot_zoom_demo()
                 Container(
                     Plot(
                         elements,               # Elements are passed directly
-                        plot_state[],          # State only contains bounds and zoom
                         plot_style,
+                        plot_state[],           # State only contains bounds and zoom
                         (new_state) -> plot_state[] = new_state
                     )
                 ),

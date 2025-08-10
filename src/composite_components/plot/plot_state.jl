@@ -9,63 +9,10 @@ struct PlotState
 end
 
 """
-Convenience constructor for PlotState with auto-calculated bounds from elements
+Default constructor for PlotState with sensible defaults
 """
-function PlotState(
-    elements::Vector{AbstractPlotElement};
-    bounds::Union{Rect2f,Nothing}=nothing,
-    auto_scale::Bool=true
-)
-    # Auto-calculate bounds if not provided and auto_scale is true
-    if bounds === nothing && auto_scale && !isempty(elements)
-        # Find overall bounds across all elements
-        all_x = Float32[]
-        all_y = Float32[]
-
-        for element in elements
-            min_x, max_x, min_y, max_y = get_element_bounds(element)
-            push!(all_x, min_x, max_x)
-            push!(all_y, min_y, max_y)
-        end
-
-        if !isempty(all_x) && !isempty(all_y)
-            min_x, max_x = extrema(all_x)
-            min_y, max_y = extrema(all_y)
-
-            # Calculate ranges
-            x_range = max_x - min_x
-            y_range = max_y - min_y
-
-            # Handle constant data by providing minimum range
-            min_range = 1.0f0
-            if x_range < min_range
-                x_range = min_range
-                x_center = (max_x + min_x) / 2
-                min_x = x_center - x_range / 2
-                max_x = x_center + x_range / 2
-            end
-
-            if y_range < min_range
-                y_range = min_range
-                y_center = (max_y + min_y) / 2
-                min_y = y_center - y_range / 2
-                max_y = y_center + y_range / 2
-            end
-
-            calculated_bounds = Rect2f(
-                min_x,
-                min_y,
-                (max_x - min_x),
-                (max_y - min_y)
-            )
-        else
-            calculated_bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
-        end
-    else
-        calculated_bounds = bounds !== nothing ? bounds : Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)
-    end
-
-    return PlotState(calculated_bounds, auto_scale, nothing, nothing, nothing, nothing)
+function PlotState()
+    return PlotState(Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0), true, nothing, nothing, nothing, nothing)
 end
 
 """
@@ -76,31 +23,26 @@ function PlotState(bounds::Rect2f; auto_scale::Bool=false)
 end
 
 """
-Convenience constructors for backward compatibility and single elements
+Calculate bounds from a vector of plot elements
 """
-function PlotState(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    bounds::Union{Rect2f,Nothing}=nothing,
-    auto_scale::Bool=true,
-    plot_type::PlotType=LINE_PLOT
-)
-    element = if plot_type == LINE_PLOT
-        LinePlotElement(y_data; x_data=x_data)
-    elseif plot_type == SCATTER_PLOT
-        ScatterPlotElement(y_data; x_data=x_data)
-    elseif plot_type == STEM_PLOT
-        StemPlotElement(y_data; x_data=x_data)
-    else
-        LinePlotElement(y_data; x_data=x_data)  # Default to line plot
+function calculate_bounds_from_elements(elements::Vector{AbstractPlotElement})::Rect2f
+    if isempty(elements)
+        return Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds for empty elements
     end
 
-    elements = [element]
+    # Find overall bounds across all elements
+    all_x = Float32[]
+    all_y = Float32[]
 
-    # Use direct constructor to avoid kwcall issues
-    if bounds === nothing && auto_scale && !isempty(elements)
-        # Find bounds from the single element
+    for element in elements
         min_x, max_x, min_y, max_y = get_element_bounds(element)
+        push!(all_x, min_x, max_x)
+        push!(all_y, min_y, max_y)
+    end
+
+    if !isempty(all_x) && !isempty(all_y)
+        min_x, max_x = extrema(all_x)
+        min_y, max_y = extrema(all_y)
 
         # Calculate ranges
         x_range = max_x - min_x
@@ -122,19 +64,15 @@ function PlotState(
             max_y = y_center + y_range / 2
         end
 
-        calculated_bounds = Rect2f(
+        return Rect2f(
             min_x,
             min_y,
             (max_x - min_x),
             (max_y - min_y)
         )
-    elseif bounds !== nothing
-        calculated_bounds = bounds
     else
-        calculated_bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
+        return Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
     end
-
-    return PlotState(elements, calculated_bounds, auto_scale, nothing, nothing, nothing, nothing)
 end
 
 """

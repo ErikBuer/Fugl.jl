@@ -144,78 +144,24 @@ Plot component.
 """
 function Plot(
     elements::Vector{<:AbstractPlotElement},
-    state::Union{PlotState,Nothing},
-    style::PlotStyle,
-    on_state_change::Function
+    style::PlotStyle=PlotStyle(),
+    state::PlotState=PlotState(),
+    on_state_change::Function=(new_state) -> nothing
 )::PlotView
-    if state === nothing
-        # Auto-calculate bounds from elements if not provided
-        if !isempty(elements)
-            # Find overall bounds across all elements
-            all_x = Float32[]
-            all_y = Float32[]
-
-            for element in elements
-                min_x, max_x, min_y, max_y = get_element_bounds(element)
-                push!(all_x, min_x, max_x)
-                push!(all_y, min_y, max_y)
-            end
-
-            if !isempty(all_x) && !isempty(all_y)
-                min_x, max_x = extrema(all_x)
-                min_y, max_y = extrema(all_y)
-
-                # Calculate ranges
-                x_range = max_x - min_x
-                y_range = max_y - min_y
-
-                # Handle constant data by providing minimum range
-                min_range = 1.0f0
-                if x_range < min_range
-                    x_range = min_range
-                    x_center = (max_x + min_x) / 2
-                    min_x = x_center - x_range / 2
-                    max_x = x_center + x_range / 2
-                end
-
-                if y_range < min_range
-                    y_range = min_range
-                    y_center = (max_y + min_y) / 2
-                    min_y = y_center - y_range / 2
-                    max_y = y_center + y_range / 2
-                end
-
-                bounds = Rect2f(
-                    min_x,
-                    min_y,
-                    (max_x - min_x),
-                    (max_y - min_y)
-                )
-            else
-                bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
-            end
-        else
-            bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds for empty elements
-        end
-
-        state = PlotState(bounds, true, nothing, nothing, nothing, nothing)
+    # If state has default bounds and auto_scale is true, calculate bounds from elements
+    if state.bounds == Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0) && state.auto_scale && !isempty(elements)
+        calculated_bounds = calculate_bounds_from_elements(Vector{AbstractPlotElement}(elements))
+        state = PlotState(calculated_bounds, state.auto_scale, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max)
     end
     return PlotView(elements, state, style, on_state_change)
 end
-
-# Convenience overloads
-Plot(elements::Vector{<:AbstractPlotElement}) = Plot(elements, nothing, PlotStyle(), (new_state) -> nothing)
-Plot(elements::Vector{<:AbstractPlotElement}, style::PlotStyle) = Plot(elements, nothing, style, (new_state) -> nothing)
-Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState) = Plot(elements, state, PlotStyle(), (new_state) -> nothing)
-Plot(elements::Vector{<:AbstractPlotElement}, state::PlotState, style::PlotStyle) = Plot(elements, state, style, (new_state) -> nothing)
-
 # Convenience constructors for specific plot types
 function LinePlot(
     elements::Vector{LinePlotElement};
     style::PlotStyle=PlotStyle(),
     on_state_change::Function=(new_state) -> nothing
 )::PlotView
-    return Plot(Vector{AbstractPlotElement}(elements), nothing, style, on_state_change)
+    return Plot(Vector{AbstractPlotElement}(elements), PlotState(), style, on_state_change)
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}

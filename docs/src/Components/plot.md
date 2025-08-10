@@ -236,7 +236,6 @@ function MyApp()
     x_data = collect(0.0:0.2:10.0)
     y_data = sin.(x_data)
 
-    # Create plot elements (stored in view, not state)
     elements = AbstractPlotElement[
         LinePlotElement(y_data; x_data=x_data,
             color=Vec4{Float32}(0.8, 0.2, 0.6, 1.0),
@@ -245,8 +244,8 @@ function MyApp()
             label="sine wave")
     ]
 
-    # Create plot state reference for zoom control only (much simpler!)
-    plot_state = Ref(PlotState(elements))
+    # Create simple plot state for zoom control
+    plot_state = Ref(PlotState())
 
     # Define plot style with initial view
     plot_style = PlotStyle(
@@ -265,12 +264,12 @@ function MyApp()
     IntrinsicColumn([
         IntrinsicHeight(Container(Text("State Management Example"))),
         
-        # Plot with user-managed state - elements passed directly, state only for zoom
+        # Plot with user-managed state - elements passed directly, bounds auto-calculated
         Container(
             Plot(
-                elements,              # Elements are in the view now
-                plot_state[],         # State only contains bounds and zoom info
+                elements,
                 plot_style,
+                plot_state[],
                 (new_state) -> plot_state[] = new_state
             )
         ),
@@ -291,7 +290,7 @@ function MyApp()
                         new_y_min = y_center - y_range / 2
                         new_y_max = y_center + y_range / 2
                         
-                        # Create new state with updated bounds (no elements needed!)
+                        # Create new state with updated bounds (clean API - no elements!)
                         plot_state[] = PlotState(
                             current_state.bounds,
                             current_state.auto_scale,
