@@ -21,10 +21,6 @@ export mouse_state, mouse_button_callback, InputState
 include("abstract_view.jl")
 export AbstractView, SizedView
 
-include("image/utilities.jl")
-include("image/draw.jl")
-export clear_texture_cache!
-
 include("gui_component/utilities.jl")
 include("gui_component/draw.jl")
 

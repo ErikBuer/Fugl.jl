@@ -49,8 +49,10 @@ export EditorState
 include("components/text_editor/code_editor.jl")
 export CodeEditor, CodeEditorStyle
 
-include("components/image.jl")
+
+include("components/image/image.jl")
 export Image
+export clear_texture_cache!
 
 include("components/split_container.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
