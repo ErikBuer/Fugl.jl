@@ -72,13 +72,7 @@ export Dropdown, DropdownState, DropdownStyle
 include("components/atlas_debug.jl")
 
 
-include("plot/rec2f.jl")
-include("plot/line_style.jl")
-include("plot/plot_style.jl")
-include("plot/shaders.jl")
-include("plot/line_draw.jl")
-include("plot/marker_draw.jl")
-include("composite_components/plot.jl")
+include("composite_components/plot/plot.jl")
 export Plot, PlotView, PlotState, PlotStyle
 export LinePlot, ScatterPlot, StemPlot  # Convenience constructors
 export LinePlotElement, ScatterPlotElement, StemPlotElement, ImagePlotElement

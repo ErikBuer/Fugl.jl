@@ -1,5 +1,13 @@
 abstract type AbstractPlotElement end
 
+include("rec2f.jl")
+include("line_style.jl")
+include("plot_style.jl")
+include("shaders.jl")
+include("line_draw.jl")
+include("marker_draw.jl")
+
+
 struct PlotState
     elements::Vector{AbstractPlotElement}
     bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
