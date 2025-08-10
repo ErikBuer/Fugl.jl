@@ -42,16 +42,11 @@ export HorizontalSlider
 include("components/text/text.jl")
 export Text, TextStyle
 
-include("text_editor/editor_action.jl")
-include("text_editor/editor_state.jl")
-include("text_editor/utilities.jl")
-include("text_editor/draw.jl")
+include("components/text_editor/text_box.jl")
+export TextBox, TextBoxStyle
 export EditorState
 
-include("components/text_box.jl")
-export TextBox, TextBoxStyle
-
-include("components/code_editor.jl")
+include("components/text_editor/code_editor.jl")
 export CodeEditor, CodeEditorStyle
 
 include("components/image.jl")

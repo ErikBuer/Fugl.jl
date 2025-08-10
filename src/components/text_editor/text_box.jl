@@ -1,3 +1,8 @@
+include("editor_action.jl")
+include("editor_state.jl")
+include("utilities.jl")
+include("draw.jl")
+
 mutable struct TextBoxStyle
     text_style::TextStyle
     background_color_focused::Vec4{<:AbstractFloat}
