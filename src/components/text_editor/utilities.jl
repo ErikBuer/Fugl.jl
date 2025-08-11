@@ -449,6 +449,8 @@ function key_event_to_action(key_event::KeyEvent)
         return ClipboardAction(:cut)
     elseif key == Int(GLFW.KEY_V) && cmd_held
         return ClipboardAction(:paste)
+    elseif key == Int(GLFW.KEY_A) && cmd_held
+        return SelectAll()
     end
 
     return nothing  # Unknown key event
@@ -584,4 +586,83 @@ function mouse_to_cursor_position(
     column = min(column, length(chars) + 1)
 
     return CursorPosition(line_number, column)
+end
+
+"""
+Check if there is an active text selection.
+"""
+function has_selection(state::EditorState)::Bool
+    return state.selection_start !== nothing && state.selection_end !== nothing
+end
+
+"""
+Get the selection range in a normalized form (start <= end).
+Returns (start_pos, end_pos) or (nothing, nothing) if no selection.
+"""
+function get_selection_range(state::EditorState)::Tuple{Union{CursorPosition,Nothing},Union{CursorPosition,Nothing}}
+    if !has_selection(state)
+        return (nothing, nothing)
+    end
+
+    start_pos = state.selection_start
+    end_pos = state.selection_end
+
+    # Normalize selection so start <= end
+    if compare_cursor_positions(start_pos, end_pos) > 0
+        start_pos, end_pos = end_pos, start_pos
+    end
+
+    return (start_pos, end_pos)
+end
+
+"""
+Compare two cursor positions. Returns:
+- -1 if pos1 < pos2
+- 0 if pos1 == pos2  
+- 1 if pos1 > pos2
+"""
+function compare_cursor_positions(pos1::CursorPosition, pos2::CursorPosition)::Int
+    if pos1.line < pos2.line
+        return -1
+    elseif pos1.line > pos2.line
+        return 1
+    else  # Same line
+        if pos1.column < pos2.column
+            return -1
+        elseif pos1.column > pos2.column
+            return 1
+        else
+            return 0
+        end
+    end
+end
+
+"""
+Clear the text selection.
+"""
+function clear_selection(state::EditorState)::EditorState
+    return EditorState(
+        state.text,
+        state.cursor,
+        state.is_focused,
+        nothing,  # Clear selection
+        nothing,  # Clear selection
+        state.cached_lines,
+        state.text_hash
+    )
+end
+
+"""
+Set a text selection from start to end position.
+"""
+function set_selection(state::EditorState, start_pos::CursorPosition, end_pos::CursorPosition)::EditorState
+    return EditorState(
+        state.text,
+        state.cursor,
+        state.is_focused,
+        start_pos,
+        end_pos,
+        state.cached_lines,
+        state.text_hash
+    )
 end

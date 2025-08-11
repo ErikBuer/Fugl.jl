@@ -30,6 +30,8 @@ State for the code editor containing text, cursor position, and cached tokenizat
 - `text`: The full text content
 - `cursor`: Current cursor position
 - `is_focused`: Whether the editor is focused
+- `selection_start`: Start position of text selection (if any)
+- `selection_end`: End position of text selection (if any)
 - `cached_lines`: Cache of tokenized line data
 - `text_hash`: Hash of the text to detect changes
 """
@@ -37,6 +39,8 @@ struct EditorState
     text::String
     cursor::CursorPosition
     is_focused::Bool
+    selection_start::Union{CursorPosition,Nothing}
+    selection_end::Union{CursorPosition,Nothing}
     cached_lines::Dict{Int,LineTokenData}
     text_hash::UInt64
 end
@@ -49,6 +53,8 @@ function EditorState(text::String="")
         text,
         CursorPosition(1, 1),  # Start at beginning
         false,
+        nothing,  # No selection initially
+        nothing,  # No selection initially
         Dict{Int,LineTokenData}(),
         hash(text)
     )
@@ -62,6 +68,8 @@ function EditorState(old_state::EditorState, new_text::String)
         new_text,
         old_state.cursor,
         old_state.is_focused,
+        nothing,  # Clear selection when text changes
+        nothing,  # Clear selection when text changes
         Dict{Int,LineTokenData}(),  # Fresh cache for new text
         hash(new_text)
     )
@@ -83,9 +91,30 @@ function EditorState(old_state::EditorState; is_focused::Bool)
         old_state.text,
         old_state.cursor,
         is_focused,
+        old_state.selection_start,  # Preserve selection
+        old_state.selection_end,    # Preserve selection
         cached_lines,
         old_state.text_hash
     )
+end
+
+"""
+Create a new EditorState with explicit parameters for all fields.
+This is the default struct constructor - it's automatically generated.
+"""
+# No need for explicit constructor - Julia provides it automatically
+
+"""
+Create a new EditorState with old 5-parameter signature (for backward compatibility).
+"""
+function EditorState(
+    text::String,
+    cursor::CursorPosition,
+    is_focused::Bool,
+    cached_lines::Dict{Int,LineTokenData},
+    text_hash::UInt64
+)
+    return EditorState(text, cursor, is_focused, nothing, nothing, cached_lines, text_hash)
 end
 
 """
@@ -145,6 +174,8 @@ function apply_editor_action(state::EditorState, action::EditorAction)
         return apply_delete_text(state, action)
     elseif action isa ClipboardAction
         return apply_clipboard_action(state, action)
+    elseif action isa SelectAll
+        return apply_select_all(state, action)
     else
         return state  # Unknown action, return unchanged state
     end
@@ -214,6 +245,8 @@ function apply_insert_text(state::EditorState, action::InsertText)
             new_text,
             new_cursor,
             state.is_focused,
+            nothing,  # Clear selection when text changes
+            nothing,
             Dict{Int,LineTokenData}(),  # Clear cache
             hash(new_text)
         )
@@ -225,6 +258,8 @@ function apply_insert_text(state::EditorState, action::InsertText)
         new_text,
         new_cursor,
         state.is_focused,
+        nothing,  # Clear selection when text changes
+        nothing,
         Dict{Int,LineTokenData}(),  # Clear cache
         hash(new_text)
     )
@@ -232,7 +267,7 @@ end
 
 """
 Apply cursor movement action.
-Returns a new EditorState with the cursor moved.
+Returns a new EditorState with the cursor moved and selection updated if needed.
 """
 function apply_move_cursor(state::EditorState, action::MoveCursor)
     lines = get_lines(state)
@@ -285,14 +320,45 @@ function apply_move_cursor(state::EditorState, action::MoveCursor)
                 CursorPosition(1, 1)
             end
         end
+    elseif action.direction == :home
+        CursorPosition(cursor.line, 1)
+    elseif action.direction == :end
+        if cursor.line <= length(lines)
+            current_line = lines[cursor.line]
+            CursorPosition(cursor.line, length(collect(current_line)) + 1)
+        else
+            cursor
+        end
     else
         cursor  # Unknown direction
+    end
+
+    # Handle text selection
+    new_selection_start = state.selection_start
+    new_selection_end = state.selection_end
+
+    if action.select
+        # Extend or create selection
+        if state.selection_start === nothing
+            # Start new selection from original cursor position
+            new_selection_start = cursor
+            new_selection_end = new_cursor
+        else
+            # Extend existing selection - keep selection_start, update selection_end
+            new_selection_end = new_cursor
+        end
+    else
+        # Clear selection
+        new_selection_start = nothing
+        new_selection_end = nothing
     end
 
     return EditorState(
         state.text,
         new_cursor,
         state.is_focused,
+        new_selection_start,
+        new_selection_end,
         state.cached_lines,  # Keep cache since text didn't change
         state.text_hash
     )
@@ -351,6 +417,8 @@ function apply_delete_text(state::EditorState, action::DeleteText)
         new_text,
         new_cursor,
         state.is_focused,
+        nothing,  # Clear selection when text changes
+        nothing,
         Dict{Int,LineTokenData}(),  # Clear cache since text changed
         hash(new_text)
     )
@@ -364,4 +432,31 @@ function apply_clipboard_action(state::EditorState, action::ClipboardAction)
     # TODO: Implement clipboard operations
     # For now, just return the unchanged state
     return state
+end
+
+"""
+Apply select all action.
+Returns a new EditorState with all text selected.
+"""
+function apply_select_all(state::EditorState, action::SelectAll)
+    lines = get_lines(state)
+    if isempty(lines) || (length(lines) == 1 && isempty(lines[1]))
+        # No text to select
+        return state
+    end
+
+    # Set selection from start to end of text
+    selection_start = CursorPosition(1, 1)
+    last_line = lines[end]
+    selection_end = CursorPosition(length(lines), length(collect(last_line)) + 1)
+
+    return EditorState(
+        state.text,
+        selection_end,  # Move cursor to end
+        state.is_focused,
+        selection_start,
+        selection_end,
+        state.cached_lines,
+        state.text_hash
+    )
 end

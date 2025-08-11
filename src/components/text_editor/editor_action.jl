@@ -16,3 +16,6 @@ end
 struct ClipboardAction <: EditorAction
     action::Symbol     # :copy, :cut, :paste
 end
+
+struct SelectAll <: EditorAction
+end

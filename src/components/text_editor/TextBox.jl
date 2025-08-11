@@ -88,6 +88,25 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
             break  # Don't render lines outside the visible area
         end
 
+        # Draw selection background if there's a selection
+        if has_selection(view.state)
+            selection_start, selection_end = get_selection_range(view.state)
+            if selection_start !== nothing && selection_end !== nothing
+                draw_selection_background(
+                    line,
+                    line_num,
+                    selection_start,
+                    selection_end,
+                    font,
+                    x + padding,
+                    current_y,
+                    size_px,
+                    projection_matrix,
+                    Vec4{Float32}(0.3f0, 0.5f0, 0.8f0, 0.3f0)  # Blue selection color
+                )
+            end
+        end
+
         # Render the line as plain text
         draw_text(
             font,                # Font face
@@ -143,11 +162,27 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
 
         if !view.state.is_focused
             # Focus change and cursor positioning - create new state with focus=true and new cursor position
-            new_state = EditorState(view.state.text, new_cursor_pos, true, view.state.cached_lines, view.state.text_hash)
+            new_state = EditorState(
+                view.state.text,
+                new_cursor_pos,
+                true,
+                nothing,  # Clear selection on click
+                nothing,
+                view.state.cached_lines,
+                view.state.text_hash
+            )
             view.on_state_change(new_state)
         else
-            # Just cursor positioning - update cursor position
-            new_state = EditorState(view.state.text, new_cursor_pos, view.state.is_focused, view.state.cached_lines, view.state.text_hash)
+            # Just cursor positioning - update cursor position and clear selection
+            new_state = EditorState(
+                view.state.text,
+                new_cursor_pos,
+                view.state.is_focused,
+                nothing,  # Clear selection on click
+                nothing,
+                view.state.cached_lines,
+                view.state.text_hash
+            )
             view.on_state_change(new_state)
         end
         return
