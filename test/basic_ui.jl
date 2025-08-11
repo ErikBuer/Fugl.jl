@@ -9,33 +9,35 @@ function main()
     # External state for the TextBox
     text_box_state = Ref(EditorState("Enter text here..."))
 
+    image_path = "test/images/logo.png"
+
     function MyApp()
         Row([
-            Container(Text("Hello World")),
-            Container(
-                if showImage[]
-                    Image("test/images/logo.png")
-                else
-                    Text("Click to show image")
-                end,
-                on_click=() -> (showImage[] = !showImage[])
-            ),
-            AlignHorizontal(FixedSize(IconButton("test/images/logo.png"; on_click=() -> (showImage[] = !showImage[])), 100f0, 100f0), :center),
-            IntrinsicColumn([
-                    Container(),
-                    Container(HorizontalSlider(slider_value[], 1.0f0, 0.0f0; on_change=(value) -> (slider_value[] = value))),
-                    IntrinsicHeight(TextButton("SomeText", on_click=() -> println("Clicked"))),
-                    Container(
-                        TextBox(
-                            text_box_state[];
-                            on_change=(new_state) -> text_box_state[] = new_state,
-                            on_focus_change=(focused) -> text_box_state[] = EditorState(text_box_state[]; is_focused=focused)
+                Container(Text("Hello World")),
+                Container(
+                    if showImage[]
+                        Image(image_path)
+                    else
+                        Text("Click to show image")
+                    end,
+                    on_click=() -> (showImage[] = !showImage[])
+                ),
+                AlignHorizontal(FixedSize(IconButton(image_path; on_click=() -> (showImage[] = !showImage[])), 100f0, 100f0), :center),
+                IntrinsicColumn([
+                        Container(),
+                        Container(HorizontalSlider(slider_value[], 0.0f0, 1.0f0; on_change=(value) -> (slider_value[] = value))),
+                        IntrinsicHeight(TextButton("SomeText", on_click=() -> println("Clicked"))),
+                        Container(
+                            TextBox(
+                                text_box_state[];
+                                on_state_change=(new_state) -> text_box_state[] = new_state,
+                                on_change=(new_text) -> println("Text changed to: ", new_text[1:min(20, length(new_text))], "...")
+                            )
                         )
-                    )
-                ],
-                padding=0
-            )
-        ])
+                    ],
+                    spacing=0, padding=0
+                )
+            ], spacing=0, padding=0)
     end
 
     # Run the GUI
