@@ -4,6 +4,7 @@ using ModernGL, GLAbstraction, GLFW # OpenGL dependencies
 const GLA = GLAbstraction
 using FreeTypeAbstraction # Font rendering dependencies
 using GeometryBasics
+using IndirectArrays
 export Vec4f, Vec4
 
 const OPENGL_LOCK = ReentrantLock()
