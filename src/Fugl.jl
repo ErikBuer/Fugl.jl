@@ -15,7 +15,7 @@ include("shaders.jl")
 export initialize_shaders
 
 include("input_state.jl")
-export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, char_callback, KeyEvent
+export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, mouse_position_callback, char_callback, KeyEvent
 export ButtonState, IsPressed, IsReleased
 export mouse_state, mouse_button_callback, InputState
 
@@ -58,10 +58,12 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
     # Store callbacks in local variables to prevent GC
     mouse_callback = (gl_window, button, action, mods) -> mouse_button_callback(gl_window, button, action, mods, mouse_state)
+    mouse_pos_callback = (gl_window, xpos, ypos) -> mouse_position_callback(gl_window, xpos, ypos, mouse_state)
     key_callback_func = (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state)
     char_callback_func = (gl_window, codepoint) -> char_callback(gl_window, codepoint, mouse_state)
 
     GLFW.SetMouseButtonCallback(gl_window, mouse_callback)
+    GLFW.SetCursorPosCallback(gl_window, mouse_pos_callback)
     GLFW.SetKeyCallback(gl_window, key_callback_func)
     GLFW.SetCharCallback(gl_window, char_callback_func)
 

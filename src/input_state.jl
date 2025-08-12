@@ -39,6 +39,12 @@ mutable struct InputState
     last_click_position::Tuple{Float64,Float64}  # Position of the last click
     key_buffer::Vector{Char}                     # Buffer for character input
     key_events::Vector{KeyEvent}                 # Buffer for key events
+    # Mouse drag tracking
+    drag_start_position::Union{Tuple{Float64,Float64},Nothing}  # Where drag started
+    is_dragging::Bool                            # Whether currently dragging
+    # Double-click tracking
+    double_click_threshold::Float64              # Max time between clicks for double-click (seconds)
+    was_double_clicked::Dict{MouseButton,Bool}   # Tracks if the button was double-clicked
 end
 
 function InputState()
@@ -50,7 +56,11 @@ function InputState()
         0.0,
         (0.0, 0.0),
         Char[],     # Initialize an empty key buffer
-        KeyEvent[]  # Initialize empty key events buffer
+        KeyEvent[], # Initialize empty key events buffer
+        nothing,    # No drag start position initially
+        false,      # Not dragging initially
+        0.5,        # 500ms double-click threshold
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false)  # No double-clicks initially
     )
 end
 
@@ -65,11 +75,64 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
         return  # Ignore unsupported buttons
     end
 
+    current_time = time()
+    current_pos = (mouse_state.x, mouse_state.y)
+
     if action == GLFW.PRESS
         mouse_state.button_state[mapped_button] = IsPressed
+
+        # Start potential drag
+        if mapped_button == LeftButton
+            mouse_state.drag_start_position = current_pos
+            mouse_state.is_dragging = false  # Not dragging yet, just pressed
+        end
+
     elseif action == GLFW.RELEASE
         mouse_state.button_state[mapped_button] = IsReleased
-        mouse_state.was_clicked[mapped_button] = true  # Mark as clicked
+
+        # Check for double-click
+        time_since_last_click = current_time - mouse_state.last_click_time
+        distance_from_last_click = sqrt((current_pos[1] - mouse_state.last_click_position[1])^2 +
+                                        (current_pos[2] - mouse_state.last_click_position[2])^2)
+
+        if (time_since_last_click <= mouse_state.double_click_threshold &&
+            distance_from_last_click <= 5.0)  # 5 pixel tolerance
+            mouse_state.was_double_clicked[mapped_button] = true
+        else
+            mouse_state.was_clicked[mapped_button] = true
+        end
+
+        # Update last click info
+        mouse_state.last_click_time = current_time
+        mouse_state.last_click_position = current_pos
+
+        # End drag
+        if mapped_button == LeftButton
+            mouse_state.drag_start_position = nothing
+            mouse_state.is_dragging = false
+        end
+    end
+end
+
+"""
+Mouse position callback to track mouse movement and detect dragging
+"""
+function mouse_position_callback(gl_window, xpos, ypos, mouse_state::InputState)
+    mouse_state.x = xpos
+    mouse_state.y = ypos
+
+    # Check if we should start dragging
+    if (mouse_state.button_state[LeftButton] == IsPressed &&
+        mouse_state.drag_start_position !== nothing &&
+        !mouse_state.is_dragging)
+
+        start_pos = mouse_state.drag_start_position
+        distance = sqrt((xpos - start_pos[1])^2 + (ypos - start_pos[2])^2)
+
+        # Start dragging if moved more than threshold
+        if distance > 3.0  # 3 pixel threshold
+            mouse_state.is_dragging = true
+        end
     end
 end
 
@@ -125,11 +188,16 @@ function collect_state!(mouse_state::InputState)::InputState
         mouse_state.last_click_position,
         deepcopy(mouse_state.key_buffer),
         deepcopy(mouse_state.key_events),
+        mouse_state.drag_start_position,
+        mouse_state.is_dragging,
+        mouse_state.double_click_threshold,
+        deepcopy(mouse_state.was_double_clicked)
     )
 
-    # Reset `was_clicked` in the original state
+    # Reset `was_clicked` and `was_double_clicked` in the original state
     for button in keys(mouse_state.was_clicked)
         mouse_state.was_clicked[button] = false
+        mouse_state.was_double_clicked[button] = false
     end
 
     return locked_state
