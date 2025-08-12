@@ -4,7 +4,7 @@ struct LineBatch
     points::Vector{Point2f}        # All line points
     colors::Vector{Vec4{Float32}}   # Color per point (for gradients)
     widths::Vector{Float32}        # Width per point (for variable thickness)
-    line_styles::Vector{Int32}     # Line style per point (enum as Int32)
+    line_styles::Vector{Float32}   # Line style per point (enum as Float32). Int somehow doesn't work on all targets.
     line_progresses::Vector{Float32} # Cumulative distance along line for dash patterns
     segment_starts::Vector{Int32}  # Start indices for each line segment
     segment_lengths::Vector{Int32} # Length of each line segment
@@ -15,7 +15,7 @@ function LineBatch()
         Point2f[],
         Vec4{Float32}[],
         Float32[],
-        Int32[],
+        Float32[],
         Float32[],
         Int32[],
         Int32[]
@@ -53,12 +53,13 @@ function add_line!(batch::LineBatch, points::Vector{Point2f}, color::Vec4{Float3
     append!(batch.points, points)
 
     # Add color, width, line style, and progress for each point
-    # Convert enum to Int32 for shader
-    line_style_i32 = Int32(line_style)
+    # Convert enum to Float32 for shader
+    # Int somehow doesn't work on all targets.
+    line_style_f32 = Float32(line_style)
     for i in 1:length(points)
         push!(batch.colors, color)
         push!(batch.widths, width)
-        push!(batch.line_styles, line_style_i32)
+        push!(batch.line_styles, line_style_f32)
         push!(batch.line_progresses, line_progress[i])
     end
 
@@ -118,7 +119,7 @@ function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32};
     all_widths = Vector{Float32}()
     all_colors = Vector{Vec4{Float32}}()
     all_vertex_types = Vector{Float32}()
-    all_line_styles = Vector{Int32}()
+    all_line_styles = Vector{Float32}()
     all_line_progresses = Vector{Float32}()
 
     # Process all segments in one go (more efficient)
@@ -134,8 +135,8 @@ function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32};
         line_points = batch.points[start_idx:end_idx]
         line_color = batch.colors[start_idx]
         line_width = batch.widths[start_idx]
-        line_style_i32 = batch.line_styles[start_idx]
-        line_style = LineStyle(line_style_i32)  # Convert back to enum for function call
+        line_style_f32 = batch.line_styles[start_idx]
+        line_style = LineStyle(Int(line_style_f32))  # Convert back to enum for function call
         line_progresses = batch.line_progresses[start_idx:end_idx]
 
         # Generate efficient line geometry (minimal triangles)
@@ -186,15 +187,16 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
     widths = Vector{Float32}()
     colors = Vector{Vec4{Float32}}()
     vertex_types = Vector{Float32}()
-    line_styles = Vector{Int32}()
+    line_styles = Vector{Float32}()
     line_progresses_out = Vector{Float32}()
 
     if length(points) < 2 || length(line_progresses) != length(points)
         return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out
     end
 
-    # Convert enum to Int32 for shader compatibility
-    line_style_i32 = Int32(line_style)
+    # Convert enum to Float32 for shader compatibility
+    # Int somehow doesn't work on all targets.
+    line_style_f32 = Float32(line_style)
 
     # Pre-allocate for efficiency (2 triangles = 6 vertices per segment)
     num_segments = length(points) - 1
@@ -223,7 +225,7 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
         append!(widths, [width, width, width])
         append!(colors, [color, color, color])
         append!(vertex_types, [0.0f0, 1.0f0, 2.0f0])  # bottom-left, bottom-right, top-left
-        append!(line_styles, [line_style_i32, line_style_i32, line_style_i32])
+        append!(line_styles, [line_style_f32, line_style_f32, line_style_f32])
         append!(line_progresses_out, [start_progress, end_progress, start_progress])
 
         # Triangle 2: bottom-right, top-right, top-left
@@ -232,7 +234,7 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
         append!(widths, [width, width, width])
         append!(colors, [color, color, color])
         append!(vertex_types, [1.0f0, 3.0f0, 2.0f0])  # bottom-right, top-right, top-left
-        append!(line_styles, [line_style_i32, line_style_i32, line_style_i32])
+        append!(line_styles, [line_style_f32, line_style_f32, line_style_f32])
         append!(line_progresses_out, [end_progress, end_progress, start_progress])
     end
 

@@ -5,14 +5,14 @@ layout (location = 1) in vec2 direction;
 layout (location = 2) in float width;
 layout (location = 3) in vec4 color;
 layout (location = 4) in float vertex_type;
-layout (location = 5) in int line_style;      // 0=solid, 1=dash, 2=dot, 3=dashdot
+layout (location = 5) in float line_style;    // 0.0=solid, 1.0=dash, 2.0=dot, 3.0=dashdot
 layout (location = 6) in float line_progress; // Progress along the line (for pattern calculation)
 
 uniform mat4 projection;
 
 out vec4 v_color;
 out vec2 v_local_pos;
-flat out int v_line_style;
+flat out float v_line_style;
 out float v_line_progress;
 out float v_line_width;
 
@@ -63,7 +63,7 @@ const line_fragment_shader = GLA.frag"""
 #version 330 core
 in vec4 v_color;
 in vec2 v_local_pos;
-flat in int v_line_style;
+flat in float v_line_style;
 in float v_line_progress;
 in float v_line_width;
 
@@ -71,7 +71,7 @@ uniform float anti_aliasing_width;
 
 out vec4 FragColor;
 
-float dash_pattern(float progress, int style, float line_width) {
+float dash_pattern(float progress, float style, float line_width) {
     // Scale pattern based on line width for consistent appearance
     float pattern_scale = max(1.0, line_width * 0.5);
     float scaled_progress = progress / pattern_scale;
@@ -93,10 +93,11 @@ float dash_pattern(float progress, int style, float line_width) {
                            float(dashdot_cycle >= 10.0) * float(dashdot_cycle < 12.0);  // dot
     
     // Create weights for each style (exactly one will be 1.0, others 0.0)
-    float solid_weight = float(style == 0);
-    float dash_weight = float(style == 1);
-    float dot_weight = float(style == 2);
-    float dashdot_weight = float(style == 3);
+    // Use abs() to ensure floating point comparison works properly
+    float solid_weight = float(abs(style - 0.0) < 0.1);
+    float dash_weight = float(abs(style - 1.0) < 0.1);
+    float dot_weight = float(abs(style - 2.0) < 0.1);
+    float dashdot_weight = float(abs(style - 3.0) < 0.1);
     
     // Blend patterns using weights (branchless selection)
     return solid_pattern * solid_weight +
