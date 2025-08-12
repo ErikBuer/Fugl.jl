@@ -1,37 +1,20 @@
-mutable struct CodeEditorStyle
-    text_style::TextStyle
-    background_color_focused::Vec4{<:AbstractFloat}
-    background_color_unfocused::Vec4{<:AbstractFloat}
-    border_color::Vec4{<:AbstractFloat}
-    border_width_px::Float32
-    corner_radius_px::Float32
-    padding_px::Float32
-    cursor_color::Vec4{<:AbstractFloat}
-end
-
-function CodeEditorStyle(;
-    text_style=TextStyle(),
-    background_color_focused=Vec4{Float32}(0.05f0, 0.05f0, 0.1f0, 1.0f0),  # Dark blue when focused
-    background_color_unfocused=Vec4{Float32}(0.1f0, 0.1f0, 0.15f0, 1.0f0), # Darker when not focused
-    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.4f0, 1.0f0),
-    border_width_px=1.0f0,
-    corner_radius_px=8.0f0,
-    padding_px=10.0f0,
-    cursor_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 0.8f0)  # White cursor for visibility on dark background
-)
-    return CodeEditorStyle(text_style, background_color_focused, background_color_unfocused, border_color, border_width_px, corner_radius_px, padding_px, cursor_color)
-end
+include("editor_state.jl")
+include("editor_action.jl")
+include("editor_actions.jl")  # The action application functions
+include("utilities.jl")
+include("draw.jl")
+include("text_editor_style.jl")  # Unified style structure
 
 struct CodeEditorView <: AbstractTextEditorView
     state::EditorState           # Editor state containing text, cursor, etc.
-    style::CodeEditorStyle       # Style for the CodeEditor
+    style::TextEditorStyle       # Style for the CodeEditor (using unified style)
     on_state_change::Function    # Callback for all state changes (focus, text, cursor)
     on_change::Function          # Optional callback for text changes only
 end
 
 function CodeEditor(
     state::EditorState;
-    style=CodeEditorStyle(),
+    style=CodeEditorStyle(),  # Use the CodeEditor-specific default style
     on_state_change::Function=(new_state) -> nothing,
     on_change::Function=(new_text) -> nothing
 )
@@ -100,7 +83,7 @@ function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Flo
                     current_y,
                     size_px,
                     projection_matrix,
-                    Vec4{Float32}(0.3f0, 0.5f0, 0.8f0, 0.3f0)  # Blue selection color
+                    view.style.selection_color  # Use configurable selection color from style
                 )
             end
         end

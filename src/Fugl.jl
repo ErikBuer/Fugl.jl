@@ -102,7 +102,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
             # Detect if previous frame took too long (freeze detection)
             frame_duration = frame_start_time - last_frame_time
-            if frame_duration > 1.0  # More than 1 second for a frame
+            if frame_duration > 5.0  # More than 5 seconds for a frame
                 @warn "Slow frame detected: $(round(frame_duration, digits=2))s - possible freeze recovery"
                 # Force garbage collection to free any leaked resources
                 GC.gc(true)
@@ -154,7 +154,6 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     if fps_overlay
                         render_fps_overlay(frame_count, debug_fps, Float32(fb_width), Float32(fb_height), projection_matrix)
                     end
-
 
                 catch e
                     @error "Error generating UI" exception = (e, catch_backtrace())
