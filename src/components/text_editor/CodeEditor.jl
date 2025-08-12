@@ -215,6 +215,7 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState)
 
     text_changed = false
     cursor_changed = false
+    selection_changed = false
     current_state = view.state
 
     # Handle special key events first (arrow keys, enter, tab, etc.)
@@ -224,6 +225,8 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState)
             if action !== nothing
                 old_cursor = current_state.cursor
                 old_text = current_state.text
+                old_selection_start = current_state.selection_start
+                old_selection_end = current_state.selection_end
                 current_state = apply_editor_action(current_state, action)
 
                 # Check if text changed
@@ -234,6 +237,11 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState)
                 # Check if cursor changed (for any action including MoveCursor)
                 if current_state.cursor != old_cursor
                     cursor_changed = true
+                end
+
+                # Check if selection changed
+                if current_state.selection_start != old_selection_start || current_state.selection_end != old_selection_end
+                    selection_changed = true
                 end
             end
         end
@@ -251,8 +259,8 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState)
         end
     end
 
-    # Trigger callbacks if either text or cursor changed
-    if text_changed || cursor_changed
+    # Trigger callbacks if text, cursor, or selection changed
+    if text_changed || cursor_changed || selection_changed
         # Always call the state change callback
         view.on_state_change(current_state)
 

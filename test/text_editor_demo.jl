@@ -12,8 +12,6 @@ end"""))
 
     function MyApp()
         IntrinsicColumn([
-                IntrinsicHeight(Container(Text("Text Editor Generalization Demo"))),
-
                 # Code Editor Section
                 IntrinsicHeight(Container(Text("Code Editor with Syntax Highlighting:"))),
                 Container(

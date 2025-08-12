@@ -182,7 +182,7 @@ function apply_move_cursor(state::EditorState, action::MoveCursor)
     # Handle text selection
     new_selection_start = state.selection_start
     new_selection_end = state.selection_end
-    
+
     if action.select
         # Extend or create selection
         if state.selection_start === nothing
@@ -290,12 +290,12 @@ function apply_select_all(state::EditorState, action::SelectAll)
         # No text to select
         return state
     end
-    
+
     # Set selection from start to end of text
     selection_start = CursorPosition(1, 1)
     last_line = lines[end]
     selection_end = CursorPosition(length(lines), length(collect(last_line)) + 1)
-    
+
     return EditorState(
         state.text,
         selection_end,  # Move cursor to end
@@ -314,48 +314,48 @@ Returns a new EditorState with the word at the cursor position selected.
 function apply_select_word(state::EditorState, action::SelectWord)
     lines = get_lines(state)
     cursor = action.cursor_position
-    
+
     if cursor.line <= 0 || cursor.line > length(lines)
         return state
     end
-    
+
     line_text = lines[cursor.line]
     line_chars = collect(line_text)
-    
+
     if isempty(line_chars)
         return state
     end
-    
+
     # Clamp cursor position to line bounds
     char_pos = max(1, min(cursor.column, length(line_chars) + 1))
-    
+
     # If cursor is at end of line, select the last word
     if char_pos > length(line_chars)
         char_pos = length(line_chars)
     end
-    
+
     # Find word boundaries
     word_start = char_pos
     word_end = char_pos
-    
+
     # Expand backwards to find word start
-    while word_start > 1 && is_word_char(line_chars[word_start - 1])
+    while word_start > 1 && is_word_char(line_chars[word_start-1])
         word_start -= 1
     end
-    
+
     # Expand forwards to find word end
     while word_end <= length(line_chars) && is_word_char(line_chars[word_end])
         word_end += 1
     end
-    
+
     # If we didn't find a word character, select nothing
     if word_start == word_end || !is_word_char(line_chars[word_start])
         return state
     end
-    
+
     selection_start = CursorPosition(cursor.line, word_start)
     selection_end = CursorPosition(cursor.line, word_end)
-    
+
     return EditorState(
         state.text,
         selection_end,  # Move cursor to end of selection
@@ -401,7 +401,7 @@ function apply_extend_mouse_selection(state::EditorState, action::ExtendMouseSel
         # If no selection exists, start one from current cursor
         selection_start = state.cursor
     end
-    
+
     return EditorState(
         state.text,
         action.end_position,  # Move cursor to end position
