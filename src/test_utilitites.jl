@@ -64,6 +64,68 @@ function screenshot(ui_funciton::Function, output_file::String, width::Int, heig
 end
 
 """
+    render_no_overlay(frame_count, fps, screen_width, screen_height, projection_matrix)
+
+No-op function for when FPS overlay is disabled. This gets optimized away by the compiler.
+"""
+@inline function render_no_overlay(frame_count::Int, fps::Float64, screen_width::Float32, screen_height::Float32, projection_matrix)
+    # Intentionally empty - this function does nothing and should be optimized away
+    nothing
+end
+
+"""
+    update_no_fps_stats(debug_frame_count, debug_last_time, frame_start_time, debug_fps_update_interval, current_fps)
+
+No-op function for when FPS overlay is disabled. Returns unchanged debug_fps value.
+"""
+@inline function update_no_fps_stats(debug_frame_count::Ref{Int}, debug_last_time::Ref{Float64}, frame_start_time::Float64, debug_fps_update_interval::Float64, current_fps::Ref{Float64})
+    # Intentionally empty - this function does nothing and should be optimized away
+    return 0.0  # Return dummy FPS value
+end
+
+"""
+    update_fps_stats!(debug_frame_count, debug_last_time, frame_start_time, debug_fps_update_interval, current_fps)
+
+Update FPS statistics when overlay is enabled. Returns current FPS value.
+"""
+function update_fps_stats!(debug_frame_count::Ref{Int}, debug_last_time::Ref{Float64}, frame_start_time::Float64, debug_fps_update_interval::Float64, current_fps::Ref{Float64})
+    debug_frame_count[] += 1
+    current_time = frame_start_time
+
+    # Update FPS every interval
+    if current_time - debug_last_time[] >= debug_fps_update_interval
+        elapsed = current_time - debug_last_time[]
+        fps = debug_frame_count[] / elapsed
+        debug_frame_count[] = 0
+        debug_last_time[] = current_time
+        current_fps[] = fps  # Store the new FPS value
+    end
+
+    return current_fps[]  # Always return the current FPS value
+end
+
+"""
+    update_fps_stats!(debug_frame_count, debug_last_time, frame_start_time, debug_fps_update_interval, current_fps)
+
+Update FPS statistics when overlay is enabled. Returns current FPS value.
+"""
+function update_fps_stats!(debug_frame_count::Ref{Int}, debug_last_time::Ref{Float64}, frame_start_time::Float64, debug_fps_update_interval::Float64, current_fps::Ref{Float64})
+    debug_frame_count[] += 1
+    current_time = frame_start_time
+
+    # Update FPS every interval
+    if current_time - debug_last_time[] >= debug_fps_update_interval
+        elapsed = current_time - debug_last_time[]
+        fps = debug_frame_count[] / elapsed
+        debug_frame_count[] = 0
+        debug_last_time[] = current_time
+        current_fps[] = fps  # Store the new FPS value
+    end
+
+    return current_fps[]  # Always return the current FPS value
+end
+
+"""
     render_fps_overlay(frame_count, fps, screen_width, screen_height, projection_matrix)
 
 Render debug overlay showing frame count and FPS in the upper right corner.

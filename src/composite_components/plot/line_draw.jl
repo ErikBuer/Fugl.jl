@@ -22,6 +22,47 @@ function LineBatch()
     )
 end
 
+"""
+Split line data at NaN values into separate continuous segments.
+Returns a vector of (x_segment, y_segment) tuples.
+"""
+function split_line_at_nan(x_data::Vector{Float32}, y_data::Vector{Float32})
+    segments = Tuple{Vector{Float32},Vector{Float32}}[]
+
+    if length(x_data) != length(y_data) || isempty(x_data)
+        return segments
+    end
+
+    current_x = Float32[]
+    current_y = Float32[]
+
+    for i in 1:length(x_data)
+        x_val = x_data[i]
+        y_val = y_data[i]
+
+        if isnan(x_val) || isnan(y_val)
+            # NaN encountered - finish current segment if it has data
+            if length(current_x) >= 2
+                push!(segments, (copy(current_x), copy(current_y)))
+            end
+            # Start new segment
+            empty!(current_x)
+            empty!(current_y)
+        else
+            # Add point to current segment
+            push!(current_x, x_val)
+            push!(current_y, y_val)
+        end
+    end
+
+    # Add final segment if it has data
+    if length(current_x) >= 2
+        push!(segments, (copy(current_x), copy(current_y)))
+    end
+
+    return segments
+end
+
 function calculate_line_progress(points::Vector{Point2f})::Vector{Float32}
     if length(points) < 2
         return Float32[]
@@ -83,18 +124,27 @@ function draw_line_plot(
         return
     end
 
-    # Transform data points to screen coordinates
-    screen_points = Vector{Point2f}()
-    sizehint!(screen_points, length(x_data))
-
-    for i in 1:length(x_data)
-        screen_x, screen_y = transform_func(x_data[i], y_data[i])
-        push!(screen_points, Point2f(screen_x, screen_y))
-    end
-
-    # Create batch and add this line
+    # Create batch
     batch = LineBatch()
-    add_line!(batch, screen_points, color, width, line_style)
+
+    # Split data at NaN values and process each segment separately
+    segments = split_line_at_nan(x_data, y_data)
+
+    for (seg_x, seg_y) in segments
+        if length(seg_x) >= 2  # Need at least 2 points for a line
+            # Transform data points to screen coordinates
+            screen_points = Vector{Point2f}()
+            sizehint!(screen_points, length(seg_x))
+
+            for i in 1:length(seg_x)
+                screen_x, screen_y = transform_func(seg_x[i], seg_y[i])
+                push!(screen_points, Point2f(screen_x, screen_y))
+            end
+
+            # Add this line segment to the batch
+            add_line!(batch, screen_points, color, width, line_style)
+        end
+    end
 
     # Draw the batch
     draw_lines_enhanced(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
