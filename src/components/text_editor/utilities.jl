@@ -1,4 +1,5 @@
 using Tokenize
+using InteractiveUtils
 
 """
 Abstract base type for text editor components.
@@ -297,12 +298,62 @@ function apply_delete_text!(state::EditorState, action::DeleteText)
 end
 
 """
-Apply clipboard action (placeholder for now).
+Apply clipboard action with platform-specific clipboard access.
 """
 function apply_clipboard_action!(state::EditorState, action::ClipboardAction)
-    # TODO: Implement clipboard actions
-    # This would require platform-specific clipboard access
-    @info "Clipboard action: $(action.action)"
+    if action.action == :copy
+        text_to_copy = get_selected_text_or_line(state)
+        if !isempty(text_to_copy)
+            copy_to_clipboard(text_to_copy)
+        end
+    elseif action.action == :cut
+        text_to_copy = get_selected_text_or_line(state)
+        if !isempty(text_to_copy)
+            copy_to_clipboard(text_to_copy)
+            # Cut operation will be handled by the apply_clipboard_action in editor_actions.jl
+        end
+    elseif action.action == :paste
+        # Paste operation will be handled by the apply_clipboard_action in editor_actions.jl
+    end
+end
+
+"""
+Get the currently selected text, or the current line if no text is selected.
+"""
+function get_selected_text_or_line(state::EditorState)::String
+    if has_selection(state)
+        return get_selected_text(state)
+    else
+        # Copy the entire current line
+        lines = get_lines(state)
+        if state.cursor.line <= length(lines)
+            return lines[state.cursor.line]
+        end
+    end
+    return ""
+end
+
+"""
+Copy text to system clipboard using Julia's standard library.
+"""
+function copy_to_clipboard(text::String)
+    try
+        InteractiveUtils.clipboard(text)
+    catch e
+        @warn "Failed to copy to clipboard: $e"
+    end
+end
+
+"""
+Get text from system clipboard using Julia's standard library.
+"""
+function get_from_clipboard()::String
+    try
+        return InteractiveUtils.clipboard()
+    catch e
+        @warn "Failed to get from clipboard: $e"
+        return ""
+    end
 end
 
 """
@@ -664,5 +715,131 @@ function set_selection(state::EditorState, start_pos::CursorPosition, end_pos::C
         end_pos,
         state.cached_lines,
         state.text_hash
+    )
+end
+
+"""
+Get the currently selected text.
+Returns empty string if no selection.
+"""
+function get_selected_text(state::EditorState)::String
+    start_pos, end_pos = get_selection_range(state)
+
+    if start_pos === nothing || end_pos === nothing
+        return ""
+    end
+
+    lines = get_lines(state)
+
+    if start_pos.line == end_pos.line
+        # Selection within a single line
+        if start_pos.line <= length(lines)
+            line_chars = collect(lines[start_pos.line])
+            start_col = clamp(start_pos.column - 1, 0, length(line_chars))
+            end_col = clamp(end_pos.column - 1, 0, length(line_chars))
+
+            if start_col < end_col
+                return join(line_chars[start_col+1:end_col])
+            end
+        end
+        return ""
+    else
+        # Multi-line selection
+        result_parts = String[]
+
+        for line_num in start_pos.line:end_pos.line
+            if line_num <= length(lines)
+                line_chars = collect(lines[line_num])
+
+                if line_num == start_pos.line
+                    # First line - from start position to end
+                    start_col = clamp(start_pos.column - 1, 0, length(line_chars))
+                    if start_col < length(line_chars)
+                        push!(result_parts, join(line_chars[start_col+1:end]))
+                    end
+                elseif line_num == end_pos.line
+                    # Last line - from beginning to end position
+                    end_col = clamp(end_pos.column - 1, 0, length(line_chars))
+                    if end_col > 0
+                        push!(result_parts, join(line_chars[1:end_col]))
+                    end
+                else
+                    # Middle line - entire line
+                    push!(result_parts, lines[line_num])
+                end
+            end
+        end
+
+        return join(result_parts, "\n")
+    end
+end
+
+"""
+Delete the currently selected text and return new state.
+Returns the state unchanged if no selection.
+"""
+function delete_selected_text(state::EditorState)::EditorState
+    start_pos, end_pos = get_selection_range(state)
+
+    if start_pos === nothing || end_pos === nothing
+        return state
+    end
+
+    lines = get_lines(state)
+
+    if start_pos.line == end_pos.line
+        # Selection within a single line
+        if start_pos.line <= length(lines)
+            line_chars = collect(lines[start_pos.line])
+            start_col = clamp(start_pos.column - 1, 0, length(line_chars))
+            end_col = clamp(end_pos.column - 1, 0, length(line_chars))
+
+            # Remove selected characters
+            new_chars = [line_chars[1:start_col]; line_chars[end_col+1:end]]
+            lines[start_pos.line] = join(new_chars)
+        end
+
+        new_cursor = CursorPosition(start_pos.line, start_pos.column)
+    else
+        # Multi-line selection
+        if start_pos.line <= length(lines) && end_pos.line <= length(lines)
+            # Get the parts to keep
+            start_line_chars = collect(lines[start_pos.line])
+            start_col = clamp(start_pos.column - 1, 0, length(start_line_chars))
+            start_line_prefix = join(start_line_chars[1:start_col])
+
+            end_line_chars = collect(lines[end_pos.line])
+            end_col = clamp(end_pos.column - 1, 0, length(end_line_chars))
+            end_line_suffix = join(end_line_chars[end_col+1:end])
+
+            # Create the new combined line
+            new_line = start_line_prefix * end_line_suffix
+
+            # Remove the selected lines and replace with the combined line
+            lines[start_pos.line] = new_line
+
+            # Remove all lines between start and end (inclusive of end)
+            if end_pos.line > start_pos.line
+                for _ in 1:(end_pos.line-start_pos.line)
+                    if start_pos.line + 1 <= length(lines)
+                        deleteat!(lines, start_pos.line + 1)
+                    end
+                end
+            end
+        end
+
+        new_cursor = CursorPosition(start_pos.line, start_pos.column)
+    end
+
+    # Create new state with updated text and cleared selection
+    new_text = join(lines, "\n")
+    return EditorState(
+        new_text,
+        new_cursor,
+        state.is_focused,
+        nothing,  # Clear selection
+        nothing,  # Clear selection
+        Dict{Int,LineTokenData}(),  # Clear cache since text changed
+        hash(new_text)
     )
 end

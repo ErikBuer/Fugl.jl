@@ -1,6 +1,8 @@
 # This file contains the action application logic that was previously in editor_state.jl
 # It's separated to resolve circular dependencies between editor_state.jl and editor_action.jl
 
+using InteractiveUtils
+
 """
 Apply an editor action to the editor state.
 Returns a new EditorState with the action applied.
@@ -272,11 +274,74 @@ end
 
 """
 Apply clipboard action.
-Returns a new EditorState (placeholder implementation).
+Returns a new EditorState with clipboard operations applied.
 """
 function apply_clipboard_action(state::EditorState, action::ClipboardAction)
-    # TODO: Implement clipboard operations
-    # For now, just return the unchanged state
+    # Call the utility function to handle the clipboard interaction
+    apply_clipboard_action!(state, action)
+
+    if action.action == :copy
+        # Copy doesn't change the editor state
+        return state
+    elseif action.action == :cut
+        # Cut deletes the selected text after copying
+        if has_selection(state)
+            return delete_selected_text(state)
+        else
+            # Cut the entire current line
+            lines = get_lines(state)
+            if state.cursor.line <= length(lines) && length(lines) > 1
+                # Remove the current line
+                deleteat!(lines, state.cursor.line)
+
+                # Adjust cursor position
+                new_line = min(state.cursor.line, length(lines))
+                new_column = 1
+
+                new_text = join(lines, "\n")
+                return EditorState(
+                    new_text,
+                    CursorPosition(new_line, new_column),
+                    state.is_focused,
+                    nothing,
+                    nothing,
+                    Dict{Int,LineTokenData}(),  # Clear cache since text changed
+                    hash(new_text)
+                )
+            elseif length(lines) == 1
+                # Only one line - clear it
+                return EditorState(
+                    "",
+                    CursorPosition(1, 1),
+                    state.is_focused,
+                    nothing,
+                    nothing,
+                    Dict{Int,LineTokenData}(),
+                    hash("")
+                )
+            end
+        end
+        return state
+    elseif action.action == :paste
+        # Get text from clipboard
+        clipboard_text = try
+            InteractiveUtils.clipboard()
+        catch e
+            @warn "Failed to get from clipboard: $e"
+            ""
+        end
+
+        if !isempty(clipboard_text)
+            # If there's a selection, delete it first
+            new_state = has_selection(state) ? delete_selected_text(state) : state
+
+            # Insert the clipboard text at cursor position
+            return apply_insert_text(new_state, InsertText(clipboard_text))
+        end
+
+        return state
+    end
+
     return state
 end
 
