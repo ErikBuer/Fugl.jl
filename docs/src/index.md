@@ -25,17 +25,17 @@ function MyApp()
             color=Vec4{Float32}(0.2, 0.6, 0.8, 1.0),
             width=3.0f0,
             line_style=SOLID,
-            label="sin(x)"),
+        ),
         LinePlotElement(y2_data; x_data=x_data,
             color=Vec4{Float32}(0.8, 0.2, 0.2, 1.0),
             width=2.5f0,
             line_style=DASH,
-            label="cos(x)"),
+        ),
         LinePlotElement(y3_data; x_data=x_data,
             color=Vec4{Float32}(0.2, 0.8, 0.2, 1.0),
             width=2.0f0,
             line_style=DOT,
-            label="0.5*sin(2x)")
+        )
     ]
 
     IntrinsicColumn([

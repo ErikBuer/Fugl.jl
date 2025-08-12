@@ -40,7 +40,7 @@ Form field for entering numbers. New values are parsed on focus loss.
 function NumberField(
     state::EditorState=EditorState();
     type::Type=Float64,
-    style::TextBoxStyle=TextBoxStyle(border_width_px=2.5f0),
+    style::TextEditorStyle=TextBoxStyle(border_width_px=2.5f0),
     on_state_change::Function=(new_state::EditorState) -> nothing,
     on_change::Function=(new_text) -> nothing
 )
@@ -56,7 +56,7 @@ function NumberField(
                 text = replace(text, ',' => '.')
                 # Remove all non-numeric characters except for decimal point and sign and a single "e".
                 text = replace(text, r"[^0-9\.\-e]" => "")
-                cleaned_State = EditorState(new_state, text)
+                cleaned_State = EditorState(new_state; text=text)
 
                 if !(state.is_focused && !new_state.is_focused)
                     return on_state_change(cleaned_State)

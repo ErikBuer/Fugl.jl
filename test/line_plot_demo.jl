@@ -22,16 +22,14 @@ function main()
                                 x_data=time_data[],
                                 color=Vec4{Float32}(0.0, 0.8, 0.2, 1.0),  # Green
                                 width=4.0f0,
-                                line_style=SOLID,
-                                label="Sine Wave"
+                                line_style=SOLID
                             ),
                             LinePlotElement(
                                 cos.(time_data[]);
                                 x_data=time_data[],
                                 color=Vec4{Float32}(0.8, 0.2, 0.0, 1.0),  # Red
                                 width=3.0f0,
-                                line_style=DASH,
-                                label="Cosine Wave"
+                                line_style=DASH
                             )
                         ], PlotStyle(show_grid=true, show_legend=true))
                 ),
@@ -43,15 +41,13 @@ function main()
                                 [1.0, 4.0, 2.0, 8.0, 5.0, 7.0];  # Just y values
                                 color=Vec4{Float32}(0.8, 0.2, 0.0, 1.0),  # Red
                                 width=3.0f0,
-                                line_style=DOT,
-                                label="Dotted Line"
+                                line_style=DOT
                             ),
                             LinePlotElement(
                                 [0.5, 3.5, 1.5, 7.5, 4.5, 6.5];  # Offset data
                                 color=Vec4{Float32}(0.2, 0.2, 0.8, 1.0),  # Blue
                                 width=2.5f0,
-                                line_style=DASHDOT,
-                                label="Dash-Dot Line"
+                                line_style=DASHDOT
                             )
                         ], PlotStyle(show_grid=true, show_legend=true))
                 ),

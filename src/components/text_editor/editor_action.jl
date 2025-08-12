@@ -16,3 +16,18 @@ end
 struct ClipboardAction <: EditorAction
     action::Symbol     # :copy, :cut, :paste
 end
+
+struct SelectAll <: EditorAction
+end
+
+struct SelectWord <: EditorAction
+    cursor_position::CursorPosition
+end
+
+struct StartMouseSelection <: EditorAction
+    start_position::CursorPosition
+end
+
+struct ExtendMouseSelection <: EditorAction
+    end_position::CursorPosition
+end

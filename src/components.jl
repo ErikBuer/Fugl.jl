@@ -50,6 +50,9 @@ export EditorState
 include("components/text_editor/CodeEditor.jl")
 export CodeEditor, CodeEditorStyle
 
+# Export the unified style structure
+export TextEditorStyle
+
 include("components/image/Image.jl")
 export Image
 export clear_texture_cache!
