@@ -1,9 +1,9 @@
 include("editor_state.jl")
 include("editor_action.jl")
-include("editor_actions.jl")  # The action application functions
+include("editor_actions.jl")
 include("utilities.jl")
 include("draw.jl")
-include("text_editor_style.jl")  # Unified style structure
+include("text_editor_style.jl")
 
 struct TextBoxView <: AbstractTextEditorView
     state::EditorState           # Editor state containing text, cursor, etc.

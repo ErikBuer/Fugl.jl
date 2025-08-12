@@ -38,9 +38,12 @@ function apply_insert_text(state::EditorState, action::InsertText)
         return apply_delete_text(state, DeleteText(:backspace))
     end
 
+    # If there's a selection, delete it first (replace selected text)
+    new_state = has_selection(state) ? delete_selected_text(state) : state
+
     # Insert text at cursor position
-    lines = get_lines(state)
-    cursor = state.cursor
+    lines = get_lines(new_state)
+    cursor = new_state.cursor
     new_cursor = cursor
 
     if cursor.line <= length(lines)
@@ -217,6 +220,11 @@ Apply text deletion action.
 Returns a new EditorState with the text deleted.
 """
 function apply_delete_text(state::EditorState, action::DeleteText)
+    # If there's a selection, delete it regardless of the delete direction
+    if has_selection(state)
+        return delete_selected_text(state)
+    end
+
     lines = get_lines(state)
     cursor = state.cursor
     new_cursor = cursor
