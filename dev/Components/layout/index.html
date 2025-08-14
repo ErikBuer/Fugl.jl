@@ -11,15 +11,15 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, &quot;column.png&quot;, 400, 300);</code></pre><p><img src="../column.png" alt="Column example"/></p><h2 id="Row"><a class="docs-heading-anchor" href="#Row">Row</a><a id="Row-1"></a><a class="docs-heading-anchor-permalink" href="#Row" title="Permalink"></a></h2><p><code>Row</code> is a component for creating linear layout.</p><pre><code class="language-julia hljs">using Fugl
+screenshot(MyApp, &quot;column.png&quot;, 400, 300);</code></pre><p><img src="../column.png" alt="Column example"/></p><h2 id="Row"><a class="docs-heading-anchor" href="#Row">Row</a><a id="Row-1"></a><a class="docs-heading-anchor-permalink" href="#Row" title="Permalink"></a></h2><p><code>Row</code> is a component for creating linear layout.</p><p>Note how we have omitted the vector in the <code>Row</code> argument. Either way is fine.</p><pre><code class="language-julia hljs">using Fugl
 
 function MyApp()
     Container(
-        Row([
+        Row(
             Container(),
             Container(),
             Container(),
-        ])
+        )
     )
 end
 
@@ -28,11 +28,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Column([
+        Column(
             IntrinsicWidth(Container(Text(&quot;IntrinsicWidth&quot;))),
             IntrinsicSize(Container(Text(&quot;IntrinsicSize&quot;))),
             IntrinsicHeight(Container(Text(&quot;IntrinsicHeight&quot;))),
-        ])
+        )
     )
 end
 
@@ -41,11 +41,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Column([
+        Column(
             FixedSize(Container(), 400, 50),
             FixedSize(Container(), 400, 50),
             FixedSize(Container(), 400, 50),
-        ])
+        )
     )
 end
 
@@ -54,11 +54,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        IntrinsicColumn([
+        IntrinsicColumn(
             FixedSize(Container(Text(&quot;Clipping width&quot;)), 800, 50),
             FixedSize(Container(), 400, 50),
             FixedSize(Container(), 200, 50),
-        ])
+        )
     )
 end
 
@@ -67,11 +67,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        IntrinsicRow([
+        IntrinsicRow(
             FixedSize(Container(Text(&quot;Clipping Height&quot;)), 50, 800),
             FixedSize(Container(), 50, 400),
             FixedSize(Container(), 50, 200),
-        ])
+        )
     )
 end
 
@@ -80,11 +80,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Column([
+        Column(
             AlignHorizontal(FixedSize(Container(Text(&quot;Left&quot;)), 100, 50), :left),
             AlignHorizontal(FixedSize(Container(Text(&quot;Center&quot;)), 100, 50), :center),
             AlignHorizontal(FixedSize(Container(Text(&quot;Right&quot;)), 100, 50), :right),
-        ])
+        )
     )
 end
 
@@ -93,11 +93,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Row([
+        Row(
             AlignVertical(IntrinsicSize(Container(Text(&quot;Top&quot;))), :top),
             AlignVertical(IntrinsicSize(Container(Text(&quot;Center&quot;))), :center),
             AlignVertical(IntrinsicSize(Container(Text(&quot;Bottom&quot;))), :bottom),
-        ])
+        )
     )
 end
 
@@ -144,4 +144,4 @@ function MyApp()
     return main_split
 end
 
-screenshot(MyApp, &quot;split_containers.png&quot;, 800, 600);</code></pre><p><img src="../split_containers.png" alt="Split container example"/></p><p>Split containers follow Fugl.jl&#39;s functional UI paradigm by keeping all mutable state external to the view components. The <code>SplitContainerState</code> struct holds the split position and interaction state, while the <code>on_state_change</code> callback updates the external state reference when users drag the handle.</p><p>The <code>SplitContainerStyle</code> struct encapsulates visual appearance settings like handle thickness, colors, and minimum panel sizes, making it easy to create reusable style configurations across your application.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../container/">« Container</a><a class="docs-footer-nextpage" href="../text/">Text »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 14 August 2025 08:37">Thursday 14 August 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+screenshot(MyApp, &quot;split_containers.png&quot;, 800, 600);</code></pre><p><img src="../split_containers.png" alt="Split container example"/></p><p>Split containers follow Fugl.jl&#39;s functional UI paradigm by keeping all mutable state external to the view components. The <code>SplitContainerState</code> struct holds the split position and interaction state, while the <code>on_state_change</code> callback updates the external state reference when users drag the handle.</p><p>The <code>SplitContainerStyle</code> struct encapsulates visual appearance settings like handle thickness, colors, and minimum panel sizes, making it easy to create reusable style configurations across your application.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../container/">« Container</a><a class="docs-footer-nextpage" href="../text/">Text »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Thursday 14 August 2025 17:45">Thursday 14 August 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
