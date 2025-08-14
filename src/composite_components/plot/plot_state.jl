@@ -14,13 +14,6 @@ struct PlotState
 end
 
 """
-Default constructor for PlotState with sensible defaults
-"""
-function PlotState()
-    return PlotState(Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0), true, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
-end
-
-"""
 Create PlotState with explicit bounds
 """
 function PlotState(bounds::Rect2f; auto_scale::Bool=false)
@@ -28,7 +21,7 @@ function PlotState(bounds::Rect2f; auto_scale::Bool=false)
 end
 
 """
-Create PlotState with initial view bounds (for fixed bounds or reset functionality)
+Create PlotState with sensible defaults or initial view bounds
 """
 function PlotState(;
     bounds::Union{Rect2f,Nothing}=nothing,

@@ -1,9 +1,4 @@
-include("editor_state.jl")
-include("editor_action.jl")
-include("editor_actions.jl")  # The action application functions
-include("utilities.jl")
-include("draw.jl")
-include("text_editor_style.jl")  # Unified style structure
+# Common text editor includes are handled in TextBox.jl which is loaded first
 
 struct CodeEditorView <: AbstractTextEditorView
     state::EditorState           # Editor state containing text, cursor, etc.

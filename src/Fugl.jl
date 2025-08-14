@@ -18,6 +18,7 @@ include("input_state.jl")
 export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, mouse_position_callback, char_callback, KeyEvent
 export ButtonState, IsPressed, IsReleased
 export mouse_state, mouse_button_callback, InputState
+export ModifierKeys, is_command_key, has_any_modifier
 
 include("abstract_view.jl")
 export AbstractView, SizedView
@@ -61,11 +62,13 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     mouse_pos_callback = (gl_window, xpos, ypos) -> mouse_position_callback(gl_window, xpos, ypos, mouse_state)
     key_callback_func = (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state)
     char_callback_func = (gl_window, codepoint) -> char_callback(gl_window, codepoint, mouse_state)
+    scroll_callback_func = (gl_window, xoffset, yoffset) -> scroll_callback(gl_window, xoffset, yoffset, mouse_state)
 
     GLFW.SetMouseButtonCallback(gl_window, mouse_callback)
     GLFW.SetCursorPosCallback(gl_window, mouse_pos_callback)
     GLFW.SetKeyCallback(gl_window, key_callback_func)
     GLFW.SetCharCallback(gl_window, char_callback_func)
+    GLFW.SetScrollCallback(gl_window, scroll_callback_func)
 
     projection_matrix = get_orthographic_matrix(0.0f0, Float32(window_width_px), Float32(window_height_px), 0.0f0, -1.0f0, 1.0f0)
 

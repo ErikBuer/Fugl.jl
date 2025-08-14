@@ -18,13 +18,8 @@ function plot_zoom_demo()
     )
     ]
 
-    # Create plot state for zoom control with initial view bounds
-    plot_state = Ref(PlotState(
-        initial_x_min=2.0f0,      # Start zoomed in on x-axis
-        initial_x_max=8.0f0,      # End zoomed in on x-axis  
-        initial_y_min=-0.5f0,     # Start zoomed in on y-axis
-        initial_y_max=0.5f0       # End zoomed in on y-axis
-    ))
+    # Create plot state for zoom control
+    plot_state = Ref(PlotState())
 
     # Define plot style (visual appearance only)
     plot_style = PlotStyle(
@@ -35,7 +30,7 @@ function plot_zoom_demo()
 
     function MyApp()
         IntrinsicColumn([
-                IntrinsicHeight(Container(Text("Plot Zoom Demo"))),
+                IntrinsicHeight(Container(Text("Plot Zoom Demo - Use Ctrl/Cmd + Scroll Wheel to Zoom"))),
 
                 # Plot with user-managed state - much simpler!
                 Container(
@@ -47,81 +42,15 @@ function plot_zoom_demo()
                     )
                 ),
 
-                # Controls for zoom
-                IntrinsicHeight(
-                    IntrinsicRow(
-                        [
-                            TextButton(
-                                "Zoom In Y";
-                                on_click=() -> begin
-                                    current_state = plot_state[]
-                                    # Create new state with tighter Y bounds
-                                    y_min = something(current_state.current_y_min, current_state.initial_y_min, -1.0f0)
-                                    y_max = something(current_state.current_y_max, current_state.initial_y_max, 1.0f0)
-                                    y_center = (y_min + y_max) / 2
-                                    y_range = (y_max - y_min) * 0.7f0  # Zoom in by 30%
-                                    new_y_min = y_center - y_range / 2
-                                    new_y_max = y_center + y_range / 2
-
-                                    plot_state[] = PlotState(
-                                        current_state.bounds,
-                                        current_state.auto_scale,
-                                        current_state.initial_x_min,
-                                        current_state.initial_x_max,
-                                        current_state.initial_y_min,
-                                        current_state.initial_y_max,
-                                        current_state.current_x_min,
-                                        current_state.current_x_max,
-                                        new_y_min,
-                                        new_y_max
-                                    )
-                                end), TextButton(
-                                "Zoom Out Y";
-                                on_click=() -> begin
-                                    current_state = plot_state[]
-                                    # Create new state with wider Y bounds
-                                    y_min = something(current_state.current_y_min, current_state.initial_y_min, -1.0f0)
-                                    y_max = something(current_state.current_y_max, current_state.initial_y_max, 1.0f0)
-                                    y_center = (y_min + y_max) / 2
-                                    y_range = (y_max - y_min) * 1.4f0  # Zoom out by 40%
-                                    new_y_min = y_center - y_range / 2
-                                    new_y_max = y_center + y_range / 2
-
-                                    plot_state[] = PlotState(
-                                        current_state.bounds,
-                                        current_state.auto_scale,
-                                        current_state.initial_x_min,
-                                        current_state.initial_x_max,
-                                        current_state.initial_y_min,
-                                        current_state.initial_y_max,
-                                        current_state.current_x_min,
-                                        current_state.current_x_max,
-                                        new_y_min,
-                                        new_y_max
-                                    )
-                                end), TextButton(
-                                "Reset View";
-                                on_click=() -> begin
-                                    current_state = plot_state[]
-                                    # Reset to initial view bounds from state
-                                    plot_state[] = PlotState(
-                                        current_state.bounds,
-                                        current_state.auto_scale,
-                                        current_state.initial_x_min,
-                                        current_state.initial_x_max,
-                                        current_state.initial_y_min,
-                                        current_state.initial_y_max,
-                                        current_state.initial_x_min,
-                                        current_state.initial_x_max,
-                                        current_state.initial_y_min,
-                                        current_state.initial_y_max
-                                    )
-                                end
-                            )
-                        ], padding=0.0, spacing=0.0)
-                ),            # Display current zoom bounds
-                IntrinsicHeight(Container(Text("Current Bounds:"))),
-                IntrinsicHeight(Container(Text("X: $(something(plot_state[].current_x_min, plot_state[].initial_x_min, "auto")) to $(something(plot_state[].current_x_max, plot_state[].initial_x_max, "auto"))"))),
+                # Simple reset button
+                IntrinsicHeight(Container(
+                    TextButton(
+                        "Reset View";
+                        on_click=() -> begin
+                            plot_state[] = PlotState()  # Reset to auto-scale
+                        end
+                    )
+                ))
             ], padding=0.0, spacing=0.0)
     end
 

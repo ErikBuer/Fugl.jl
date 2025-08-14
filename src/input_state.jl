@@ -16,6 +16,61 @@ Enum representing the state of a mouse button.
 @enum ButtonState IsReleased IsPressed
 
 """
+Struct representing the current state of modifier keys.
+This provides a clean, explicit API that doesn't require knowledge of GLFW constants.
+
+- `shift`: Whether Shift key is pressed
+- `control`: Whether Control key is pressed  
+- `alt`: Whether Alt key is pressed
+- `super`: Whether Super/Cmd/Windows key is pressed
+- `caps_lock`: Whether Caps Lock is active
+- `num_lock`: Whether Num Lock is active
+"""
+struct ModifierKeys
+    shift::Bool
+    control::Bool
+    alt::Bool
+    super::Bool
+    caps_lock::Bool
+    num_lock::Bool
+end
+
+"""
+Default constructor for ModifierKeys with all keys released
+"""
+function ModifierKeys()
+    return ModifierKeys(false, false, false, false, false, false)
+end
+
+"""
+Create ModifierKeys from GLFW modifier bit flags
+"""
+function ModifierKeys(glfw_mods::Int32)
+    return ModifierKeys(
+        (glfw_mods & GLFW.MOD_SHIFT) != 0,
+        (glfw_mods & GLFW.MOD_CONTROL) != 0,
+        (glfw_mods & GLFW.MOD_ALT) != 0,
+        (glfw_mods & GLFW.MOD_SUPER) != 0,
+        false,  # caps_lock - not available in this GLFW version
+        false   # num_lock - not available in this GLFW version
+    )
+end
+
+"""
+Check if Control or Command (Super) key is pressed - common pattern for shortcuts
+"""
+function is_command_key(mods::ModifierKeys)::Bool
+    return mods.control || mods.super
+end
+
+"""
+Check if any modifier key is pressed
+"""
+function has_any_modifier(mods::ModifierKeys)::Bool
+    return mods.shift || mods.control || mods.alt || mods.super
+end
+
+"""
 Struct representing a keyboard event.
 
 - `key`: GLFW key code (e.g., GLFW.KEY_A, GLFW.KEY_ENTER)
@@ -45,6 +100,11 @@ mutable struct InputState
     # Double-click tracking
     double_click_threshold::Float64              # Max time between clicks for double-click (seconds)
     was_double_clicked::Dict{MouseButton,Bool}   # Tracks if the button was double-clicked
+    # Scroll wheel tracking
+    scroll_x::Float64                            # Horizontal scroll delta
+    scroll_y::Float64                            # Vertical scroll delta
+    # Modifier keys tracking
+    modifier_keys::ModifierKeys                  # Current modifier keys state
 end
 
 function InputState()
@@ -60,7 +120,10 @@ function InputState()
         nothing,    # No drag start position initially
         false,      # Not dragging initially
         0.5,        # 500ms double-click threshold
-        Dict(LeftButton => false, RightButton => false, MiddleButton => false)  # No double-clicks initially
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # No double-clicks initially
+        0.0,        # No horizontal scroll initially
+        0.0,        # No vertical scroll initially
+        ModifierKeys()  # No modifier keys initially
     )
 end
 
@@ -136,7 +199,18 @@ function mouse_position_callback(gl_window, xpos, ypos, mouse_state::InputState)
     end
 end
 
+"""
+Mouse scroll callback to track scroll wheel input
+"""
+function scroll_callback(gl_window, xoffset, yoffset, mouse_state::InputState)
+    mouse_state.scroll_x = xoffset
+    mouse_state.scroll_y = yoffset
+end
+
 function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Action, mods::Int32, mouse_state::InputState)
+    # Update modifier keys state using the ModifierKeys constructor
+    mouse_state.modifier_keys = ModifierKeys(mods)
+
     if action == GLFW.PRESS || action == GLFW.REPEAT
         # Store raw key events for navigation and shortcuts
         key_event = KeyEvent(Int32(key), scancode, Int32(action), mods)
@@ -150,6 +224,9 @@ function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Ac
         elseif key == GLFW.KEY_TAB
             push!(mouse_state.key_buffer, '\t')
         end
+    elseif action == GLFW.RELEASE
+        # Update modifier keys on release too
+        mouse_state.modifier_keys = ModifierKeys(mods)
     end
 end
 
@@ -191,14 +268,21 @@ function collect_state!(mouse_state::InputState)::InputState
         mouse_state.drag_start_position,
         mouse_state.is_dragging,
         mouse_state.double_click_threshold,
-        deepcopy(mouse_state.was_double_clicked)
+        deepcopy(mouse_state.was_double_clicked),
+        mouse_state.scroll_x,
+        mouse_state.scroll_y,
+        mouse_state.modifier_keys
     )
 
-    # Reset `was_clicked` and `was_double_clicked` in the original state
+    # Reset `was_clicked`, `was_double_clicked`, and scroll in the original state
     for button in keys(mouse_state.was_clicked)
         mouse_state.was_clicked[button] = false
         mouse_state.was_double_clicked[button] = false
     end
+
+    # Reset scroll values
+    mouse_state.scroll_x = 0.0
+    mouse_state.scroll_y = 0.0
 
     return locked_state
 end
