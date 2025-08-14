@@ -99,8 +99,12 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         line_width = measure_word_width(font, line, size_px)
         horizontal_offset = calculate_horizontal_offset(width, line_width, view.horizontal_align)
 
-        push!(x_positions, x + horizontal_offset)
-        push!(y_positions, current_y)
+        # Snap positions to pixel boundaries for crisp text rendering
+        snapped_x = round(x + horizontal_offset)
+        snapped_y = round(current_y)
+
+        push!(x_positions, Float32(snapped_x))
+        push!(y_positions, Float32(snapped_y))
 
         # Move to the next line
         current_y += size_px
