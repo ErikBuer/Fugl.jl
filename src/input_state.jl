@@ -94,9 +94,10 @@ mutable struct InputState
     last_click_position::Tuple{Float64,Float64}  # Position of the last click
     key_buffer::Vector{Char}                     # Buffer for character input
     key_events::Vector{KeyEvent}                 # Buffer for key events
-    # Mouse drag tracking
-    drag_start_position::Union{Tuple{Float64,Float64},Nothing}  # Where drag started
-    is_dragging::Bool                            # Whether currently dragging
+    # Mouse drag tracking (per button)
+    drag_start_position::Dict{MouseButton,Union{Tuple{Float64,Float64},Nothing}}  # Where drag started for each button
+    is_dragging::Dict{MouseButton,Bool}          # Whether currently dragging for each button
+    last_drag_position::Dict{MouseButton,Union{Tuple{Float64,Float64},Nothing}}   # Last position during drag for incremental movement
     # Double-click tracking
     double_click_threshold::Float64              # Max time between clicks for double-click (seconds)
     was_double_clicked::Dict{MouseButton,Bool}   # Tracks if the button was double-clicked
@@ -117,8 +118,9 @@ function InputState()
         (0.0, 0.0),
         Char[],     # Initialize an empty key buffer
         KeyEvent[], # Initialize empty key events buffer
-        nothing,    # No drag start position initially
-        false,      # Not dragging initially
+        Dict(LeftButton => nothing, RightButton => nothing, MiddleButton => nothing),    # No drag start positions initially
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),         # Not dragging initially
+        Dict(LeftButton => nothing, RightButton => nothing, MiddleButton => nothing),    # No last drag positions initially
         0.5,        # 500ms double-click threshold
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # No double-clicks initially
         0.0,        # No horizontal scroll initially
@@ -144,11 +146,10 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
     if action == GLFW.PRESS
         mouse_state.button_state[mapped_button] = IsPressed
 
-        # Start potential drag
-        if mapped_button == LeftButton
-            mouse_state.drag_start_position = current_pos
-            mouse_state.is_dragging = false  # Not dragging yet, just pressed
-        end
+        # Start potential drag for this button
+        mouse_state.drag_start_position[mapped_button] = current_pos
+        mouse_state.is_dragging[mapped_button] = false  # Not dragging yet, just pressed
+        mouse_state.last_drag_position[mapped_button] = nothing  # Reset last drag position
 
     elseif action == GLFW.RELEASE
         mouse_state.button_state[mapped_button] = IsReleased
@@ -169,11 +170,10 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
         mouse_state.last_click_time = current_time
         mouse_state.last_click_position = current_pos
 
-        # End drag
-        if mapped_button == LeftButton
-            mouse_state.drag_start_position = nothing
-            mouse_state.is_dragging = false
-        end
+        # End drag for this button
+        mouse_state.drag_start_position[mapped_button] = nothing
+        mouse_state.is_dragging[mapped_button] = false
+        mouse_state.last_drag_position[mapped_button] = nothing  # Reset last drag position
     end
 end
 
@@ -184,17 +184,19 @@ function mouse_position_callback(gl_window, xpos, ypos, mouse_state::InputState)
     mouse_state.x = xpos
     mouse_state.y = ypos
 
-    # Check if we should start dragging
-    if (mouse_state.button_state[LeftButton] == IsPressed &&
-        mouse_state.drag_start_position !== nothing &&
-        !mouse_state.is_dragging)
+    # Check if we should start dragging for any pressed button
+    for button in [LeftButton, RightButton, MiddleButton]
+        if (mouse_state.button_state[button] == IsPressed &&
+            mouse_state.drag_start_position[button] !== nothing &&
+            !mouse_state.is_dragging[button])
 
-        start_pos = mouse_state.drag_start_position
-        distance = sqrt((xpos - start_pos[1])^2 + (ypos - start_pos[2])^2)
+            start_pos = mouse_state.drag_start_position[button]
+            distance = sqrt((xpos - start_pos[1])^2 + (ypos - start_pos[2])^2)
 
-        # Start dragging if moved more than threshold
-        if distance > 3.0  # 3 pixel threshold
-            mouse_state.is_dragging = true
+            # Start dragging if moved more than threshold
+            if distance > 3.0  # 3 pixel threshold
+                mouse_state.is_dragging[button] = true
+            end
         end
     end
 end
@@ -265,8 +267,9 @@ function collect_state!(mouse_state::InputState)::InputState
         mouse_state.last_click_position,
         deepcopy(mouse_state.key_buffer),
         deepcopy(mouse_state.key_events),
-        mouse_state.drag_start_position,
-        mouse_state.is_dragging,
+        deepcopy(mouse_state.drag_start_position),
+        deepcopy(mouse_state.is_dragging),
+        deepcopy(mouse_state.last_drag_position),
         mouse_state.double_click_threshold,
         deepcopy(mouse_state.was_double_clicked),
         mouse_state.scroll_x,

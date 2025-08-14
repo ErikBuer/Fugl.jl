@@ -30,7 +30,7 @@ function plot_zoom_demo()
 
     function MyApp()
         IntrinsicColumn([
-                IntrinsicHeight(Container(Text("Plot Zoom Demo - Use Ctrl/Cmd + Scroll Wheel to Zoom"))),
+                IntrinsicHeight(Container(Text("Plot Demo"))),
 
                 # Plot with user-managed state - much simpler!
                 Container(

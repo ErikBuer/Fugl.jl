@@ -448,6 +448,19 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
             handle_scroll_zoom(view, mouse_x, mouse_y, width, height, Float32(mouse_state.scroll_y))
         end
     end
+
+    # Check for middle mouse button drag (pan functionality)
+    if mouse_state.button_state[MiddleButton] == IsPressed && mouse_state.is_dragging[MiddleButton]
+        # Get mouse position relative to plot area
+        mouse_x = Float32(mouse_state.x) - x
+        mouse_y = Float32(mouse_state.y) - y
+
+        # Check if mouse is within plot bounds
+        if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height && mouse_state.drag_start_position[MiddleButton] !== nothing
+            handle_middle_button_drag(view, mouse_state, x, y, width, height)
+        end
+    end
+
     return
 end
 
@@ -498,6 +511,119 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
     new_state = PlotState(
         current_state.bounds,
         false,  # Disable auto_scale when user zooms
+        current_state.initial_x_min,
+        current_state.initial_x_max,
+        current_state.initial_y_min,
+        current_state.initial_y_max,
+        new_min_x,
+        new_max_x,
+        new_min_y,
+        new_max_y
+    )
+
+    # Notify of state change
+    view.on_state_change(new_state)
+end
+
+function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot_x::Float32, plot_y::Float32, plot_width::Float32, plot_height::Float32)
+    # Get the drag start position
+    drag_start = mouse_state.drag_start_position[MiddleButton]
+    current_mouse_x = Float32(mouse_state.x)
+    current_mouse_y = Float32(mouse_state.y)
+
+    # Get current plot state
+    current_state = view.state
+
+    # Calculate drag vector from start position to current position
+    start_x_screen = Float32(drag_start[1]) - plot_x
+    start_y_screen = Float32(drag_start[2]) - plot_y
+    current_x_screen = current_mouse_x - plot_x
+    current_y_screen = current_mouse_y - plot_y
+
+    # Calculate screen space drag vector from drag start
+    delta_x_screen = current_x_screen - start_x_screen
+    delta_y_screen = current_y_screen - start_y_screen
+
+    # Only proceed if there's actually some movement (avoid unnecessary updates)
+    if abs(delta_x_screen) < 0.5 && abs(delta_y_screen) < 0.5
+        return  # No significant movement, don't update
+    end
+
+    # If this is the first drag frame, store the current bounds as initial bounds
+    # We use the initial bounds fields to store the drag start bounds
+    if isnothing(current_state.initial_x_min) || isnothing(current_state.initial_x_max) ||
+       isnothing(current_state.initial_y_min) || isnothing(current_state.initial_y_max)
+
+        # Get the current plot bounds to use as the base for dragging
+        if !isnothing(current_state.current_x_min) && !isnothing(current_state.current_x_max) &&
+           !isnothing(current_state.current_y_min) && !isnothing(current_state.current_y_max)
+            # Use current bounds as the drag start reference (preserve existing zoom)
+            base_min_x = current_state.current_x_min
+            base_max_x = current_state.current_x_max
+            base_min_y = current_state.current_y_min
+            base_max_y = current_state.current_y_max
+        else
+            # Calculate bounds from plot elements
+            if !isempty(view.elements)
+                all_bounds = [get_element_bounds(element) for element in view.elements]
+                base_min_x = minimum(bounds[1] for bounds in all_bounds)
+                base_max_x = maximum(bounds[2] for bounds in all_bounds)
+                base_min_y = minimum(bounds[3] for bounds in all_bounds)
+                base_max_y = maximum(bounds[4] for bounds in all_bounds)
+            else
+                base_min_x, base_max_x, base_min_y, base_max_y = 0.0f0, 1.0f0, 0.0f0, 1.0f0
+            end
+        end
+
+        # Store these bounds as initial bounds - PRESERVE the existing current bounds (zoom state)
+        initial_state = PlotState(
+            current_state.bounds,
+            false,  # Disable auto_scale when user drags
+            base_min_x,  # Store drag start bounds in initial fields
+            base_max_x,
+            base_min_y,
+            base_max_y,
+            current_state.current_x_min,  # PRESERVE existing zoom state
+            current_state.current_x_max,
+            current_state.current_y_min,
+            current_state.current_y_max
+        )
+
+        # Update the plot state to store the initial bounds
+        view.on_state_change(initial_state)
+        return  # Exit early on first frame to avoid double update
+    end
+
+    # Use the stored initial bounds as the drag start reference (these are the bounds when drag started)
+    base_min_x = current_state.initial_x_min
+    base_max_x = current_state.initial_x_max
+    base_min_y = current_state.initial_y_min
+    base_max_y = current_state.initial_y_max
+
+    # Get the current bounds that we're modifying
+    current_min_x = current_state.current_x_min
+    current_max_x = current_state.current_x_max
+    current_min_y = current_state.current_y_min
+    current_max_y = current_state.current_y_max
+
+    # Convert screen space drag to data space using the base bounds range
+    x_range = base_max_x - base_min_x
+    y_range = base_max_y - base_min_y
+
+    # Calculate data space offset (invert drag direction for natural feel)
+    delta_x_data = -(delta_x_screen / plot_width) * x_range
+    delta_y_data = (delta_y_screen / plot_height) * y_range  # Note: Y is flipped in screen coords
+
+    # Apply drag vector to the BASE bounds (stored in initial fields) for 1:1 movement
+    new_min_x = base_min_x + delta_x_data
+    new_max_x = base_max_x + delta_x_data
+    new_min_y = base_min_y + delta_y_data
+    new_max_y = base_max_y + delta_y_data
+
+    # Create new state with updated pan bounds
+    new_state = PlotState(
+        current_state.bounds,
+        false,  # Disable auto_scale when user pans
         current_state.initial_x_min,
         current_state.initial_x_max,
         current_state.initial_y_min,
