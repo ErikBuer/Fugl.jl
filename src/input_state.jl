@@ -16,6 +16,61 @@ Enum representing the state of a mouse button.
 @enum ButtonState IsReleased IsPressed
 
 """
+Struct representing the current state of modifier keys.
+This provides a clean, explicit API that doesn't require knowledge of GLFW constants.
+
+- `shift`: Whether Shift key is pressed
+- `control`: Whether Control key is pressed  
+- `alt`: Whether Alt key is pressed
+- `super`: Whether Super/Cmd/Windows key is pressed
+- `caps_lock`: Whether Caps Lock is active
+- `num_lock`: Whether Num Lock is active
+"""
+struct ModifierKeys
+    shift::Bool
+    control::Bool
+    alt::Bool
+    super::Bool
+    caps_lock::Bool
+    num_lock::Bool
+end
+
+"""
+Default constructor for ModifierKeys with all keys released
+"""
+function ModifierKeys()
+    return ModifierKeys(false, false, false, false, false, false)
+end
+
+"""
+Create ModifierKeys from GLFW modifier bit flags
+"""
+function ModifierKeys(glfw_mods::Int32)
+    return ModifierKeys(
+        (glfw_mods & GLFW.MOD_SHIFT) != 0,
+        (glfw_mods & GLFW.MOD_CONTROL) != 0,
+        (glfw_mods & GLFW.MOD_ALT) != 0,
+        (glfw_mods & GLFW.MOD_SUPER) != 0,
+        false,  # caps_lock - not available in this GLFW version
+        false   # num_lock - not available in this GLFW version
+    )
+end
+
+"""
+Check if Control or Command (Super) key is pressed - common pattern for shortcuts
+"""
+function is_command_key(mods::ModifierKeys)::Bool
+    return mods.control || mods.super
+end
+
+"""
+Check if any modifier key is pressed
+"""
+function has_any_modifier(mods::ModifierKeys)::Bool
+    return mods.shift || mods.control || mods.alt || mods.super
+end
+
+"""
 Struct representing a keyboard event.
 
 - `key`: GLFW key code (e.g., GLFW.KEY_A, GLFW.KEY_ENTER)
@@ -39,12 +94,18 @@ mutable struct InputState
     last_click_position::Tuple{Float64,Float64}  # Position of the last click
     key_buffer::Vector{Char}                     # Buffer for character input
     key_events::Vector{KeyEvent}                 # Buffer for key events
-    # Mouse drag tracking
-    drag_start_position::Union{Tuple{Float64,Float64},Nothing}  # Where drag started
-    is_dragging::Bool                            # Whether currently dragging
+    # Mouse drag tracking (per button)
+    drag_start_position::Dict{MouseButton,Union{Tuple{Float64,Float64},Nothing}}  # Where drag started for each button
+    is_dragging::Dict{MouseButton,Bool}          # Whether currently dragging for each button
+    last_drag_position::Dict{MouseButton,Union{Tuple{Float64,Float64},Nothing}}   # Last position during drag for incremental movement
     # Double-click tracking
     double_click_threshold::Float64              # Max time between clicks for double-click (seconds)
     was_double_clicked::Dict{MouseButton,Bool}   # Tracks if the button was double-clicked
+    # Scroll wheel tracking
+    scroll_x::Float64                            # Horizontal scroll delta
+    scroll_y::Float64                            # Vertical scroll delta
+    # Modifier keys tracking
+    modifier_keys::ModifierKeys                  # Current modifier keys state
 end
 
 function InputState()
@@ -57,10 +118,14 @@ function InputState()
         (0.0, 0.0),
         Char[],     # Initialize an empty key buffer
         KeyEvent[], # Initialize empty key events buffer
-        nothing,    # No drag start position initially
-        false,      # Not dragging initially
+        Dict(LeftButton => nothing, RightButton => nothing, MiddleButton => nothing),    # No drag start positions initially
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),         # Not dragging initially
+        Dict(LeftButton => nothing, RightButton => nothing, MiddleButton => nothing),    # No last drag positions initially
         0.5,        # 500ms double-click threshold
-        Dict(LeftButton => false, RightButton => false, MiddleButton => false)  # No double-clicks initially
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # No double-clicks initially
+        0.0,        # No horizontal scroll initially
+        0.0,        # No vertical scroll initially
+        ModifierKeys()  # No modifier keys initially
     )
 end
 
@@ -81,11 +146,10 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
     if action == GLFW.PRESS
         mouse_state.button_state[mapped_button] = IsPressed
 
-        # Start potential drag
-        if mapped_button == LeftButton
-            mouse_state.drag_start_position = current_pos
-            mouse_state.is_dragging = false  # Not dragging yet, just pressed
-        end
+        # Start potential drag for this button
+        mouse_state.drag_start_position[mapped_button] = current_pos
+        mouse_state.is_dragging[mapped_button] = false  # Not dragging yet, just pressed
+        mouse_state.last_drag_position[mapped_button] = nothing  # Reset last drag position
 
     elseif action == GLFW.RELEASE
         mouse_state.button_state[mapped_button] = IsReleased
@@ -106,11 +170,10 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
         mouse_state.last_click_time = current_time
         mouse_state.last_click_position = current_pos
 
-        # End drag
-        if mapped_button == LeftButton
-            mouse_state.drag_start_position = nothing
-            mouse_state.is_dragging = false
-        end
+        # End drag for this button
+        mouse_state.drag_start_position[mapped_button] = nothing
+        mouse_state.is_dragging[mapped_button] = false
+        mouse_state.last_drag_position[mapped_button] = nothing  # Reset last drag position
     end
 end
 
@@ -121,22 +184,35 @@ function mouse_position_callback(gl_window, xpos, ypos, mouse_state::InputState)
     mouse_state.x = xpos
     mouse_state.y = ypos
 
-    # Check if we should start dragging
-    if (mouse_state.button_state[LeftButton] == IsPressed &&
-        mouse_state.drag_start_position !== nothing &&
-        !mouse_state.is_dragging)
+    # Check if we should start dragging for any pressed button
+    for button in [LeftButton, RightButton, MiddleButton]
+        if (mouse_state.button_state[button] == IsPressed &&
+            mouse_state.drag_start_position[button] !== nothing &&
+            !mouse_state.is_dragging[button])
 
-        start_pos = mouse_state.drag_start_position
-        distance = sqrt((xpos - start_pos[1])^2 + (ypos - start_pos[2])^2)
+            start_pos = mouse_state.drag_start_position[button]
+            distance = sqrt((xpos - start_pos[1])^2 + (ypos - start_pos[2])^2)
 
-        # Start dragging if moved more than threshold
-        if distance > 3.0  # 3 pixel threshold
-            mouse_state.is_dragging = true
+            # Start dragging if moved more than threshold
+            if distance > 3.0  # 3 pixel threshold
+                mouse_state.is_dragging[button] = true
+            end
         end
     end
 end
 
+"""
+Mouse scroll callback to track scroll wheel input
+"""
+function scroll_callback(gl_window, xoffset, yoffset, mouse_state::InputState)
+    mouse_state.scroll_x = xoffset
+    mouse_state.scroll_y = yoffset
+end
+
 function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Action, mods::Int32, mouse_state::InputState)
+    # Update modifier keys state using the ModifierKeys constructor
+    mouse_state.modifier_keys = ModifierKeys(mods)
+
     if action == GLFW.PRESS || action == GLFW.REPEAT
         # Store raw key events for navigation and shortcuts
         key_event = KeyEvent(Int32(key), scancode, Int32(action), mods)
@@ -150,6 +226,9 @@ function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Ac
         elseif key == GLFW.KEY_TAB
             push!(mouse_state.key_buffer, '\t')
         end
+    elseif action == GLFW.RELEASE
+        # Update modifier keys on release too
+        mouse_state.modifier_keys = ModifierKeys(mods)
     end
 end
 
@@ -188,17 +267,25 @@ function collect_state!(mouse_state::InputState)::InputState
         mouse_state.last_click_position,
         deepcopy(mouse_state.key_buffer),
         deepcopy(mouse_state.key_events),
-        mouse_state.drag_start_position,
-        mouse_state.is_dragging,
+        deepcopy(mouse_state.drag_start_position),
+        deepcopy(mouse_state.is_dragging),
+        deepcopy(mouse_state.last_drag_position),
         mouse_state.double_click_threshold,
-        deepcopy(mouse_state.was_double_clicked)
+        deepcopy(mouse_state.was_double_clicked),
+        mouse_state.scroll_x,
+        mouse_state.scroll_y,
+        mouse_state.modifier_keys
     )
 
-    # Reset `was_clicked` and `was_double_clicked` in the original state
+    # Reset `was_clicked`, `was_double_clicked`, and scroll in the original state
     for button in keys(mouse_state.was_clicked)
         mouse_state.was_clicked[button] = false
         mouse_state.was_double_clicked[button] = false
     end
+
+    # Reset scroll values
+    mouse_state.scroll_x = 0.0
+    mouse_state.scroll_y = 0.0
 
     return locked_state
 end

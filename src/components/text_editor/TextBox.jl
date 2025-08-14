@@ -145,13 +145,13 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
             new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash)
             view.on_state_change(new_state)
 
-        elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.is_dragging
+        elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.is_dragging[LeftButton]
             # Mouse drag: extend selection
             action = ExtendMouseSelection(new_cursor_pos)
             new_state = apply_editor_action(view.state, action)
             view.on_state_change(new_state)
 
-        elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.drag_start_position !== nothing && !mouse_state.is_dragging
+        elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.drag_start_position[LeftButton] !== nothing && !mouse_state.is_dragging[LeftButton]
             # Mouse press (start of potential drag): start selection
             action = StartMouseSelection(new_cursor_pos)
             new_state = apply_editor_action(view.state, action)

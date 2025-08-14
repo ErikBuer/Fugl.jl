@@ -27,16 +27,18 @@ nothing #hide
 
 `Row` is a component for creating linear layout.
 
+Note how we have omitted the vector in the `Row` argument. Either way is fine.
+
 ``` @example RowExample
 using Fugl
 
 function MyApp()
     Container(
-        Row([
+        Row(
             Container(),
             Container(),
             Container(),
-        ])
+        )
     )
 end
 
@@ -54,11 +56,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Column([
+        Column(
             IntrinsicWidth(Container(Text("IntrinsicWidth"))),
             IntrinsicSize(Container(Text("IntrinsicSize"))),
             IntrinsicHeight(Container(Text("IntrinsicHeight"))),
-        ])
+        )
     )
 end
 
@@ -74,11 +76,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Column([
+        Column(
             FixedSize(Container(), 400, 50),
             FixedSize(Container(), 400, 50),
             FixedSize(Container(), 400, 50),
-        ])
+        )
     )
 end
 
@@ -96,11 +98,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        IntrinsicColumn([
+        IntrinsicColumn(
             FixedSize(Container(Text("Clipping width")), 800, 50),
             FixedSize(Container(), 400, 50),
             FixedSize(Container(), 200, 50),
-        ])
+        )
     )
 end
 
@@ -118,11 +120,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        IntrinsicRow([
+        IntrinsicRow(
             FixedSize(Container(Text("Clipping Height")), 50, 800),
             FixedSize(Container(), 50, 400),
             FixedSize(Container(), 50, 200),
-        ])
+        )
     )
 end
 
@@ -144,11 +146,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Column([
+        Column(
             AlignHorizontal(FixedSize(Container(Text("Left")), 100, 50), :left),
             AlignHorizontal(FixedSize(Container(Text("Center")), 100, 50), :center),
             AlignHorizontal(FixedSize(Container(Text("Right")), 100, 50), :right),
-        ])
+        )
     )
 end
 
@@ -166,11 +168,11 @@ using Fugl: Text
 
 function MyApp()
     Container(
-        Row([
+        Row(
             AlignVertical(IntrinsicSize(Container(Text("Top"))), :top),
             AlignVertical(IntrinsicSize(Container(Text("Center"))), :center),
             AlignVertical(IntrinsicSize(Container(Text("Bottom"))), :bottom),
-        ])
+        )
     )
 end
 

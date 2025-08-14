@@ -9,6 +9,10 @@ function Column(children::Vector{<:AbstractView}; padding=10.0, spacing=10.0, on
     return ColumnView(children, padding, spacing, on_click)
 end
 
+@inline function Column(children::AbstractView...; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
+    return ColumnView(collect(AbstractView, children), padding, spacing, on_click)
+end
+
 function apply_layout(view::ColumnView, x::Float32, y::Float32, width::Float32, height::Float32)
     # Adjust the layout area to account for the global padding
     padded_x = x + view.padding
