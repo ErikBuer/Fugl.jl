@@ -9,6 +9,10 @@ function IntrinsicColumn(children::Vector{<:AbstractView}; padding=10.0, spacing
     return IntrinsicColumnView(children, padding, spacing, on_click)
 end
 
+@inline function IntrinsicColumn(children::AbstractView...; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
+    return IntrinsicColumnView(collect(AbstractView, children), padding, spacing, on_click)
+end
+
 function apply_layout(view::IntrinsicColumnView, x, y, width, height)
     padded_x = x + view.padding
     padded_y = y + view.padding
