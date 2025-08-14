@@ -1,7 +1,5 @@
 abstract type AbstractPlotElement end
 
-using ModernGL  # For scissor testing to clip plot traces
-
 include("rec2f.jl")
 include("line_style.jl")
 include("plot_style.jl")
@@ -250,118 +248,191 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
         )
     end
 
-    # Draw all plot elements with clipping enabled
-    # Enable scissor testing to clip drawing to plot area
-    ModernGL.glEnable(ModernGL.GL_SCISSOR_TEST)
+    # Draw plot elements with intelligent viewport culling (no scissor test)
+    # Get effective bounds for data culling
+    effective_bounds = get_effective_bounds(state, style)
 
-    # Get current viewport to properly convert coordinates
-    viewport = Vector{Int32}(undef, 4)
-    ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport)
-    viewport_height = viewport[4]
-
-    # Set scissor rectangle to plot area
-    # Convert from top-left coordinates (Fugl) to bottom-left coordinates (OpenGL)
-    scissor_x = Int32(round(plot_x))
-    scissor_y = Int32(viewport_height - round(plot_y + plot_height))
-    scissor_width = Int32(round(plot_width))
-    scissor_height = Int32(round(plot_height))
-    ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
-
-    # Draw plot elements (will be clipped to scissor rectangle)
     for element in elements
-        draw_plot_element(element, data_to_screen, projection_matrix, style, state.bounds)
+        draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
     end
-
-    # Disable scissor testing
-    ModernGL.glDisable(ModernGL.GL_SCISSOR_TEST)
 end
 
-# Drawing functions for different plot element types
-function draw_plot_element(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
+# Drawing functions for different plot element types with viewport culling
+function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
     if length(element.x_data) >= 2 && length(element.y_data) >= 2
-        draw_line_plot(
+        # Use a small margin for data culling to include points just outside viewport
+        # but clip lines to exact axis bounds
+        margin_x = effective_bounds.width * 0.01f0  # 1% margin for data selection
+        margin_y = effective_bounds.height * 0.01f0
+
+        culled_x, culled_y = cull_line_data(
             element.x_data,
             element.y_data,
-            data_to_screen,
-            element.color,
-            element.width,
-            element.line_style,
-            projection_matrix;
-            anti_aliasing_width=style.anti_aliasing_width
+            effective_bounds.x - margin_x,           # Use margin for data selection
+            effective_bounds.x + effective_bounds.width + margin_x,
+            effective_bounds.y - margin_y,
+            effective_bounds.y + effective_bounds.height + margin_y
         )
-    end
-end
 
-function draw_plot_element(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
-    if length(element.x_data) >= 1 && length(element.y_data) >= 1
-        draw_scatter_plot(
-            element.x_data,
-            element.y_data,
-            data_to_screen,
-            element.fill_color,
-            element.border_color,
-            element.marker_size,
-            element.border_width,
-            element.marker_type,
-            projection_matrix;
-            anti_aliasing_width=style.anti_aliasing_width
-        )
-    end
-end
+        # Now clip the selected data to exact axis bounds (no margin)
+        if length(culled_x) >= 2
+            final_x, final_y = cull_line_data(
+                culled_x,
+                culled_y,
+                effective_bounds.x,                  # Exact bounds for final clipping
+                effective_bounds.x + effective_bounds.width,
+                effective_bounds.y,
+                effective_bounds.y + effective_bounds.height
+            )
 
-function draw_plot_element(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
-    if length(element.x_data) >= 1 && length(element.y_data) >= 1
-        # Calculate the visible Y bounds
-        min_y_visible = bounds.y
-        max_y_visible = bounds.y + bounds.height
-
-        # Draw vertical lines from baseline (clipped to visible area) to each data point
-        for i in 1:length(element.x_data)
-            x_val = element.x_data[i]
-            y_val = element.y_data[i]
-
-            # Clip the baseline to the visible plot area
-            # If baseline is below the visible area, start from the bottom edge
-            # If baseline is above the visible area, start from the top edge
-            clipped_baseline = clamp(element.baseline, min_y_visible, max_y_visible)
-
-            # Only draw the stem if the data point and clipped baseline are different
-            if abs(clipped_baseline - y_val) > 1e-6  # Avoid drawing zero-length lines
-                stem_x_data = [x_val, x_val]
-                stem_y_data = [clipped_baseline, y_val]
-
+            if length(final_x) >= 2
                 draw_line_plot(
-                    stem_x_data,
-                    stem_y_data,
+                    final_x,
+                    final_y,
                     data_to_screen,
-                    element.line_color,
-                    element.line_width,
-                    SOLID,  # SOLID line style
+                    element.color,
+                    element.width,
+                    element.line_style,
                     projection_matrix;
                     anti_aliasing_width=style.anti_aliasing_width
                 )
             end
         end
-
-        # Draw markers at data points
-        draw_scatter_plot(
-            element.x_data,
-            element.y_data,
-            data_to_screen,
-            element.fill_color,
-            element.border_color,
-            element.marker_size,
-            element.border_width,
-            element.marker_type,
-            projection_matrix;
-            anti_aliasing_width=style.anti_aliasing_width
-        )
     end
 end
 
-function draw_plot_element(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, bounds::Rect2f)
-    # TODO: Implement image/matrix plot drawing
-    # This will require texture mapping and colormap support
+function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+    if length(element.x_data) >= 1 && length(element.y_data) >= 1
+        # Use margin for data selection but exact bounds for final culling
+        margin_x = effective_bounds.width * 0.02f0  # 2% margin for markers
+        margin_y = effective_bounds.height * 0.02f0
+
+        # First pass: select points with margin to capture markers near edges
+        culled_x, culled_y = cull_point_data(
+            element.x_data,
+            element.y_data,
+            effective_bounds.x - margin_x,
+            effective_bounds.x + effective_bounds.width + margin_x,
+            effective_bounds.y - margin_y,
+            effective_bounds.y + effective_bounds.height + margin_y
+        )
+
+        # Second pass: final culling to exact bounds for precise clipping
+        if length(culled_x) >= 1
+            final_x, final_y = cull_point_data(
+                culled_x,
+                culled_y,
+                effective_bounds.x,
+                effective_bounds.x + effective_bounds.width,
+                effective_bounds.y,
+                effective_bounds.y + effective_bounds.height
+            )
+
+            if length(final_x) >= 1
+                draw_scatter_plot(
+                    final_x,
+                    final_y,
+                    data_to_screen,
+                    element.fill_color,
+                    element.border_color,
+                    element.marker_size,
+                    element.border_width,
+                    element.marker_type,
+                    projection_matrix;
+                    anti_aliasing_width=style.anti_aliasing_width
+                )
+            end
+        end
+    end
+end
+
+function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+    if length(element.x_data) >= 1 && length(element.y_data) >= 1
+        # Use margin for data selection but exact bounds for final culling
+        margin_x = effective_bounds.width * 0.02f0
+        margin_y = effective_bounds.height * 0.02f0
+
+        # First pass: select points with margin
+        culled_x, culled_y = cull_point_data(
+            element.x_data,
+            element.y_data,
+            effective_bounds.x - margin_x,
+            effective_bounds.x + effective_bounds.width + margin_x,
+            effective_bounds.y - margin_y,
+            effective_bounds.y + effective_bounds.height + margin_y
+        )
+
+        # Second pass: final culling to exact bounds
+        if length(culled_x) >= 1
+            final_x, final_y = cull_point_data(
+                culled_x,
+                culled_y,
+                effective_bounds.x,
+                effective_bounds.x + effective_bounds.width,
+                effective_bounds.y,
+                effective_bounds.y + effective_bounds.height
+            )
+
+            if length(final_x) >= 1
+                # Draw vertical lines from baseline to each data point (only for visible points)
+                for i in 1:length(final_x)
+                    x_val = final_x[i]
+                    y_val = final_y[i]
+
+                    # Clamp baseline to visible Y bounds to avoid drawing outside plot area
+                    clipped_baseline = clamp(element.baseline, effective_bounds.y, effective_bounds.y + effective_bounds.height)
+
+                    # Only draw the stem if the data point and clipped baseline are different
+                    if abs(clipped_baseline - y_val) > 1e-6  # Avoid drawing zero-length lines
+                        stem_x_data = [x_val, x_val]
+                        stem_y_data = [clipped_baseline, y_val]
+
+                        # Clip stem lines to exact bounds
+                        stem_clipped_x, stem_clipped_y = cull_line_data(
+                            stem_x_data,
+                            stem_y_data,
+                            effective_bounds.x,
+                            effective_bounds.x + effective_bounds.width,
+                            effective_bounds.y,
+                            effective_bounds.y + effective_bounds.height
+                        )
+
+                        if length(stem_clipped_x) >= 2
+                            draw_line_plot(
+                                stem_clipped_x,
+                                stem_clipped_y,
+                                data_to_screen,
+                                element.line_color,
+                                element.line_width,
+                                SOLID,  # SOLID line style
+                                projection_matrix;
+                                anti_aliasing_width=style.anti_aliasing_width
+                            )
+                        end
+                    end
+                end
+
+                # Draw markers at data points (only for visible points)
+                draw_scatter_plot(
+                    final_x,
+                    final_y,
+                    data_to_screen,
+                    element.fill_color,
+                    element.border_color,
+                    element.marker_size,
+                    element.border_width,
+                    element.marker_type,
+                    projection_matrix;
+                    anti_aliasing_width=style.anti_aliasing_width
+                )
+            end
+        end
+    end
+end
+
+function draw_plot_element_culled(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+    # TODO: Implement image/matrix plot drawing with viewport culling
+    # This will require texture mapping, colormap support, and intelligent sub-sampling
     println("ImagePlot drawing not yet implemented")
 end
 
@@ -369,4 +440,183 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
     # For now, plots don't handle clicks
     # Could add zoom/pan functionality later
     return
+end
+
+# Data culling functions for efficient viewport rendering
+
+"""
+Cull point data to only include points within the specified bounds.
+Returns culled x and y data arrays.
+"""
+function cull_point_data(x_data::Vector{Float32}, y_data::Vector{Float32},
+    x_min::Float32, x_max::Float32, y_min::Float32, y_max::Float32)
+    if length(x_data) != length(y_data)
+        return Float32[], Float32[]
+    end
+
+    culled_x = Float32[]
+    culled_y = Float32[]
+
+    for i in 1:length(x_data)
+        x_val = x_data[i]
+        y_val = y_data[i]
+
+        # Include point if it's within bounds
+        if x_val >= x_min && x_val <= x_max && y_val >= y_min && y_val <= y_max
+            push!(culled_x, x_val)
+            push!(culled_y, y_val)
+        end
+    end
+
+    return culled_x, culled_y
+end
+
+"""
+Cull line data and clip line segments to viewport bounds using proper interpolation.
+This function clips line segments at the exact viewport boundaries to prevent 
+lines from extending outside the visible area.
+Returns culled x and y data arrays with clipped segments.
+"""
+function cull_line_data(x_data::Vector{Float32}, y_data::Vector{Float32},
+    x_min::Float32, x_max::Float32, y_min::Float32, y_max::Float32)
+    if length(x_data) != length(y_data) || length(x_data) < 2
+        return Float32[], Float32[]
+    end
+
+    culled_x = Float32[]
+    culled_y = Float32[]
+
+    # Helper function to check if a point is inside bounds
+    function point_in_bounds(x::Float32, y::Float32)::Bool
+        return x >= x_min && x <= x_max && y >= y_min && y <= y_max
+    end
+
+    # Cohen-Sutherland line clipping algorithm
+    # Compute outcode for a point relative to the clipping rectangle
+    function compute_outcode(x::Float32, y::Float32)::UInt8
+        code = 0x00
+        if x < x_min
+            code |= 0x01  # LEFT
+        elseif x > x_max
+            code |= 0x02  # RIGHT
+        end
+        if y < y_min
+            code |= 0x04  # BOTTOM
+        elseif y > y_max
+            code |= 0x08  # TOP
+        end
+        return code
+    end
+
+    # Clip a line segment to the viewport bounds
+    function clip_line_segment(x1::Float32, y1::Float32, x2::Float32, y2::Float32)
+        outcode1 = compute_outcode(x1, y1)
+        outcode2 = compute_outcode(x2, y2)
+
+        accept = false
+
+        while true
+            if (outcode1 | outcode2) == 0  # Both points inside
+                accept = true
+                break
+            elseif (outcode1 & outcode2) != 0  # Both points on same side outside
+                break  # Trivially reject
+            else
+                # At least one point is outside - clip it
+                x = 0.0f0
+                y = 0.0f0
+
+                # Pick the point that is outside
+                outcode_out = outcode1 != 0 ? outcode1 : outcode2
+
+                # Find intersection point using line equation
+                # y = y1 + slope * (x - x1), where slope = (y2 - y1) / (x2 - x1)
+                if (outcode_out & 0x08) != 0  # TOP
+                    x = x1 + (x2 - x1) * (y_max - y1) / (y2 - y1)
+                    y = y_max
+                elseif (outcode_out & 0x04) != 0  # BOTTOM
+                    x = x1 + (x2 - x1) * (y_min - y1) / (y2 - y1)
+                    y = y_min
+                elseif (outcode_out & 0x02) != 0  # RIGHT
+                    y = y1 + (y2 - y1) * (x_max - x1) / (x2 - x1)
+                    x = x_max
+                elseif (outcode_out & 0x01) != 0  # LEFT
+                    y = y1 + (y2 - y1) * (x_min - x1) / (x2 - x1)
+                    x = x_min
+                end
+
+                # Update the point that was outside and its outcode
+                if outcode_out == outcode1
+                    x1 = x
+                    y1 = y
+                    outcode1 = compute_outcode(x1, y1)
+                else
+                    x2 = x
+                    y2 = y
+                    outcode2 = compute_outcode(x2, y2)
+                end
+            end
+        end
+
+        if accept
+            return true, x1, y1, x2, y2
+        else
+            return false, 0.0f0, 0.0f0, 0.0f0, 0.0f0
+        end
+    end
+
+    # Process line segments
+    for i in 1:(length(x_data)-1)
+        x1, y1 = x_data[i], y_data[i]
+        x2, y2 = x_data[i+1], y_data[i+1]
+
+        # Skip if either point is NaN
+        if isnan(x1) || isnan(y1) || isnan(x2) || isnan(y2)
+            if !isempty(culled_x) && !isnan(culled_x[end])
+                # Add NaN to break line continuity
+                push!(culled_x, NaN32)
+                push!(culled_y, NaN32)
+            end
+            continue
+        end
+
+        # Clip the line segment to viewport bounds
+        clipped, cx1, cy1, cx2, cy2 = clip_line_segment(x1, y1, x2, y2)
+
+        if clipped
+            # Check if we need to start a new line segment
+            need_new_segment = false
+            if isempty(culled_x) || isnan(culled_x[end])
+                need_new_segment = true
+            else
+                # Check if this segment connects to the previous one
+                last_x, last_y = culled_x[end], culled_y[end]
+                if abs(last_x - cx1) > 1e-6 || abs(last_y - cy1) > 1e-6
+                    need_new_segment = true
+                end
+            end
+
+            if need_new_segment
+                # Start new segment
+                if !isempty(culled_x) && !isnan(culled_x[end])
+                    push!(culled_x, NaN32)
+                    push!(culled_y, NaN32)
+                end
+                push!(culled_x, cx1)
+                push!(culled_y, cy1)
+            end
+
+            # Add the end point
+            push!(culled_x, cx2)
+            push!(culled_y, cy2)
+        else
+            # Segment is completely outside - break line continuity
+            if !isempty(culled_x) && !isnan(culled_x[end])
+                push!(culled_x, NaN32)
+                push!(culled_y, NaN32)
+            end
+        end
+    end
+
+    return culled_x, culled_y
 end

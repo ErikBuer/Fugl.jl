@@ -75,10 +75,16 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     last_frame_time = time()  # Track frame timing for freeze detection
 
     # Debug overlay timing variables
-    debug_frame_count = 0
-    debug_last_time = time()
-    debug_fps = 0.0
+    debug_frame_count = Ref(0)
+    debug_last_time = Ref(time())
+    debug_fps = Ref(0.0)  # Store current FPS as Ref for persistence
     debug_fps_update_interval = 0.5  # Update FPS every 0.5 seconds
+
+    # Choose overlay function at compile time based on fps_overlay flag
+    overlay_function = fps_overlay ? render_fps_overlay : render_no_overlay
+
+    # Choose debug stats update function at compile time based on fps_overlay flag
+    update_debug_stats = fps_overlay ? update_fps_stats! : update_no_fps_stats
 
     try
         # Main loop
@@ -86,19 +92,8 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
             frame_start_time = time()
             frame_count += 1
 
-            # Update debug overlay stats if enabled
-            if fps_overlay
-                debug_frame_count += 1
-                current_time = frame_start_time
-
-                # Update FPS every interval
-                if current_time - debug_last_time >= debug_fps_update_interval
-                    elapsed = current_time - debug_last_time
-                    debug_fps = debug_frame_count / elapsed
-                    debug_frame_count = 0
-                    debug_last_time = current_time
-                end
-            end
+            # Update debug overlay stats using compile-time selected function
+            current_fps_value = update_debug_stats(debug_frame_count, debug_last_time, frame_start_time, debug_fps_update_interval, debug_fps)
 
             # Detect if previous frame took too long (freeze detection)
             frame_duration = frame_start_time - last_frame_time
@@ -150,10 +145,8 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
                     interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
 
-                    # Render debug overlay if enabled
-                    if fps_overlay
-                        render_fps_overlay(frame_count, debug_fps, Float32(fb_width), Float32(fb_height), projection_matrix)
-                    end
+                    # Render overlay using compile-time selected function
+                    overlay_function(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)
 
                 catch e
                     @error "Error generating UI" exception = (e, catch_backtrace())
