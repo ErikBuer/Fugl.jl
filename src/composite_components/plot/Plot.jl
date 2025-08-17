@@ -3,10 +3,19 @@ abstract type AbstractPlotElement end
 include("rec2f.jl")
 include("line_style.jl")
 include("plot_style.jl")
+include("plot_state.jl")
 include("shaders.jl")
 include("line_draw.jl")
 include("marker_draw.jl")
-include("plot_state.jl")
+
+struct PlotView <: AbstractView
+    elements::Vector{AbstractPlotElement}
+    state::PlotState
+    style::PlotStyle
+    on_state_change::Function
+end
+
+include("plot_cache.jl")
 
 # Line plot element
 struct LinePlotElement <: AbstractPlotElement
@@ -130,13 +139,6 @@ function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32
     return (0.0f0, 1.0f0, 0.0f0, 1.0f0)  # Default bounds
 end
 
-struct PlotView <: AbstractView
-    elements::Vector{AbstractPlotElement}
-    state::PlotState
-    style::PlotStyle
-    on_state_change::Function
-end
-
 """
 Plot component.
 """
@@ -171,13 +173,114 @@ function apply_layout(view::PlotView, x::Float32, y::Float32, width::Float32, he
 end
 
 function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Create a more stable cache key based on elements and style, not the view object itself
+    # This allows the cache to persist across state changes (which create new PlotView objects)
+    elements_hash = hash_plot_elements(view.elements)
+    style_hash = hash_plot_style(view.style)
+    cache_key = (elements_hash, style_hash)
+
+    # Get or create cache for this cache key
+    if !haskey(_plot_caches, cache_key)
+        _plot_caches[cache_key] = PlotCache()
+    end
+    cache = _plot_caches[cache_key]
+
+    bounds = (x, y, width, height)
+    cache_width = Int32(round(width))
+    cache_height = Int32(round(height))
+
+    # Check if we need to invalidate cache
+    needs_redraw = should_invalidate_cache(cache, view, bounds)
+
+    if needs_redraw
+        # Clean up old framebuffer if size changed
+        if cache.framebuffer !== nothing && (cache.cache_width != cache_width || cache.cache_height != cache_height)
+            cleanup_plot_cache(cache)
+        end
+
+        # Create new framebuffer if needed
+        if cache.framebuffer === nothing
+            if cache_width > 0 && cache_height > 0
+                try
+                    (framebuffer, color_texture, depth_texture) = create_plot_framebuffer(cache_width, cache_height)
+                    cache.framebuffer = framebuffer
+                    cache.color_texture = color_texture
+                    cache.depth_texture = depth_texture
+                    cache.cache_width = cache_width
+                    cache.cache_height = cache_height
+                catch e
+                    @warn "Failed to create plot framebuffer: $e"
+                    # Fall back to immediate rendering
+                    render_plot_immediate(view, x, y, width, height, projection_matrix)
+                    return
+                end
+            else
+                # Invalid size, skip rendering
+                return
+            end
+        end
+
+        # Render to framebuffer
+        render_plot_to_framebuffer(view, cache, width, height, projection_matrix)
+
+        # Update cache validity and hashes
+        cache.is_valid = true
+        cache.last_bounds = bounds
+        cache.last_elements_hash = elements_hash
+        cache.last_state_hash = hash_plot_state(view.state)
+        cache.last_style_hash = style_hash
+    end
+
+    # Draw cached texture to screen
+    if cache.is_valid && cache.color_texture !== nothing
+        draw_cached_plot_texture(cache.color_texture, x, y, width, height, projection_matrix)
+    else
+        # Fallback to immediate rendering if cache failed
+        render_plot_immediate(view, x, y, width, height, projection_matrix)
+    end
+end
+
+function render_plot_to_framebuffer(view::PlotView, cache::PlotCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     state = view.state
     style = view.style
     elements = view.elements
 
+    # Save current viewport
+    current_viewport = Vector{Int32}(undef, 4)
+    ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, current_viewport)
+
+    # Bind framebuffer for off-screen rendering
+    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, cache.framebuffer)
+    ModernGL.glViewport(0, 0, cache.cache_width, cache.cache_height)
+
+    # Clear framebuffer
+    ModernGL.glClearColor(style.background_color[1], style.background_color[2], style.background_color[3], style.background_color[4])
+    ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
+
+    # Create framebuffer-specific projection matrix
+    fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+
+    # Render plot content to framebuffer
+    render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+
+    # Restore default framebuffer and viewport
+    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, 0)
+    ModernGL.glViewport(current_viewport[1], current_viewport[2], current_viewport[3], current_viewport[4])
+end
+
+function render_plot_immediate(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Draw background
     bg_vertices = generate_rectangle_vertices(x, y, width, height)
-    draw_rectangle(bg_vertices, style.background_color, projection_matrix)
+    draw_rectangle(bg_vertices, view.style.background_color, projection_matrix)
+
+    # Render plot content directly
+    render_plot_content(view, x, y, width, height, projection_matrix)
+end
+
+function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    state = view.state
+    style = view.style
+    elements = view.elements
 
     # Calculate plot area (subtract padding)
     plot_x = x + style.padding_px
@@ -255,6 +358,63 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     for element in elements
         draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
     end
+end
+
+function draw_cached_plot_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Create vertices using the standard generate_rectangle_vertices pattern
+    positions = [
+        Point2f(x, y),                    # Top-left (0)
+        Point2f(x, y + height),           # Bottom-left (1)
+        Point2f(x + width, y + height),   # Bottom-right (2)
+        Point2f(x + width, y),            # Top-right (3)
+    ]
+
+    # Texture coordinates matching the vertex positions
+    texturecoordinates = [
+        Vec{2,Float32}(0.0f0, 1.0f0),  # Top-left -> texture top-left
+        Vec{2,Float32}(0.0f0, 0.0f0),  # Bottom-left -> texture bottom-left
+        Vec{2,Float32}(1.0f0, 0.0f0),  # Bottom-right -> texture bottom-right
+        Vec{2,Float32}(1.0f0, 1.0f0),  # Top-right -> texture top-right
+    ]
+
+    # White color for all vertices (texture will override)
+    colors = [Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0) for _ in 1:4]
+
+    # Standard triangulation exactly like draw_rectangle
+    elements = NgonFace{3,UInt32}[
+        (0, 1, 2),  # First triangle: top-left, bottom-left, bottom-right
+        (2, 3, 0)   # Second triangle: bottom-right, top-right, top-left
+    ]
+
+    # Generate buffers and create a Vertex Array Object (VAO)
+    vao = GLA.VertexArray(
+        GLA.generate_buffers(
+            prog[],
+            position=positions,
+            color=colors,
+            texcoord=texturecoordinates
+        ),
+        elements
+    )
+
+    # Bind the shader program
+    GLA.bind(prog[])
+
+    # Set uniforms
+    GLA.gluniform(prog[], :use_texture, true)
+    ModernGL.glActiveTexture(ModernGL.GL_TEXTURE0)
+    ModernGL.glBindTexture(ModernGL.GL_TEXTURE_2D, texture_id)
+    GLA.gluniform(prog[], :image, Int32(0))
+    GLA.gluniform(prog[], :projection, projection_matrix)
+
+    # Draw the quad
+    GLA.bind(vao)
+    GLA.draw(vao)
+
+    # Cleanup
+    GLA.unbind(vao)
+    GLA.unbind(prog[])
+    ModernGL.glBindTexture(ModernGL.GL_TEXTURE_2D, 0)
 end
 
 # Drawing functions for different plot element types with viewport culling
@@ -437,6 +597,15 @@ function draw_plot_element_culled(element::ImagePlotElement, data_to_screen::Fun
 end
 
 function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+    # Create the same cache key used in interpret_view
+    elements_hash = hash_plot_elements(view.elements)
+    style_hash = hash_plot_style(view.style)
+    cache_key = (elements_hash, style_hash)
+
+    # Get cache for this cache key (if it exists)
+    cache = get(_plot_caches, cache_key, nothing)
+    interaction_occurred = false
+
     # Check for scroll wheel zoom with Ctrl/Cmd modifier
     if (mouse_state.scroll_y != 0.0) && is_command_key(mouse_state.modifier_keys)
         # Get mouse position relative to plot area
@@ -446,6 +615,7 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
         # Check if mouse is within plot bounds
         if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height
             handle_scroll_zoom(view, mouse_x, mouse_y, width, height, Float32(mouse_state.scroll_y))
+            interaction_occurred = true
         end
     end
 
@@ -458,7 +628,13 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
         # Check if mouse is within plot bounds
         if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height && mouse_state.drag_start_position[MiddleButton] !== nothing
             handle_middle_button_drag(view, mouse_state, x, y, width, height)
+            interaction_occurred = true
         end
+    end
+
+    # Invalidate cache if there was user interaction that changes the view
+    if interaction_occurred && cache !== nothing
+        invalidate_plot_cache!(cache)
     end
 
     return
@@ -521,7 +697,7 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
         new_max_y
     )
 
-    # Notify of state change
+    # Notify callback for state management - user must handle updating the PlotView
     view.on_state_change(new_state)
 end
 
@@ -550,7 +726,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     end
 
     # If this is the first drag frame, store the current bounds as initial bounds
-    # We use the initial bounds fields to store the drag start bounds
+    # The initial bounds will serve as the drag start reference in the immutable state
     if isnothing(current_state.initial_x_min) || isnothing(current_state.initial_x_max) ||
        isnothing(current_state.initial_y_min) || isnothing(current_state.initial_y_max)
 
@@ -589,7 +765,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
             current_state.current_y_max
         )
 
-        # Update the plot state to store the initial bounds
+        # Update the plot state to store the initial bounds for drag reference
         view.on_state_change(initial_state)
         return  # Exit early on first frame to avoid double update
     end
@@ -599,12 +775,6 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     base_max_x = current_state.initial_x_max
     base_min_y = current_state.initial_y_min
     base_max_y = current_state.initial_y_max
-
-    # Get the current bounds that we're modifying
-    current_min_x = current_state.current_x_min
-    current_max_x = current_state.current_x_max
-    current_min_y = current_state.current_y_min
-    current_max_y = current_state.current_y_max
 
     # Convert screen space drag to data space using the base bounds range
     x_range = base_max_x - base_min_x
@@ -634,7 +804,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
         new_max_y
     )
 
-    # Notify of state change
+    # Notify of state change - user must handle updating the PlotView
     view.on_state_change(new_state)
 end
 

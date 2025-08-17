@@ -9,10 +9,14 @@ function main()
     # For real-time updates
     frame_count = Ref(0)
 
+    # Plot states for interactive zoom/pan
+    plot1_state = Ref(PlotState())
+    plot2_state = Ref(PlotState())
+
     function MyApp()
 
         IntrinsicColumn([
-                IntrinsicHeight(Container(Text("Real-time Line Plot Demo"))),
+                IntrinsicHeight(Container(Text("Real-time Line Plot Demo - Try Ctrl+Scroll to zoom!"))),
 
                 # Line plot using LinePlotElement with different line styles
                 Container(
@@ -31,7 +35,11 @@ function main()
                                 width=3.0f0,
                                 line_style=DASH
                             )
-                        ], PlotStyle(show_grid=true, show_legend=true))
+                        ],
+                        PlotStyle(show_grid=true, show_legend=true),
+                        plot1_state[],  # Add state management
+                        (new_state) -> plot1_state[] = new_state  # Add callback
+                    )
                 ),
 
                 # Simple plot with different line styles
@@ -49,7 +57,11 @@ function main()
                                 width=2.5f0,
                                 line_style=DASHDOT
                             )
-                        ], PlotStyle(show_grid=true, show_legend=true))
+                        ],
+                        PlotStyle(show_grid=true, show_legend=true),
+                        plot2_state[],  # Add state management
+                        (new_state) -> plot2_state[] = new_state  # Add callback
+                    )
                 ),
             ], padding=0.0, spacing=0.0)
     end
