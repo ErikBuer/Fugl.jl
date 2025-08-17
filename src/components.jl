@@ -71,7 +71,7 @@ export Dropdown, DropdownState, DropdownStyle
 
 include("components/AtlasDebug.jl")
 
-include("composite_components/plot/plot.jl")
+include("composite_components/plot/Plot.jl")
 export Plot, PlotView, PlotState, PlotStyle
 export LinePlot, ScatterPlot, StemPlot  # Convenience constructors
 export LinePlotElement, ScatterPlotElement, StemPlotElement, ImagePlotElement
