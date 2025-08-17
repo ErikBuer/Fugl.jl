@@ -58,15 +58,35 @@ function NumberField(
                 text = replace(text, r"[^0-9\.\-e]" => "")
                 cleaned_State = EditorState(new_state; text=text)
 
-                if !(state.is_focused && !new_state.is_focused)
-                    return on_state_change(cleaned_State)
-                end
+                # Check if this is a focus loss (was focused, now not focused)
+                focus_lost = state.is_focused && !new_state.is_focused
 
-                (filtered_state, parsed_value) = filter_input(cleaned_State, type)
-                on_state_change(filtered_state)
-                on_change(parsed_value)
+                # Apply changes on focus loss
+                if focus_lost
+                    (filtered_state, parsed_value) = filter_input(cleaned_State, type)
+                    on_state_change(filtered_state)
+                    on_change(parsed_value)
+                else
+                    # Just update state without parsing/validating
+                    on_state_change(cleaned_State)
+                end
             end,
-            on_change=(new_text) -> nothing
+            on_change=(new_text) -> begin
+                # Check if Enter was pressed by looking for newline in the text change
+                if occursin('\n', new_text)
+                    # Remove the newline and apply validation
+                    clean_text = replace(new_text, '\n' => "")
+                    clean_text = replace(clean_text, ',' => '.')
+                    clean_text = replace(clean_text, r"[^0-9\.\-e]" => "")
+
+                    temp_state = EditorState(clean_text)
+                    (filtered_state, parsed_value) = filter_input(temp_state, type)
+                    on_state_change(filtered_state)
+                    on_change(parsed_value)
+                end
+                # Note: We don't call on_change for regular text changes since 
+                # NumberField only triggers on_change for validated values
+            end
         ), height)
     )
 end
