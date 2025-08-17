@@ -1,3 +1,4 @@
+include("texture_cache.jl")
 include("utilities.jl")
 include("draw.jl")
 

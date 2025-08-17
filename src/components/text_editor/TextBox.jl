@@ -1,3 +1,4 @@
+include("text_render_cache.jl")
 include("editor_state.jl")
 include("editor_action.jl")
 include("editor_actions.jl")
@@ -31,6 +32,83 @@ function apply_layout(view::TextBoxView, x::Float32, y::Float32, width::Float32,
 end
 
 function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Use render caching for TextBox to improve performance with large text content
+    bounds = (x, y, width, height)
+    cache_width = Int32(round(width))
+    cache_height = Int32(round(height))
+
+    # Get text render cache using stable cache key
+    cache_key, cache = get_text_render_cache(view.state.text, view.style, :textbox)
+
+    # Generate content hash for this text component
+    content_hash = hash_text_content(view.state.text, view.style, view.state.is_focused, view.state.cursor, (view.state.selection_start, view.state.selection_end))
+
+    # Check if we need to invalidate cache
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+
+    if needs_redraw
+        # Create new framebuffer if needed
+        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
+            if cache_width > 0 && cache_height > 0
+                try
+                    (framebuffer, color_texture, depth_texture) = create_text_framebuffer(cache_width, cache_height)
+
+                    # Update cache with new framebuffer and content hash
+                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
+                catch e
+                    @warn "Failed to create text framebuffer: $e"
+                    # Fall back to immediate rendering
+                    render_textbox_immediate(view, x, y, width, height, projection_matrix)
+                    return
+                end
+            else
+                # Invalid size, skip rendering
+                return
+            end
+        else
+            # Update cache with existing framebuffer and new content hash
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
+        end
+
+        # Render to framebuffer
+        render_textbox_to_framebuffer(view, cache, width, height, projection_matrix)
+    end
+
+    # Draw cached texture to screen
+    if cache.is_valid && cache.color_texture !== nothing
+        draw_cached_text_texture(cache.color_texture, x, y, width, height, projection_matrix)
+    else
+        # Fallback to immediate rendering if cache failed
+        render_textbox_immediate(view, x, y, width, height, projection_matrix)
+    end
+end
+
+function render_textbox_to_framebuffer(view::TextBoxView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Push current framebuffer and viewport onto stacks
+    push_framebuffer!(cache.framebuffer)
+    push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
+
+    # Clear framebuffer with transparent background
+    ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
+    ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
+
+    # Create framebuffer-specific projection matrix
+    fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+
+    # Render TextBox content to framebuffer
+    render_textbox_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+
+    # Restore previous framebuffer and viewport
+    pop_viewport!()
+    pop_framebuffer!()
+end
+
+function render_textbox_immediate(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Render TextBox content directly (fallback)
+    render_textbox_content(view, x, y, width, height, projection_matrix)
+end
+
+function render_textbox_content(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Extract style properties
     font = view.style.text_style.font
     size_px = view.style.text_style.size_px

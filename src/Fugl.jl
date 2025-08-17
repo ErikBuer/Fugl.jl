@@ -10,7 +10,7 @@ export Vec4f, Vec4
 const OPENGL_LOCK = ReentrantLock()
 
 include("matrices.jl")
-
+include("gl_context_state.jl")
 include("shaders.jl")
 export initialize_shaders
 
@@ -53,6 +53,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
     initialize_shaders()
     initialize_plot_shaders()
+    initialize_gl_state!()
 
     # Initialize local states
     mouse_state = InputState()
@@ -186,6 +187,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         clear_font_cache!()
         clear_glyph_atlas!()
         clear_text_batch!()
+        clear_render_caches!()
 
         # Clear UI reference
         last_ui = nothing

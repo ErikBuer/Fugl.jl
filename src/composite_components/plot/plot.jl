@@ -3,10 +3,19 @@ abstract type AbstractPlotElement end
 include("rec2f.jl")
 include("line_style.jl")
 include("plot_style.jl")
+include("plot_state.jl")
 include("shaders.jl")
 include("line_draw.jl")
 include("marker_draw.jl")
-include("plot_state.jl")
+
+struct PlotView <: AbstractView
+    elements::Vector{AbstractPlotElement}
+    state::PlotState
+    style::PlotStyle
+    on_state_change::Function
+end
+
+include("plot_cache.jl")
 
 # Line plot element
 struct LinePlotElement <: AbstractPlotElement
@@ -130,13 +139,6 @@ function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32
     return (0.0f0, 1.0f0, 0.0f0, 1.0f0)  # Default bounds
 end
 
-struct PlotView <: AbstractView
-    elements::Vector{AbstractPlotElement}
-    state::PlotState
-    style::PlotStyle
-    on_state_change::Function
-end
-
 """
 Plot component.
 """
@@ -171,13 +173,108 @@ function apply_layout(view::PlotView, x::Float32, y::Float32, width::Float32, he
 end
 
 function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    bounds = (x, y, width, height)
+    cache_width = Int32(round(width))
+    cache_height = Int32(round(height))
+
+    # Ensure minimum cache size to avoid zero-sized framebuffers
+    if cache_width <= 0 || cache_height <= 0
+        return  # Skip rendering if size is invalid
+    end
+
+    # Get plot render cache using stable cache key
+    cache_key, cache = get_plot_render_cache(view)
+
+    # Generate content hash for this plot
+    content_hash = hash_plot_content(view.elements, view.state, view.style)
+
+    # Check if we need to invalidate cache
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+
+    # During active interactions, bypass caching to avoid visual glitches
+    # This ensures smooth zoom/pan without cache timing issues
+    if !cache.is_valid
+        # Use immediate rendering when cache is invalid (during interactions)
+        render_plot_immediate(view, x, y, width, height, projection_matrix)
+        return
+    end
+
+    if needs_redraw
+        # Create new framebuffer if needed
+        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
+            if cache_width > 0 && cache_height > 0
+                try
+                    (framebuffer, color_texture, depth_texture) = create_plot_framebuffer(cache_width, cache_height)
+
+                    # Update cache with new framebuffer and content hash
+                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
+                catch e
+                    @warn "Failed to create plot framebuffer: $e"
+                    # Fall back to immediate rendering
+                    render_plot_immediate(view, x, y, width, height, projection_matrix)
+                    return
+                end
+            else
+                # Invalid size, skip rendering
+                return
+            end
+        else
+            # Update cache with existing framebuffer and new content hash
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
+        end
+
+        # Render to framebuffer
+        render_plot_to_framebuffer(view, cache, width, height, projection_matrix)
+    end
+
+    # Draw cached texture to screen
+    if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0
+        draw_cached_plot_texture(cache.color_texture, x, y, width, height, projection_matrix)
+    else
+        # Fallback to immediate rendering if cache failed or invalid size
+        if cache_width > 0 && cache_height > 0
+            render_plot_immediate(view, x, y, width, height, projection_matrix)
+        end
+    end
+end
+
+function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     state = view.state
     style = view.style
     elements = view.elements
 
+    # Push current framebuffer and viewport onto stacks
+    push_framebuffer!(cache.framebuffer)
+    push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
+
+    # Clear framebuffer
+    ModernGL.glClearColor(style.background_color[1], style.background_color[2], style.background_color[3], style.background_color[4])
+    ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
+
+    # Create framebuffer-specific projection matrix
+    fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+
+    # Render plot content to framebuffer
+    render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+
+    # Restore previous framebuffer and viewport
+    pop_viewport!()
+    pop_framebuffer!()
+end
+
+function render_plot_immediate(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Draw background
     bg_vertices = generate_rectangle_vertices(x, y, width, height)
-    draw_rectangle(bg_vertices, style.background_color, projection_matrix)
+    draw_rectangle(bg_vertices, view.style.background_color, projection_matrix)
+
+    # Render plot content directly
+    render_plot_content(view, x, y, width, height, projection_matrix)
+end
+
+function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    state = view.state
+    style = view.style
+    elements = view.elements
 
     # Calculate plot area (subtract padding)
     plot_x = x + style.padding_px
@@ -255,6 +352,11 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     for element in elements
         draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
     end
+end
+
+function draw_cached_plot_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Use the generic cached texture drawing function
+    draw_cached_texture(texture_id, x, y, width, height, projection_matrix)
 end
 
 # Drawing functions for different plot element types with viewport culling
@@ -437,6 +539,10 @@ function draw_plot_element_culled(element::ImagePlotElement, data_to_screen::Fun
 end
 
 function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+    # Get plot render cache using the same key as interpret_view
+    cache_key, cache = get_plot_render_cache(view)
+    interaction_occurred = false
+
     # Check for scroll wheel zoom with Ctrl/Cmd modifier
     if (mouse_state.scroll_y != 0.0) && is_command_key(mouse_state.modifier_keys)
         # Get mouse position relative to plot area
@@ -446,6 +552,7 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
         # Check if mouse is within plot bounds
         if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height
             handle_scroll_zoom(view, mouse_x, mouse_y, width, height, Float32(mouse_state.scroll_y))
+            interaction_occurred = true
         end
     end
 
@@ -458,7 +565,15 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
         # Check if mouse is within plot bounds
         if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height && mouse_state.drag_start_position[MiddleButton] !== nothing
             handle_middle_button_drag(view, mouse_state, x, y, width, height)
+            interaction_occurred = true
         end
+    end
+
+    # Invalidate cache if there was user interaction that changes the view
+    # NOTE: We invalidate cache to force immediate rendering during interactions
+    # This prevents cached content from being displayed with wrong bounds during zoom/pan
+    if interaction_occurred
+        invalidate_plot_cache!(cache)
     end
 
     return
@@ -521,7 +636,7 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
         new_max_y
     )
 
-    # Notify of state change
+    # Notify callback for state management - user must handle updating the PlotView
     view.on_state_change(new_state)
 end
 
@@ -550,7 +665,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     end
 
     # If this is the first drag frame, store the current bounds as initial bounds
-    # We use the initial bounds fields to store the drag start bounds
+    # The initial bounds will serve as the drag start reference in the immutable state
     if isnothing(current_state.initial_x_min) || isnothing(current_state.initial_x_max) ||
        isnothing(current_state.initial_y_min) || isnothing(current_state.initial_y_max)
 
@@ -589,7 +704,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
             current_state.current_y_max
         )
 
-        # Update the plot state to store the initial bounds
+        # Update the plot state to store the initial bounds for drag reference
         view.on_state_change(initial_state)
         return  # Exit early on first frame to avoid double update
     end
@@ -599,12 +714,6 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     base_max_x = current_state.initial_x_max
     base_min_y = current_state.initial_y_min
     base_max_y = current_state.initial_y_max
-
-    # Get the current bounds that we're modifying
-    current_min_x = current_state.current_x_min
-    current_max_x = current_state.current_x_max
-    current_min_y = current_state.current_y_min
-    current_max_y = current_state.current_y_max
 
     # Convert screen space drag to data space using the base bounds range
     x_range = base_max_x - base_min_x
@@ -634,7 +743,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
         new_max_y
     )
 
-    # Notify of state change
+    # Notify of state change - user must handle updating the PlotView
     view.on_state_change(new_state)
 end
 
