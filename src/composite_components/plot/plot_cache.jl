@@ -45,6 +45,17 @@ function cleanup_plot_cache(cache::PlotCache)
     cache.is_valid = false
 end
 
+"""
+Clear all plot caches and free associated OpenGL resources.
+Call this when the OpenGL context is being destroyed or recreated.
+"""
+function clear_plot_caches!()
+    for (key, cache) in _plot_caches
+        cleanup_plot_cache(cache)
+    end
+    empty!(_plot_caches)
+end
+
 function create_plot_framebuffer(width::Int32, height::Int32)::Tuple{UInt32,UInt32,UInt32}
     # Generate framebuffer
     framebuffer_ref = Ref{UInt32}(0)

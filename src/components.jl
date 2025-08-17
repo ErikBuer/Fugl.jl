@@ -76,5 +76,6 @@ export Plot, PlotView, PlotState, PlotStyle
 export LinePlot, ScatterPlot, StemPlot  # Convenience constructors
 export LinePlotElement, ScatterPlotElement, StemPlotElement, ImagePlotElement
 export AbstractPlotElement, PlotType, LINE_PLOT, SCATTER_PLOT, STEM_PLOT, MATRIX_PLOT
+export clear_plot_caches!  # Cache cleanup function
 export LineStyle, SOLID, DASH, DOT, DASHDOT
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE
