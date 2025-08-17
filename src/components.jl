@@ -1,5 +1,6 @@
 include("components/common/utilities.jl")
 include("components/common/draw.jl")
+include("components/common/render_cache.jl")
 
 include("components/Empty.jl")
 export Empty
@@ -76,6 +77,6 @@ export Plot, PlotView, PlotState, PlotStyle
 export LinePlot, ScatterPlot, StemPlot  # Convenience constructors
 export LinePlotElement, ScatterPlotElement, StemPlotElement, ImagePlotElement
 export AbstractPlotElement, PlotType, LINE_PLOT, SCATTER_PLOT, STEM_PLOT, MATRIX_PLOT
-export clear_plot_caches!  # Cache cleanup function
+export clear_plot_caches!  # Backward compatibility wrapper
 export LineStyle, SOLID, DASH, DOT, DASHDOT
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE

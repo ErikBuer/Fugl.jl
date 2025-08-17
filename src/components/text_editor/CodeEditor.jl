@@ -27,6 +27,90 @@ function apply_layout(view::CodeEditorView, x::Float32, y::Float32, width::Float
 end
 
 function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Use render caching for CodeEditor to improve performance with syntax highlighting
+    bounds = (x, y, width, height)
+    cache_width = Int32(round(width))
+    cache_height = Int32(round(height))
+
+    # Get text render cache using stable cache key
+    cache_key, cache = get_text_render_cache(view.state.text, view.style, :codeeditor)
+
+    # Generate content hash for this code editor component
+    content_hash = hash_text_content(view.state.text, view.style, view.state.is_focused, view.state.cursor, (view.state.selection_start, view.state.selection_end))
+
+    # Check if we need to invalidate cache
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+
+    if needs_redraw
+        # Create new framebuffer if needed
+        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
+            if cache_width > 0 && cache_height > 0
+                try
+                    (framebuffer, color_texture, depth_texture) = create_text_framebuffer(cache_width, cache_height)
+
+                    # Update cache with new framebuffer and content hash
+                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
+                catch e
+                    @warn "Failed to create code editor framebuffer: $e"
+                    # Fall back to immediate rendering
+                    render_codeeditor_immediate(view, x, y, width, height, projection_matrix)
+                    return
+                end
+            else
+                # Invalid size, skip rendering
+                return
+            end
+        else
+            # Update cache with existing framebuffer and new content hash
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
+        end
+
+        # Render to framebuffer
+        render_codeeditor_to_framebuffer(view, cache, width, height, projection_matrix)
+    end
+
+    # Draw cached texture to screen
+    if cache.is_valid && cache.color_texture !== nothing
+        draw_cached_text_texture(cache.color_texture, x, y, width, height, projection_matrix)
+    else
+        # Fallback to immediate rendering if cache failed
+        render_codeeditor_immediate(view, x, y, width, height, projection_matrix)
+    end
+end
+
+function render_codeeditor_to_framebuffer(view::CodeEditorView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Save current viewport and framebuffer
+    current_viewport = Vector{Int32}(undef, 4)
+    ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, current_viewport)
+
+    current_framebuffer = Ref{Int32}(0)
+    ModernGL.glGetIntegerv(ModernGL.GL_FRAMEBUFFER_BINDING, current_framebuffer)
+
+    # Bind framebuffer for off-screen rendering
+    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, cache.framebuffer)
+    ModernGL.glViewport(0, 0, cache.cache_width, cache.cache_height)
+
+    # Clear framebuffer with transparent background
+    ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
+    ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
+
+    # Create framebuffer-specific projection matrix
+    fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+
+    # Render CodeEditor content with syntax highlighting to framebuffer
+    render_codeeditor_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+
+    # Restore previous framebuffer and viewport
+    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, current_framebuffer[])
+    ModernGL.glViewport(current_viewport[1], current_viewport[2], current_viewport[3], current_viewport[4])
+end
+
+function render_codeeditor_immediate(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Render CodeEditor content directly (fallback)
+    render_codeeditor_content(view, x, y, width, height, projection_matrix)
+end
+
+function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Extract style properties
     font = view.style.text_style.font
     size_px = view.style.text_style.size_px

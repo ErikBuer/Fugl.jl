@@ -173,41 +173,33 @@ function apply_layout(view::PlotView, x::Float32, y::Float32, width::Float32, he
 end
 
 function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Create a more stable cache key based on elements and style, not the view object itself
-    # This allows the cache to persist across state changes (which create new PlotView objects)
-    elements_hash = hash_plot_elements(view.elements)
-    style_hash = hash_plot_style(view.style)
-    cache_key = (elements_hash, style_hash)
-
-    # Get or create cache for this cache key
-    if !haskey(_plot_caches, cache_key)
-        _plot_caches[cache_key] = PlotCache()
-    end
-    cache = _plot_caches[cache_key]
-
     bounds = (x, y, width, height)
     cache_width = Int32(round(width))
     cache_height = Int32(round(height))
 
+    # Ensure minimum cache size to avoid zero-sized framebuffers
+    if cache_width <= 0 || cache_height <= 0
+        return  # Skip rendering if size is invalid
+    end
+
+    # Get plot render cache using stable cache key
+    cache_key, cache = get_plot_render_cache(view)
+
+    # Generate content hash for this plot
+    content_hash = hash_plot_content(view.elements, view.state, view.style)
+
     # Check if we need to invalidate cache
-    needs_redraw = should_invalidate_cache(cache, view, bounds)
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
 
     if needs_redraw
-        # Clean up old framebuffer if size changed
-        if cache.framebuffer !== nothing && (cache.cache_width != cache_width || cache.cache_height != cache_height)
-            cleanup_plot_cache(cache)
-        end
-
         # Create new framebuffer if needed
-        if cache.framebuffer === nothing
+        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
             if cache_width > 0 && cache_height > 0
                 try
                     (framebuffer, color_texture, depth_texture) = create_plot_framebuffer(cache_width, cache_height)
-                    cache.framebuffer = framebuffer
-                    cache.color_texture = color_texture
-                    cache.depth_texture = depth_texture
-                    cache.cache_width = cache_width
-                    cache.cache_height = cache_height
+
+                    # Update cache with new framebuffer and content hash
+                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
                 catch e
                     @warn "Failed to create plot framebuffer: $e"
                     # Fall back to immediate rendering
@@ -218,36 +210,37 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
                 # Invalid size, skip rendering
                 return
             end
+        else
+            # Update cache with existing framebuffer and new content hash
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
         end
 
         # Render to framebuffer
         render_plot_to_framebuffer(view, cache, width, height, projection_matrix)
-
-        # Update cache validity and hashes
-        cache.is_valid = true
-        cache.last_bounds = bounds
-        cache.last_elements_hash = elements_hash
-        cache.last_state_hash = hash_plot_state(view.state)
-        cache.last_style_hash = style_hash
     end
 
     # Draw cached texture to screen
-    if cache.is_valid && cache.color_texture !== nothing
+    if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0
         draw_cached_plot_texture(cache.color_texture, x, y, width, height, projection_matrix)
     else
-        # Fallback to immediate rendering if cache failed
-        render_plot_immediate(view, x, y, width, height, projection_matrix)
+        # Fallback to immediate rendering if cache failed or invalid size
+        if cache_width > 0 && cache_height > 0
+            render_plot_immediate(view, x, y, width, height, projection_matrix)
+        end
     end
 end
 
-function render_plot_to_framebuffer(view::PlotView, cache::PlotCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     state = view.state
     style = view.style
     elements = view.elements
 
-    # Save current viewport
+    # Save current viewport and framebuffer
     current_viewport = Vector{Int32}(undef, 4)
     ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, current_viewport)
+
+    current_framebuffer = Ref{Int32}(0)
+    ModernGL.glGetIntegerv(ModernGL.GL_FRAMEBUFFER_BINDING, current_framebuffer)
 
     # Bind framebuffer for off-screen rendering
     ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, cache.framebuffer)
@@ -263,8 +256,8 @@ function render_plot_to_framebuffer(view::PlotView, cache::PlotCache, width::Flo
     # Render plot content to framebuffer
     render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
 
-    # Restore default framebuffer and viewport
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, 0)
+    # Restore previous framebuffer and viewport
+    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, current_framebuffer[])
     ModernGL.glViewport(current_viewport[1], current_viewport[2], current_viewport[3], current_viewport[4])
 end
 
@@ -361,60 +354,8 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 end
 
 function draw_cached_plot_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Create vertices using the standard generate_rectangle_vertices pattern
-    positions = [
-        Point2f(x, y),                    # Top-left (0)
-        Point2f(x, y + height),           # Bottom-left (1)
-        Point2f(x + width, y + height),   # Bottom-right (2)
-        Point2f(x + width, y),            # Top-right (3)
-    ]
-
-    # Texture coordinates matching the vertex positions
-    texturecoordinates = [
-        Vec{2,Float32}(0.0f0, 1.0f0),  # Top-left -> texture top-left
-        Vec{2,Float32}(0.0f0, 0.0f0),  # Bottom-left -> texture bottom-left
-        Vec{2,Float32}(1.0f0, 0.0f0),  # Bottom-right -> texture bottom-right
-        Vec{2,Float32}(1.0f0, 1.0f0),  # Top-right -> texture top-right
-    ]
-
-    # White color for all vertices (texture will override)
-    colors = [Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0) for _ in 1:4]
-
-    # Standard triangulation exactly like draw_rectangle
-    elements = NgonFace{3,UInt32}[
-        (0, 1, 2),  # First triangle: top-left, bottom-left, bottom-right
-        (2, 3, 0)   # Second triangle: bottom-right, top-right, top-left
-    ]
-
-    # Generate buffers and create a Vertex Array Object (VAO)
-    vao = GLA.VertexArray(
-        GLA.generate_buffers(
-            prog[],
-            position=positions,
-            color=colors,
-            texcoord=texturecoordinates
-        ),
-        elements
-    )
-
-    # Bind the shader program
-    GLA.bind(prog[])
-
-    # Set uniforms
-    GLA.gluniform(prog[], :use_texture, true)
-    ModernGL.glActiveTexture(ModernGL.GL_TEXTURE0)
-    ModernGL.glBindTexture(ModernGL.GL_TEXTURE_2D, texture_id)
-    GLA.gluniform(prog[], :image, Int32(0))
-    GLA.gluniform(prog[], :projection, projection_matrix)
-
-    # Draw the quad
-    GLA.bind(vao)
-    GLA.draw(vao)
-
-    # Cleanup
-    GLA.unbind(vao)
-    GLA.unbind(prog[])
-    ModernGL.glBindTexture(ModernGL.GL_TEXTURE_2D, 0)
+    # Use the generic cached texture drawing function
+    draw_cached_texture(texture_id, x, y, width, height, projection_matrix)
 end
 
 # Drawing functions for different plot element types with viewport culling
@@ -597,13 +538,8 @@ function draw_plot_element_culled(element::ImagePlotElement, data_to_screen::Fun
 end
 
 function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
-    # Create the same cache key used in interpret_view
-    elements_hash = hash_plot_elements(view.elements)
-    style_hash = hash_plot_style(view.style)
-    cache_key = (elements_hash, style_hash)
-
-    # Get cache for this cache key (if it exists)
-    cache = get(_plot_caches, cache_key, nothing)
+    # Get plot render cache using the same key as interpret_view
+    cache_key, cache = get_plot_render_cache(view)
     interaction_occurred = false
 
     # Check for scroll wheel zoom with Ctrl/Cmd modifier
@@ -633,7 +569,7 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
     end
 
     # Invalidate cache if there was user interaction that changes the view
-    if interaction_occurred && cache !== nothing
+    if interaction_occurred
         invalidate_plot_cache!(cache)
     end
 

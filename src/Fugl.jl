@@ -186,7 +186,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         clear_font_cache!()
         clear_glyph_atlas!()
         clear_text_batch!()
-        clear_plot_caches!()
+        clear_render_caches!()
 
         # Clear UI reference
         last_ui = nothing
