@@ -20,6 +20,8 @@ Clean up OpenGL resources for a single cache entry
 """
 function cleanup_render_cache(cache::RenderCache)
     if cache.framebuffer !== nothing
+        # Unregister from tracking before deleting
+        unregister_cache_framebuffer!(cache.framebuffer)
         framebuffer_ref = Ref{UInt32}(cache.framebuffer)
         ModernGL.glDeleteFramebuffers(1, framebuffer_ref)
     end
@@ -42,15 +44,13 @@ Create a framebuffer with color and optional depth texture
 Returns (framebuffer_id, color_texture_id, depth_texture_id)
 """
 function create_render_framebuffer(width::Int32, height::Int32; with_depth::Bool=false)::Tuple{UInt32,UInt32,Union{UInt32,Nothing}}
-    # Save current framebuffer binding to restore it later
-    current_framebuffer = Ref{Int32}(0)
-    ModernGL.glGetIntegerv(ModernGL.GL_FRAMEBUFFER_BINDING, current_framebuffer)
-
     # Generate framebuffer
     framebuffer_ref = Ref{UInt32}(0)
     ModernGL.glGenFramebuffers(1, framebuffer_ref)
     framebuffer = framebuffer_ref[]
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, framebuffer)
+
+    # Push current framebuffer onto stack and bind the new one
+    push_framebuffer!(framebuffer)
 
     # Create color texture
     color_texture_ref = Ref{UInt32}(0)
@@ -80,8 +80,11 @@ function create_render_framebuffer(width::Int32, height::Int32; with_depth::Bool
         error("Framebuffer not complete!")
     end
 
-    # Restore previous framebuffer binding
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, current_framebuffer[])
+    # Register this as a cache framebuffer
+    register_cache_framebuffer!(framebuffer)
+
+    # Restore previous framebuffer binding and unbind texture
+    pop_framebuffer!()
     ModernGL.glBindTexture(ModernGL.GL_TEXTURE_2D, 0)
 
     return (framebuffer, color_texture, depth_texture)

@@ -84,16 +84,9 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
 end
 
 function render_textbox_to_framebuffer(view::TextBoxView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Save current viewport and framebuffer
-    current_viewport = Vector{Int32}(undef, 4)
-    ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, current_viewport)
-
-    current_framebuffer = Ref{Int32}(0)
-    ModernGL.glGetIntegerv(ModernGL.GL_FRAMEBUFFER_BINDING, current_framebuffer)
-
-    # Bind framebuffer for off-screen rendering
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, cache.framebuffer)
-    ModernGL.glViewport(0, 0, cache.cache_width, cache.cache_height)
+    # Push current framebuffer and viewport onto stacks
+    push_framebuffer!(cache.framebuffer)
+    push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
 
     # Clear framebuffer with transparent background
     ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
@@ -106,8 +99,8 @@ function render_textbox_to_framebuffer(view::TextBoxView, cache::RenderCache, wi
     render_textbox_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
 
     # Restore previous framebuffer and viewport
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, current_framebuffer[])
-    ModernGL.glViewport(current_viewport[1], current_viewport[2], current_viewport[3], current_viewport[4])
+    pop_viewport!()
+    pop_framebuffer!()
 end
 
 function render_textbox_immediate(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})

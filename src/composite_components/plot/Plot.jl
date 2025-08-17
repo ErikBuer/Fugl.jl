@@ -191,6 +191,14 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # Check if we need to invalidate cache
     needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
 
+    # During active interactions, bypass caching to avoid visual glitches
+    # This ensures smooth zoom/pan without cache timing issues
+    if !cache.is_valid
+        # Use immediate rendering when cache is invalid (during interactions)
+        render_plot_immediate(view, x, y, width, height, projection_matrix)
+        return
+    end
+
     if needs_redraw
         # Create new framebuffer if needed
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
@@ -235,16 +243,9 @@ function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::F
     style = view.style
     elements = view.elements
 
-    # Save current viewport and framebuffer
-    current_viewport = Vector{Int32}(undef, 4)
-    ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, current_viewport)
-
-    current_framebuffer = Ref{Int32}(0)
-    ModernGL.glGetIntegerv(ModernGL.GL_FRAMEBUFFER_BINDING, current_framebuffer)
-
-    # Bind framebuffer for off-screen rendering
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, cache.framebuffer)
-    ModernGL.glViewport(0, 0, cache.cache_width, cache.cache_height)
+    # Push current framebuffer and viewport onto stacks
+    push_framebuffer!(cache.framebuffer)
+    push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
 
     # Clear framebuffer
     ModernGL.glClearColor(style.background_color[1], style.background_color[2], style.background_color[3], style.background_color[4])
@@ -257,8 +258,8 @@ function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::F
     render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
 
     # Restore previous framebuffer and viewport
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, current_framebuffer[])
-    ModernGL.glViewport(current_viewport[1], current_viewport[2], current_viewport[3], current_viewport[4])
+    pop_viewport!()
+    pop_framebuffer!()
 end
 
 function render_plot_immediate(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
@@ -569,6 +570,8 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
     end
 
     # Invalidate cache if there was user interaction that changes the view
+    # NOTE: We invalidate cache to force immediate rendering during interactions
+    # This prevents cached content from being displayed with wrong bounds during zoom/pan
     if interaction_occurred
         invalidate_plot_cache!(cache)
     end

@@ -3,7 +3,9 @@ using FileIO, ImageCore
 function create_offscreen_framebuffer(width::Int, height::Int)
     framebuffer = Ref{UInt32}(0)
     ModernGL.glGenFramebuffers(1, framebuffer)
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, framebuffer[])
+
+    # Use GL state management for both framebuffer and viewport
+    push_framebuffer!(framebuffer[])
 
     texture = Ref{UInt32}(0)
     ModernGL.glGenTextures(1, texture)
@@ -17,6 +19,9 @@ function create_offscreen_framebuffer(width::Int, height::Int)
     if ModernGL.glCheckFramebufferStatus(ModernGL.GL_FRAMEBUFFER) != ModernGL.GL_FRAMEBUFFER_COMPLETE
         error("Framebuffer is not complete!")
     end
+
+    # Restore previous framebuffer
+    pop_framebuffer!()
 
     return framebuffer[], texture[]
 end
@@ -33,12 +38,15 @@ function screenshot(ui_function::Function, output_file::String, width::Int, heig
 
     initialize_shaders()
     initialize_plot_shaders()
+    initialize_gl_state!()  # Initialize GL state management for offscreen context
 
     root_view::AbstractView = ui_function()
 
     framebuffer, texture = create_offscreen_framebuffer(width, height)
-    ModernGL.glBindFramebuffer(ModernGL.GL_FRAMEBUFFER, framebuffer)
-    ModernGL.glViewport(0, 0, width, height)
+
+    # Use the new GL state management for both framebuffer and viewport
+    push_framebuffer!(framebuffer)
+    push_viewport!(Int32(0), Int32(0), Int32(width), Int32(height))
     ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
     projection_matrix = get_orthographic_matrix(0.0f0, Float32(width), Float32(height), 0.0f0, -1.0f0, 1.0f0)
@@ -53,6 +61,9 @@ function screenshot(ui_function::Function, output_file::String, width::Int, heig
     img = permutedims(flipped_buffer, (3, 2, 1))  # Convert to (width, height, channels)
     save(output_file, img)
 
+    # Restore GL state and cleanup
+    pop_viewport!()
+    pop_framebuffer!()
     ModernGL.glDeleteFramebuffers(1, Ref(framebuffer))
     ModernGL.glDeleteTextures(1, Ref(texture))
     GLFW.DestroyWindow(gl_window)

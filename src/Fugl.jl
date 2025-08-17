@@ -10,7 +10,7 @@ export Vec4f, Vec4
 const OPENGL_LOCK = ReentrantLock()
 
 include("matrices.jl")
-
+include("gl_context_state.jl")
 include("shaders.jl")
 export initialize_shaders
 
@@ -53,6 +53,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
     initialize_shaders()
     initialize_plot_shaders()
+    initialize_gl_state!()
 
     # Initialize local states
     mouse_state = InputState()
