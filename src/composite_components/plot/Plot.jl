@@ -1,5 +1,6 @@
 abstract type AbstractPlotElement end
 
+include("utilities.jl")
 include("rec2f.jl")
 include("line_style.jl")
 include("plot_style.jl")
@@ -7,6 +8,11 @@ include("plot_state.jl")
 include("shaders.jl")
 include("line_draw.jl")
 include("marker_draw.jl")
+
+include("line_plot_element.jl")
+include("scatter_plot_element.jl")
+include("stem_plot_element.jl")
+include("image_plot_element.jl")
 
 struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}
@@ -16,128 +22,6 @@ struct PlotView <: AbstractView
 end
 
 include("plot_cache.jl")
-
-# Line plot element
-struct LinePlotElement <: AbstractPlotElement
-    x_data::Vector{Float32}
-    y_data::Vector{Float32}
-    color::Vec4{Float32}
-    width::Float32
-    line_style::LineStyle
-    label::String
-end
-
-# Scatter plot element
-struct ScatterPlotElement <: AbstractPlotElement
-    x_data::Vector{Float32}
-    y_data::Vector{Float32}
-    fill_color::Vec4{Float32}
-    border_color::Vec4{Float32}
-    marker_size::Float32
-    border_width::Float32
-    marker_type::MarkerType
-    label::String
-end
-
-# Stem plot element
-struct StemPlotElement <: AbstractPlotElement
-    x_data::Vector{Float32}
-    y_data::Vector{Float32}
-    line_color::Vec4{Float32}
-    fill_color::Vec4{Float32}
-    border_color::Vec4{Float32}
-    line_width::Float32
-    marker_size::Float32
-    border_width::Float32
-    marker_type::MarkerType
-    baseline::Float32  # Y value for stem baseline
-    label::String
-end
-
-# Image/Matrix plot element
-struct ImagePlotElement <: AbstractPlotElement
-    data::Matrix{Float32}
-    x_range::Tuple{Float32,Float32}  # (min_x, max_x)
-    y_range::Tuple{Float32,Float32}  # (min_y, max_y)
-    colormap::Symbol  # :viridis, :plasma, :grayscale, etc.
-    label::String
-end
-
-# Convenience constructors for plot elements
-function LinePlotElement(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.6f0, 0.8f0, 1.0f0),
-    width::Float32=2.0f0,
-    line_style::LineStyle=SOLID,
-    label::String=""
-)
-    y_f32 = Float32.(y_data)
-    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return LinePlotElement(x_f32, y_f32, color, width, line_style, label)
-end
-
-function ScatterPlotElement(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    fill_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
-    marker_size::Float32=5.0f0,
-    border_width::Float32=1.50f0,
-    marker_type::MarkerType=CIRCLE,
-    label::String=""
-)
-    y_f32 = Float32.(y_data)
-    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return ScatterPlotElement(x_f32, y_f32, fill_color, border_color, marker_size, border_width, marker_type, label)
-end
-
-function StemPlotElement(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    line_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    fill_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0),
-    line_width::Float32=2.0f0,
-    marker_size::Float32=5.0f0,
-    border_width::Float32=0.0f0,
-    marker_type::MarkerType=CIRCLE,
-    baseline::Float32=0.0f0,
-    label::String=""
-)
-    y_f32 = Float32.(y_data)
-    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return StemPlotElement(x_f32, y_f32, line_color, fill_color, border_color, line_width, marker_size, border_width, marker_type, baseline, label)
-end
-
-function ImagePlotElement(
-    data::Matrix{<:Real};
-    x_range::Tuple{Real,Real}=(1, size(data, 2)),
-    y_range::Tuple{Real,Real}=(1, size(data, 1)),
-    colormap::Symbol=:viridis,
-    label::String=""
-)
-    data_f32 = Float32.(data)
-    x_range_f32 = (Float32(x_range[1]), Float32(x_range[2]))
-    y_range_f32 = (Float32(y_range[1]), Float32(y_range[2]))
-    return ImagePlotElement(data_f32, x_range_f32, y_range_f32, colormap, label)
-end
-
-# Helper function to extract data bounds from any plot element
-function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32,Float32,Float32}
-    if element isa LinePlotElement || element isa ScatterPlotElement || element isa StemPlotElement
-        if !isempty(element.x_data) && !isempty(element.y_data)
-            min_x, max_x = extrema(element.x_data)
-            min_y, max_y = extrema(element.y_data)
-            return (min_x, max_x, min_y, max_y)
-        end
-    elseif element isa ImagePlotElement
-        min_x, max_x = element.x_range
-        min_y, max_y = element.y_range
-        return (min_x, max_x, min_y, max_y)
-    end
-    return (0.0f0, 1.0f0, 0.0f0, 1.0f0)  # Default bounds
-end
 
 """
 Plot component.
@@ -229,7 +113,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
 
     # Draw cached texture to screen
     if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0
-        draw_cached_plot_texture(cache.color_texture, x, y, width, height, projection_matrix)
+        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
     else
         # Fallback to immediate rendering if cache failed or invalid size
         if cache_width > 0 && cache_height > 0
@@ -352,11 +236,6 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
     for element in elements
         draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
     end
-end
-
-function draw_cached_plot_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Use the generic cached texture drawing function
-    draw_cached_texture(texture_id, x, y, width, height, projection_matrix)
 end
 
 # Drawing functions for different plot element types with viewport culling
