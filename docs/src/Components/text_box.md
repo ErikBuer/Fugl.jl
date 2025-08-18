@@ -8,9 +8,6 @@ text_box_state = Ref(EditorState("Enter your text here..."))
 
 function MyApp()
     IntrinsicColumn([
-        IntrinsicHeight(Container(Text("Text Editor Generalization Demo"))),
-
-        # Text Box Section
         IntrinsicHeight(Container(Text("Plain Text Box:"))),
         Container(
             TextBox(
