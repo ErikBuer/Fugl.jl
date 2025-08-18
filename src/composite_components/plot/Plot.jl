@@ -395,7 +395,7 @@ function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Func
     end
 end
 
-function draw_plot_element_culled(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
     # Check if image overlaps with viewport
     x_min, x_max = element.x_range
     y_min, y_max = element.y_range

@@ -37,7 +37,7 @@ function image_plot_demo()
 
     # Create plot elements with different colormaps
     elements = AbstractPlotElement[
-        ImagePlotElement(
+        HeatmapElement(
         data;
         x_range=(0.0, 10.0),
         y_range=(0.0, 10.0),

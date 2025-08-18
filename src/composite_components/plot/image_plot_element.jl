@@ -1,4 +1,4 @@
-struct ImagePlotElement <: AbstractPlotElement
+struct HeatmapElement <: AbstractPlotElement
     data::Matrix{Float32}
     x_range::Tuple{Float32,Float32}  # (min_x, max_x)
     y_range::Tuple{Float32,Float32}  # (min_y, max_y)
@@ -6,7 +6,7 @@ struct ImagePlotElement <: AbstractPlotElement
     label::String
 end
 
-function ImagePlotElement(
+function HeatmapElement(
     data::Matrix{<:Real};
     x_range::Tuple{Real,Real}=(1, size(data, 2)),
     y_range::Tuple{Real,Real}=(1, size(data, 1)),
@@ -16,7 +16,7 @@ function ImagePlotElement(
     data_f32 = Float32.(data)
     x_range_f32 = (Float32(x_range[1]), Float32(x_range[2]))
     y_range_f32 = (Float32(y_range[1]), Float32(y_range[2]))
-    return ImagePlotElement(data_f32, x_range_f32, y_range_f32, colormap, label)
+    return HeatmapElement(data_f32, x_range_f32, y_range_f32, colormap, label)
 end
 
 # Colormap definitions - simple linear interpolation for now
@@ -59,7 +59,7 @@ end
 
 # Draw image plot using texture and existing shader - much more efficient!
 function draw_image_plot(
-    element::ImagePlotElement,
+    element::HeatmapElement,
     data_to_screen::Function,
     projection_matrix::Mat4{Float32};
     anti_aliasing_width::Float32=1.5f0
@@ -85,7 +85,7 @@ end
 
 # Draw image plot with clipping to effective bounds (plot axes)
 function draw_image_plot_clipped(
-    element::ImagePlotElement,
+    element::HeatmapElement,
     data_to_screen::Function,
     projection_matrix::Mat4{Float32},
     effective_bounds::Rect2f;
@@ -132,7 +132,7 @@ end
 
 # Texture-based rendering using existing shader with precomputed colormap texture
 function draw_image_plot_textured(
-    element::ImagePlotElement,
+    element::HeatmapElement,
     bottom_left_x::Float32, bottom_left_y::Float32,
     bottom_right_x::Float32, bottom_right_y::Float32,
     top_left_x::Float32, top_left_y::Float32,
@@ -152,7 +152,7 @@ end
 
 # Texture-based rendering with custom texture coordinates for clipping
 function draw_image_plot_textured_clipped(
-    element::ImagePlotElement,
+    element::HeatmapElement,
     bottom_left_x::Float32, bottom_left_y::Float32,
     bottom_right_x::Float32, bottom_right_y::Float32,
     top_left_x::Float32, top_left_y::Float32,
