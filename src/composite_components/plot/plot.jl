@@ -476,41 +476,58 @@ function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Func
             )
 
             if length(final_x) >= 1
-                # Draw vertical lines from baseline to each data point (only for visible points)
+                # Clamp baseline to visible Y bounds to avoid drawing outside plot area
+                clipped_baseline = clamp(element.baseline, effective_bounds.y, effective_bounds.y + effective_bounds.height)
+
+                # Batch all stem lines into a single draw call for performance
+                # Each stem is represented as two points: baseline and data point
+                # We'll use NaN values to separate individual stems
+                batched_x = Float32[]
+                batched_y = Float32[]
+
                 for i in 1:length(final_x)
                     x_val = final_x[i]
                     y_val = final_y[i]
 
-                    # Clamp baseline to visible Y bounds to avoid drawing outside plot area
-                    clipped_baseline = clamp(element.baseline, effective_bounds.y, effective_bounds.y + effective_bounds.height)
-
-                    # Only draw the stem if the data point and clipped baseline are different
+                    # Only include the stem if the data point and clipped baseline are different
                     if abs(clipped_baseline - y_val) > 1e-6  # Avoid drawing zero-length lines
-                        stem_x_data = [x_val, x_val]
-                        stem_y_data = [clipped_baseline, y_val]
+                        # Add stem line points
+                        push!(batched_x, x_val)
+                        push!(batched_y, clipped_baseline)
+                        push!(batched_x, x_val)
+                        push!(batched_y, y_val)
 
-                        # Clip stem lines to exact bounds
-                        stem_clipped_x, stem_clipped_y = cull_line_data(
-                            stem_x_data,
-                            stem_y_data,
-                            effective_bounds.x,
-                            effective_bounds.x + effective_bounds.width,
-                            effective_bounds.y,
-                            effective_bounds.y + effective_bounds.height
-                        )
-
-                        if length(stem_clipped_x) >= 2
-                            draw_line_plot(
-                                stem_clipped_x,
-                                stem_clipped_y,
-                                data_to_screen,
-                                element.line_color,
-                                element.line_width,
-                                SOLID,  # SOLID line style
-                                projection_matrix;
-                                anti_aliasing_width=style.anti_aliasing_width
-                            )
+                        # Add NaN separator to break the line between stems
+                        if i < length(final_x)
+                            push!(batched_x, NaN32)
+                            push!(batched_y, NaN32)
                         end
+                    end
+                end
+
+                # Draw all stems in a single batched call
+                if length(batched_x) >= 2
+                    # Clip the entire batched line data to exact bounds
+                    stem_clipped_x, stem_clipped_y = cull_line_data(
+                        batched_x,
+                        batched_y,
+                        effective_bounds.x,
+                        effective_bounds.x + effective_bounds.width,
+                        effective_bounds.y,
+                        effective_bounds.y + effective_bounds.height
+                    )
+
+                    if length(stem_clipped_x) >= 2
+                        draw_line_plot(
+                            stem_clipped_x,
+                            stem_clipped_y,
+                            data_to_screen,
+                            element.line_color,
+                            element.line_width,
+                            SOLID,  # SOLID line style
+                            projection_matrix;
+                            anti_aliasing_width=style.anti_aliasing_width
+                        )
                     end
                 end
 
