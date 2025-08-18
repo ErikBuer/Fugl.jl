@@ -64,6 +64,6 @@ function preferred_height(view::AbstractView)::Bool
     return false
 end
 
-function preferred_size(view::AbstractView)::Bool
+@inline function preferred_size(view::AbstractView)::Bool
     return preferred_width(view) || preferred_height(view)
 end
