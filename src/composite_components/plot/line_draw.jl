@@ -1,13 +1,14 @@
-
-
+"""
+Struct for storing a batch of lines for efficient drawing.
+"""
 struct LineBatch
-    points::Vector{Point2f}        # All line points
-    colors::Vector{Vec4{Float32}}   # Color per point (for gradients)
-    widths::Vector{Float32}        # Width per point (for variable thickness)
-    line_styles::Vector{Float32}   # Line style per point (enum as Float32). Int somehow doesn't work on all targets.
+    points::Vector{Point2f}          # All line points
+    colors::Vector{Vec4{Float32}}    # Color per point (for gradients)
+    widths::Vector{Float32}          # Width per point (for variable thickness)
+    line_styles::Vector{Float32}     # Line style per point (enum as Float32). Int somehow doesn't work on all targets.
     line_progresses::Vector{Float32} # Cumulative distance along line for dash patterns
-    segment_starts::Vector{Int32}  # Start indices for each line segment
-    segment_lengths::Vector{Int32} # Length of each line segment
+    segment_starts::Vector{Int32}    # Start indices for each line segment
+    segment_lengths::Vector{Int32}   # Length of each line segment
 end
 
 function LineBatch()
@@ -61,22 +62,6 @@ function split_line_at_nan(x_data::Vector{Float32}, y_data::Vector{Float32})
     end
 
     return segments
-end
-
-function calculate_line_progress(points::Vector{Point2f})::Vector{Float32}
-    if length(points) < 2
-        return Float32[]
-    end
-
-    progress = Vector{Float32}(undef, length(points))
-    progress[1] = 0.0f0
-
-    for i in 2:length(points)
-        segment_length = norm(points[i] - points[i-1])
-        progress[i] = progress[i-1] + segment_length
-    end
-
-    return progress
 end
 
 # Add a complete line (series of connected points) to the batch
@@ -147,11 +132,13 @@ function draw_line_plot(
     end
 
     # Draw the batch
-    draw_lines_enhanced(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
+    draw_lines(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
 
-# Enhanced line drawing using efficient method (keeping old interface but with optimizations)
-function draw_lines_enhanced(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_aliasing_width::Float32=1.5f0)
+"""
+Batched line drawing function.
+"""
+function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_aliasing_width::Float32=1.5f0)
     if isempty(batch.points)
         return
     end
@@ -291,160 +278,6 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
     return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out
 end
 
-# Generate enhanced line geometry with line style support and progress calculation
-function generate_enhanced_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::Float32)
-    positions = Vector{Point2f}()
-    directions = Vector{Point2f}()
-    widths = Vector{Float32}()
-    colors = Vector{Vec4{Float32}}()
-    vertex_types = Vector{Float32}()
-    line_styles = Vector{Float32}()
-    line_progresses = Vector{Float32}()
-
-    if length(points) < 2
-        return positions, directions, widths, colors, vertex_types, line_styles, line_progresses
-    end
-
-    # Calculate cumulative distance along the line for pattern progress
-    cumulative_distance = 0.0f0
-    distances = Float32[0.0f0]  # Start at 0
-
-    for i in 2:length(points)
-        segment_length = norm(points[i] - points[i-1])
-        cumulative_distance += segment_length
-        push!(distances, cumulative_distance)
-    end
-
-    # For each line segment, generate geometry with slight overlaps and progress info
-    for i in 1:(length(points)-1)
-        start_point = points[i]
-        end_point = points[i+1]
-        start_progress = distances[i]
-        end_progress = distances[i+1]
-
-        # Calculate direction vector for current segment
-        direction_vec = Point2f(end_point[1] - start_point[1], end_point[2] - start_point[2])
-
-        # Slight overlap for crack elimination
-        actual_start = start_point
-        actual_end = end_point
-        actual_start_progress = start_progress
-        actual_end_progress = end_progress
-
-        if i > 1
-            # Extend start point slightly backwards
-            if norm(direction_vec) > 0
-                dir_norm = direction_vec / norm(direction_vec)
-                overlap = width * 0.1f0
-                actual_start = Point2f(start_point[1] - dir_norm[1] * overlap,
-                    start_point[2] - dir_norm[2] * overlap)
-                actual_start_progress = start_progress - overlap
-            end
-        end
-
-        if i < length(points) - 1
-            # Extend end point slightly forward
-            if norm(direction_vec) > 0
-                dir_norm = direction_vec / norm(direction_vec)
-                overlap = width * 0.1f0
-                actual_end = Point2f(end_point[1] + dir_norm[1] * overlap,
-                    end_point[2] + dir_norm[2] * overlap)
-                actual_end_progress = end_progress + overlap
-            end
-        end
-
-        # Recalculate direction with adjusted endpoints
-        adjusted_direction = Point2f(actual_end[1] - actual_start[1], actual_end[2] - actual_start[2])
-
-        # Generate quad vertices (2 triangles = 6 vertices)
-        # Triangle 1: bottom-left, bottom-right, top-left
-        push!(positions, actual_start, actual_start, actual_start)
-        push!(directions, adjusted_direction, adjusted_direction, adjusted_direction)
-        push!(widths, width, width, width)
-        push!(colors, color, color, color)
-        push!(vertex_types, 0.0f0, 1.0f0, 2.0f0)  # bottom-left, bottom-right, top-left
-        push!(line_styles, line_style, line_style, line_style)
-        push!(line_progresses, actual_start_progress, actual_end_progress, actual_start_progress)
-
-        # Triangle 2: bottom-right, top-right, top-left
-        push!(positions, actual_start, actual_start, actual_start)
-        push!(directions, adjusted_direction, adjusted_direction, adjusted_direction)
-        push!(widths, width, width, width)
-        push!(colors, color, color, color)
-        push!(vertex_types, 1.0f0, 3.0f0, 2.0f0)  # bottom-right, top-right, top-left
-        push!(line_styles, line_style, line_style, line_style)
-        push!(line_progresses, actual_end_progress, actual_end_progress, actual_start_progress)
-    end
-
-    return positions, directions, widths, colors, vertex_types, line_styles, line_progresses
-end
-
-# Generate simple line geometry - quad-based with proper joins to eliminate cracks (legacy function)
-function generate_simple_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32)
-    positions = Vector{Point2f}()
-    directions = Vector{Point2f}()
-    widths = Vector{Float32}()
-    colors = Vector{Vec4{Float32}}()
-    vertex_types = Vector{Float32}()
-
-    if length(points) < 2
-        return positions, directions, widths, colors, vertex_types
-    end
-
-    # For each line segment, generate geometry with slight overlaps to eliminate cracks
-    for i in 1:(length(points)-1)
-        start_point = points[i]
-        end_point = points[i+1]
-
-        # Calculate direction vector for current segment
-        direction_vec = Point2f(end_point[1] - start_point[1], end_point[2] - start_point[2])
-
-        # Slight overlap for crack elimination
-        actual_start = start_point
-        actual_end = end_point
-
-        if i > 1
-            # Extend start point slightly backwards
-            if norm(direction_vec) > 0
-                dir_norm = direction_vec / norm(direction_vec)
-                actual_start = Point2f(start_point[1] - dir_norm[1] * width * 0.1f0,
-                    start_point[2] - dir_norm[2] * width * 0.1f0)
-            end
-        end
-
-        if i < length(points) - 1
-            # Extend end point slightly forward
-            if norm(direction_vec) > 0
-                dir_norm = direction_vec / norm(direction_vec)
-                actual_end = Point2f(end_point[1] + dir_norm[1] * width * 0.1f0,
-                    end_point[2] + dir_norm[2] * width * 0.1f0)
-            end
-        end
-
-        # Recalculate direction with adjusted endpoints
-        adjusted_direction = Point2f(actual_end[1] - actual_start[1], actual_end[2] - actual_start[2])
-
-        # Generate quad vertices (2 triangles = 6 vertices)
-        # Triangle 1: bottom-left, bottom-right, top-left
-        push!(positions, actual_start, actual_start, actual_start)
-        push!(directions, adjusted_direction, adjusted_direction, adjusted_direction)
-        push!(widths, width, width, width)
-        push!(colors, color, color, color)
-        push!(vertex_types, 0.0f0, 1.0f0, 2.0f0)  # bottom-left, bottom-right, top-left
-
-        # Triangle 2: bottom-right, top-right, top-left
-        push!(positions, actual_start, actual_start, actual_start)
-        push!(directions, adjusted_direction, adjusted_direction, adjusted_direction)
-        push!(widths, width, width, width)
-        push!(colors, color, color, color)
-        push!(vertex_types, 1.0f0, 3.0f0, 2.0f0)  # bottom-right, top-right, top-left
-    end
-
-    return positions, directions, widths, colors, vertex_types
-end
-
-# Grid and axis rendering functions using the enhanced line shader
-
 """
 Draw a grid with specified parameters using the enhanced line shader
 """
@@ -486,41 +319,7 @@ function draw_grid(
     end
 
     # Draw all grid lines
-    draw_lines_enhanced(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
-end
-
-"""
-Draw axes (x and y axis lines) using the enhanced line shader
-"""
-function draw_axes(
-    plot_bounds::Rect2f,
-    transform_func::Function,
-    color::Vec4{Float32},
-    width::Float32,
-    projection_matrix::Mat4{Float32}
-)
-    batch = LineBatch()
-
-    # X-axis (y = 0, if 0 is within bounds)
-    if 0.0f0 >= plot_bounds.y && 0.0f0 <= plot_bounds.y + plot_bounds.height
-        start_screen_x, start_screen_y = transform_func(plot_bounds.x, 0.0f0)
-        end_screen_x, end_screen_y = transform_func(plot_bounds.x + plot_bounds.width, 0.0f0)
-
-        x_axis_points = [Point2f(start_screen_x, start_screen_y), Point2f(end_screen_x, end_screen_y)]
-        add_line!(batch, x_axis_points, color, width, SOLID)  # Solid line for axes
-    end
-
-    # Y-axis (x = 0, if 0 is within bounds)
-    if 0.0f0 >= plot_bounds.x && 0.0f0 <= plot_bounds.x + plot_bounds.width
-        start_screen_x, start_screen_y = transform_func(0.0f0, plot_bounds.y)
-        end_screen_x, end_screen_y = transform_func(0.0f0, plot_bounds.y + plot_bounds.height)
-
-        y_axis_points = [Point2f(start_screen_x, start_screen_y), Point2f(end_screen_x, end_screen_y)]
-        add_line!(batch, y_axis_points, color, width, SOLID)  # Solid line for axes
-    end
-
-    # Draw all axis lines
-    draw_lines_enhanced(batch, projection_matrix)
+    draw_lines(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
 
 """
@@ -607,7 +406,7 @@ function draw_grid_with_labels(
     add_line!(axis_batch, left_axis_points, axis_color, axis_width, SOLID)  # Solid line
 
     # Draw the axis lines only (no labels - those are handled by draw_axes_with_labels)
-    draw_lines_enhanced(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
+    draw_lines(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
 
 """
@@ -677,7 +476,7 @@ function draw_axes_with_labels(
     end
 
     # Draw the axis lines and tick marks
-    draw_lines_enhanced(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
+    draw_lines(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 
     # Create text style for labels
     text_style = TextStyle(size_px=label_size_px, color=label_color)

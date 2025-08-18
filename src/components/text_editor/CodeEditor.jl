@@ -83,19 +83,21 @@ function render_codeeditor_to_framebuffer(view::CodeEditorView, cache::RenderCac
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
 
-    # Clear framebuffer with transparent background
-    ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
-    ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
+    try
+        # Clear framebuffer with transparent background
+        ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
+        ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
-    # Create framebuffer-specific projection matrix
-    fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+        # Create framebuffer-specific projection matrix
+        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
 
-    # Render CodeEditor content with syntax highlighting to framebuffer
-    render_codeeditor_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
-
-    # Restore previous framebuffer and viewport
-    pop_viewport!()
-    pop_framebuffer!()
+        # Render CodeEditor content with syntax highlighting to framebuffer
+        render_codeeditor_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+    finally
+        # Always restore previous framebuffer and viewport, even if there's an exception
+        pop_viewport!()
+        pop_framebuffer!()
+    end
 end
 
 function render_codeeditor_immediate(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})

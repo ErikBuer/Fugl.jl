@@ -8,6 +8,9 @@ function Float32(arg::Fugl.MarkerType)
     return Float32(Int(arg))
 end
 
+"""
+Struct for batch drawing markers.
+"""
 struct MarkerBatch
     positions::Vector{Point2f}        # Center positions of markers
     sizes::Vector{Float32}           # Size (radius/half-width) of each marker
@@ -28,7 +31,9 @@ function MarkerBatch()
     )
 end
 
-# Add a single marker to the batch
+"""
+Add a marker to the batch.
+"""
 function add_marker!(
     batch::MarkerBatch,
     position::Point2f,
@@ -46,7 +51,9 @@ function add_marker!(
     push!(batch.marker_types, Int32(marker_type))
 end
 
-# Draw a batch of markers using the marker shader
+"""
+Draw markers from a batch using the marker shader.
+"""
 function draw_markers(batch::MarkerBatch, projection_matrix::Mat4{Float32}; anti_aliasing_width::Float32=1.5f0)
     if isempty(batch.positions)
         return
@@ -141,7 +148,9 @@ function draw_markers(batch::MarkerBatch, projection_matrix::Mat4{Float32}; anti
     GLA.unbind(marker_prog[])
 end
 
-# Convenience function to draw scatter plot with markers
+"""
+Draw cached text texture to screen
+"""
 function draw_scatter_plot(
     x_data::Vector{Float32},
     y_data::Vector{Float32},

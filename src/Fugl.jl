@@ -124,6 +124,8 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
             # Update viewport and projection matrix
             glViewport(0, 0, fb_width, fb_height)
+            # Update our GL state tracker to match the current viewport
+            GL_STATE.current_viewport = (0, 0, Int32(fb_width), Int32(fb_height))
             projection_matrix = get_orthographic_matrix(0.0f0, Float32(fb_width), Float32(fb_height), 0.0f0, -1.0f0, 1.0f0)
 
             lock(OPENGL_LOCK) do

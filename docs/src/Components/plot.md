@@ -48,7 +48,7 @@ function MyApp()
         ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "linePlot.png", 600, 400);
+screenshot(MyApp, "linePlot.png", 840, 400);
 nothing #hide
 ```
 
@@ -111,7 +111,7 @@ function MyApp()
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "scatterPlot.png", 600, 400);
+screenshot(MyApp, "scatterPlot.png", 840, 400);
 nothing #hide
 ```
 
@@ -169,7 +169,7 @@ function MyApp()
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "stemPlot.png", 600, 400);
+screenshot(MyApp, "stemPlot.png", 840, 400);
 nothing #hide
 ```
 
@@ -223,7 +223,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "fixedBoundsPlot.png", 600, 400);
+screenshot(MyApp, "fixedBoundsPlot.png", 840, 400);
 nothing #hide
 ```
 
@@ -328,7 +328,7 @@ function MyApp()
         ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "stateManagementPlot.png", 600, 500);
+screenshot(MyApp, "stateManagementPlot.png", 840, 500);
 nothing #hide
 ```
 

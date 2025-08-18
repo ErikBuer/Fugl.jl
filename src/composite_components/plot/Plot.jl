@@ -1,12 +1,17 @@
 abstract type AbstractPlotElement end
 
-include("rec2f.jl")
+include("utilities.jl")
 include("line_style.jl")
 include("plot_style.jl")
 include("plot_state.jl")
 include("shaders.jl")
 include("line_draw.jl")
 include("marker_draw.jl")
+
+include("line_plot_element.jl")
+include("scatter_plot_element.jl")
+include("stem_plot_element.jl")
+include("image_plot_element.jl")
 
 struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}
@@ -16,128 +21,6 @@ struct PlotView <: AbstractView
 end
 
 include("plot_cache.jl")
-
-# Line plot element
-struct LinePlotElement <: AbstractPlotElement
-    x_data::Vector{Float32}
-    y_data::Vector{Float32}
-    color::Vec4{Float32}
-    width::Float32
-    line_style::LineStyle
-    label::String
-end
-
-# Scatter plot element
-struct ScatterPlotElement <: AbstractPlotElement
-    x_data::Vector{Float32}
-    y_data::Vector{Float32}
-    fill_color::Vec4{Float32}
-    border_color::Vec4{Float32}
-    marker_size::Float32
-    border_width::Float32
-    marker_type::MarkerType
-    label::String
-end
-
-# Stem plot element
-struct StemPlotElement <: AbstractPlotElement
-    x_data::Vector{Float32}
-    y_data::Vector{Float32}
-    line_color::Vec4{Float32}
-    fill_color::Vec4{Float32}
-    border_color::Vec4{Float32}
-    line_width::Float32
-    marker_size::Float32
-    border_width::Float32
-    marker_type::MarkerType
-    baseline::Float32  # Y value for stem baseline
-    label::String
-end
-
-# Image/Matrix plot element
-struct ImagePlotElement <: AbstractPlotElement
-    data::Matrix{Float32}
-    x_range::Tuple{Float32,Float32}  # (min_x, max_x)
-    y_range::Tuple{Float32,Float32}  # (min_y, max_y)
-    colormap::Symbol  # :viridis, :plasma, :grayscale, etc.
-    label::String
-end
-
-# Convenience constructors for plot elements
-function LinePlotElement(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.6f0, 0.8f0, 1.0f0),
-    width::Float32=2.0f0,
-    line_style::LineStyle=SOLID,
-    label::String=""
-)
-    y_f32 = Float32.(y_data)
-    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return LinePlotElement(x_f32, y_f32, color, width, line_style, label)
-end
-
-function ScatterPlotElement(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    fill_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
-    marker_size::Float32=5.0f0,
-    border_width::Float32=1.50f0,
-    marker_type::MarkerType=CIRCLE,
-    label::String=""
-)
-    y_f32 = Float32.(y_data)
-    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return ScatterPlotElement(x_f32, y_f32, fill_color, border_color, marker_size, border_width, marker_type, label)
-end
-
-function StemPlotElement(
-    y_data::Vector{<:Real};
-    x_data::Union{Vector{<:Real},Nothing}=nothing,
-    line_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    fill_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0),
-    line_width::Float32=2.0f0,
-    marker_size::Float32=5.0f0,
-    border_width::Float32=0.0f0,
-    marker_type::MarkerType=CIRCLE,
-    baseline::Float32=0.0f0,
-    label::String=""
-)
-    y_f32 = Float32.(y_data)
-    x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return StemPlotElement(x_f32, y_f32, line_color, fill_color, border_color, line_width, marker_size, border_width, marker_type, baseline, label)
-end
-
-function ImagePlotElement(
-    data::Matrix{<:Real};
-    x_range::Tuple{Real,Real}=(1, size(data, 2)),
-    y_range::Tuple{Real,Real}=(1, size(data, 1)),
-    colormap::Symbol=:viridis,
-    label::String=""
-)
-    data_f32 = Float32.(data)
-    x_range_f32 = (Float32(x_range[1]), Float32(x_range[2]))
-    y_range_f32 = (Float32(y_range[1]), Float32(y_range[2]))
-    return ImagePlotElement(data_f32, x_range_f32, y_range_f32, colormap, label)
-end
-
-# Helper function to extract data bounds from any plot element
-function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32,Float32,Float32}
-    if element isa LinePlotElement || element isa ScatterPlotElement || element isa StemPlotElement
-        if !isempty(element.x_data) && !isempty(element.y_data)
-            min_x, max_x = extrema(element.x_data)
-            min_y, max_y = extrema(element.y_data)
-            return (min_x, max_x, min_y, max_y)
-        end
-    elseif element isa ImagePlotElement
-        min_x, max_x = element.x_range
-        min_y, max_y = element.y_range
-        return (min_x, max_x, min_y, max_y)
-    end
-    return (0.0f0, 1.0f0, 0.0f0, 1.0f0)  # Default bounds
-end
 
 """
 Plot component.
@@ -191,16 +74,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # Check if we need to invalidate cache
     needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
 
-    # During active interactions, bypass caching to avoid visual glitches
-    # This ensures smooth zoom/pan without cache timing issues
-    if !cache.is_valid
-        # Use immediate rendering when cache is invalid (during interactions)
-        render_plot_immediate(view, x, y, width, height, projection_matrix)
-        return
-    end
-
-    if needs_redraw
-        # Create new framebuffer if needed
+    if needs_redraw || !cache.is_valid
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
             if cache_width > 0 && cache_height > 0
                 try
@@ -210,9 +84,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
                     update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
                 catch e
                     @warn "Failed to create plot framebuffer: $e"
-                    # Fall back to immediate rendering
-                    render_plot_immediate(view, x, y, width, height, projection_matrix)
-                    return
+                    return  # Skip rendering if framebuffer creation fails
                 end
             else
                 # Invalid size, skip rendering
@@ -227,14 +99,8 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
         render_plot_to_framebuffer(view, cache, width, height, projection_matrix)
     end
 
-    # Draw cached texture to screen
     if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0
-        draw_cached_plot_texture(cache.color_texture, x, y, width, height, projection_matrix)
-    else
-        # Fallback to immediate rendering if cache failed or invalid size
-        if cache_width > 0 && cache_height > 0
-            render_plot_immediate(view, x, y, width, height, projection_matrix)
-        end
+        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
     end
 end
 
@@ -247,28 +113,21 @@ function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::F
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
 
-    # Clear framebuffer
-    ModernGL.glClearColor(style.background_color[1], style.background_color[2], style.background_color[3], style.background_color[4])
-    ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
+    try
+        # Clear framebuffer
+        ModernGL.glClearColor(style.background_color[1], style.background_color[2], style.background_color[3], style.background_color[4])
+        ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
 
-    # Create framebuffer-specific projection matrix
-    fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+        # Create framebuffer-specific projection matrix
+        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
 
-    # Render plot content to framebuffer
-    render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
-
-    # Restore previous framebuffer and viewport
-    pop_viewport!()
-    pop_framebuffer!()
-end
-
-function render_plot_immediate(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Draw background
-    bg_vertices = generate_rectangle_vertices(x, y, width, height)
-    draw_rectangle(bg_vertices, view.style.background_color, projection_matrix)
-
-    # Render plot content directly
-    render_plot_content(view, x, y, width, height, projection_matrix)
+        # Render plot content to framebuffer
+        render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+    finally
+        # Always restore previous framebuffer and viewport, even if there's an exception
+        pop_viewport!()
+        pop_framebuffer!()
+    end
 end
 
 function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
@@ -352,11 +211,6 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
     for element in elements
         draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
     end
-end
-
-function draw_cached_plot_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Use the generic cached texture drawing function
-    draw_cached_texture(texture_id, x, y, width, height, projection_matrix)
 end
 
 # Drawing functions for different plot element types with viewport culling
@@ -476,41 +330,58 @@ function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Func
             )
 
             if length(final_x) >= 1
-                # Draw vertical lines from baseline to each data point (only for visible points)
+                # Clamp baseline to visible Y bounds to avoid drawing outside plot area
+                clipped_baseline = clamp(element.baseline, effective_bounds.y, effective_bounds.y + effective_bounds.height)
+
+                # Batch all stem lines into a single draw call for performance
+                # Each stem is represented as two points: baseline and data point
+                # We'll use NaN values to separate individual stems
+                batched_x = Float32[]
+                batched_y = Float32[]
+
                 for i in 1:length(final_x)
                     x_val = final_x[i]
                     y_val = final_y[i]
 
-                    # Clamp baseline to visible Y bounds to avoid drawing outside plot area
-                    clipped_baseline = clamp(element.baseline, effective_bounds.y, effective_bounds.y + effective_bounds.height)
-
-                    # Only draw the stem if the data point and clipped baseline are different
+                    # Only include the stem if the data point and clipped baseline are different
                     if abs(clipped_baseline - y_val) > 1e-6  # Avoid drawing zero-length lines
-                        stem_x_data = [x_val, x_val]
-                        stem_y_data = [clipped_baseline, y_val]
+                        # Add stem line points
+                        push!(batched_x, x_val)
+                        push!(batched_y, clipped_baseline)
+                        push!(batched_x, x_val)
+                        push!(batched_y, y_val)
 
-                        # Clip stem lines to exact bounds
-                        stem_clipped_x, stem_clipped_y = cull_line_data(
-                            stem_x_data,
-                            stem_y_data,
-                            effective_bounds.x,
-                            effective_bounds.x + effective_bounds.width,
-                            effective_bounds.y,
-                            effective_bounds.y + effective_bounds.height
-                        )
-
-                        if length(stem_clipped_x) >= 2
-                            draw_line_plot(
-                                stem_clipped_x,
-                                stem_clipped_y,
-                                data_to_screen,
-                                element.line_color,
-                                element.line_width,
-                                SOLID,  # SOLID line style
-                                projection_matrix;
-                                anti_aliasing_width=style.anti_aliasing_width
-                            )
+                        # Add NaN separator to break the line between stems
+                        if i < length(final_x)
+                            push!(batched_x, NaN32)
+                            push!(batched_y, NaN32)
                         end
+                    end
+                end
+
+                # Draw all stems in a single batched call
+                if length(batched_x) >= 2
+                    # Clip the entire batched line data to exact bounds
+                    stem_clipped_x, stem_clipped_y = cull_line_data(
+                        batched_x,
+                        batched_y,
+                        effective_bounds.x,
+                        effective_bounds.x + effective_bounds.width,
+                        effective_bounds.y,
+                        effective_bounds.y + effective_bounds.height
+                    )
+
+                    if length(stem_clipped_x) >= 2
+                        draw_line_plot(
+                            stem_clipped_x,
+                            stem_clipped_y,
+                            data_to_screen,
+                            element.line_color,
+                            element.line_width,
+                            SOLID,  # SOLID line style
+                            projection_matrix;
+                            anti_aliasing_width=style.anti_aliasing_width
+                        )
                     end
                 end
 
@@ -567,13 +438,6 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
             handle_middle_button_drag(view, mouse_state, x, y, width, height)
             interaction_occurred = true
         end
-    end
-
-    # Invalidate cache if there was user interaction that changes the view
-    # NOTE: We invalidate cache to force immediate rendering during interactions
-    # This prevents cached content from being displayed with wrong bounds during zoom/pan
-    if interaction_occurred
-        invalidate_plot_cache!(cache)
     end
 
     return

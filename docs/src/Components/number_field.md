@@ -42,7 +42,7 @@ function MyApp()
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "numberField.png", 600, 400);
+screenshot(MyApp, "numberField.png", 840, 400);
 nothing #hide
 ```
 
