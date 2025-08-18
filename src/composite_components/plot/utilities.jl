@@ -8,7 +8,7 @@ function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32
             min_y, max_y = extrema(element.y_data)
             return (min_x, max_x, min_y, max_y)
         end
-    elseif element isa ImagePlotElement
+    elseif element isa HeatmapElement
         min_x, max_x = element.x_range
         min_y, max_y = element.y_range
         return (min_x, max_x, min_y, max_y)

@@ -15,7 +15,7 @@ function hash_plot_content(elements::Vector{AbstractPlotElement}, state::PlotSta
             h = hash((element.x_data, element.y_data, element.line_color, element.fill_color,
                     element.border_color, element.line_width, element.marker_size,
                     element.border_width, element.marker_type, element.baseline), h)
-        elseif element isa ImagePlotElement
+        elseif element isa HeatmapElement
             h = hash((element.data, element.x_range, element.y_range, element.colormap), h)
         end
     end

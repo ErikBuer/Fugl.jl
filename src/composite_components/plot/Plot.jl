@@ -8,10 +8,10 @@ include("shaders.jl")
 include("line_draw.jl")
 include("marker_draw.jl")
 
-include("line_plot_element.jl")
-include("scatter_plot_element.jl")
-include("stem_plot_element.jl")
-include("image_plot_element.jl")
+include("elements/line_plot.jl")
+include("elements/scatter_plot.jl")
+include("elements/stem_plot.jl")
+include("elements/heatmap.jl")
 
 struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}
@@ -37,14 +37,6 @@ function Plot(
         state = PlotState(calculated_bounds, state.auto_scale, state.initial_x_min, state.initial_x_max, state.initial_y_min, state.initial_y_max, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max)
     end
     return PlotView(elements, state, style, on_state_change)
-end
-# Convenience constructors for specific plot types
-function LinePlot(
-    elements::Vector{LinePlotElement};
-    style::PlotStyle=PlotStyle(),
-    on_state_change::Function=(new_state) -> nothing
-)::PlotView
-    return Plot(Vector{AbstractPlotElement}(elements), PlotState(), style, on_state_change)
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}
@@ -403,10 +395,25 @@ function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Func
     end
 end
 
-function draw_plot_element_culled(element::ImagePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
-    # TODO: Implement image/matrix plot drawing with viewport culling
-    # This will require texture mapping, colormap support, and intelligent sub-sampling
-    println("ImagePlot drawing not yet implemented")
+function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+    # Check if image overlaps with viewport
+    x_min, x_max = element.x_range
+    y_min, y_max = element.y_range
+
+    # Simple bounds check - if image completely outside viewport, skip
+    if x_max < effective_bounds.x || x_min > effective_bounds.x + effective_bounds.width ||
+       y_max < effective_bounds.y || y_min > effective_bounds.y + effective_bounds.height
+        return  # Image is completely outside viewport
+    end
+
+    # Draw the image plot with clipping bounds
+    draw_image_plot_clipped(
+        element,
+        data_to_screen,
+        projection_matrix,
+        effective_bounds;
+        anti_aliasing_width=style.anti_aliasing_width
+    )
 end
 
 function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
