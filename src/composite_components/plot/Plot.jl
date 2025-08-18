@@ -1,7 +1,6 @@
 abstract type AbstractPlotElement end
 
 include("utilities.jl")
-include("rec2f.jl")
 include("line_style.jl")
 include("plot_style.jl")
 include("plot_state.jl")

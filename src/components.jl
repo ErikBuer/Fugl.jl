@@ -1,6 +1,7 @@
 include("components/common/utilities.jl")
 include("components/common/draw.jl")
 include("components/common/render_cache.jl")
+include("components/common/rec2f.jl")
 
 include("components/Empty.jl")
 export Empty
