@@ -1,7 +1,7 @@
 using Fugl
 using Fugl: Text
 
-function image_plot_demo()
+function heatmap_plot_demo()
     # Create test image data
     size_x, size_y = 50, 50
 
@@ -41,14 +41,16 @@ function image_plot_demo()
         data;
         x_range=(0.0, 10.0),
         y_range=(0.0, 10.0),
-        colormap=:viridis,
-        label="Viridis Map"
+        colormap=:viridis,  # Use viridis instead of grayscale
+        nan_color=(1.0, 0.0, 1.0, 1.0),  # Magenta for NaN values
+        background_color=(0.2, 0.2, 0.2, 1.0),  # Dark gray background
+        value_range=nothing  # Auto-detect from data
     )
     ]
 
     function MyApp()
         IntrinsicColumn([
-                IntrinsicHeight(Container(Text("Image Plot Demo - 2D Gaussian + Waves"))),
+                IntrinsicHeight(Container(Text("Heatmap Demo - 2D Gaussian + Waves"))),
                 Container(
                     Plot(
                         elements,
@@ -65,7 +67,7 @@ function image_plot_demo()
             ], padding=0.0, spacing=0.0)
     end
 
-    Fugl.run(MyApp, title="Image Plot Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
+    Fugl.run(MyApp, title="Heatmap Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
 end
 
-image_plot_demo()
+heatmap_plot_demo()

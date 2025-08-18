@@ -11,7 +11,7 @@ include("marker_draw.jl")
 include("line_plot_element.jl")
 include("scatter_plot_element.jl")
 include("stem_plot_element.jl")
-include("image_plot_element.jl")
+include("heatmap_element.jl")
 
 struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}

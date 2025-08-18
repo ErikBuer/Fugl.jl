@@ -3,7 +3,9 @@ struct HeatmapElement <: AbstractPlotElement
     x_range::Tuple{Float32,Float32}  # (min_x, max_x)
     y_range::Tuple{Float32,Float32}  # (min_y, max_y)
     colormap::Symbol  # :viridis, :plasma, :grayscale, etc.
-    label::String
+    nan_color::Tuple{Float32,Float32,Float32,Float32}  # Color for NaN/invalid values
+    background_color::Tuple{Float32,Float32,Float32,Float32}  # Background color
+    value_range::Tuple{Float32,Float32}  # For color normalization
 end
 
 function HeatmapElement(
@@ -11,36 +13,81 @@ function HeatmapElement(
     x_range::Tuple{Real,Real}=(1, size(data, 2)),
     y_range::Tuple{Real,Real}=(1, size(data, 1)),
     colormap::Symbol=:viridis,
-    label::String=""
+    nan_color::Tuple{Real,Real,Real,Real}=(1.0, 0.0, 1.0, 1.0),  # Magenta for NaN
+    background_color::Tuple{Real,Real,Real,Real}=(0.0, 0.0, 0.0, 1.0),  # Black background
+    value_range::Union{Nothing,Tuple{Real,Real}}=nothing
 )
     data_f32 = Float32.(data)
     x_range_f32 = (Float32(x_range[1]), Float32(x_range[2]))
     y_range_f32 = (Float32(y_range[1]), Float32(y_range[2]))
-    return HeatmapElement(data_f32, x_range_f32, y_range_f32, colormap, label)
+    nan_color_f32 = (Float32(nan_color[1]), Float32(nan_color[2]), Float32(nan_color[3]), Float32(nan_color[4]))
+    background_color_f32 = (Float32(background_color[1]), Float32(background_color[2]), Float32(background_color[3]), Float32(background_color[4]))
+
+    # Auto-detect value range if not provided
+    if value_range === nothing
+        min_val, max_val = extrema(data_f32)
+        value_range_f32 = (min_val, max_val)
+    else
+        value_range_f32 = (Float32(value_range[1]), Float32(value_range[2]))
+    end
+
+    return HeatmapElement(data_f32, x_range_f32, y_range_f32, colormap, nan_color_f32, background_color_f32, value_range_f32)
 end
 
-# Colormap definitions - simple linear interpolation for now
+# Enhanced colormap definitions inspired by GLMakie
 function apply_colormap(value::Float32, colormap::Symbol)::Tuple{Float32,Float32,Float32,Float32}
     # Clamp value to [0, 1] range
     t = clamp(value, 0.0f0, 1.0f0)
 
+    # GLMakie-style interpolation with smoother gradients
     if colormap == :viridis
-        # Viridis colormap approximation
-        r = t * t * (3.0f0 - 2.0f0 * t) * 0.267f0 + (1.0f0 - t) * 0.267f0
-        g = t * 0.874f0 + (1.0f0 - t) * 0.004f0
-        b = t * 0.562f0 + (1.0f0 - t) * 0.329f0
+        # Improved Viridis colormap with better color accuracy
+        if t < 0.25f0
+            s = t / 0.25f0
+            r = 0.267f0 + s * (0.229f0 - 0.267f0)
+            g = 0.004f0 + s * (0.322f0 - 0.004f0)
+            b = 0.329f0 + s * (0.545f0 - 0.329f0)
+        elseif t < 0.5f0
+            s = (t - 0.25f0) / 0.25f0
+            r = 0.229f0 + s * (0.127f0 - 0.229f0)
+            g = 0.322f0 + s * (0.563f0 - 0.322f0)
+            b = 0.545f0 + s * (0.562f0 - 0.545f0)
+        elseif t < 0.75f0
+            s = (t - 0.5f0) / 0.25f0
+            r = 0.127f0 + s * (0.208f0 - 0.127f0)
+            g = 0.563f0 + s * (0.718f0 - 0.563f0)
+            b = 0.562f0 + s * (0.394f0 - 0.562f0)
+        else
+            s = (t - 0.75f0) / 0.25f0
+            r = 0.208f0 + s * (0.993f0 - 0.208f0)
+            g = 0.718f0 + s * (0.906f0 - 0.718f0)
+            b = 0.394f0 + s * (0.144f0 - 0.394f0)
+        end
         return (r, g, b, 1.0f0)
     elseif colormap == :plasma
-        # Plasma colormap approximation
-        r = t * 0.940f0 + (1.0f0 - t) * 0.050f0
-        g = t * t * 0.796f0 + (1.0f0 - t) * 0.029f0
-        b = t * 0.280f0 + (1.0f0 - t) * 0.527f0
+        # Improved Plasma colormap
+        if t < 0.33f0
+            s = t / 0.33f0
+            r = 0.050f0 + s * (0.574f0 - 0.050f0)
+            g = 0.029f0 + s * (0.104f0 - 0.029f0)
+            b = 0.527f0 + s * (0.593f0 - 0.527f0)
+        elseif t < 0.66f0
+            s = (t - 0.33f0) / 0.33f0
+            r = 0.574f0 + s * (0.897f0 - 0.574f0)
+            g = 0.104f0 + s * (0.463f0 - 0.104f0)
+            b = 0.593f0 + s * (0.094f0 - 0.593f0)
+        else
+            s = (t - 0.66f0) / 0.34f0
+            r = 0.897f0 + s * (0.940f0 - 0.897f0)
+            g = 0.463f0 + s * (0.975f0 - 0.463f0)
+            b = 0.094f0 + s * (0.131f0 - 0.094f0)
+        end
         return (r, g, b, 1.0f0)
     elseif colormap == :grayscale
-        # Grayscale
+        # Simple grayscale
         return (t, t, t, 1.0f0)
     elseif colormap == :hot
-        # Hot colormap (black -> red -> yellow -> white)
+        # Classic hot colormap with smooth transitions
         if t < 0.33f0
             s = t / 0.33f0
             return (s, 0.0f0, 0.0f0, 1.0f0)
@@ -162,11 +209,11 @@ function draw_image_plot_textured_clipped(
     projection_matrix::Mat4{Float32}
 )
     try
-        # Apply colormap to create RGB matrix following image component pattern
-        rgb_matrix = apply_colormap_to_matrix(element.data, element.colormap)
+        # Apply colormap to create texture matrix
+        matrix_data = apply_colormap_to_matrix(element.data, element.colormap)
 
-        # Create texture from RGB matrix
-        texture = create_texture_from_matrix(rgb_matrix)
+        # Create texture from matrix
+        texture = create_texture_from_matrix(matrix_data)
 
         # Create quad vertices 
         positions = [
@@ -193,20 +240,24 @@ function draw_image_plot_textured_clipped(
         # Generate buffers and create a Vertex Array Object (VAO)
         vao = GLA.VertexArray(
             GLA.generate_buffers(
-                image_plot_prog[],
+                image_plot_prog[],  # Use extended heatmap shader
                 position=positions,
                 texcoord=texcoords
             ),
             indices
         )
 
-        # Use the custom image plot shader with full control
+        # Use the extended heatmap shader
         GLA.bind(image_plot_prog[])
 
-        # Set uniforms for custom image plot shader
-        GLA.gluniform(image_plot_prog[], :projection, projection_matrix)
+        # Set all uniforms including extended ones
         GLA.gluniform(image_plot_prog[], :use_texture, true)
         GLA.gluniform(image_plot_prog[], :image, 0, texture)
+        GLA.gluniform(image_plot_prog[], :projection, projection_matrix)
+        GLA.gluniform(image_plot_prog[], :value_range, Vec2f(element.value_range))
+        GLA.gluniform(image_plot_prog[], :nan_color, Vec4f(element.nan_color))
+        GLA.gluniform(image_plot_prog[], :background_color, Vec4f(element.background_color))
+        GLA.gluniform(image_plot_prog[], :colormap_type, colormap_to_int(element.colormap))
 
         # Draw the quad
         GLA.bind(vao)
@@ -215,34 +266,39 @@ function draw_image_plot_textured_clipped(
         GLA.unbind(image_plot_prog[])
 
     catch e
-        @warn "Failed to draw image plot: $e"
+        @warn "Failed to draw heatmap: $e"
     end
 end
 
-# Apply colormap and create texture following image component pattern
+# Apply colormap and create texture
 function apply_colormap_to_matrix(data::Matrix{Float32}, colormap_symbol::Symbol)
     height, width = size(data)
 
-    # Normalize data to [0, 1] range
-    min_val, max_val = extrema(data)
-    if min_val == max_val
-        normalized_data = fill(0.5f0, size(data))
+    # Find valid (non-NaN) values for normalization
+    valid_data = data[.!isnan.(data)]
+
+    if isempty(valid_data)
+        # All NaN data - use special value to indicate NaN in texture
+        normalized_data = fill(-1.0f0, size(data))  # Use -1 to indicate NaN
     else
-        normalized_data = (data .- min_val) ./ (max_val - min_val)
+        min_val, max_val = extrema(valid_data)
+
+        if min_val == max_val
+            normalized_data = fill(0.5f0, size(data))
+        else
+            normalized_data = similar(data)
+            for i in eachindex(data)
+                if isnan(data[i])
+                    normalized_data[i] = -1.0f0  # Special value for NaN
+                else
+                    normalized_data[i] = (data[i] - min_val) / (max_val - min_val)
+                end
+            end
+        end
     end
 
-    # Create RGB texture (3 channels) following image component pattern
-    rgb_matrix = Array{Float32}(undef, 3, height, width)
-
-    for i in 1:height, j in 1:width
-        # Apply colormap based on the symbol
-        r, g, b, a = apply_colormap_rgba(normalized_data[i, j], colormap_symbol)
-        rgb_matrix[1, i, j] = r
-        rgb_matrix[2, i, j] = g
-        rgb_matrix[3, i, j] = b
-    end
-
-    return rgb_matrix
+    # Always return normalized grayscale data - colormap will be applied in shader
+    return normalized_data
 end
 
 # Apply colormap based on symbol and normalized value (0-1)
@@ -250,21 +306,28 @@ function apply_colormap_rgba(value::Float32, colormap_symbol::Symbol)
     return apply_colormap(value, colormap_symbol)
 end
 
-function create_texture_from_matrix(rgb_matrix::Array{Float32,3})
-    # Create texture using GLAbstraction following the same pattern as image component
-    # Try grayscale first to test if the issue is with 3-channel format
-    height, width = size(rgb_matrix)[2:3]
-    grayscale_matrix = Array{Float32}(undef, height, width)
-
-    for i in 1:height, j in 1:width
-        # Convert RGB to grayscale using standard weights
-        grayscale_matrix[i, j] = 0.299f0 * rgb_matrix[1, i, j] + 0.587f0 * rgb_matrix[2, i, j] + 0.114f0 * rgb_matrix[3, i, j]
-    end
-
-    return GLA.Texture(grayscale_matrix;
-        minfilter=:linear,
-        magfilter=:linear,
+function create_texture_from_matrix(matrix_data::Matrix{Float32})
+    # Always create grayscale texture - colormap applied in shader
+    texture = GLA.Texture(matrix_data;
+        minfilter=:nearest,
+        magfilter=:nearest,
         x_repeat=:clamp_to_edge,
         y_repeat=:clamp_to_edge
     )
+    return texture
+end
+
+# Convert colormap symbol to integer for shader uniform
+function colormap_to_int(colormap::Symbol)::Int32
+    if colormap == :grayscale
+        return 0
+    elseif colormap == :viridis
+        return 1
+    elseif colormap == :plasma
+        return 2
+    elseif colormap == :hot
+        return 3
+    else
+        return 0  # Default to grayscale
+    end
 end

@@ -34,7 +34,12 @@ makedocs(
             "Components/slider.md",
             "Components/number_field.md",
             "Components/text_button.md",
-            "Components/plot.md",
+            "Plot"=>Any[
+                "Components/plot/01_line_plot.md",
+                "Components/plot/02_stem_plot.md",
+                "Components/plot/03_scatter_plot.md",
+                "Components/plot/04_heatmap.md",
+            ],
         ],
         "interaction.md",
         "api_reference.md",
