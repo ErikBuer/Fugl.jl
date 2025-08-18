@@ -34,76 +34,6 @@ function HeatmapElement(
     return HeatmapElement(data_f32, x_range_f32, y_range_f32, colormap, nan_color_f32, background_color_f32, value_range_f32)
 end
 
-# Enhanced colormap definitions inspired by GLMakie
-function apply_colormap(value::Float32, colormap::Symbol)::Tuple{Float32,Float32,Float32,Float32}
-    # Clamp value to [0, 1] range
-    t = clamp(value, 0.0f0, 1.0f0)
-
-    # GLMakie-style interpolation with smoother gradients
-    if colormap == :viridis
-        # Improved Viridis colormap with better color accuracy
-        if t < 0.25f0
-            s = t / 0.25f0
-            r = 0.267f0 + s * (0.229f0 - 0.267f0)
-            g = 0.004f0 + s * (0.322f0 - 0.004f0)
-            b = 0.329f0 + s * (0.545f0 - 0.329f0)
-        elseif t < 0.5f0
-            s = (t - 0.25f0) / 0.25f0
-            r = 0.229f0 + s * (0.127f0 - 0.229f0)
-            g = 0.322f0 + s * (0.563f0 - 0.322f0)
-            b = 0.545f0 + s * (0.562f0 - 0.545f0)
-        elseif t < 0.75f0
-            s = (t - 0.5f0) / 0.25f0
-            r = 0.127f0 + s * (0.208f0 - 0.127f0)
-            g = 0.563f0 + s * (0.718f0 - 0.563f0)
-            b = 0.562f0 + s * (0.394f0 - 0.562f0)
-        else
-            s = (t - 0.75f0) / 0.25f0
-            r = 0.208f0 + s * (0.993f0 - 0.208f0)
-            g = 0.718f0 + s * (0.906f0 - 0.718f0)
-            b = 0.394f0 + s * (0.144f0 - 0.394f0)
-        end
-        return (r, g, b, 1.0f0)
-    elseif colormap == :plasma
-        # Improved Plasma colormap
-        if t < 0.33f0
-            s = t / 0.33f0
-            r = 0.050f0 + s * (0.574f0 - 0.050f0)
-            g = 0.029f0 + s * (0.104f0 - 0.029f0)
-            b = 0.527f0 + s * (0.593f0 - 0.527f0)
-        elseif t < 0.66f0
-            s = (t - 0.33f0) / 0.33f0
-            r = 0.574f0 + s * (0.897f0 - 0.574f0)
-            g = 0.104f0 + s * (0.463f0 - 0.104f0)
-            b = 0.593f0 + s * (0.094f0 - 0.593f0)
-        else
-            s = (t - 0.66f0) / 0.34f0
-            r = 0.897f0 + s * (0.940f0 - 0.897f0)
-            g = 0.463f0 + s * (0.975f0 - 0.463f0)
-            b = 0.094f0 + s * (0.131f0 - 0.094f0)
-        end
-        return (r, g, b, 1.0f0)
-    elseif colormap == :grayscale
-        # Simple grayscale
-        return (t, t, t, 1.0f0)
-    elseif colormap == :hot
-        # Classic hot colormap with smooth transitions
-        if t < 0.33f0
-            s = t / 0.33f0
-            return (s, 0.0f0, 0.0f0, 1.0f0)
-        elseif t < 0.66f0
-            s = (t - 0.33f0) / 0.33f0
-            return (1.0f0, s, 0.0f0, 1.0f0)
-        else
-            s = (t - 0.66f0) / 0.34f0
-            return (1.0f0, 1.0f0, s, 1.0f0)
-        end
-    else
-        # Default to grayscale for unknown colormaps
-        return (t, t, t, 1.0f0)
-    end
-end
-
 # Draw image plot using texture and existing shader - much more efficient!
 function draw_image_plot(
     element::HeatmapElement,
@@ -299,11 +229,6 @@ function apply_colormap_to_matrix(data::Matrix{Float32}, colormap_symbol::Symbol
 
     # Always return normalized grayscale data - colormap will be applied in shader
     return normalized_data
-end
-
-# Apply colormap based on symbol and normalized value (0-1)
-function apply_colormap_rgba(value::Float32, colormap_symbol::Symbol)
-    return apply_colormap(value, colormap_symbol)
 end
 
 function create_texture_from_matrix(matrix_data::Matrix{Float32})
