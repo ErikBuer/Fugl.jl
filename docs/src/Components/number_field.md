@@ -34,11 +34,14 @@ function MyApp()
                 on_change=(new_value) -> println("Float32 changed to: ", new_value, " (type: ", typeof(new_value), ")")
             )
         ),
-
-        # Display current values - display the state text and parsed values
-        IntrinsicHeight(Container(Fugl.Text("Current Values:"))),
-        IntrinsicHeight(Container(Fugl.Text("Integer: $(int_state[].text)"))),
-        IntrinsicHeight(Container(Fugl.Text("Float32: $(float_state[].text)"))),
+        Container(
+            IntrinsicColumn([
+                # Display current values - display the state text and parsed values
+                IntrinsicHeight(Fugl.Text("Current Values:")),
+                IntrinsicHeight(Fugl.Text("Integer: $(int_state[].text)")),
+                IntrinsicHeight(Fugl.Text("Float32: $(float_state[].text)")),
+            ], padding=0.0, spacing=5.0)
+        )
     ], padding=0.0, spacing=0.0)
 end
 
