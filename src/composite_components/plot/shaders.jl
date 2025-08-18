@@ -260,8 +260,50 @@ void main() {
 }
 """
 
-# Global variable for marker shader program
+# Global variable for shader programs
 const marker_prog = Ref{GLA.Program}()
+
+
+const image_plot_vertex_shader = GLA.vert"""
+#version 330 core
+layout(location = 0) in vec2 position; // Position in pixels
+layout(location = 1) in vec4 color;
+layout(location = 2) in vec2 texcoord;
+
+out vec4 v_color;
+out vec2 v_texcoord;
+
+uniform mat4 projection; // Projection matrix
+
+void main() {
+    // Transform position from pixels to NDC using the projection matrix
+    gl_Position = projection * vec4(position, 0.0, 1.0);
+
+    v_color = color;
+    v_texcoord = texcoord;
+}
+"""
+
+const image_plot_fragment_shader = GLA.frag"""
+#version 330 core
+in vec4 v_color;
+in vec2 v_texcoord;
+
+out vec4 FragColor;
+
+uniform sampler2D image;
+uniform bool use_texture;
+
+void main() {
+    if (use_texture) {
+        FragColor = texture(image, v_texcoord);
+    } else {
+        FragColor = v_color;
+    }
+}
+"""
+
+const image_plot_prog = Ref{GLA.Program}()
 
 """
 Initialize the plot shader programs (must be called after OpenGL context is created)
@@ -269,4 +311,5 @@ Initialize the plot shader programs (must be called after OpenGL context is crea
 function initialize_plot_shaders()
     line_prog[] = GLA.Program(line_vertex_shader, line_fragment_shader)
     marker_prog[] = GLA.Program(marker_vertex_shader, marker_fragment_shader)
+    image_plot_prog[] = GLA.Program(image_plot_vertex_shader, image_plot_fragment_shader)
 end
