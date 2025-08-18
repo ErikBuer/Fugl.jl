@@ -17,7 +17,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "column.png", 400, 300);
+screenshot(MyApp, "column.png", 840, 300);
 nothing #hide
 ```
 
@@ -42,7 +42,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "row.png", 400, 300);
+screenshot(MyApp, "row.png", 840, 300);
 nothing #hide
 ```
 
@@ -64,7 +64,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "intrinsic_sizing.png", 400, 300);
+screenshot(MyApp, "intrinsic_sizing.png", 840, 300);
 nothing #hide
 ```
 
@@ -77,14 +77,14 @@ using Fugl: Text
 function MyApp()
     Container(
         Column(
-            FixedSize(Container(), 400, 50),
-            FixedSize(Container(), 400, 50),
-            FixedSize(Container(), 400, 50),
+            FixedSize(Container(), 840, 50),
+            FixedSize(Container(), 840, 50),
+            FixedSize(Container(), 840, 50),
         )
     )
 end
 
-screenshot(MyApp, "fixed_sizing.png", 400, 300);
+screenshot(MyApp, "fixed_sizing.png", 840, 300);
 nothing #hide
 ```
 
@@ -99,14 +99,14 @@ using Fugl: Text
 function MyApp()
     Container(
         IntrinsicColumn(
-            FixedSize(Container(Text("Clipping width")), 800, 50),
+            FixedSize(Container(Text("Clipping width")), 900, 50),
             FixedSize(Container(), 400, 50),
             FixedSize(Container(), 200, 50),
         )
     )
 end
 
-screenshot(MyApp, "intrinsic_column.png", 400, 300);
+screenshot(MyApp, "intrinsic_column.png", 840, 300);
 nothing #hide
 ```
 
@@ -128,7 +128,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "intrinsic_row.png", 400, 300);
+screenshot(MyApp, "intrinsic_row.png", 840, 300);
 nothing #hide
 ```
 
@@ -154,7 +154,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "horizontal_alignment.png", 400, 300);
+screenshot(MyApp, "horizontal_alignment.png", 840, 300);
 nothing #hide
 ```
 
@@ -176,7 +176,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "vertical_alignment.png", 400, 300);
+screenshot(MyApp, "vertical_alignment.png", 840, 300);
 nothing #hide
 ```
 
@@ -230,7 +230,7 @@ function MyApp()
     return main_split
 end
 
-screenshot(MyApp, "split_containers.png", 800, 600);
+screenshot(MyApp, "split_containers.png", 840, 600);
 nothing #hide
 ```
 

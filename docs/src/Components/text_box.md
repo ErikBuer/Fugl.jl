@@ -38,7 +38,7 @@ function MyApp()
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "textBox.png", 600, 400);
+screenshot(MyApp, "textBox.png", 840, 400);
 nothing #hide
 ```
 
