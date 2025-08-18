@@ -79,6 +79,19 @@ HeatmapElement(data; colormap=:hot)      # Classic hot colors
 HeatmapElement(data; colormap=:grayscale) # Grayscale
 ```
 
+## NaN Value Handling
+
+All colormaps support proper NaN value handling. You can specify a custom color for NaN values using the `nan_color` parameter:
+
+```julia
+HeatmapElement(data; 
+    colormap=:viridis,
+    nan_color=(1.0, 0.0, 1.0, 1.0)  # Magenta for NaN values
+)
+```
+
+NaN values in the data will be displayed in the specified `nan_color` regardless of which colormap is used, while valid data points will be colored according to the chosen colormap.
+
 ## Multiple Colormaps Example
 
 ``` @example MultipleColormapsExample
@@ -152,6 +165,8 @@ nothing #hide
 
 ## NaN Values Example
 
+The API support custom colors for NaN-values.
+
 ``` @example NaNExample
 using Fugl
 using Fugl: Text, HeatmapElement
@@ -203,6 +218,60 @@ nothing #hide
 ```
 
 ![NaN Values](nanValues.png)
+
+## Grayscale NaN Example
+
+You can also have a colored NaN cell in grayscale plots.
+
+``` @example GrayscaleNaNExample
+using Fugl
+using Fugl: Text, HeatmapElement
+
+function MyApp()
+    # Create grayscale data with NaN cross pattern
+    size_x, size_y = 12, 12
+    data = Matrix{Float32}(undef, size_y, size_x)
+    
+    for j in 1:size_y
+        for i in 1:size_x
+            # Create NaN cross pattern in the middle
+            if i == 6 || j == 6
+                data[j, i] = NaN32
+            else
+                # Create simple gradient
+                data[j, i] = Float32((i + j) / (size_x + size_y))
+            end
+        end
+    end
+
+    elements = [
+        HeatmapElement(
+            data;
+            x_range=(0.0, 10.0),
+            y_range=(0.0, 10.0),
+            colormap=:grayscale,
+            nan_color=(1.0, 0.0, 1.0, 1.0)  # Magenta for NaN
+        )
+    ]
+
+    IntrinsicColumn([
+        IntrinsicHeight(Container(Text("Grayscale with NaN Cross"))),
+        Plot(
+            elements,
+            PlotStyle(
+                show_grid=true,
+                show_axes=true,
+                padding_px=50.0f0
+            )
+        )
+    ], padding=0.0, spacing=0.0)
+end
+
+screenshot(MyApp, "grayscaleNaN.png", 840, 400);
+nothing #hide
+```
+
+![Grayscale NaN](grayscaleNaN.png)
 
 ## Checkerboard Example
 

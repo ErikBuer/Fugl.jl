@@ -8,10 +8,10 @@ include("shaders.jl")
 include("line_draw.jl")
 include("marker_draw.jl")
 
-include("line_plot_element.jl")
-include("scatter_plot_element.jl")
-include("stem_plot_element.jl")
-include("heatmap_element.jl")
+include("elements/line_plot.jl")
+include("elements/scatter_plot.jl")
+include("elements/stem_plot.jl")
+include("elements/heatmap.jl")
 
 struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}

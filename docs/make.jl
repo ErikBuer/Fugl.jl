@@ -26,10 +26,12 @@ makedocs(
         "index.md",
         "Components"=>Any[
             "Components/container.md",
-            "Components/row_col.md",
-            "Components/split_container.md",
-            "Components/align.md",
-            "Components/sizing.md",
+            "Layout"=>Any[
+                "Components/layout/row_col.md",
+                "Components/layout/split_container.md",
+                "Components/layout/align.md",
+                "Components/layout/sizing.md",
+            ],
             "Components/text_box.md",
             "Components/code_editor.md",
             "Components/dropdown.md",
