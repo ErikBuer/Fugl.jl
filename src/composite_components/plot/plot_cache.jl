@@ -68,20 +68,20 @@ end
 """
 Create framebuffer for plot rendering (with depth for 3D plots in future)
 """
-function create_plot_framebuffer(width::Int32, height::Int32)::Tuple{UInt32,UInt32,Union{UInt32,Nothing}}
+@inline function create_plot_framebuffer(width::Int32, height::Int32)::Tuple{UInt32,UInt32,Union{UInt32,Nothing}}
     return create_render_framebuffer(width, height; with_depth=false)
 end
 
 """
 Clear all plot caches - wrapper for the generic system
 """
-function clear_plot_caches!()
+@inline function clear_plot_caches!()
     clear_render_caches!()
 end
 
 """
 Manually invalidate plot cache to force re-render on next frame
 """
-function invalidate_plot_cache!(cache::RenderCache)
+@inline function invalidate_plot_cache!(cache::RenderCache)
     invalidate_render_cache!(cache)
 end

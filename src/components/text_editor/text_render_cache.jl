@@ -74,13 +74,13 @@ end
 """
 Create framebuffer for text rendering (no depth needed)
 """
-function create_text_framebuffer(width::Int32, height::Int32)::Tuple{UInt32,UInt32,Union{UInt32,Nothing}}
+@inline function create_text_framebuffer(width::Int32, height::Int32)::Tuple{UInt32,UInt32,Union{UInt32,Nothing}}
     return create_render_framebuffer(width, height; with_depth=false)
 end
 
 """
 Draw cached text texture to screen
 """
-function draw_cached_text_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+@inline function draw_cached_text_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     draw_cached_texture(texture_id, x, y, width, height, projection_matrix)
 end
