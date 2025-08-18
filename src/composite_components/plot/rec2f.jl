@@ -1,4 +1,6 @@
-# Simple 2D rectangle type for plot bounds
+"""
+Simple 2D rectangle type.
+"""
 struct Rect2f
     x::Float32
     y::Float32
@@ -6,7 +8,9 @@ struct Rect2f
     height::Float32
 end
 
-# Constructor convenience function for different numeric types
+"""
+Constructor convenience function for different numeric types
+"""
 Rect2f(x::Real, y::Real, width::Real, height::Real) = Rect2f(Float32(x), Float32(y), Float32(width), Float32(height))
 
 # Utility functions for Rect2f

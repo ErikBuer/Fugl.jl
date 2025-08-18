@@ -75,16 +75,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # Check if we need to invalidate cache
     needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
 
-    # During active interactions, bypass caching to avoid visual glitches
-    # This ensures smooth zoom/pan without cache timing issues
-    if !cache.is_valid
-        # Use immediate rendering when cache is invalid (during interactions)
-        render_plot_immediate(view, x, y, width, height, projection_matrix)
-        return
-    end
-
-    if needs_redraw
-        # Create new framebuffer if needed
+    if needs_redraw || !cache.is_valid
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
             if cache_width > 0 && cache_height > 0
                 try
@@ -94,9 +85,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
                     update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
                 catch e
                     @warn "Failed to create plot framebuffer: $e"
-                    # Fall back to immediate rendering
-                    render_plot_immediate(view, x, y, width, height, projection_matrix)
-                    return
+                    return  # Skip rendering if framebuffer creation fails
                 end
             else
                 # Invalid size, skip rendering
@@ -111,14 +100,8 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
         render_plot_to_framebuffer(view, cache, width, height, projection_matrix)
     end
 
-    # Draw cached texture to screen
     if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0
         draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
-    else
-        # Fallback to immediate rendering if cache failed or invalid size
-        if cache_width > 0 && cache_height > 0
-            render_plot_immediate(view, x, y, width, height, projection_matrix)
-        end
     end
 end
 
@@ -131,28 +114,21 @@ function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::F
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
 
-    # Clear framebuffer
-    ModernGL.glClearColor(style.background_color[1], style.background_color[2], style.background_color[3], style.background_color[4])
-    ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
+    try
+        # Clear framebuffer
+        ModernGL.glClearColor(style.background_color[1], style.background_color[2], style.background_color[3], style.background_color[4])
+        ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
 
-    # Create framebuffer-specific projection matrix
-    fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+        # Create framebuffer-specific projection matrix
+        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
 
-    # Render plot content to framebuffer
-    render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
-
-    # Restore previous framebuffer and viewport
-    pop_viewport!()
-    pop_framebuffer!()
-end
-
-function render_plot_immediate(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Draw background
-    bg_vertices = generate_rectangle_vertices(x, y, width, height)
-    draw_rectangle(bg_vertices, view.style.background_color, projection_matrix)
-
-    # Render plot content directly
-    render_plot_content(view, x, y, width, height, projection_matrix)
+        # Render plot content to framebuffer
+        render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+    finally
+        # Always restore previous framebuffer and viewport, even if there's an exception
+        pop_viewport!()
+        pop_framebuffer!()
+    end
 end
 
 function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
@@ -463,13 +439,6 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
             handle_middle_button_drag(view, mouse_state, x, y, width, height)
             interaction_occurred = true
         end
-    end
-
-    # Invalidate cache if there was user interaction that changes the view
-    # NOTE: We invalidate cache to force immediate rendering during interactions
-    # This prevents cached content from being displayed with wrong bounds during zoom/pan
-    if interaction_occurred
-        invalidate_plot_cache!(cache)
     end
 
     return
