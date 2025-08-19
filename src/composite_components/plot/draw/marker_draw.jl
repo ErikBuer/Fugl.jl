@@ -8,48 +8,7 @@ function Float32(arg::Fugl.MarkerType)
     return Float32(Int(arg))
 end
 
-"""
-Struct for batch drawing markers.
-"""
-struct MarkerBatch
-    positions::Vector{Point2f}        # Center positions of markers
-    sizes::Vector{Float32}           # Size (radius/half-width) of each marker
-    fill_colors::Vector{Vec4{Float32}}   # Fill color per marker
-    border_colors::Vector{Vec4{Float32}} # Border color per marker
-    border_widths::Vector{Float32}   # Border width per marker
-    marker_types::Vector{Int32}      # Marker type per marker (enum as Int32)
-end
-
-function MarkerBatch()
-    return MarkerBatch(
-        Point2f[],
-        Float32[],
-        Vec4{Float32}[],
-        Vec4{Float32}[],
-        Float32[],
-        Int32[]
-    )
-end
-
-"""
-Add a marker to the batch.
-"""
-function add_marker!(
-    batch::MarkerBatch,
-    position::Point2f,
-    size::Float32,
-    fill_color::Vec4{Float32},
-    border_color::Vec4{Float32},
-    border_width::Float32,
-    marker_type::MarkerType
-)
-    push!(batch.positions, position)
-    push!(batch.sizes, size)
-    push!(batch.fill_colors, fill_color)
-    push!(batch.border_colors, border_color)
-    push!(batch.border_widths, border_width)
-    push!(batch.marker_types, Int32(marker_type))
-end
+include("marker_batch.jl")
 
 """
 Draw markers from a batch using the marker shader.

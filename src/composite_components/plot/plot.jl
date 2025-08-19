@@ -5,13 +5,15 @@ include("line_style.jl")
 include("plot_style.jl")
 include("plot_state.jl")
 include("shaders.jl")
-include("line_draw.jl")
-include("marker_draw.jl")
+include("draw/line_draw.jl")
+include("draw/marker_draw.jl")
+include("draw/texture_draw.jl")
 
 include("elements/line_plot.jl")
 include("elements/scatter_plot.jl")
 include("elements/stem_plot.jl")
 include("elements/heatmap.jl")
+include("elements/colorbar.jl")
 
 struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}
@@ -40,7 +42,8 @@ function Plot(
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}
-    return (Inf32, Inf32)  # Take all available space
+    # Default: take all available space
+    return (Inf32, Inf32)
 end
 
 function apply_layout(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -157,23 +160,21 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
         screen_bounds = Rect2f(x, y, width, height)
 
-        draw_grid_with_labels(
+        draw_grid(
             effective_bounds,
             x_ticks,
             y_ticks,
             data_to_screen,
-            screen_bounds,
             style.grid_color,
             1.0f0,  # Grid line width
             DOT,  # DOT line style for grid
             projection_matrix;
-            axis_color=style.axis_color,
             anti_aliasing_width=style.anti_aliasing_width
         )
     end
 
-    # Draw axes if enabled
-    if style.show_axes
+    # Draw axes and ticks if enabled
+    if style.show_left_axis || style.show_right_axis || style.show_top_axis || style.show_bottom_axis || style.show_x_ticks || style.show_y_ticks
         effective_bounds = get_effective_bounds(state, style)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
@@ -192,7 +193,15 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
             axis_color=style.axis_color,
             label_offset_px=5.0f0,
             tick_length_px=8.0f0,
-            anti_aliasing_width=style.anti_aliasing_width
+            anti_aliasing_width=style.anti_aliasing_width,
+            show_left_axis=style.show_left_axis,
+            show_right_axis=style.show_right_axis,
+            show_top_axis=style.show_top_axis,
+            show_bottom_axis=style.show_bottom_axis,
+            show_x_tick_marks=style.show_x_tick_marks,
+            show_y_tick_marks=style.show_y_tick_marks,
+            show_x_tick_labels=style.show_x_tick_labels,
+            show_y_tick_labels=style.show_y_tick_labels
         )
     end
 
@@ -414,6 +423,40 @@ function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Funct
         effective_bounds;
         anti_aliasing_width=style.anti_aliasing_width
     )
+end
+
+function draw_plot_element_culled(element::VerticalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+    # For vertical colorbar, use the full height and the value range
+    min_val, max_val = element.value_range
+
+    # Define the colorbar data coordinate bounds that will be mapped via data_to_screen
+    # For vertical: thin width (0-1), height matches value range (min_val to max_val)
+    colorbar_x_min = 0.0f0
+    colorbar_x_max = 1.0f0
+    colorbar_y_min = min_val
+    colorbar_y_max = max_val
+
+    # Draw the colorbar gradient using the proper data coordinate system
+    draw_colorbar_gradient(element, :vertical,
+        colorbar_x_min, colorbar_y_min, colorbar_x_max, colorbar_y_max,
+        data_to_screen, projection_matrix, effective_bounds)
+end
+
+function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+    # For horizontal colorbar, use the full width and the value range
+    min_val, max_val = element.value_range
+
+    # Define the colorbar data coordinate bounds that will be mapped via data_to_screen
+    # For horizontal: width matches value range (min_val to max_val), thin height (0-1)
+    colorbar_x_min = min_val
+    colorbar_x_max = max_val
+    colorbar_y_min = 0.0f0
+    colorbar_y_max = 1.0f0
+
+    # Draw the colorbar gradient using the proper data coordinate system
+    draw_colorbar_gradient(element, :horizontal,
+        colorbar_x_min, colorbar_y_min, colorbar_x_max, colorbar_y_max,
+        data_to_screen, projection_matrix, effective_bounds)
 end
 
 function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -795,4 +838,50 @@ function cull_line_data(x_data::Vector{Float32}, y_data::Vector{Float32},
     end
 
     return culled_x, culled_y
+end
+
+"""
+Draw a colorbar gradient using the existing heatmap drawing system with proper coordinate transform.
+"""
+function draw_colorbar_gradient(
+    element::Union{VerticalColorbar,HorizontalColorbar},
+    orientation::Symbol,
+    data_x_min::Float32, data_y_min::Float32,
+    data_x_max::Float32, data_y_max::Float32,
+    data_to_screen::Function,
+    projection_matrix::Mat4{Float32},
+    effective_bounds::Rect2f
+)
+    # Create gradient data that maps to the coordinate range
+    if orientation == :vertical
+        # For vertical colorbar: create thin tall matrix (2 columns, gradient_pixels rows)
+        cols, rows = 2, element.gradient_pixels
+        # Create gradient from bottom (data_y_min) to top (data_y_max)
+        gradient_data = Float32[data_y_min + (j - 1) / (rows - 1) * (data_y_max - data_y_min) for i in 1:cols, j in 1:rows]
+    else
+        # For horizontal colorbar: create thin wide matrix (gradient_pixels columns, 2 rows)
+        cols, rows = element.gradient_pixels, 2
+        # Create gradient from left (data_x_min) to right (data_x_max)
+        gradient_data = Float32[data_x_min + (i - 1) / (cols - 1) * (data_x_max - data_x_min) for i in 1:cols, j in 1:rows]
+    end
+
+    # Create a temporary HeatmapElement with the proper coordinate ranges
+    temp_heatmap = HeatmapElement(
+        gradient_data;
+        x_range=(data_x_min, data_x_max),
+        y_range=(data_y_min, data_y_max),
+        colormap=element.colormap,
+        nan_color=(1.0f0, 0.0f0, 1.0f0, 1.0f0),
+        background_color=(0.0f0, 0.0f0, 0.0f0, 1.0f0),
+        value_range=element.value_range  # Use the actual value range for color mapping
+    )
+
+    # Use the existing heatmap drawing function with the provided data_to_screen transform
+    draw_image_plot_clipped(
+        temp_heatmap,
+        data_to_screen,  # Use the provided coordinate transform
+        projection_matrix,
+        effective_bounds;
+        anti_aliasing_width=1.0f0
+    )
 end

@@ -66,7 +66,6 @@ function main()
                         PlotStyle(
                             background_color=Vec4{Float32}(0.95, 0.95, 0.95, 1.0),
                             show_grid=true,
-                            show_axes=true
                         )
                     )
                 ),], padding=0.0, spacing=0.0)

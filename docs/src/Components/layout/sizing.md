@@ -14,7 +14,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "intrinsic_sizing.png", 840, 300);
+screenshot(MyApp, "intrinsic_sizing.png", 812, 300);
 nothing #hide
 ```
 
@@ -27,14 +27,14 @@ using Fugl: Text
 function MyApp()
     Container(
         Column(
-            FixedSize(Container(), 840, 50),
-            FixedSize(Container(), 840, 50),
-            FixedSize(Container(), 840, 50),
+            FixedSize(Container(), 812, 50),
+            FixedSize(Container(), 812, 50),
+            FixedSize(Container(), 812, 50),
         )
     )
 end
 
-screenshot(MyApp, "fixed_sizing.png", 840, 300);
+screenshot(MyApp, "fixed_sizing.png", 812, 300);
 nothing #hide
 ```
 

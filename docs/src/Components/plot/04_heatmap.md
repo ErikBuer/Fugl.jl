@@ -48,14 +48,13 @@ function MyApp()
                 grid_color=Vec4{Float32}(0.8, 0.8, 0.8, 1.0),           # Gray grid
                 axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                 show_grid=true,
-                show_axes=true,
                 padding_px=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "heatmap.png", 840, 400);
+screenshot(MyApp, "heatmap.png", 812, 400);
 nothing #hide
 ```
 
@@ -150,14 +149,13 @@ function MyApp()
                 grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),        # Gray grid
                 axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                 show_grid=true,
-                show_axes=true,
                 padding_px=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "multipleColormaps.png", 840, 400);
+screenshot(MyApp, "multipleColormaps.png", 812, 400);
 nothing #hide
 ```
 
@@ -206,14 +204,13 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=true,
-                show_axes=true,
                 padding_px=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "nanValues.png", 840, 400);
+screenshot(MyApp, "nanValues.png", 812, 400);
 nothing #hide
 ```
 
@@ -260,14 +257,13 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=true,
-                show_axes=true,
                 padding_px=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "grayscaleNaN.png", 840, 400);
+screenshot(MyApp, "grayscaleNaN.png", 812, 400);
 nothing #hide
 ```
 
@@ -299,14 +295,13 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=true,
-                show_axes=true,
                 padding_px=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "checkerboard.png", 840, 400);
+screenshot(MyApp, "checkerboard.png", 812, 400);
 nothing #hide
 ```
 
@@ -348,14 +343,13 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=false,
-                show_axes=false,
                 padding_px=10.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "noAxes.png", 840, 400);
+screenshot(MyApp, "noAxes.png", 812, 400);
 nothing #hide
 ```
 

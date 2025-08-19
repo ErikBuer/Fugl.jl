@@ -27,7 +27,9 @@ function hash_plot_content(elements::Vector{AbstractPlotElement}, state::PlotSta
 
     # Hash plot style
     h = hash((style.background_color, style.grid_color, style.axis_color,
-            style.show_grid, style.show_axes, style.show_legend,
+            style.show_grid, style.show_left_axis, style.show_right_axis,
+            style.show_top_axis, style.show_bottom_axis,
+            style.show_x_ticks, style.show_y_ticks, style.show_legend,
             style.padding_px, style.anti_aliasing_width), h)
 
     return h

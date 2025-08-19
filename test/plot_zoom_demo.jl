@@ -41,7 +41,6 @@ function plot_zoom_demo()
     # Define plot style (visual appearance only)
     plot_style = PlotStyle(
         show_grid=true,
-        show_axes=true,
         show_legend=true
     )
 
@@ -71,7 +70,7 @@ function plot_zoom_demo()
             ], padding=0.0, spacing=0.0)
     end
 
-    Fugl.run(MyApp, title="Plot Zoom Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
+    Fugl.run(MyApp, title="Plot Zoom Demo", window_width_px=812, window_height_px=600, fps_overlay=true)
 end
 
 plot_zoom_demo()

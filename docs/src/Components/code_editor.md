@@ -21,7 +21,7 @@ function MyApp()
     ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "CodeEditor.png", 840, 400);
+screenshot(MyApp, "CodeEditor.png", 812, 400);
 nothing #hide
 ```
 

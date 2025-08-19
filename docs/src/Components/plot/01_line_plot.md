@@ -40,7 +40,6 @@ function MyApp()
                         grid_color=Vec4{Float32}(0.9, 0.9, 0.9, 1.0),        # Light gray grid
                         axis_color=Vec4{Float32}(1.0, 1.0, 1.0, 1.0),        # White axes
                         show_grid=true,
-                        show_axes=true,
                         padding_px=50.0f0
                     )
                 )
@@ -48,7 +47,7 @@ function MyApp()
         ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "linePlot.png", 840, 400);
+screenshot(MyApp, "linePlot.png", 812, 400);
 nothing #hide
 ```
 
@@ -85,7 +84,6 @@ function MyApp()
                         grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),
                         axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
                         show_grid=true,
-                        show_axes=true,
                         padding_px=50.0f0
                     ),
                     PlotState(
@@ -102,7 +100,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "fixedBoundsPlot.png", 840, 400);
+screenshot(MyApp, "fixedBoundsPlot.png", 812, 400);
 nothing #hide
 ```
 
@@ -136,7 +134,6 @@ function MyApp()
         grid_color=Vec4{Float32}(0.8, 0.8, 0.8, 1.0),
         axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
         show_grid=true,
-        show_axes=true,
         padding_px=40.0f0
     )
 
@@ -207,7 +204,7 @@ function MyApp()
         ], padding=0.0, spacing=0.0)
 end
 
-screenshot(MyApp, "stateManagementPlot.png", 840, 500);
+screenshot(MyApp, "stateManagementPlot.png", 812, 500);
 nothing #hide
 ```
 

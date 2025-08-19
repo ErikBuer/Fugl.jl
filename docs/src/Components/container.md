@@ -61,7 +61,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "container_style.png", 840, 300);
+screenshot(MyApp, "container_style.png", 812, 300);
 nothing #hide
 ```
 

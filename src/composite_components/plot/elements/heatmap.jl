@@ -34,33 +34,7 @@ function HeatmapElement(
     return HeatmapElement(data_f32, x_range_f32, y_range_f32, colormap, nan_color_f32, background_color_f32, value_range_f32)
 end
 
-# Draw image plot using texture and existing shader - much more efficient!
-function draw_image_plot(
-    element::HeatmapElement,
-    data_to_screen::Function,
-    projection_matrix::Mat4{Float32};
-    anti_aliasing_width::Float32=1.5f0
-)
-    # Get screen coordinates for corners
-    x_min, x_max = element.x_range
-    y_min, y_max = element.y_range
-
-    # Transform corner points to screen coordinates
-    bottom_left_x, bottom_left_y = data_to_screen(x_min, y_min)
-    bottom_right_x, bottom_right_y = data_to_screen(x_max, y_min)
-    top_left_x, top_left_y = data_to_screen(x_min, y_max)
-    top_right_x, top_right_y = data_to_screen(x_max, y_max)
-
-    # Use texture-based rendering for all cases
-    draw_image_plot_textured(element,
-        bottom_left_x, bottom_left_y,
-        bottom_right_x, bottom_right_y,
-        top_left_x, top_left_y,
-        top_right_x, top_right_y,
-        projection_matrix)
-end
-
-# Draw image plot with clipping to effective bounds (plot axes)
+# Draw heatmap image with clipping to effective bounds (plot axes)
 function draw_image_plot_clipped(
     element::HeatmapElement,
     data_to_screen::Function,
@@ -96,108 +70,21 @@ function draw_image_plot_clipped(
     top_left_x, top_left_y = data_to_screen(clipped_x_min, clipped_y_max)
     top_right_x, top_right_y = data_to_screen(clipped_x_max, clipped_y_max)
 
-    # Use texture-based rendering with custom texture coordinates
-    draw_image_plot_textured_clipped(element,
+    # Use the generalized texture drawing function directly
+    draw_matrix_with_colormap(
+        element.data,
+        element.colormap,
+        element.value_range,
+        element.nan_color,
+        element.background_color,
         bottom_left_x, bottom_left_y,
         bottom_right_x, bottom_right_y,
         top_left_x, top_left_y,
         top_right_x, top_right_y,
         tex_x_min, tex_y_min,
         tex_x_max, tex_y_max,
-        projection_matrix)
-end
-
-# Texture-based rendering using existing shader with precomputed colormap texture
-function draw_image_plot_textured(
-    element::HeatmapElement,
-    bottom_left_x::Float32, bottom_left_y::Float32,
-    bottom_right_x::Float32, bottom_right_y::Float32,
-    top_left_x::Float32, top_left_y::Float32,
-    top_right_x::Float32, top_right_y::Float32,
-    projection_matrix::Mat4{Float32}
-)
-    # Use full texture coordinates (0,0) to (1,1)
-    draw_image_plot_textured_clipped(element,
-        bottom_left_x, bottom_left_y,
-        bottom_right_x, bottom_right_y,
-        top_left_x, top_left_y,
-        top_right_x, top_right_y,
-        0.0f0, 0.0f0,  # tex_x_min, tex_y_min
-        1.0f0, 1.0f0,  # tex_x_max, tex_y_max
-        projection_matrix)
-end
-
-# Texture-based rendering with custom texture coordinates for clipping
-function draw_image_plot_textured_clipped(
-    element::HeatmapElement,
-    bottom_left_x::Float32, bottom_left_y::Float32,
-    bottom_right_x::Float32, bottom_right_y::Float32,
-    top_left_x::Float32, top_left_y::Float32,
-    top_right_x::Float32, top_right_y::Float32,
-    tex_x_min::Float32, tex_y_min::Float32,
-    tex_x_max::Float32, tex_y_max::Float32,
-    projection_matrix::Mat4{Float32}
-)
-    try
-        # Apply colormap to create texture matrix
-        matrix_data = apply_colormap_to_matrix(element.data, element.colormap)
-
-        # Create texture from matrix
-        texture = create_texture_from_matrix(matrix_data)
-
-        # Create quad vertices 
-        positions = [
-            Point2f(bottom_left_x, bottom_left_y),     # Bottom-left
-            Point2f(bottom_right_x, bottom_right_y),   # Bottom-right
-            Point2f(top_right_x, top_right_y),         # Top-right
-            Point2f(top_left_x, top_left_y),           # Top-left
-        ]
-
-        # Texture coordinates for the quad (using custom coordinates for clipping)
-        texcoords = [
-            Vec{2,Float32}(tex_x_min, tex_y_min),  # Bottom-left
-            Vec{2,Float32}(tex_x_max, tex_y_min),  # Bottom-right
-            Vec{2,Float32}(tex_x_max, tex_y_max),  # Top-right
-            Vec{2,Float32}(tex_x_min, tex_y_max),  # Top-left
-        ]
-
-        # Define the elements (two triangles forming the rectangle)
-        indices = NgonFace{3,UInt32}[
-            (0, 1, 2),  # First triangle: bottom-left, bottom-right, top-right
-            (2, 3, 0)   # Second triangle: top-right, top-left, bottom-left
-        ]
-
-        # Generate buffers and create a Vertex Array Object (VAO)
-        vao = GLA.VertexArray(
-            GLA.generate_buffers(
-                image_plot_prog[],  # Use extended heatmap shader
-                position=positions,
-                texcoord=texcoords
-            ),
-            indices
-        )
-
-        # Use the extended heatmap shader
-        GLA.bind(image_plot_prog[])
-
-        # Set all uniforms including extended ones
-        GLA.gluniform(image_plot_prog[], :use_texture, true)
-        GLA.gluniform(image_plot_prog[], :image, 0, texture)
-        GLA.gluniform(image_plot_prog[], :projection, projection_matrix)
-        GLA.gluniform(image_plot_prog[], :value_range, Vec2f(element.value_range))
-        GLA.gluniform(image_plot_prog[], :nan_color, Vec4f(element.nan_color))
-        GLA.gluniform(image_plot_prog[], :background_color, Vec4f(element.background_color))
-        GLA.gluniform(image_plot_prog[], :colormap_type, colormap_to_int(element.colormap))
-
-        # Draw the quad
-        GLA.bind(vao)
-        GLA.draw(vao)
-        GLA.unbind(vao)
-        GLA.unbind(image_plot_prog[])
-
-    catch e
-        @warn "Failed to draw heatmap: $e"
-    end
+        projection_matrix
+    )
 end
 
 # Apply colormap and create texture

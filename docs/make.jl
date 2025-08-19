@@ -44,6 +44,8 @@ makedocs(
                 "Components/plot/02_stem_plot.md",
                 "Components/plot/03_scatter_plot.md",
                 "Components/plot/04_heatmap.md",
+                "Components/plot/05_colorbar.md",
+                "Components/plot/06_plot_style.md",
             ],
         ],
         "interaction.md",

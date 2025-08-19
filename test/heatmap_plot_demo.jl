@@ -56,7 +56,6 @@ function heatmap_plot_demo()
                         elements,
                         PlotStyle(
                             show_grid=true,
-                            show_axes=true,
                             show_legend=true,
                             padding_px=50.0f0
                         ),
@@ -67,7 +66,7 @@ function heatmap_plot_demo()
             ], padding=0.0, spacing=0.0)
     end
 
-    Fugl.run(MyApp, title="Heatmap Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
+    Fugl.run(MyApp, title="Heatmap Demo", window_width_px=812, window_height_px=600, fps_overlay=true)
 end
 
 heatmap_plot_demo()

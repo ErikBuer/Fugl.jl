@@ -18,7 +18,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "horizontal_alignment.png", 840, 300);
+screenshot(MyApp, "horizontal_alignment.png", 812, 300);
 nothing #hide
 ```
 
@@ -40,7 +40,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "vertical_alignment.png", 840, 300);
+screenshot(MyApp, "vertical_alignment.png", 812, 300);
 nothing #hide
 ```
 
