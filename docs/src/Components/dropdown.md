@@ -1,6 +1,6 @@
 # Dropdown
 
-The `Dropdown` component provides a dropdown selection interface that allows users to choose from a list of options. 
+The `Dropdown` component provides a dropdown selection interface that allows users to choose from a list of options.
 It follows the same immutable state management pattern as other Fugl components.
 
 ```@example DropDown
