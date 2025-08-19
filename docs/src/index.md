@@ -51,7 +51,6 @@ plot_state = Ref(PlotState())
 # Define plot style (visual appearance only)
 plot_style = PlotStyle(
     show_grid=true,
-    show_axes=true,
     show_legend=true
 )
 
@@ -82,9 +81,9 @@ function MyApp()
 end
 
 # Run the GUI:
-# Fugl.run(MyApp, title="Plot Zoom Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
+# Fugl.run(MyApp, title="Plot Zoom Demo", window_width_px=812, window_height_px=600, fps_overlay=true)
 
-screenshot(MyApp, "plot_example.png", 840, 400);
+screenshot(MyApp, "plot_example.png", 812, 400);
 nothing #hide
 ```
 

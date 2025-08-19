@@ -9,7 +9,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "textButton.png", 840, 150);
+screenshot(MyApp, "textButton.png", 812, 150);
 nothing #hide
 ```
 

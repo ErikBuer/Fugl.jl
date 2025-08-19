@@ -17,7 +17,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "horizontal_slider.png", 840, 100);
+screenshot(MyApp, "horizontal_slider.png", 812, 100);
 nothing #hide
 ```
 

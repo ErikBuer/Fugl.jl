@@ -11,7 +11,7 @@ function MyApp()
     ], spacing=0.0, padding = 0.0)
 end
 
-screenshot(MyApp, "logo_image.png", 840, 400);
+screenshot(MyApp, "logo_image.png", 812, 400);
 nothing #hide
 ```
 
@@ -34,7 +34,7 @@ function MyApp()
     ], spacing=0.0, padding = 0.0)
 end
 
-screenshot(MyApp, "intrinsic_image.png", 840, 400);
+screenshot(MyApp, "intrinsic_image.png", 812, 400);
 nothing #hide
 ```
 
@@ -68,7 +68,7 @@ function MyApp()
     ], spacing=0.0, padding = 0.0)
 end
 
-screenshot(MyApp, "fixed_size_images.png", 840, 400);
+screenshot(MyApp, "fixed_size_images.png", 812, 400);
 nothing #hide
 ```
 
@@ -117,7 +117,7 @@ function MyApp()
     ], spacing=0.0, padding=0.0)
 end
 
-screenshot(MyApp, "aligned_images.png", 840, 400);
+screenshot(MyApp, "aligned_images.png", 812, 400);
 nothing #hide
 ```
 
@@ -134,7 +134,7 @@ function MyApp()
     Container(Image(""))
 end
 
-screenshot(MyApp, "missing_image.png", 840, 300);
+screenshot(MyApp, "missing_image.png", 812, 300);
 nothing #hide
 ```
 

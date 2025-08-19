@@ -1,27 +1,4 @@
-"""
-Struct for storing a batch of lines for efficient drawing.
-"""
-struct LineBatch
-    points::Vector{Point2f}          # All line points
-    colors::Vector{Vec4{Float32}}    # Color per point (for gradients)
-    widths::Vector{Float32}          # Width per point (for variable thickness)
-    line_styles::Vector{Float32}     # Line style per point (enum as Float32). Int somehow doesn't work on all targets.
-    line_progresses::Vector{Float32} # Cumulative distance along line for dash patterns
-    segment_starts::Vector{Int32}    # Start indices for each line segment
-    segment_lengths::Vector{Int32}   # Length of each line segment
-end
-
-function LineBatch()
-    return LineBatch(
-        Point2f[],
-        Vec4{Float32}[],
-        Float32[],
-        Float32[],
-        Float32[],
-        Int32[],
-        Int32[]
-    )
-end
+include("line_batch.jl")
 
 """
 Split line data at NaN values into separate continuous segments.
@@ -62,36 +39,6 @@ function split_line_at_nan(x_data::Vector{Float32}, y_data::Vector{Float32})
     end
 
     return segments
-end
-
-# Add a complete line (series of connected points) to the batch
-function add_line!(batch::LineBatch, points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::LineStyle=SOLID)
-    if length(points) < 2
-        return  # Need at least 2 points for a line
-    end
-
-    start_idx = length(batch.points) + 1
-
-    # Calculate progress along this line
-    line_progress = calculate_line_progress(points)
-
-    # Add all points
-    append!(batch.points, points)
-
-    # Add color, width, line style, and progress for each point
-    # Convert enum to Float32 for shader
-    # Int somehow doesn't work on all targets.
-    line_style_f32 = Float32(line_style)
-    for i in 1:length(points)
-        push!(batch.colors, color)
-        push!(batch.widths, width)
-        push!(batch.line_styles, line_style_f32)
-        push!(batch.line_progresses, line_progress[i])
-    end
-
-    # Record this line segment
-    push!(batch.segment_starts, Int32(start_idx))
-    push!(batch.segment_lengths, Int32(length(points)))
 end
 
 # Optimized line drawing using enhanced shader with line style support
@@ -322,92 +269,6 @@ function draw_grid(
     draw_lines(batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
 
-"""
-Generate reasonable tick positions for a given range
-"""
-function generate_tick_positions(min_val::Float32, max_val::Float32, approx_num_ticks::Int=8)::Vector{Float32}
-    if min_val >= max_val
-        return Float32[]
-    end
-
-    range_val = max_val - min_val
-    # Find a nice step size
-    raw_step = range_val / approx_num_ticks
-
-    # Round to a nice number
-    magnitude = 10.0f0^floor(log10(raw_step))
-    normalized_step = raw_step / magnitude
-
-    nice_step = if normalized_step <= 1.0f0
-        1.0f0
-    elseif normalized_step <= 2.0f0
-        2.0f0
-    elseif normalized_step <= 5.0f0
-        5.0f0
-    else
-        10.0f0
-    end
-
-    step = nice_step * magnitude
-
-    # Generate ticks
-    ticks = Float32[]
-    start_tick = ceil(min_val / step) * step
-
-    current_tick = start_tick
-    while current_tick <= max_val
-        push!(ticks, current_tick)
-        current_tick += step
-    end
-
-    return ticks
-end
-
-"""
-Draw a grid with axis lines using both enhanced line shader
-Grid lines and axis lines are positioned at plot edges (left/bottom), not at zero lines
-Labels are handled separately by draw_axes_with_labels
-"""
-function draw_grid_with_labels(
-    plot_bounds::Rect2f,
-    x_ticks::Vector{Float32},
-    y_ticks::Vector{Float32},
-    transform_func::Function,
-    screen_bounds::Rect2f,
-    color::Vec4{Float32},
-    width::Float32,
-    line_style::LineStyle,
-    projection_matrix::Mat4{Float32};
-    label_size_px::Int=12,
-    label_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
-    label_offset_px::Float32=5.0f0,
-    axis_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
-    axis_width::Float32=2.0f0,
-    anti_aliasing_width::Float32=1.5f0
-)
-    # Draw the grid lines (including x=0, y=0 if in bounds)
-    draw_grid(plot_bounds, x_ticks, y_ticks, transform_func, color, width, line_style, projection_matrix; anti_aliasing_width=anti_aliasing_width)
-
-    # Draw axis lines at plot edges (left and bottom edges) - no labels, those are handled by draw_axes_with_labels
-    axis_batch = LineBatch()
-
-    # Bottom edge axis line (horizontal line at bottom of plot)
-    bottom_y = plot_bounds.y
-    bottom_start_x, bottom_start_y = transform_func(plot_bounds.x, bottom_y)
-    bottom_end_x, bottom_end_y = transform_func(plot_bounds.x + plot_bounds.width, bottom_y)
-    bottom_axis_points = [Point2f(bottom_start_x, bottom_start_y), Point2f(bottom_end_x, bottom_end_y)]
-    add_line!(axis_batch, bottom_axis_points, axis_color, axis_width, SOLID)  # Solid line
-
-    # Left edge axis line (vertical line at left of plot)
-    left_x = plot_bounds.x
-    left_start_x, left_start_y = transform_func(left_x, plot_bounds.y)
-    left_end_x, left_end_y = transform_func(left_x, plot_bounds.y + plot_bounds.height)
-    left_axis_points = [Point2f(left_start_x, left_start_y), Point2f(left_end_x, left_end_y)]
-    add_line!(axis_batch, left_axis_points, axis_color, axis_width, SOLID)  # Solid line
-
-    # Draw the axis lines only (no labels - those are handled by draw_axes_with_labels)
-    draw_lines(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
-end
 
 """
 Draw axes with labels and tick marks using both lines and Text components
@@ -428,50 +289,85 @@ function draw_axes_with_labels(
     axis_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
     axis_width::Float32=2.0f0,
     tick_length_px::Float32=8.0f0,
-    anti_aliasing_width::Float32=1.5f0
+    anti_aliasing_width::Float32=1.5f0,
+    show_left_axis::Bool=true,
+    show_right_axis::Bool=false,
+    show_top_axis::Bool=false,
+    show_bottom_axis::Bool=true,
+    show_x_tick_marks::Bool=true,
+    show_y_tick_marks::Bool=true,
+    show_x_tick_labels::Bool=true,
+    show_y_tick_labels::Bool=true
 )
-    # Draw axis lines and tick marks at plot edges (left and bottom edges)
+    # Draw axis lines and tick marks at plot edges
     axis_batch = LineBatch()
 
-    # Bottom edge axis line (horizontal line at bottom of plot)
-    bottom_y = plot_bounds.y
-    bottom_start_x, bottom_start_y = transform_func(plot_bounds.x, bottom_y)
-    bottom_end_x, bottom_end_y = transform_func(plot_bounds.x + plot_bounds.width, bottom_y)
-    bottom_axis_points = [Point2f(bottom_start_x, bottom_start_y), Point2f(bottom_end_x, bottom_end_y)]
-    add_line!(axis_batch, bottom_axis_points, axis_color, axis_width, SOLID)  # Solid line
+    # Draw individual axis lines if enabled
+    if show_bottom_axis
+        # Bottom edge axis line (horizontal line at bottom of plot)
+        bottom_y = plot_bounds.y
+        bottom_start_x, bottom_start_y = transform_func(plot_bounds.x, bottom_y)
+        bottom_end_x, bottom_end_y = transform_func(plot_bounds.x + plot_bounds.width, bottom_y)
+        bottom_axis_points = [Point2f(bottom_start_x, bottom_start_y), Point2f(bottom_end_x, bottom_end_y)]
+        add_line!(axis_batch, bottom_axis_points, axis_color, axis_width, SOLID)
+    end
 
-    # Left edge axis line (vertical line at left of plot)
-    left_x = plot_bounds.x
-    left_start_x, left_start_y = transform_func(left_x, plot_bounds.y)
-    left_end_x, left_end_y = transform_func(left_x, plot_bounds.y + plot_bounds.height)
-    left_axis_points = [Point2f(left_start_x, left_start_y), Point2f(left_end_x, left_end_y)]
-    add_line!(axis_batch, left_axis_points, axis_color, axis_width, SOLID)  # Solid line
+    if show_left_axis
+        # Left edge axis line (vertical line at left of plot)
+        left_x = plot_bounds.x
+        left_start_x, left_start_y = transform_func(left_x, plot_bounds.y)
+        left_end_x, left_end_y = transform_func(left_x, plot_bounds.y + plot_bounds.height)
+        left_axis_points = [Point2f(left_start_x, left_start_y), Point2f(left_end_x, left_end_y)]
+        add_line!(axis_batch, left_axis_points, axis_color, axis_width, SOLID)
+    end
 
-    # Add tick marks for x-axis
-    for x_tick in x_ticks
-        if x_tick >= plot_bounds.x && x_tick <= plot_bounds.x + plot_bounds.width
-            # Transform tick position to screen coordinates (at bottom edge)
-            tick_screen_x, tick_screen_y = transform_func(x_tick, plot_bounds.y)
+    if show_right_axis
+        # Right edge axis line (vertical line at right of plot)
+        right_x = plot_bounds.x + plot_bounds.width
+        right_start_x, right_start_y = transform_func(right_x, plot_bounds.y)
+        right_end_x, right_end_y = transform_func(right_x, plot_bounds.y + plot_bounds.height)
+        right_axis_points = [Point2f(right_start_x, right_start_y), Point2f(right_end_x, right_end_y)]
+        add_line!(axis_batch, right_axis_points, axis_color, axis_width, SOLID)
+    end
 
-            # Create small vertical tick mark
-            tick_start = Point2f(tick_screen_x, tick_screen_y)
-            tick_end = Point2f(tick_screen_x, tick_screen_y - tick_length_px)
-            tick_points = [tick_start, tick_end]
-            add_line!(axis_batch, tick_points, axis_color, axis_width, SOLID)
+    if show_top_axis
+        # Top edge axis line (horizontal line at top of plot)
+        top_y = plot_bounds.y + plot_bounds.height
+        top_start_x, top_start_y = transform_func(plot_bounds.x, top_y)
+        top_end_x, top_end_y = transform_func(plot_bounds.x + plot_bounds.width, top_y)
+        top_axis_points = [Point2f(top_start_x, top_start_y), Point2f(top_end_x, top_end_y)]
+        add_line!(axis_batch, top_axis_points, axis_color, axis_width, SOLID)
+    end
+
+    # Add tick marks for x-axis if enabled
+    if show_x_tick_marks
+        for x_tick in x_ticks
+            if x_tick >= plot_bounds.x && x_tick <= plot_bounds.x + plot_bounds.width
+                # Transform tick position to screen coordinates (at bottom edge)
+                tick_screen_x, tick_screen_y = transform_func(x_tick, plot_bounds.y)
+
+                # Create small vertical tick mark
+                tick_start = Point2f(tick_screen_x, tick_screen_y)
+                tick_end = Point2f(tick_screen_x, tick_screen_y - tick_length_px)
+                tick_points = [tick_start, tick_end]
+                add_line!(axis_batch, tick_points, axis_color, axis_width, SOLID)
+            end
         end
     end
 
-    # Add tick marks for y-axis
-    for y_tick in y_ticks
-        if y_tick >= plot_bounds.y && y_tick <= plot_bounds.y + plot_bounds.height
-            # Transform tick position to screen coordinates (at left edge)
-            tick_screen_x, tick_screen_y = transform_func(plot_bounds.x, y_tick)
+    # Add tick marks for y-axis if enabled
+    if show_y_tick_marks
+        for y_tick in y_ticks
+            if y_tick >= plot_bounds.y && y_tick <= plot_bounds.y + plot_bounds.height
+                # Transform tick position to screen coordinates (at left edge)
+                tick_screen_x, tick_screen_y = transform_func(plot_bounds.x, y_tick)
 
-            # Create small horizontal tick mark
-            tick_start = Point2f(tick_screen_x, tick_screen_y)
-            tick_end = Point2f(tick_screen_x + tick_length_px, tick_screen_y)
-            tick_points = [tick_start, tick_end]
-            add_line!(axis_batch, tick_points, axis_color, axis_width, SOLID)
+                # Create small horizontal tick mark
+                tick_start = Point2f(tick_screen_x, tick_screen_y)
+                tick_end = Point2f(tick_screen_x + tick_length_px, tick_screen_y)
+                tick_points = [tick_start, tick_end]
+                add_line!(axis_batch, tick_points, axis_color, axis_width, SOLID)
+            end
         end
     end
 
@@ -481,55 +377,59 @@ function draw_axes_with_labels(
     # Create text style for labels
     text_style = TextStyle(size_px=label_size_px, color=label_color)
 
-    # Draw x-axis labels along the bottom edge (outside plot area)
-    for x_tick in x_ticks
-        if x_tick >= plot_bounds.x && x_tick <= plot_bounds.x + plot_bounds.width
-            # Transform tick position to screen coordinates (at bottom edge)
-            tick_screen_x, tick_screen_y = transform_func(x_tick, plot_bounds.y)
+    # Draw x-axis labels along the bottom edge (outside plot area) if x-tick labels are enabled
+    if show_x_tick_labels
+        for x_tick in x_ticks
+            if x_tick >= plot_bounds.x && x_tick <= plot_bounds.x + plot_bounds.width
+                # Transform tick position to screen coordinates (at bottom edge)
+                tick_screen_x, tick_screen_y = transform_func(x_tick, plot_bounds.y)
 
-            # Format the number
-            label_text = if x_tick == round(x_tick)
-                string(Int(round(x_tick)))
-            else
-                string(round(x_tick, digits=2))
+                # Format the number
+                label_text = if x_tick == round(x_tick)
+                    string(Int(round(x_tick)))
+                else
+                    string(round(x_tick, digits=2))
+                end
+
+                # Create Text component and measure it
+                text_component = Text(label_text, style=text_style, horizontal_align=:center, vertical_align=:top)
+                text_width, text_height = measure(text_component)
+
+                # Position label below the bottom axis line and tick mark, outside plot area
+                label_x = tick_screen_x - text_width / 2.0f0
+                label_y = tick_screen_y + tick_length_px + label_offset_px  # Below tick mark
+
+                # Render the text component
+                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix)
             end
-
-            # Create Text component and measure it
-            text_component = Text(label_text, style=text_style, horizontal_align=:center, vertical_align=:top)
-            text_width, text_height = measure(text_component)
-
-            # Position label below the bottom axis line and tick mark, outside plot area
-            label_x = tick_screen_x - text_width / 2.0f0
-            label_y = tick_screen_y + tick_length_px + label_offset_px  # Below tick mark
-
-            # Render the text component
-            interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix)
         end
     end
 
-    # Draw y-axis labels along the left edge (outside plot area)
-    for y_tick in y_ticks
-        if y_tick >= plot_bounds.y && y_tick <= plot_bounds.y + plot_bounds.height
-            # Transform tick position to screen coordinates (at left edge)
-            tick_screen_x, tick_screen_y = transform_func(plot_bounds.x, y_tick)
+    # Draw y-axis labels along the left edge (outside plot area) if y-tick labels are enabled
+    if show_y_tick_labels
+        for y_tick in y_ticks
+            if y_tick >= plot_bounds.y && y_tick <= plot_bounds.y + plot_bounds.height
+                # Transform tick position to screen coordinates (at left edge)
+                tick_screen_x, tick_screen_y = transform_func(plot_bounds.x, y_tick)
 
-            # Format the number
-            label_text = if y_tick == round(y_tick)
-                string(Int(round(y_tick)))
-            else
-                string(round(y_tick, digits=2))
+                # Format the number
+                label_text = if y_tick == round(y_tick)
+                    string(Int(round(y_tick)))
+                else
+                    string(round(y_tick, digits=2))
+                end
+
+                # Create Text component and measure it
+                text_component = Text(label_text, style=text_style, horizontal_align=:right, vertical_align=:middle)
+                text_width, text_height = measure(text_component)
+
+                # Position label to the left of the left axis line and tick mark, outside plot area
+                label_x = tick_screen_x - tick_length_px - text_width - label_offset_px  # Left of tick mark
+                label_y = tick_screen_y - text_height / 2.0f0  # Centered vertically on tick
+
+                # Render the text component
+                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix)
             end
-
-            # Create Text component and measure it
-            text_component = Text(label_text, style=text_style, horizontal_align=:right, vertical_align=:middle)
-            text_width, text_height = measure(text_component)
-
-            # Position label to the left of the left axis line and tick mark, outside plot area
-            label_x = tick_screen_x - tick_length_px - text_width - label_offset_px  # Left of tick mark
-            label_y = tick_screen_y - text_height / 2.0f0  # Centered vertically on tick
-
-            # Render the text component
-            interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix)
         end
     end
 end

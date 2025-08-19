@@ -17,7 +17,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "column.png", 840, 300);
+screenshot(MyApp, "column.png", 812, 300);
 nothing #hide
 ```
 
@@ -42,7 +42,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "row.png", 840, 300);
+screenshot(MyApp, "row.png", 812, 300);
 nothing #hide
 ```
 
@@ -64,7 +64,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "intrinsic_column.png", 840, 300);
+screenshot(MyApp, "intrinsic_column.png", 812, 300);
 nothing #hide
 ```
 
@@ -79,14 +79,14 @@ using Fugl: Text
 function MyApp()
     Container(
         IntrinsicRow(
-            FixedSize(Container(Text("Clipping Height")), 50, 800),
+            FixedSize(Container(Text("Clipping Height")), 50, 812),
             FixedSize(Container(), 50, 400),
             FixedSize(Container(), 50, 200),
         )
     )
 end
 
-screenshot(MyApp, "intrinsic_row.png", 840, 300);
+screenshot(MyApp, "intrinsic_row.png", 812, 300);
 nothing #hide
 ```
 

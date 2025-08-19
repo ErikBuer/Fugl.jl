@@ -28,7 +28,6 @@ function simple_heatmap_test()
                         elements,
                         PlotStyle(
                             show_grid=true,
-                            show_axes=true,
                             show_legend=true,
                             padding_px=50.0f0
                         ),

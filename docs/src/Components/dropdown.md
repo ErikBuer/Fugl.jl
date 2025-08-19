@@ -37,7 +37,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "dropdown.png", 840, 400);
+screenshot(MyApp, "dropdown.png", 812, 400);
 nothing #hide
 ```
 

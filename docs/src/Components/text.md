@@ -10,7 +10,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "text.png", 840, 150);
+screenshot(MyApp, "text.png", 812, 150);
 nothing #hide
 ```
 
@@ -52,7 +52,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "text_align.png", 840, 150);
+screenshot(MyApp, "text_align.png", 812, 150);
 nothing #hide
 ```
 
@@ -74,7 +74,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "text_vertical_align.png", 840, 150);
+screenshot(MyApp, "text_vertical_align.png", 812, 150);
 nothing #hide
 ```
 
@@ -101,7 +101,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "text_style.png", 840, 150);
+screenshot(MyApp, "text_style.png", 812, 150);
 nothing #hide
 ```
 

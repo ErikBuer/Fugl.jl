@@ -50,7 +50,7 @@ function MyApp()
     return main_split
 end
 
-screenshot(MyApp, "split_containers.png", 840, 600);
+screenshot(MyApp, "split_containers.png", 812, 600);
 nothing #hide
 ```
 

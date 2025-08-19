@@ -76,6 +76,7 @@ include("components/AtlasDebug.jl")
 include("composite_components/plot/Plot.jl")
 export Plot, PlotView, PlotState, PlotStyle
 export LinePlotElement, ScatterPlotElement, StemPlotElement, HeatmapElement
-export AbstractPlotElement, PlotType, LINE_PLOT, SCATTER_PLOT, STEM_PLOT, MATRIX_PLOT
+export AbstractPlotElement
 export LineStyle, SOLID, DASH, DOT, DASHDOT
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE
+export VerticalColorbar, HorizontalColorbar
