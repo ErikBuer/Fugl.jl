@@ -343,6 +343,14 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=false,
+                show_left_axis=false,
+                show_right_axis=false,
+                show_top_axis=false,
+                show_bottom_axis=false,
+                show_x_tick_marks=false,
+                show_y_tick_marks=false,
+                show_x_tick_labels=false,
+                show_y_tick_labels=false,
                 padding_px=10.0f0
             )
         )
