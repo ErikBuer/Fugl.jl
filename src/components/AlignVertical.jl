@@ -46,7 +46,7 @@ function apply_layout(view::AlignVerticalView, x::Float32, y::Float32, width::Fl
     # Calculate vertical alignment
     if view.alignment == :top
         child_y = y
-    elseif view.alignment == :center
+    elseif view.alignment == :middle
         child_y = y + (height - final_child_height) / 2
     else  # :bottom
         child_y = y + height - final_child_height

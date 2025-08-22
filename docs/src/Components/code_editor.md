@@ -11,14 +11,14 @@ code_editor_state = Ref(EditorState("""function hello_world()
 end"""))
 
 function MyApp()
-    IntrinsicColumn([
-        IntrinsicHeight(Container(Text("Code Editor with Syntax Highlighting:"))),
+    Card(
+        "Code Editor with Syntax Highlighting:",
         CodeEditor(
             code_editor_state[];
             on_state_change=(new_state) -> code_editor_state[] = new_state,
             on_change=(new_text) -> println("Optional hook. Code is now: ", new_text[1:min(20, length(new_text))], "...")
         )
-    ], padding=0.0, spacing=0.0)
+    )
 end
 
 screenshot(MyApp, "CodeEditor.png", 812, 400);

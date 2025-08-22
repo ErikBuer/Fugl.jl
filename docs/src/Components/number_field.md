@@ -14,8 +14,8 @@ function MyApp()
         IntrinsicHeight(Container(Fugl.Text("NumberField Demo - Type Casting"))),
 
         # Integer field
-        IntrinsicHeight(Container(Fugl.Text("Integer Field:"))),
-        Container(
+        Card(
+            "Integer Field:",
             NumberField(
                 int_state[];
                 type=Int,
@@ -25,8 +25,8 @@ function MyApp()
         ),
 
         # Float32 field
-        IntrinsicHeight(Container(Fugl.Text("Float32 Field:"))),
-        Container(
+        Card(
+            "Float32 Field:",
             NumberField(
                 float_state[];
                 type=Float32,
