@@ -114,34 +114,29 @@ function colormap_types_demo()
             padding_px=30.0f0
         )), 100.0f0)
 
-    ui = Container(
-        IntrinsicColumn([
-                IntrinsicHeight(Text("Different Colormap Types")),
-                IntrinsicRow([
-                        IntrinsicColumn([
-                                IntrinsicHeight(Text("Grayscale")),
-                                MyColorBar(grayscale_bar)
-                            ], spacing=0.0),
-                        IntrinsicColumn([
-                                IntrinsicHeight(Text("Viridis")),
-                                MyColorBar(viridis_bar)
-                            ], spacing=0.0),
-                        IntrinsicColumn([
-                                IntrinsicHeight(Text("Plasma")),
-                                MyColorBar(plasma_bar)
-                            ], spacing=0.0),
-                        IntrinsicColumn([
-                                IntrinsicHeight(Text("Hot")),
-                                MyColorBar(hot_bar)
-                            ], spacing=0.0)
-                    ], spacing=0.0)
-            ], spacing=0.0, padding=0.0)
-    )
-
+    ui =
+        IntrinsicRow([
+            Card(
+                "Grayscale",
+                MyColorBar(grayscale_bar)
+            ),
+            Card(
+                "Viridis",
+                MyColorBar(viridis_bar)
+            ),
+            Card(
+                "Plasma",
+                MyColorBar(plasma_bar)
+            ),
+            Card(
+                "Hot",
+                MyColorBar(hot_bar)
+            )
+        ], spacing=0.0, padding=0.0)
     return ui
 end
 
-screenshot(colormap_types_demo, "colorbar_types.png", 812, 180);
+screenshot(colormap_types_demo, "colorbar_types.png", 812, 160);
 
 nothing #hide
 ```
@@ -176,28 +171,27 @@ function gradient_resolution_demo()
 
     ui = Container(
         IntrinsicColumn([
-                IntrinsicHeight(Text("Different Gradient Resolutions")),
-                IntrinsicRow([
-                        IntrinsicColumn([
-                                IntrinsicHeight(Text("10 pixels")),
-                                MyColorBar(low_res_bar)
-                            ], spacing=0.0),
-                        IntrinsicColumn([
-                                IntrinsicHeight(Text("60 pixels")),
-                                MyColorBar(medium_res_bar)
-                            ], spacing=0.0),
-                        IntrinsicColumn([
-                                IntrinsicHeight(Text("240 pixels")),
-                                MyColorBar(high_res_bar)
-                            ], spacing=0.0),
-                    ], spacing=0.0)
+            IntrinsicHeight(Text("Different Gradient Resolutions")),
+            IntrinsicRow([
+                Card(
+                    "10 pixels",
+                    MyColorBar(low_res_bar)
+                ),
+                Card(
+                    "60 pixels",
+                    MyColorBar(medium_res_bar)
+                ),
+                Card(
+                    "240 pixels",
+                    MyColorBar(high_res_bar)
+                ),
             ], spacing=0.0, padding=0.0)
+        ], spacing=10.0, padding=0.0)
     )
-
     return ui
 end
 
-screenshot(gradient_resolution_demo, "colorbar_resolution.png", 812, 180);
+screenshot(gradient_resolution_demo, "colorbar_resolution.png", 812, 160);
 
 nothing #hide
 ```

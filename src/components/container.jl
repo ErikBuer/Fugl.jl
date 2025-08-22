@@ -40,6 +40,9 @@ function measure(view::ContainerView)::Tuple{Float32,Float32}
     return (child_width + 2 * padding, child_height + 2 * padding)
 end
 
+"""
+Calculate layout to the container and its child.
+"""
 function apply_layout(view::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32)
     # Extract padding from the container's layout
     padding = view.style.padding_px
@@ -58,6 +61,9 @@ function apply_layout(view::ContainerView, x::Float32, y::Float32, width::Float3
     return (child_x, child_y, child_width, child_height)
 end
 
+"""
+Render the container and its child.
+"""
 function interpret_view(container::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Compute the layout for the container
     (child_x, child_y, child_width, child_height) = apply_layout(container, x, y, width, height)
@@ -73,4 +79,23 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
 
     # Render the child
     interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix)
+end
+
+"""
+Detect clicks on the container and its child.
+"""
+function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+    (child_x, child_y, child_width, child_height) = apply_layout(view, x, y, width, height)
+
+    # Check if the mouse is inside the component
+    if inside_component(view, child_x, child_y, child_width, child_height, mouse_state.x, mouse_state.y)
+        if mouse_state.button_state[LeftButton] == IsPressed
+            view.on_mouse_down()  # Trigger `on_mouse_down`
+        elseif mouse_state.was_clicked[LeftButton]
+            view.on_click()  # Trigger `on_click`
+        end
+    end
+
+    # Recursively check the child
+    detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
 end

@@ -1,4 +1,4 @@
-# Number Field
+# NumberField
 
 The NumberField component provides type-safe numeric input with automatic parsing and validation. It extends the TextBox functionality to handle numeric types like `Int`, `Float32`, `Float64`, etc.
 
@@ -11,11 +11,11 @@ function MyApp()
     float_state = Ref(EditorState("123.45"))
 
     IntrinsicColumn([
-        IntrinsicHeight(Container(Fugl.Text("Number Field Demo - Type Casting"))),
+        IntrinsicHeight(Container(Fugl.Text("NumberField Demo - Type Casting"))),
 
         # Integer field
-        IntrinsicHeight(Container(Fugl.Text("Integer Field:"))),
-        Container(
+        Card(
+            "Integer Field:",
             NumberField(
                 int_state[];
                 type=Int,
@@ -25,8 +25,8 @@ function MyApp()
         ),
 
         # Float32 field
-        IntrinsicHeight(Container(Fugl.Text("Float32 Field:"))),
-        Container(
+        Card(
+            "Float32 Field:",
             NumberField(
                 float_state[];
                 type=Float32,

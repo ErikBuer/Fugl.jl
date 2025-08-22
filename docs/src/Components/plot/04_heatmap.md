@@ -39,8 +39,8 @@ function MyApp()
         )
     ]
 
-    IntrinsicColumn([
-        IntrinsicHeight(Container(Text("Heatmap Example"))),
+    Card(
+        "Heatmap Example",
         Plot(
             elements,
             PlotStyle(
@@ -51,7 +51,7 @@ function MyApp()
                 padding_px=50.0f0
             )
         )
-    ], padding=0.0, spacing=0.0)
+    )
 end
 
 screenshot(MyApp, "heatmap.png", 812, 400);
@@ -140,8 +140,8 @@ function MyApp()
         )
     ]
 
-    IntrinsicColumn([
-        IntrinsicHeight(Container(Text("Multiple Colormaps Example"))),
+    Card(
+        "Multiple Colormaps Example",
         Plot(
             elements,
             PlotStyle(
@@ -152,7 +152,7 @@ function MyApp()
                 padding_px=50.0f0
             )
         )
-    ], padding=0.0, spacing=0.0)
+    )
 end
 
 screenshot(MyApp, "multipleColormaps.png", 812, 400);
@@ -343,6 +343,14 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=false,
+                show_left_axis=false,
+                show_right_axis=false,
+                show_top_axis=false,
+                show_bottom_axis=false,
+                show_x_tick_marks=false,
+                show_y_tick_marks=false,
+                show_x_tick_labels=false,
+                show_y_tick_labels=false,
                 padding_px=10.0f0
             )
         )

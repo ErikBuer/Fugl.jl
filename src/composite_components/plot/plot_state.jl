@@ -11,13 +11,15 @@ struct PlotState
     current_x_max::Union{Float32,Nothing}
     current_y_min::Union{Float32,Nothing}
     current_y_max::Union{Float32,Nothing}
+    # Cache ID for render caching
+    cache_id::UInt64
 end
 
 """
 Create PlotState with explicit bounds
 """
 function PlotState(bounds::Rect2f; auto_scale::Bool=false)
-    return PlotState(bounds, auto_scale, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
+    return PlotState(bounds, auto_scale, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, generate_cache_id())
 end
 
 """
@@ -34,7 +36,7 @@ function PlotState(;
     if bounds === nothing
         bounds = Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
     end
-    return PlotState(bounds, auto_scale, initial_x_min, initial_x_max, initial_y_min, initial_y_max, nothing, nothing, nothing, nothing)
+    return PlotState(bounds, auto_scale, initial_x_min, initial_x_max, initial_y_min, initial_y_max, nothing, nothing, nothing, nothing, generate_cache_id())
 end
 
 """

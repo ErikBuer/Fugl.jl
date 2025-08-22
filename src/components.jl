@@ -10,10 +10,10 @@ include("components/FixedSize.jl")
 export FixedSize, FixedWidth, FixedHeight
 
 include("components/AlignVertical.jl")
-export AlignVertical
+export AlignVertical, AlignTop, AlignMiddle, AlignBottom
 
 include("components/AlignHorizontal.jl")
-export AlignHorizontal
+export AlignHorizontal, AlignLeft, AlignCenter, AlignRight
 
 include("components/IntrinsicSize.jl")
 export IntrinsicSize
@@ -59,6 +59,10 @@ include("components/image/Image.jl")
 export Image
 export clear_texture_cache!
 
+include("components/separator_line/HorizontalLine.jl")
+include("components/separator_line/VerticalLine.jl")
+export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
+
 include("components/SplitContainer.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 
@@ -70,6 +74,9 @@ export NumberField, NumberFieldState, NumberFieldOptions, NumberFieldStyle
 
 include("composite_components/Dropdown.jl")
 export Dropdown, DropdownState, DropdownStyle
+
+include("composite_components/Card.jl")
+export Card
 
 include("components/AtlasDebug.jl")
 

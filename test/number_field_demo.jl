@@ -8,7 +8,7 @@ function main()
 
     function MyApp()
         IntrinsicColumn([
-                IntrinsicHeight(Container(Text("Number Field Demo - Type Casting"))),
+                IntrinsicHeight(Container(Text("NumberField Demo - Type Casting"))),
 
                 # Integer field
                 IntrinsicHeight(Container(Text("Integer Field:"))),

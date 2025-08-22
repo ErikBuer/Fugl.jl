@@ -5,11 +5,11 @@ struct IntrinsicColumnView <: AbstractView
     on_click::Function
 end
 
-function IntrinsicColumn(children::Vector{<:AbstractView}; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
+function IntrinsicColumn(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, on_click::Function=() -> nothing)
     return IntrinsicColumnView(children, padding, spacing, on_click)
 end
 
-@inline function IntrinsicColumn(children::AbstractView...; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
+@inline function IntrinsicColumn(children::AbstractView...; padding=0.0, spacing=10.0, on_click::Function=() -> nothing)
     return IntrinsicColumnView(collect(AbstractView, children), padding, spacing, on_click)
 end
 

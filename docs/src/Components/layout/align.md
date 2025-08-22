@@ -34,7 +34,7 @@ function MyApp()
     Container(
         Row(
             AlignVertical(IntrinsicSize(Container(Text("Top"))), :top),
-            AlignVertical(IntrinsicSize(Container(Text("Center"))), :center),
+            AlignVertical(IntrinsicSize(Container(Text("Middle"))), :middle),
             AlignVertical(IntrinsicSize(Container(Text("Bottom"))), :bottom),
         )
     )

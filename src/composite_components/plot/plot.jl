@@ -36,7 +36,7 @@ function Plot(
     # If state has default bounds and auto_scale is true, calculate bounds from elements
     if state.bounds == Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0) && state.auto_scale && !isempty(elements)
         calculated_bounds = calculate_bounds_from_elements(Vector{AbstractPlotElement}(elements))
-        state = PlotState(calculated_bounds, state.auto_scale, state.initial_x_min, state.initial_x_max, state.initial_y_min, state.initial_y_max, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max)
+        state = PlotState(calculated_bounds, state.auto_scale, state.initial_x_min, state.initial_x_max, state.initial_y_min, state.initial_y_max, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max, state.cache_id)
     end
     return PlotView(elements, state, style, on_state_change)
 end
@@ -60,8 +60,8 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
         return  # Skip rendering if size is invalid
     end
 
-    # Get plot render cache using stable cache key
-    cache_key, cache = get_plot_render_cache(view)
+    # Get plot render cache using state's cache ID
+    cache = get_render_cache(view.state.cache_id)
 
     # Generate content hash for this plot
     content_hash = hash_plot_content(view.elements, view.state, view.style)
@@ -73,7 +73,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
             if cache_width > 0 && cache_height > 0
                 try
-                    (framebuffer, color_texture, depth_texture) = create_plot_framebuffer(cache_width, cache_height)
+                    (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
 
                     # Update cache with new framebuffer and content hash
                     update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
@@ -460,8 +460,8 @@ function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::F
 end
 
 function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
-    # Get plot render cache using the same key as interpret_view
-    cache_key, cache = get_plot_render_cache(view)
+    # Get plot render cache using state's cache ID
+    cache = get_render_cache(view.state.cache_id)
     interaction_occurred = false
 
     # Check for scroll wheel zoom with Ctrl/Cmd modifier
@@ -547,7 +547,8 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
         new_min_x,
         new_max_x,
         new_min_y,
-        new_max_y
+        new_max_y,
+        current_state.cache_id
     )
 
     # Notify callback for state management - user must handle updating the PlotView
@@ -615,7 +616,8 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
             current_state.current_x_min,  # PRESERVE existing zoom state
             current_state.current_x_max,
             current_state.current_y_min,
-            current_state.current_y_max
+            current_state.current_y_max,
+            current_state.cache_id
         )
 
         # Update the plot state to store the initial bounds for drag reference
@@ -654,7 +656,8 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
         new_min_x,
         new_max_x,
         new_min_y,
-        new_max_y
+        new_max_y,
+        current_state.cache_id
     )
 
     # Notify of state change - user must handle updating the PlotView
