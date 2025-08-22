@@ -32,23 +32,8 @@ function handle_key_input(component::AbstractView, mouse_state::InputState)
     error("handle_key_input is not implemented for $(typeof(component))")
 end
 
-function detect_click(root_view::AbstractView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
-    # Traverse the UI hierarchy
-    if root_view isa ContainerView
-        (child_x, child_y, child_width, child_height) = apply_layout(root_view, x, y, width, height)
-
-        # Check if the mouse is inside the component
-        if inside_component(root_view, child_x, child_y, child_width, child_height, mouse_state.x, mouse_state.y)
-            if mouse_state.button_state[LeftButton] == IsPressed
-                root_view.on_mouse_down()  # Trigger `on_mouse_down`
-            elseif mouse_state.was_clicked[LeftButton]
-                root_view.on_click()  # Trigger `on_click`
-            end
-        end
-
-        # Recursively check the child
-        detect_click(root_view.child, mouse_state, child_x, child_y, child_width, child_height)
-    end
+function detect_click(view::AbstractView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+    nothing
 end
 
 function measure(view::AbstractView)::Tuple{Float32,Float32}

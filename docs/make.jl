@@ -32,6 +32,7 @@ makedocs(
                 "Components/layout/align.md",
                 "Components/layout/sizing.md",
             ],
+            "Components/vline_hline.md",
             "Components/text_box.md",
             "Components/code_editor.md",
             "Components/dropdown.md",
