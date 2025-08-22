@@ -699,7 +699,8 @@ function clear_selection(state::EditorState)::EditorState
         nothing,  # Clear selection
         nothing,  # Clear selection
         state.cached_lines,
-        state.text_hash
+        state.text_hash,
+        state.cache_id
     )
 end
 
@@ -714,7 +715,8 @@ function set_selection(state::EditorState, start_pos::CursorPosition, end_pos::C
         start_pos,
         end_pos,
         state.cached_lines,
-        state.text_hash
+        state.text_hash,
+        state.cache_id
     )
 end
 
@@ -840,6 +842,7 @@ function delete_selected_text(state::EditorState)::EditorState
         nothing,  # Clear selection
         nothing,  # Clear selection
         Dict{Int,LineTokenData}(),  # Clear cache since text changed
-        hash(new_text)
+        hash(new_text),
+        state.cache_id
     )
 end

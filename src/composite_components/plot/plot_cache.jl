@@ -1,5 +1,19 @@
 """
-Generate a content hash for a plot that captures all rendering-relevant state
+Check if plot cache should be invalidated based on content changes or bounds changes
+"""
+function should_invalidate_plot_cache(view::PlotView, bounds::Tuple{Float32,Float32,Float32,Float32})::Bool
+    # Generate content hash for the plot
+    content_hash = hash_plot_content(view.elements, view.state, view.style)
+
+    # Get the cache using the state's cache ID
+    cache = get_render_cache(view.state.cache_id)
+
+    # Use generic cache invalidation logic
+    return should_invalidate_cache(cache, content_hash, bounds)
+end
+
+"""
+Generate a content hash for all rendering-relevant state
 """
 function hash_plot_content(elements::Vector{AbstractPlotElement}, state::PlotState, style::PlotStyle)::UInt64
     h = hash(length(elements))
@@ -52,38 +66,4 @@ function should_invalidate_plot_cache(view::PlotView, bounds::Tuple{Float32,Floa
 
     # Use generic cache invalidation logic
     return should_invalidate_cache(cache, content_hash, bounds)
-end
-
-"""
-Get plot render cache using a stable cache key
-"""
-function get_plot_render_cache(view::PlotView)::Tuple{Any,RenderCache}
-    # Create cache key based on elements and style (stable across state changes)
-    elements_hash = hash(view.elements)
-    style_hash = hash(view.style)
-    cache_key = (elements_hash, style_hash)
-
-    cache = get_render_cache(cache_key)
-    return cache_key, cache
-end
-
-"""
-Create framebuffer for plot rendering (with depth for 3D plots in future)
-"""
-@inline function create_plot_framebuffer(width::Int32, height::Int32)::Tuple{UInt32,UInt32,Union{UInt32,Nothing}}
-    return create_render_framebuffer(width, height; with_depth=false)
-end
-
-"""
-Clear all plot caches - wrapper for the generic system
-"""
-@inline function clear_plot_caches!()
-    clear_render_caches!()
-end
-
-"""
-Manually invalidate plot cache to force re-render on next frame
-"""
-@inline function invalidate_plot_cache!(cache::RenderCache)
-    invalidate_render_cache!(cache)
 end

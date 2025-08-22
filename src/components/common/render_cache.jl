@@ -12,8 +12,19 @@ mutable struct RenderCache
     RenderCache() = new(nothing, nothing, nothing, 0, 0, false, (0.0f0, 0.0f0, 0.0f0, 0.0f0), 0x0, time())
 end
 
-# Global cache storage - maps cache keys to their caches
-const _render_caches = Dict{Any,RenderCache}()
+# Global cache storage - maps cache IDs to their caches
+const _render_caches = Dict{UInt64,RenderCache}()
+
+# Global counter for generating unique cache IDs
+const _cache_id_counter = Ref{UInt64}(0)
+
+"""
+Generate a unique cache ID for a component
+"""
+function generate_cache_id()::UInt64
+    _cache_id_counter[] += 1
+    return _cache_id_counter[]
+end
 
 """
 Clean up OpenGL resources for a single cache entry
@@ -91,14 +102,13 @@ function create_render_framebuffer(width::Int32, height::Int32; with_depth::Bool
 end
 
 """
-Get or create a render cache for the given cache key.
-The cache key should uniquely identify the component and its content.
+Get or create a render cache for the given cache ID.
 """
-function get_render_cache(cache_key::Any)::RenderCache
-    if !haskey(_render_caches, cache_key)
-        _render_caches[cache_key] = RenderCache()
+function get_render_cache(cache_id::UInt64)::RenderCache
+    if !haskey(_render_caches, cache_id)
+        _render_caches[cache_id] = RenderCache()
     end
-    cache = _render_caches[cache_key]
+    cache = _render_caches[cache_id]
     cache.last_access = time()
     return cache
 end
@@ -199,13 +209,13 @@ function invalidate_render_cache!(cache::RenderCache)
 end
 
 """
-Clean up render cache for a specific cache key
+Clean up render cache for a specific cache ID
 """
-function cleanup_render_cache_key!(cache_key::Any)
-    if haskey(_render_caches, cache_key)
-        cache = _render_caches[cache_key]
+function cleanup_render_cache_id!(cache_id::UInt64)
+    if haskey(_render_caches, cache_id)
+        cache = _render_caches[cache_id]
         cleanup_render_cache(cache)
-        delete!(_render_caches, cache_key)
+        delete!(_render_caches, cache_id)
     end
 end
 
@@ -214,7 +224,7 @@ Clear all render caches and free associated OpenGL resources.
 Call this when the OpenGL context is being destroyed or recreated.
 """
 function clear_render_caches!()
-    for (key, cache) in _render_caches
+    for (cache_id, cache) in _render_caches
         cleanup_render_cache(cache)
     end
     empty!(_render_caches)
@@ -226,20 +236,20 @@ Call this periodically to prevent memory leaks from unused caches.
 """
 function cleanup_stale_render_caches!(max_age_seconds::Float64=300.0)
     current_time = time()
-    stale_keys = []
+    stale_ids = UInt64[]
 
-    for (key, cache) in _render_caches
+    for (cache_id, cache) in _render_caches
         if current_time - cache.last_access > max_age_seconds
-            push!(stale_keys, key)
+            push!(stale_ids, cache_id)
         end
     end
 
-    for key in stale_keys
-        cleanup_render_cache_key!(key)
+    for cache_id in stale_ids
+        cleanup_render_cache_id!(cache_id)
     end
 
-    if !isempty(stale_keys)
-        @info "Cleaned up $(length(stale_keys)) stale render caches"
+    if !isempty(stale_ids)
+        @info "Cleaned up $(length(stale_ids)) stale render caches"
     end
 end
 

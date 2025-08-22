@@ -43,6 +43,7 @@ struct EditorState
     selection_end::Union{CursorPosition,Nothing}
     cached_lines::Dict{Int,LineTokenData}
     text_hash::UInt64
+    cache_id::UInt64  # Unique cache ID for render caching
 end
 
 """
@@ -61,14 +62,14 @@ function EditorState(
     cached_lines::Dict{Int,LineTokenData},
     text_hash::UInt64
 )
-    return EditorState(text, cursor, is_focused, nothing, nothing, cached_lines, text_hash)
+    return EditorState(text, cursor, is_focused, nothing, nothing, cached_lines, text_hash, generate_cache_id())
 end
 
 """
 Create a new EditorState with the given text and cursor at the beginning.
 """
 function EditorState(text::String)
-    return EditorState(text, CursorPosition(1, 1), false, nothing, nothing, Dict{Int,LineTokenData}(), hash(text))
+    return EditorState(text, CursorPosition(1, 1), false, nothing, nothing, Dict{Int,LineTokenData}(), hash(text), generate_cache_id())
 end
 
 """
@@ -82,7 +83,7 @@ function EditorState(state::EditorState;
     selection_end=state.selection_end,
     cached_lines=state.cached_lines,
     text_hash=state.text_hash)
-    return EditorState(text, cursor, is_focused, selection_start, selection_end, cached_lines, text_hash)
+    return EditorState(text, cursor, is_focused, selection_start, selection_end, cached_lines, text_hash, state.cache_id)
 end
 
 """

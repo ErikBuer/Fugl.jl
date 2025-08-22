@@ -37,8 +37,8 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
     cache_width = Int32(round(width))
     cache_height = Int32(round(height))
 
-    # Get text render cache using stable cache key
-    cache_key, cache = get_text_render_cache(view.state.text, view.style, :textbox)
+    # Get text render cache using state's cache ID
+    cache = get_render_cache(view.state.cache_id)
 
     # Generate content hash for this text component
     content_hash = hash_text_content(view.state.text, view.style, view.state.is_focused, view.state.cursor, (view.state.selection_start, view.state.selection_end))
@@ -51,7 +51,7 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
             if cache_width > 0 && cache_height > 0
                 try
-                    (framebuffer, color_texture, depth_texture) = create_text_framebuffer(cache_width, cache_height)
+                    (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
 
                     # Update cache with new framebuffer and content hash
                     update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
@@ -76,7 +76,7 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
 
     # Draw cached texture to screen
     if cache.is_valid && cache.color_texture !== nothing
-        draw_cached_text_texture(cache.color_texture, x, y, width, height, projection_matrix)
+        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
     else
         # Fallback to immediate rendering if cache failed
         render_textbox_immediate(view, x, y, width, height, projection_matrix)
@@ -222,7 +222,7 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
             # Double-click: select word
             action = SelectWord(new_cursor_pos)
             new_state = apply_editor_action(view.state, action)
-            new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash)
+            new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
             view.on_state_change(new_state)
 
         elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.is_dragging[LeftButton]
@@ -238,7 +238,7 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
 
             # Also handle focus if needed
             if !view.state.is_focused
-                new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash)
+                new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
             end
             view.on_state_change(new_state)
 
