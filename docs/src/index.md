@@ -55,29 +55,29 @@ plot_style = PlotStyle(
 )
 
 function MyApp()
-    IntrinsicColumn([
-            IntrinsicHeight(Container(Text("Plot Zoom Demo - Line & Stem"))),
+    Card(
+        "Plot Zoom Demo",
+        IntrinsicColumn([
+                # Plot with user-managed state
 
-            # Plot with user-managed state - much simpler!
-            Container(
                 Plot(
                     elements,               # Elements are passed directly
                     plot_style,             # Style for visual appearance
                     plot_state[],           # State only contains bounds and zoom
                     (new_state) -> plot_state[] = new_state
-                )
-            ),
+                ),
 
-            # Simple reset button
-            IntrinsicHeight(Container(
-                TextButton(
-                    "Reset View";
-                    on_click=() -> begin
-                        plot_state[] = PlotState()  # Reset to auto-scale
-                    end
+                # Simple reset button
+                IntrinsicHeight(
+                    TextButton(
+                        "Reset View";
+                        on_click=() -> begin
+                            plot_state[] = PlotState()  # Reset to auto-scale
+                        end
+                    )
                 )
-            ))
-        ], padding=0.0, spacing=0.0)
+            ], padding=0.0, spacing=0.0)
+    )
 end
 
 # Run the GUI:
