@@ -1,3 +1,6 @@
+#TODO the current caching requires the state of the component to be user managed.
+# If we derive a number for the components place in the view hierarchy, we can use caching even for components that are not user managed (state).
+
 mutable struct RenderCache
     framebuffer::Union{UInt32,Nothing}     # OpenGL framebuffer object
     color_texture::Union{UInt32,Nothing}   # Color texture

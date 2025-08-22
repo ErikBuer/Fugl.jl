@@ -26,6 +26,7 @@ makedocs(
         "index.md",
         "Components"=>Any[
             "Components/container.md",
+            "Components/card.md",
             "Layout"=>Any[
                 "Components/layout/row_col.md",
                 "Components/layout/split_container.md",

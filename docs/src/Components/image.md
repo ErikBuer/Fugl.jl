@@ -100,7 +100,7 @@ function MyApp()
                 Container(
                     AlignVertical(
                         FixedSize(Image("../assets/julia_logo.png"), 80, 80),
-                        :center
+                        :middle
                     )
                 )
             ], spacing=0.0, padding=0.0),
