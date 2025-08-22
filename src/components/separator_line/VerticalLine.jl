@@ -21,7 +21,7 @@ VLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = Ver
 
 function measure(view::VerticalLineView)::Tuple{Float32,Float32}
     # Width: line width, Height: fill available (Inf32)
-    return (view.style.line_width, Inf32)
+    return (view.style.line_width, Inf32)  # Width and height
 end
 
 function apply_layout(view::VerticalLineView, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -64,4 +64,8 @@ function interpret_view(view::VerticalLineView, x::Float32, y::Float32, width::F
     GLA.draw(vao)
     GLA.unbind(vao)
     GLA.unbind(prog[])
+end
+
+function preferred_width(view::VerticalLineView)::Bool
+    return true
 end

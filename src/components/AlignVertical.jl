@@ -1,6 +1,6 @@
 struct AlignVerticalView <: AbstractView
     child::SizedView
-    alignment::Symbol  # :top, :center, :bottom
+    alignment::Symbol  # :top, :middle, :bottom
 end
 
 """
@@ -10,20 +10,24 @@ Aligns a sized child component vertically within its container.
 
 # Arguments
 - `child`: A SizedView component that has intrinsic dimensions
-- `alignment`: Vertical alignment (:top, :center, :bottom)
+- `alignment`: Vertical alignment (:top, :middle, :bottom)
 
 # Example
 ```julia
 AlignVertical(IntrinsicSize(Image("logo.png")), :top)
-AlignVertical(FixedSize(Text("Hello"), 100.0f0, 50.0f0), :center)
+AlignVertical(FixedSize(Text("Hello"), 100.0f0, 50.0f0), :middle)
 ```
 """
-function AlignVertical(child::SizedView, alignment::Symbol=:center)
-    if alignment ∉ (:top, :center, :bottom)
-        error("Invalid vertical alignment: $alignment. Must be :top, :center, or :bottom")
+function AlignVertical(child::SizedView, alignment::Symbol=:middle)
+    if alignment ∉ (:top, :middle, :bottom)
+        error("Invalid vertical alignment: $alignment. Must be :top, :middle, or :bottom")
     end
     return AlignVerticalView(child, alignment)
 end
+
+@inline AlignTop(child::SizedView) = AlignVertical(child, :top)
+@inline AlignMiddle(child::SizedView) = AlignVertical(child, :middle)
+@inline AlignBottom(child::SizedView) = AlignVertical(child, :bottom)
 
 function measure(view::AlignVerticalView)::Tuple{Float32,Float32}
     # Return the child's preferred size

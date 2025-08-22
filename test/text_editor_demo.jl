@@ -13,8 +13,8 @@ end"""))
     function MyApp()
         IntrinsicColumn([
                 # Code Editor Section
-                IntrinsicHeight(Container(Text("Code Editor with Syntax Highlighting:"))),
-                Container(
+                Card(
+                    "Code Editor with Syntax Highlighting:",
                     CodeEditor(
                         code_editor_state[];
                         on_state_change=(new_state) -> code_editor_state[] = new_state,
@@ -23,8 +23,8 @@ end"""))
                 ),
 
                 # Text Box Section
-                IntrinsicHeight(Container(Text("Plain Text Box:"))),
-                Container(
+                Card(
+                    "Plain Text Box",
                     TextBox(
                         text_box_state[];
                         on_state_change=(new_state) -> text_box_state[] = new_state,
@@ -32,7 +32,7 @@ end"""))
                     )
                 ),
             ],
-            padding=0, spacing=0
+            spacing=0
         )
     end
 

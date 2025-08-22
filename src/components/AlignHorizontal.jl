@@ -25,6 +25,10 @@ function AlignHorizontal(child::SizedView, alignment::Symbol=:center)
     return AlignHorizontalView(child, alignment)
 end
 
+@inline AlignLeft(child::SizedView) = AlignHorizontal(child, :left)
+@inline AlignCenter(child::SizedView) = AlignHorizontal(child, :center)
+@inline AlignRight(child::SizedView) = AlignHorizontal(child, :right)
+
 function measure(view::AlignHorizontalView)::Tuple{Float32,Float32}
     # Return the child's preferred size
     return measure(view.child)

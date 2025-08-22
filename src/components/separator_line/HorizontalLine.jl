@@ -23,7 +23,7 @@ HLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = Hor
 
 function measure(view::HorizontalLineView)::Tuple{Float32,Float32}
     # Width: fill available (Inf32), Height: line width
-    return (Inf32, view.style.line_width)
+    return (Inf32, view.style.line_width)  # Width and height
 end
 
 function apply_layout(view::HorizontalLineView, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -66,4 +66,8 @@ function interpret_view(view::HorizontalLineView, x::Float32, y::Float32, width:
     GLA.draw(vao)
     GLA.unbind(vao)
     GLA.unbind(prog[])
+end
+
+function preferred_height(view::HorizontalLineView)::Bool
+    return true
 end
