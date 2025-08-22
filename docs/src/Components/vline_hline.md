@@ -16,7 +16,7 @@ function MyApp()
             IntrinsicHeight(Container(Text("Default Line"))),
             HLine(),  # Basic horizontal line
             IntrinsicHeight(Container(Text("Oversize Line"))),
-            HLine(SeparatorStyle(line_width=3.0f0, color=Vec4{Float32}(1.0f0, 0.2f0, 0.2f0, 1.0f0)), 6.0f0),  # Thick red line
+            HLine(style=SeparatorStyle(line_width=3.0f0, color=Vec4{Float32}(1.0f0, 0.2f0, 0.2f0, 1.0f0)), end_length=6.0f0),  # Thick red line
         ],
         padding=0.0f0, spacing=10.0f0)
     )
@@ -42,7 +42,7 @@ function MyApp()
             Container(Text("Undersized Line")),
             VLine(end_length=-10.0f0),  # Basic vertical line
             Container(Text("Styled Line")),
-            VLine(SeparatorStyle(line_width=3.0f0, color=Vec4{Float32}(0.2f0, 0.8f0, 0.2f0, 1.0f0))),  # Thick green line
+            VLine(style=SeparatorStyle(line_width=3.0f0, color=Vec4{Float32}(0.2f0, 0.8f0, 0.2f0, 1.0f0))),  # Thick green line
         ],
         padding=0.0f0, spacing=10.0f0)
     )

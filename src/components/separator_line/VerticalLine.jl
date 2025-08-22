@@ -10,13 +10,14 @@ struct VerticalLineView <: SizedView
     end
 end
 
-VerticalLine(style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
+"""
+Vertical line separator that fills available height.
+"""
 VerticalLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
 
 """
 Convenience constructor for vertical line
 """
-VLine(style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
 VLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
 
 function measure(view::VerticalLineView)::Tuple{Float32,Float32}
