@@ -39,7 +39,7 @@ export IntrinsicRow
 include("components/Container.jl")
 export Container, ContainerStyle
 
-include("components/HorizontalSlider.jl")
+include("components/slider/HorizontalSlider.jl")
 export HorizontalSlider
 
 include("components/text/Text.jl")

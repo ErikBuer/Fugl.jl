@@ -41,7 +41,7 @@ function main()
     end
 
     # Run the GUI
-    Fugl.run(MyApp, title="Dynamic UI Example")
+    Fugl.run(MyApp, title="Dynamic UI Example", fps_overlay=true)
     #screenshot(MyApp, "test/test_output/dynamic_ui_example.png", 1920, 1080)
 end
 
