@@ -9,7 +9,7 @@ end
 
 function ContainerStyle(;
     background_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),
-    border_color=Vec4{Float32}(0.1f0, 0.1f0, 0.1f0, 1.0f0),
+    border_color=Vec4{Float32}(0.32f0, 0.46f0, 0.54f0, 1.0f0),
     border_width=1.0f0,
     padding::Float32=6f0,
     corner_radius::Float32=5.0f0,

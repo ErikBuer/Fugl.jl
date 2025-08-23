@@ -76,9 +76,12 @@ Draw a rounded rectangle with border using the custom shader.
 """
 function draw_rounded_rectangle(
     vertices::Vector{Point2f},
-    width::Float32, height::Float32,
-    fill_color_rgba::Vec4{<:AbstractFloat}, border_color_rgba::Vec4{<:AbstractFloat},
-    border_width::Float32, radius::Float32,
+    width::Float32,
+    height::Float32,
+    fill_color_rgba::Vec4{<:AbstractFloat},
+    border_color_rgba::Vec4{<:AbstractFloat},
+    border_width::Float32,
+    radius::Float32,
     projection_matrix::Mat4{Float32},
     anti_aliasing_width::Float32
 )

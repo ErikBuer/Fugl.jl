@@ -40,7 +40,7 @@ Form field for entering numbers. New values are parsed on focus loss.
 function NumberField(
     state::EditorState=EditorState();
     type::Type=Float64,
-    style::TextEditorStyle=TextBoxStyle(border_width=2.5f0),
+    style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
     on_state_change::Function=(new_state::EditorState) -> nothing,
     on_change::Function=(new_text) -> nothing
 )
