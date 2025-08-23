@@ -44,7 +44,7 @@ function hash_plot_content(elements::Vector{AbstractPlotElement}, state::PlotSta
             style.show_grid, style.show_left_axis, style.show_right_axis,
             style.show_top_axis, style.show_bottom_axis,
             style.show_x_ticks, style.show_y_ticks, style.show_legend,
-            style.padding_px, style.anti_aliasing_width), h)
+            style.padding, style.anti_aliasing_width), h)
 
     return h
 end

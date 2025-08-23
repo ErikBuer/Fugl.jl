@@ -29,7 +29,7 @@ function simple_heatmap_test()
                         PlotStyle(
                             show_grid=true,
                             show_legend=true,
-                            padding_px=50.0f0
+                            padding=50.0f0
                         ),
                         plot_state[],
                         (new_state) -> plot_state[] = new_state

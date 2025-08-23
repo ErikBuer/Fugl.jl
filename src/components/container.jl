@@ -1,19 +1,21 @@
 mutable struct ContainerStyle
     background_color::Vec4{<:AbstractFloat} #RGBA color
     border_color::Vec4{<:AbstractFloat} #RGBA color
-    border_width_px::Float32
-    padding_px::Float32
-    corner_radius_px::Float32
+    border_width::Float32
+    padding::Float32
+    corner_radius::Float32
+    anti_aliasing_width::Float32
 end
 
 function ContainerStyle(;
     background_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),
-    border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
-    border_width_px=4.0f0,
-    padding_px::Float32=6f0,
-    corner_radius_px::Float32=5.0f0
+    border_color=Vec4{Float32}(0.1f0, 0.1f0, 0.1f0, 1.0f0),
+    border_width=1.0f0,
+    padding::Float32=6f0,
+    corner_radius::Float32=5.0f0,
+    anti_aliasing_width::Float32=1.0f0
 )
-    return ContainerStyle(background_color, border_color, border_width_px, padding_px, corner_radius_px)
+    return ContainerStyle(background_color, border_color, border_width, padding, corner_radius, anti_aliasing_width)
 end
 
 struct ContainerView <: AbstractView
@@ -36,7 +38,7 @@ function measure(view::ContainerView)::Tuple{Float32,Float32}
     child_width, child_height = measure(view.child)
 
     # Add padding
-    padding = view.style.padding_px
+    padding = view.style.padding
     return (child_width + 2 * padding, child_height + 2 * padding)
 end
 
@@ -45,7 +47,7 @@ Calculate layout to the container and its child.
 """
 function apply_layout(view::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32)
     # Extract padding from the container's layout
-    padding = view.style.padding_px
+    padding = view.style.padding
     padded_x = x + padding
     padded_y = y + padding
     padded_width = width - 2 * padding
@@ -68,14 +70,15 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     # Compute the layout for the container
     (child_x, child_y, child_width, child_height) = apply_layout(container, x, y, width, height)
 
-    # Render the container background
-    bg_color = container.style.background_color
-    border_color = container.style.border_color
-    border_width_px = container.style.border_width_px
-    corner_radius_px = container.style.corner_radius_px
-
     vertex_positions = generate_rectangle_vertices(x, y, width, height)
-    draw_rounded_rectangle(vertex_positions, width, height, bg_color, border_color, border_width_px, corner_radius_px, projection_matrix)
+    draw_rounded_rectangle(vertex_positions, width, height,
+        container.style.background_color,
+        container.style.border_color,
+        container.style.border_width,
+        container.style.corner_radius,
+        projection_matrix,
+        container.style.anti_aliasing_width
+    )
 
     # Render the child
     interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix)

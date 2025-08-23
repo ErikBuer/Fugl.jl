@@ -40,16 +40,16 @@ using Fugl
 my_style = ContainerStyle(;
     background_color=Vec4{Float32}(0.3f0, 0.7f0, 0.7f0, 1.0f0),
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
-    border_width_px=1.0f0,
-    padding_px=25.0f0,
-    corner_radius_px=25.0f0
+    border_width=1.0f0,
+    padding=25.0f0,
+    corner_radius=25.0f0
 )
 
 my_style2 = ContainerStyle(;
     background_color=Vec4{Float32}(0.7f0, 0.3f0, 0.3f0, 1.0f0),
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
-    border_width_px=5.0f0,
-    corner_radius_px=25.0f0
+    border_width=5.0f0,
+    corner_radius=25.0f0
 )
 
 function MyApp()
@@ -66,3 +66,45 @@ nothing #hide
 ```
 
 ![Container Style](container_style.png)
+
+### Corner Radius
+
+```@example ContainerCornerRadius
+using Fugl
+
+function MyApp()
+    Container(
+        IntrinsicRow([
+            Container(; style=ContainerStyle(corner_radius=0.0f0)),
+            Container(; style=ContainerStyle(corner_radius=15.0f0)),
+            Container(; style=ContainerStyle(corner_radius=40.0f0))
+        ], spacing=20.0f0)
+    )
+end
+
+screenshot(MyApp, "container_corner_radius.png", 812, 180);
+nothing #hide
+```
+
+![Corner Radius Example](container_corner_radius.png)
+
+### Border Width
+
+```@example ContainerBorderWidth
+using Fugl
+
+function MyApp()
+    Container(
+        IntrinsicRow([
+            Container(; style=ContainerStyle(border_width=0.0f0)),
+            Container(; style=ContainerStyle(border_width=4.0f0)),
+            Container(; style=ContainerStyle(border_width=10.0f0))
+        ], spacing=20.0f0)
+    )
+end
+
+screenshot(MyApp, "container_border_width.png", 812, 180);
+nothing #hide
+```
+
+![Border Width Example](container_border_width.png)

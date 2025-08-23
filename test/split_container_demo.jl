@@ -12,7 +12,7 @@ function main()
             Text("Click and drag the gray bar to resize!"),
             style=ContainerStyle(
                 background_color=Vec4f(0.9, 0.9, 1.0, 1.0),  # Light blue
-                padding_px=20.0f0
+                padding=20.0f0
             )
         )
 
@@ -20,7 +20,7 @@ function main()
             Text("This side can be resized by dragging the splitter handle."),
             style=ContainerStyle(
                 background_color=Vec4f(1.0, 0.9, 0.9, 1.0),  # Light red
-                padding_px=20.0f0
+                padding=20.0f0
             )
         )
 
@@ -38,7 +38,7 @@ function main()
             Text("This demonstrates vertical splitting"),
             style=ContainerStyle(
                 background_color=Vec4f(0.9, 1.0, 0.9, 1.0),  # Light green
-                padding_px=20.0f0
+                padding=20.0f0
             )
         )
 

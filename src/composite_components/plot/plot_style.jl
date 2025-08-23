@@ -2,7 +2,7 @@ mutable struct PlotStyle
     background_color::Vec4{Float32}
     grid_color::Vec4{Float32}
     axis_color::Vec4{Float32}
-    padding_px::Float32
+    padding::Float32
     show_grid::Bool
     # Axis line controls for each side
     show_left_axis::Bool     # Show left axis line
@@ -26,7 +26,7 @@ function PlotStyle(;
     background_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),  # White background
     grid_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),  # Light gray grid
     axis_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),  # Black axes
-    padding_px=40.0f0,  # More padding to accommodate axis labels outside plot area
+    padding=40.0f0,  # More padding to accommodate axis labels outside plot area
     show_grid=true,
     # Individual axis line controls
     show_left_axis=true,     # Show left axis line by default
@@ -50,7 +50,7 @@ function PlotStyle(;
     final_show_x_tick_labels = show_x_tick_labels !== nothing ? show_x_tick_labels : show_x_ticks
     final_show_y_tick_labels = show_y_tick_labels !== nothing ? show_y_tick_labels : show_y_ticks
 
-    return PlotStyle(background_color, grid_color, axis_color, padding_px, show_grid,
+    return PlotStyle(background_color, grid_color, axis_color, padding, show_grid,
         show_left_axis, show_right_axis, show_top_axis, show_bottom_axis,
         final_show_x_tick_marks, final_show_y_tick_marks,
         final_show_x_tick_labels, final_show_y_tick_labels,

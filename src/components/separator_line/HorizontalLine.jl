@@ -12,13 +12,14 @@ struct HorizontalLineView <: SizedView
     end
 end
 
-HorizontalLine(style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
+"""
+Horizontal line separator that fills available width.
+"""
 HorizontalLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
 
 """
 Convenience constructor for horizontal line
 """
-HLine(style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
 HLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
 
 function measure(view::HorizontalLineView)::Tuple{Float32,Float32}

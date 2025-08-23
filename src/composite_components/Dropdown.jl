@@ -4,9 +4,9 @@ mutable struct DropdownStyle
     background_color_hover::Vec4{<:AbstractFloat}
     background_color_open::Vec4{<:AbstractFloat}
     border_color::Vec4{<:AbstractFloat}
-    border_width_px::Float32
-    corner_radius_px::Float32
-    padding_px::Float32
+    border_width::Float32
+    corner_radius::Float32
+    padding::Float32
     arrow_color::Vec4{<:AbstractFloat}
     item_height_px::Float32
     max_visible_items::Int
@@ -18,16 +18,16 @@ function DropdownStyle(;
     background_color_hover=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0), # Light gray on hover
     background_color_open=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),     # Darker gray when open
     border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
-    border_width_px=1.0f0,
-    corner_radius_px=8.0f0,
-    padding_px=10.0f0,
+    border_width=1.0f0,
+    corner_radius=8.0f0,
+    padding=10.0f0,
     arrow_color=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
     item_height_px=30.0f0,
     max_visible_items=5
 )
     return DropdownStyle(
         text_style, background_color, background_color_hover, background_color_open,
-        border_color, border_width_px, corner_radius_px, padding_px, arrow_color,
+        border_color, border_width, corner_radius, padding, arrow_color,
         item_height_px, max_visible_items
     )
 end
@@ -80,7 +80,7 @@ end
 
 function measure(view::DropdownView)::Tuple{Float32,Float32}
     # Always return just the button height - dropdown list overlays outside bounds
-    button_height = view.style.text_style.size_px + 2 * view.style.padding_px
+    button_height = view.style.text_style.size_px + 2 * view.style.padding
     return (Inf32, button_height)
 end
 
@@ -90,7 +90,7 @@ end
 
 function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Calculate button height
-    button_height = view.style.text_style.size_px + 2 * view.style.padding_px
+    button_height = view.style.text_style.size_px + 2 * view.style.padding
 
     # Draw the main dropdown button
     draw_dropdown_button(view, x, y, width, button_height, projection_matrix)
@@ -122,9 +122,10 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
         height,
         bg_color,
         view.style.border_color,
-        view.style.border_width_px,
-        view.style.corner_radius_px,
-        projection_matrix
+        view.style.border_width,
+        view.style.corner_radius,
+        projection_matrix,
+        1.5f0
     )
 
     # Draw selected text or placeholder
@@ -142,15 +143,15 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
     )
 
     # Position text with proper vertical centering
-    text_x = x + view.style.padding_px
-    text_y = y + view.style.padding_px
-    available_text_width = width - 2 * view.style.padding_px - 20.0f0  # Reserve space for arrow
-    text_height = height - 2 * view.style.padding_px
+    text_x = x + view.style.padding
+    text_y = y + view.style.padding
+    available_text_width = width - 2 * view.style.padding - 20.0f0  # Reserve space for arrow
+    text_height = height - 2 * view.style.padding
 
     interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix)
 
     # Draw dropdown arrow
-    draw_dropdown_arrow(view, x + width - view.style.padding_px - 10.0f0, y + height / 2.0f0, projection_matrix)
+    draw_dropdown_arrow(view, x + width - view.style.padding - 10.0f0, y + height / 2.0f0, projection_matrix)
 end
 
 function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
@@ -162,9 +163,10 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
         height,
         view.style.background_color,
         view.style.border_color,
-        view.style.border_width_px,
-        view.style.corner_radius_px,
-        projection_matrix
+        view.style.border_width,
+        view.style.corner_radius,
+        projection_matrix,
+        1.5f0
     )
 
     # Draw each visible option
@@ -189,7 +191,8 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
                 Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0), # No border for highlight
                 0.0f0,
                 0.0f0,
-                projection_matrix
+                projection_matrix,
+                1.5f0
             )
         end
 
@@ -203,9 +206,9 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
         )
 
         # Position text with proper vertical centering
-        text_x = x + view.style.padding_px
+        text_x = x + view.style.padding
         text_y = item_y
-        available_text_width = width - 2 * view.style.padding_px
+        available_text_width = width - 2 * view.style.padding
         text_height = item_height
 
         interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix)
@@ -232,7 +235,7 @@ function draw_dropdown_arrow(view::DropdownView, x::Float32, y::Float32, project
 end
 
 function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
-    button_height = view.style.text_style.size_px + 2 * view.style.padding_px
+    button_height = view.style.text_style.size_px + 2 * view.style.padding
     mouse_x, mouse_y = mouse_state.x, mouse_state.y
 
     # Check if mouse is over the dropdown button
