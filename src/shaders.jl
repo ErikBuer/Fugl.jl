@@ -57,14 +57,15 @@ const rounded_rect_fragment_shader = GLA.frag"""
 in vec2 v_uv;
 out vec4 FragColor;
 
-uniform vec4 fill_color;
-uniform vec4 border_color;
-uniform float border_width; // in pixels
-uniform float radius;       // in pixels
-uniform float aa;           // in pixels
-uniform vec2 rect_size;     // in pixels
+// Uniforms for rectangle appearance
+uniform vec4 fill_color;      // Fill color inside the rectangle
+uniform vec4 border_color;    // Border color
+uniform float border_width;   // Border thickness in pixels
+uniform float radius;         // Corner radius in pixels
+uniform float aa;             // Anti-aliasing width in pixels
+uniform vec2 rect_size;       // Size of the rectangle in pixels
 
-// Aspect-corrected SDF for rounded rectangle
+// Signed distance function for a rounded rectangle
 float sdRoundBox(vec2 p, vec2 size, float r, vec2 rect_size) {
     vec2 centered = (p - 0.5) * rect_size;
     vec2 half_size = size * 0.5 * rect_size - vec2(r);
@@ -73,19 +74,23 @@ float sdRoundBox(vec2 p, vec2 size, float r, vec2 rect_size) {
 }
 
 void main() {
-    float r = radius;
-    float bw = border_width;
-    float antialias = aa;
+    float r = radius;         // Corner radius
+    float bw = border_width;  // Border thickness
+    float antialias = aa;     // Anti-aliasing width
 
-    float dist = sdRoundBox(v_uv, vec2(1.0, 1.0), r, rect_size);
+    // SDF for the original rectangle, but increase radius by border width
+    float dist = sdRoundBox(v_uv, vec2(1.0, 1.0), r + bw, rect_size);
 
-    float fill_alpha = 1.0 - smoothstep(-antialias, antialias, dist);
-    float border_alpha = smoothstep(-antialias, antialias, dist + bw) - smoothstep(-antialias, antialias, dist);
+    // Border: band between dist = 0 (outer edge) and dist = -bw (inner edge)
+    float border_alpha =  smoothstep(-antialias, antialias, dist + bw) - smoothstep(-antialias, antialias, dist);
 
-    vec4 color = mix(border_color, fill_color, fill_alpha);
-    float alpha = max(fill_alpha, border_alpha);
+    // Fill: everything inside the border
+    float fill_alpha = 1.0 - smoothstep(-antialias, antialias, dist + bw);
 
-    FragColor = vec4(color.rgb, color.a * alpha);
+    vec4 border = border_color * border_alpha;
+    vec4 fill = fill_color * fill_alpha;
+
+    FragColor = border + fill;
 }
 """
 

@@ -40,7 +40,7 @@ function MyApp()
                         grid_color=Vec4{Float32}(0.9, 0.9, 0.9, 1.0),        # Light gray grid
                         axis_color=Vec4{Float32}(1.0, 1.0, 1.0, 1.0),        # White axes
                         show_grid=true,
-                        padding_px=50.0f0
+                        padding=50.0f0
                     )
                 )
             ),
@@ -84,7 +84,7 @@ function MyApp()
                         grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),
                         axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
                         show_grid=true,
-                        padding_px=50.0f0
+                        padding=50.0f0
                     ),
                     PlotState(
                         # Fixed axis bounds - only show x from 0 to 8, y from -0.8 to 1.0
@@ -134,7 +134,7 @@ function MyApp()
         grid_color=Vec4{Float32}(0.8, 0.8, 0.8, 1.0),
         axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
         show_grid=true,
-        padding_px=40.0f0
+        padding=40.0f0
     )
 
     IntrinsicColumn([

@@ -82,6 +82,7 @@ function draw_rounded_rectangle(
     projection_matrix::Mat4{Float32},
     anti_aliasing_width::Float32
 )
+
     fill_color_f32 = Vec{4,Float32}(fill_color_rgba)
     border_color_f32 = Vec{4,Float32}(border_color_rgba)
 

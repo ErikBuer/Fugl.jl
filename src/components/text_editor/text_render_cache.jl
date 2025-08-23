@@ -24,9 +24,9 @@ function hash_text_content(text::String, style::Any, is_focused::Bool, cursor_po
             style.background_color_focused,
             style.background_color_unfocused,
             style.border_color,
-            style.border_width_px,
-            style.corner_radius_px,
-            style.padding_px,
+            style.border_width,
+            style.corner_radius,
+            style.padding,
             style.cursor_color,
             style.selection_color
         ), h)

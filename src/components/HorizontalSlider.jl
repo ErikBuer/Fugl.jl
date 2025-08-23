@@ -2,16 +2,16 @@ mutable struct SliderStyle
     background_color::Vec4{Float32}  # RGBA color for the slider background
     handle_color::Vec4{Float32}      # RGBA color for the slider handle
     border_color::Vec4{Float32}      # RGBA color for the slider border
-    border_width_px::Float32         # Border width in pixels
+    border_width::Float32         # Border width in pixels
 end
 
 function SliderStyle(;
     background_color=Vec4{Float32}(0.8f0, 0.8f0, 0.8f0, 1.0f0),
     handle_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
-    border_width_px=1.0f0
+    border_width=1.0f0
 )
-    return SliderStyle(background_color, handle_color, border_color, border_width_px)
+    return SliderStyle(background_color, handle_color, border_color, border_width)
 end
 
 struct HorizontalSliderView <: AbstractView
@@ -55,7 +55,7 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
     draw_rectangle(handle_vertices, view.style.handle_color, projection_matrix)
 
     # Draw the slider border
-    if view.style.border_width_px > 0.0
+    if view.style.border_width > 0.0
         draw_closed_lines(slider_vertices, view.style.border_color)
         draw_closed_lines(handle_vertices, view.style.border_color)
     end

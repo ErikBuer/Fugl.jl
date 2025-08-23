@@ -109,7 +109,7 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
     # Extract style properties
     font = view.style.text_style.font
     size_px = view.style.text_style.size_px
-    padding = view.style.padding_px
+    padding = view.style.padding
 
     # Render the background with rounded corners
     bg_color = view.state.is_focused ?
@@ -123,8 +123,8 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
         height,
         bg_color,
         view.style.border_color,
-        view.style.border_width_px,
-        view.style.corner_radius_px,
+        view.style.border_width,
+        view.style.corner_radius,
         projection_matrix,
         1.5f0
     )
@@ -208,7 +208,7 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
             view.state,
             view.style.text_style.font,
             view.style.text_style.size_px,
-            view.style.padding_px,
+            view.style.padding,
             mouse_state.x,
             mouse_state.y,
             x, y, width, height

@@ -48,7 +48,7 @@ function MyApp()
                 grid_color=Vec4{Float32}(0.8, 0.8, 0.8, 1.0),           # Gray grid
                 axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                 show_grid=true,
-                padding_px=50.0f0
+                padding=50.0f0
             )
         )
     )
@@ -149,7 +149,7 @@ function MyApp()
                 grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),        # Gray grid
                 axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                 show_grid=true,
-                padding_px=50.0f0
+                padding=50.0f0
             )
         )
     )
@@ -204,7 +204,7 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=true,
-                padding_px=50.0f0
+                padding=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
@@ -257,7 +257,7 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=true,
-                padding_px=50.0f0
+                padding=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
@@ -295,7 +295,7 @@ function MyApp()
             elements,
             PlotStyle(
                 show_grid=true,
-                padding_px=50.0f0
+                padding=50.0f0
             )
         )
     ], padding=0.0, spacing=0.0)
@@ -351,7 +351,7 @@ function MyApp()
                 show_y_tick_marks=false,
                 show_x_tick_labels=false,
                 show_y_tick_labels=false,
-                padding_px=10.0f0
+                padding=10.0f0
             )
         )
     ], padding=0.0, spacing=0.0)

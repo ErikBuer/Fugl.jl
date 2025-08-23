@@ -111,7 +111,7 @@ function colormap_types_demo()
             show_bottom_axis=true,
             show_x_ticks=true,
             show_y_ticks=false,
-            padding_px=30.0f0
+            padding=30.0f0
         )), 100.0f0)
 
     ui =
@@ -166,7 +166,7 @@ function gradient_resolution_demo()
             show_bottom_axis=true,
             show_x_ticks=true,
             show_y_ticks=false,
-            padding_px=30.0f0
+            padding=30.0f0
         )), 100.0f0)
 
     ui = Container(

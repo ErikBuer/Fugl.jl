@@ -115,7 +115,7 @@ function render_textbox_content(view::TextBoxView, x::Float32, y::Float32, width
     font = view.style.text_style.font
     size_px = view.style.text_style.size_px
     color = view.style.text_style.color
-    padding = view.style.padding_px
+    padding = view.style.padding
 
     # Render the background with rounded corners
     bg_color = view.state.is_focused ?
@@ -129,8 +129,8 @@ function render_textbox_content(view::TextBoxView, x::Float32, y::Float32, width
         height,
         bg_color,
         view.style.border_color,
-        view.style.border_width_px,
-        view.style.corner_radius_px,
+        view.style.border_width,
+        view.style.corner_radius,
         projection_matrix,
         1.5f0
     )
@@ -212,7 +212,7 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
             view.state,
             view.style.text_style.font,
             view.style.text_style.size_px,
-            view.style.padding_px,
+            view.style.padding,
             mouse_state.x,
             mouse_state.y,
             x, y, width, height

@@ -46,7 +46,7 @@ function MyApp()
                     grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),        # Gray grid
                     axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                     show_grid=true,
-                    padding_px=50.0f0,
+                    padding=50.0f0,
                     anti_aliasing_width=1.5f0
                 )
             )

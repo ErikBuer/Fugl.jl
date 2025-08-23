@@ -570,7 +570,7 @@ function mouse_to_cursor_position(
     editor_state::EditorState,
     font,
     size_px::Int,
-    padding_px::Float32,
+    padding::Float32,
     mouse_x::Float64,
     mouse_y::Float64,
     x::Float32,
@@ -579,7 +579,7 @@ function mouse_to_cursor_position(
     height::Float32
 )::CursorPosition
     # Calculate which line the mouse is on
-    text_start_y = y + size_px + padding_px
+    text_start_y = y + size_px + padding
     line_height = Float32(size_px * 1.2)
 
     lines = get_lines(editor_state)
@@ -605,7 +605,7 @@ function mouse_to_cursor_position(
     end
 
     # Calculate which character position the mouse is on
-    text_start_x = x + padding_px
+    text_start_x = x + padding
     relative_x = Float32(mouse_x) - text_start_x
 
     # If mouse is before the text starts, put cursor at beginning of line

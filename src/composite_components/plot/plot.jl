@@ -131,10 +131,10 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
     elements = view.elements
 
     # Calculate plot area (subtract padding)
-    plot_x = x + style.padding_px
-    plot_y = y + style.padding_px
-    plot_width = width - 2 * style.padding_px
-    plot_height = height - 2 * style.padding_px
+    plot_x = x + style.padding
+    plot_y = y + style.padding
+    plot_width = width - 2 * style.padding
+    plot_height = height - 2 * style.padding
 
     if plot_width <= 0 || plot_height <= 0 || isempty(elements)
         return  # Not enough space or no data to draw
