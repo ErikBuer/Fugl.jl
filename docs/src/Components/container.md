@@ -66,3 +66,22 @@ nothing #hide
 ```
 
 ![Container Style](container_style.png)
+
+### Corner Radius
+
+```@example ContainerCornerRadius
+using Fugl
+
+function MyApp()
+    IntrinsicRow([
+        Container(; style=ContainerStyle(corner_radius_px=0.0f0)),
+        Container(; style=ContainerStyle(corner_radius_px=15.0f0)),
+        Container(; style=ContainerStyle(corner_radius_px=40.0f0))
+    ], spacing=20.0f0)
+end
+
+screenshot(MyApp, "container_corner_radius.png", 812, 180);
+nothing #hide
+```
+
+![Corner Radius Example](container_corner_radius.png)
