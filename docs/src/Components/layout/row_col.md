@@ -79,9 +79,9 @@ using Fugl: Text
 function MyApp()
     Container(
         IntrinsicRow(
-            FixedSize(Container(Text("Clipping Height")), 50, 812),
-            FixedSize(Container(), 50, 400),
-            FixedSize(Container(), 50, 200),
+            FixedSize(Container(Text("Clipping Height")), 150, 900),
+            FixedSize(Container(), 150, 400),
+            FixedSize(Container(), 150, 200),
         )
     )
 end

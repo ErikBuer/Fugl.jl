@@ -1,4 +1,4 @@
-# Stem Plot Example
+# Stem Plot
 
 ``` @example StemPlotExample
 using Fugl

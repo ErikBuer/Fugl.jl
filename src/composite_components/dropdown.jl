@@ -17,7 +17,7 @@ function DropdownStyle(;
     background_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),        # White background
     background_color_hover=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0), # Light gray on hover
     background_color_open=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),     # Darker gray when open
-    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
+    border_color=Vec4{Float32}(0.32f0, 0.46f0, 0.54f0, 1.0f0),
     border_width=1.0f0,
     corner_radius=8.0f0,
     padding=10.0f0,

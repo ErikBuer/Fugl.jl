@@ -22,7 +22,7 @@ function CodeEditorStyle(;
     text_style=TextStyle(),
     background_color_focused=Vec4{Float32}(0.05f0, 0.05f0, 0.1f0, 1.0f0),  # Dark blue when focused
     background_color_unfocused=Vec4{Float32}(0.1f0, 0.1f0, 0.15f0, 1.0f0), # Darker when not focused
-    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.4f0, 1.0f0),
+    border_color=Vec4{Float32}(0.32f0, 0.46f0, 0.54f0, 1.0f0),
     border_width=1.0f0,
     corner_radius=8.0f0,
     padding=10.0f0,
@@ -39,7 +39,7 @@ function TextBoxStyle(;
     text_style=TextStyle(),
     background_color_focused=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),    # White when focused
     background_color_unfocused=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0), # Light gray when not focused
-    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
+    border_color=Vec4{Float32}(0.32f0, 0.46f0, 0.54f0, 1.0f0),
     border_width=1.0f0,
     corner_radius=8.0f0,
     padding=10.0f0,
@@ -56,7 +56,7 @@ function TextEditorStyle(;
     text_style=TextStyle(),
     background_color_focused=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0),
     background_color_unfocused=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0),
-    border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
+    border_color=Vec4{Float32}(0.32f0, 0.46f0, 0.54f0, 1.0f0),
     border_width=1.0f0,
     corner_radius=8.0f0,
     padding=10.0f0,
