@@ -4,6 +4,7 @@ mutable struct ContainerStyle
     border_width_px::Float32
     padding_px::Float32
     corner_radius_px::Float32
+    anti_aliasing_width::Float32
 end
 
 function ContainerStyle(;
@@ -11,9 +12,10 @@ function ContainerStyle(;
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
     border_width_px=4.0f0,
     padding_px::Float32=6f0,
-    corner_radius_px::Float32=5.0f0
+    corner_radius_px::Float32=5.0f0,
+    anti_aliasing_width::Float32=1.5f0
 )
-    return ContainerStyle(background_color, border_color, border_width_px, padding_px, corner_radius_px)
+    return ContainerStyle(background_color, border_color, border_width_px, padding_px, corner_radius_px, anti_aliasing_width)
 end
 
 struct ContainerView <: AbstractView
@@ -68,14 +70,15 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     # Compute the layout for the container
     (child_x, child_y, child_width, child_height) = apply_layout(container, x, y, width, height)
 
-    # Render the container background
-    bg_color = container.style.background_color
-    border_color = container.style.border_color
-    border_width_px = container.style.border_width_px
-    corner_radius_px = container.style.corner_radius_px
-
     vertex_positions = generate_rectangle_vertices(x, y, width, height)
-    draw_rounded_rectangle(vertex_positions, width, height, bg_color, border_color, border_width_px, corner_radius_px, projection_matrix)
+    draw_rounded_rectangle(vertex_positions, width, height,
+        container.style.background_color,
+        container.style.border_color,
+        container.style.border_width_px,
+        container.style.corner_radius_px,
+        projection_matrix,
+        container.style.anti_aliasing_width
+    )
 
     # Render the child
     interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix)

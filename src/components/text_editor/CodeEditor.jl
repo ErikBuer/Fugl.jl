@@ -125,7 +125,8 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
         view.style.border_color,
         view.style.border_width_px,
         view.style.corner_radius_px,
-        projection_matrix
+        projection_matrix,
+        1.5f0
     )
 
     # Split the text into lines

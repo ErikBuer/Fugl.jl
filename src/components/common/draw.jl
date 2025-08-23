@@ -68,7 +68,8 @@ end
         width::Float32, height::Float32,
         fill_color_rgba::Vec4{<:AbstractFloat}, border_color_rgba::Vec4{<:AbstractFloat},
         border_width::Float32, radius::Float32,
-        projection_matrix::Mat4{Float32}
+        projection_matrix::Mat4{Float32},
+        anti_aliasing_width::Float32
     )
 
 Draw a rounded rectangle with border using the custom shader.
@@ -78,7 +79,8 @@ function draw_rounded_rectangle(
     width::Float32, height::Float32,
     fill_color_rgba::Vec4{<:AbstractFloat}, border_color_rgba::Vec4{<:AbstractFloat},
     border_width::Float32, radius::Float32,
-    projection_matrix::Mat4{Float32}
+    projection_matrix::Mat4{Float32},
+    anti_aliasing_width::Float32
 )
     fill_color_f32 = Vec{4,Float32}(fill_color_rgba)
     border_color_f32 = Vec{4,Float32}(border_color_rgba)
@@ -107,7 +109,7 @@ function draw_rounded_rectangle(
     GLA.gluniform(rounded_rect_prog[], :border_color, border_color_f32)
     GLA.gluniform(rounded_rect_prog[], :border_width, border_width)
     GLA.gluniform(rounded_rect_prog[], :radius, radius)
-    GLA.gluniform(rounded_rect_prog[], :aa, 1.5f0)
+    GLA.gluniform(rounded_rect_prog[], :aa, anti_aliasing_width)
     GLA.gluniform(rounded_rect_prog[], :rect_size, Vec{2,Float32}(width, height))
 
     GLA.draw(vao)

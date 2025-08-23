@@ -124,7 +124,8 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
         view.style.border_color,
         view.style.border_width_px,
         view.style.corner_radius_px,
-        projection_matrix
+        projection_matrix,
+        1.5f0
     )
 
     # Draw selected text or placeholder
@@ -164,7 +165,8 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
         view.style.border_color,
         view.style.border_width_px,
         view.style.corner_radius_px,
-        projection_matrix
+        projection_matrix,
+        1.5f0
     )
 
     # Draw each visible option
@@ -189,7 +191,8 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
                 Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0), # No border for highlight
                 0.0f0,
                 0.0f0,
-                projection_matrix
+                projection_matrix,
+                1.5f0
             )
         end
 
