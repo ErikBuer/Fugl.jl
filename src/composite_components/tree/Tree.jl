@@ -3,6 +3,7 @@ include("tree_node.jl")
 include("tree_state.jl")
 include("utilities.jl")
 export tree_from_walkdir
+include("tree_cache.jl")
 
 struct TreeView <: AbstractView
     state::TreeState
@@ -36,16 +37,70 @@ function apply_layout(view::TreeView, x::Float32, y::Float32, width::Float32, he
 end
 
 function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    bounds = (x, y, width, height)
+    cache_width = Int32(round(width))
+    cache_height = Int32(round(height))
+
+    # Ensure minimum cache size to avoid zero-sized framebuffers
+    if cache_width <= 0 || cache_height <= 0
+        return  # Skip rendering if size is invalid
+    end
+
+    cache = get_render_cache(view.state.cache_id)
+
+    # Tree render cache logic
+    content_hash = hash_tree_content(view.state.tree, view.state, view.style)
+
+    # Check if we need to invalidate cache
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+
+    if needs_redraw || !cache.is_valid
+        try
+            if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
+                framebuffer, color_texture, depth_texture = create_render_framebuffer(cache_width, cache_height; with_depth=false)
+                update_cache!(cache, framebuffer, color_texture, depth_texture, cache.last_content_hash, bounds)
+            end
+        catch e
+            @warn "Failed to create plot framebuffer: $e"
+            return  # Skip rendering if framebuffer creation fails
+        end
+        render_tree_to_framebuffer(view, cache, width, height, projection_matrix)
+        cache.is_valid = true
+    end
+
+    # If cache is valid and has a color texture, draw it
+    if cache.is_valid && cache.color_texture !== nothing
+        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
+        return
+    end
+end
+
+function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Push framebuffer and viewport
+    push_framebuffer!(cache.framebuffer)
+    push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
+
+    try
+        # Clear framebuffer
+        ModernGL.glClearColor(1.0f0, 1.0f0, 1.0f0, 0.0f0) # White background, transparent
+        ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
+
+        # Create framebuffer-specific projection matrix
+        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+
+        # Draw the tree into the framebuffer using shared function
+        render_tree_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+    finally
+        pop_viewport!()
+        pop_framebuffer!()
+    end
+end
+
+"""
+Render the tree content (shared between direct and framebuffer drawing)
+"""
+function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     current_y = y
-
-    if view.state.tree === nothing
-        return
-    end
-
-    if isempty(view.state.tree.children)
-        return
-    end
-
     function draw_node(node::TreeNode, depth::Int, parent_path::String="")
         # Build the current path, but skip the root folder name
         current_path = parent_path == "" ? node.name : joinpath(parent_path, node.name)
@@ -81,7 +136,9 @@ function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, 
         end
     end
 
-    draw_node(view.state.tree, 0)
+    if view.state.tree !== nothing && !isempty(view.state.tree.children)
+        draw_node(view.state.tree, 0)
+    end
 end
 
 function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)

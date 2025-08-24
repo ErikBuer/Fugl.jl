@@ -69,9 +69,11 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # Check if we need to invalidate cache
     needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
 
+    # TODO: the below section seems to be overly complicated, and can likelybe simplified and made more readable.
+    # See comparable code in Tree and Textbox/CodeEditor
     if needs_redraw || !cache.is_valid
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-            if cache_width > 0 && cache_height > 0
+            if cache_width > 0 && cache_height > 0 # TODO this seems to be the same check as above
                 try
                     (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
 
@@ -94,7 +96,7 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
         render_plot_to_framebuffer(view, cache, width, height, projection_matrix)
     end
 
-    if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0
+    if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0 # TODO this seems to be the same check as above
         draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
     end
 end
