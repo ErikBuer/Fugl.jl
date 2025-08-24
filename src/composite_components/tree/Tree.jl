@@ -4,16 +4,16 @@ include("tree_state.jl")
 include("utilities.jl")
 export tree_from_walkdir
 
-
 struct TreeView <: AbstractView
     state::TreeState
     indent::Float32
     style::TreeStyle
     on_state_change::Function  # Callback for state changes (expand/collapse/select)
+    on_select::Function        # Callback for file selection (path, name)
 end
 
-function Tree(state::TreeState; indent=18f0, style=TreeStyle(), on_state_change=(new_state) -> nothing)
-    return TreeView(state, indent, style, on_state_change)
+function Tree(state::TreeState; indent=18f0, style=TreeStyle(), on_state_change=(new_state) -> nothing, on_select=(path, name) -> nothing)
+    return TreeView(state, indent, style, on_state_change, on_select)
 end
 
 function measure(view::TreeView)::Tuple{Float32,Float32}
@@ -46,7 +46,10 @@ function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, 
         return
     end
 
-    function draw_node(node::TreeNode, depth::Int)
+    function draw_node(node::TreeNode, depth::Int, parent_path::String="")
+        # Build the current path, but skip the root folder name
+        current_path = parent_path == "" ? node.name : joinpath(parent_path, node.name)
+
         # Root node: always expanded, no marker
         if depth == 0
             text = node.name
@@ -57,7 +60,7 @@ function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, 
             text = marker_text * node.name
         end
 
-        is_selected = node.name == view.state.selected_item
+        is_selected = current_path == view.state.selected_item
         style = is_selected ? view.style.selected : view.style.normal
 
         interpret_view(Text(text; style=style, horizontal_align=:left), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix)
@@ -66,13 +69,13 @@ function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, 
         # Always show children for root node
         if depth == 0
             for child in node.children
-                draw_node(child, depth + 1)
+                draw_node(child, depth + 1, "")
             end
         else
             is_open = node.is_folder && (node.name in view.state.open_folders)
             if node.is_folder && is_open
                 for child in node.children
-                    draw_node(child, depth + 1)
+                    draw_node(child, depth + 1, current_path)
                 end
             end
         end
@@ -89,12 +92,16 @@ function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Fl
         return
     end
 
-    function click_node(node::TreeNode, depth::Int)
+    function click_node(node::TreeNode, depth::Int, parent_path::String="")
+        # Build the current path, but skip the root folder name
+        current_path = parent_path == "" ? node.name : joinpath(parent_path, node.name)
+
         # Root node: do not allow expand/collapse or selection
         if depth == 0
             current_y += 22f0
             for child in node.children
-                click_node(child, depth + 1)
+                # For children of root, parent_path is "" so path starts from here
+                click_node(child, depth + 1, "")
             end
             return
         end
@@ -117,15 +124,17 @@ function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Fl
 
             # File: select item in immutable state
             if !node.is_folder && mouse_state.was_clicked[LeftButton]
-                new_state = TreeState(view.state.tree; open_folders=view.state.open_folders, selected_item=node.name)
+                new_state = TreeState(view.state.tree; open_folders=view.state.open_folders, selected_item=current_path)
                 view.on_state_change(new_state)
+                # Call on_select hook with (path, name)
+                view.on_select(current_path, node.name)
             end
         end
 
         current_y += 22f0
         if node.is_folder && (node.name in view.state.open_folders)
             for child in node.children
-                click_node(child, depth + 1)
+                click_node(child, depth + 1, current_path)
             end
         end
     end

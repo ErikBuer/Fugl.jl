@@ -3,7 +3,7 @@ struct TreeStyle
     normal::TextStyle
 end
 
-function TreeStyle(; selected=TextStyle(color=Vec4(0.2f0, 0.5f0, 1.0f0, 1.0f0)), normal=TextStyle())
+function TreeStyle(; selected=TextStyle(color=Vec4(0.24f0, 0.36f0, 0.7f0, 1.0f0)), normal=TextStyle())
     TreeStyle(
         selected,
         normal

@@ -1,7 +1,7 @@
 struct TreeState
     tree::Union{TreeNode,Nothing}         # Root node of the tree
     open_folders::Set{String}             # Set of folder paths/names that are expanded
-    selected_item::Union{String,Nothing}  # Path or name of selected item
+    selected_item::Union{String,Nothing}  # Path (relative) of selected item
 end
 
 """
