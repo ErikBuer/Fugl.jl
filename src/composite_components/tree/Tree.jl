@@ -84,6 +84,11 @@ end
 function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     current_y = y
 
+    # Guard: do nothing if tree is missing or empty
+    if view.state.tree === nothing || isempty(view.state.tree.children)
+        return
+    end
+
     function click_node(node::TreeNode, depth::Int)
         # Root node: do not allow expand/collapse or selection
         if depth == 0

@@ -3,7 +3,8 @@ using Fugl
 project_dir = pwd()
 items = [item for item in walkdir(project_dir)]
 root_node = tree_from_walkdir(items)
-tree_state = Ref(TreeState(root_node))
+#tree_state = Ref(TreeState(root_node))
+tree_state = Ref(TreeState(nothing))
 
 function my_gui()
     Card(
