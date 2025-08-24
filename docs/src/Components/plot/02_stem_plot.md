@@ -37,8 +37,8 @@ function MyApp()
             Plot(
                 elements,
                 PlotStyle(
-                    background_color=Vec4{Float32}(0.95, 0.98, 0.95, 1.0),  # Light green background
-                    grid_color=Vec4{Float32}(0.8, 0.9, 0.8, 1.0),           # Light green grid
+                    background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                    grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),
                     axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                     show_grid=true,
                     padding=50.0f0,

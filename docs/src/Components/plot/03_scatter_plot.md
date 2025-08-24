@@ -43,7 +43,7 @@ function MyApp()
                 elements,
                 PlotStyle(
                     background_color=Vec4{Float32}(0.98, 0.98, 0.98, 1.0),  # Light background
-                    grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),        # Gray grid
+                    grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),        # Gray grid
                     axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                     show_grid=true,
                     padding=50.0f0,

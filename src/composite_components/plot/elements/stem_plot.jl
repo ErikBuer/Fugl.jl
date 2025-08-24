@@ -15,10 +15,10 @@ end
 function StemPlotElement(
     y_data::Vector{<:Real};
     x_data::Union{Vector{<:Real},Nothing}=nothing,
-    line_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    fill_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0),
-    border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0),
-    line_width::Float32=2.0f0,
+    line_color::Vec4{Float32}=Vec4{Float32}(0.28f0, 0.4f0, 0.74f0, 1.0f0),
+    fill_color::Vec4{Float32}=Vec4{Float32}(0.28f0, 0.4f0, 0.74f0, 1.0f0),
+    border_color::Vec4{Float32}=Vec4{Float32}(0.28f0, 0.4f0, 0.74f0, 1.0f0),
+    line_width::Float32=2.5f0,
     marker_size::Float32=5.0f0,
     border_width::Float32=0.0f0,
     marker_type::MarkerType=CIRCLE,

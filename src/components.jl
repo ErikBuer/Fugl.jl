@@ -87,3 +87,6 @@ export AbstractPlotElement
 export LineStyle, SOLID, DASH, DOT, DASHDOT
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE
 export VerticalColorbar, HorizontalColorbar
+
+include("composite_components/tree/Tree.jl")
+export Tree, TreeNode, TreeStyle, TreeState

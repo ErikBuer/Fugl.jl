@@ -49,6 +49,7 @@ makedocs(
                 "Components/plot/05_colorbar.md",
                 "Components/plot/06_plot_style.md",
             ],
+            "Components/tree.md",
         ],
         "interaction.md",
         "api_reference.md",
