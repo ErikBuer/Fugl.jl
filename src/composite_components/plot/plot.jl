@@ -166,7 +166,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
             y_ticks,
             data_to_screen,
             style.grid_color,
-            1.0f0,  # Grid line width
+            style.grid_width,
             DOT,  # DOT line style for grid
             projection_matrix;
             anti_aliasing_width=style.anti_aliasing_width
