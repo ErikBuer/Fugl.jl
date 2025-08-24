@@ -9,7 +9,7 @@ end
 function SliderStyle(;
     background_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),
     handle_color=Vec4{Float32}(0.67f0, 0.75f0, 0.78f0, 1.0f0),
-    border_color=Vec4{Float32}(0.32f0, 0.46f0, 0.54f0, 1.0f0),
+    border_color=Vec4{Float32}(0.5f0, 0.5f0, 0.5f0, 1.0f0),
     border_width=1.0f0,
     radius=2.0f0,
 )
