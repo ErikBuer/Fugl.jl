@@ -40,12 +40,12 @@ function MyApp()
     ]
 
     Card(
-        "Heatmap Example",
+        "Heatmap",
         Plot(
             elements,
             PlotStyle(
-                background_color=Vec4{Float32}(0.95, 0.95, 0.95, 1.0),  # Light background
-                grid_color=Vec4{Float32}(0.8, 0.8, 0.8, 1.0),           # Gray grid
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),           # Gray grid
                 axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
                 show_grid=true,
                 padding=50.0f0
@@ -141,13 +141,13 @@ function MyApp()
     ]
 
     Card(
-        "Multiple Colormaps Example",
+        "Multiple Colormaps",
         Plot(
             elements,
             PlotStyle(
-                background_color=Vec4{Float32}(0.98, 0.98, 0.98, 1.0),  # Light background
-                grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),           # Gray grid
-                axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),
+                axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
                 show_grid=true,
                 padding=50.0f0
             )
@@ -198,16 +198,17 @@ function MyApp()
         )
     ]
 
-    IntrinsicColumn([
-        IntrinsicHeight(Container(Text("NaN Values Example"))),
+    Card(
+        "NaN Values",
         Plot(
             elements,
             PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
                 show_grid=true,
                 padding=50.0f0
             )
         )
-    ], padding=0.0, spacing=0.0)
+    )
 end
 
 screenshot(MyApp, "nanValues.png", 812, 400);
@@ -251,16 +252,17 @@ function MyApp()
         )
     ]
 
-    IntrinsicColumn([
-        IntrinsicHeight(Container(Text("Grayscale with NaN Cross"))),
+    Card(
+        "Grayscale with NaN Cross",
         Plot(
             elements,
             PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
                 show_grid=true,
                 padding=50.0f0
             )
         )
-    ], padding=0.0, spacing=0.0)
+    )
 end
 
 screenshot(MyApp, "grayscaleNaN.png", 812, 400);
@@ -289,16 +291,17 @@ function MyApp()
         )
     ]
 
-    IntrinsicColumn([
-        IntrinsicHeight(Container(Text("Checkerboard Example"))),
+    Card(
+        "Checkerboard",
         Plot(
             elements,
             PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
                 show_grid=true,
                 padding=50.0f0
             )
         )
-    ], padding=0.0, spacing=0.0)
+    )
 end
 
 screenshot(MyApp, "checkerboard.png", 812, 400);
@@ -337,11 +340,12 @@ function MyApp()
         )
     ]
 
-    IntrinsicColumn([
-        IntrinsicHeight(Container(Text("No Axes Example"))),
+    Card(
+        "No Axes",
         Plot(
             elements,
             PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
                 show_grid=false,
                 show_left_axis=false,
                 show_right_axis=false,
@@ -354,7 +358,7 @@ function MyApp()
                 padding=10.0f0
             )
         )
-    ], padding=0.0, spacing=0.0)
+    )
 end
 
 screenshot(MyApp, "noAxes.png", 812, 400);
