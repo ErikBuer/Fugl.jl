@@ -1,5 +1,5 @@
 struct TreeState
-    tree::TreeNode
+    tree::Union{TreeNode,Nothing}         # Root node of the tree
     open_folders::Set{String}             # Set of folder paths/names that are expanded
     selected_item::Union{String,Nothing}  # Path or name of selected item
 end
@@ -7,7 +7,7 @@ end
 """
 Create a new TreeState with the given tree.
 """
-function TreeState(tree::TreeNode; open_folders=Set{String}(), selected_item=nothing)
+function TreeState(tree::Union{TreeNode,Nothing}; open_folders=Set{String}(), selected_item=nothing)
     return TreeState(tree, open_folders, selected_item)
 end
 

@@ -38,6 +38,14 @@ end
 function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     current_y = y
 
+    if view.state.tree === nothing
+        return
+    end
+
+    if isempty(view.state.tree.children)
+        return
+    end
+
     function draw_node(node::TreeNode, depth::Int)
         # Root node: always expanded, no marker
         if depth == 0
