@@ -9,7 +9,7 @@ function MyApp()
     project_dir = pwd()
     items = [item for item in walkdir(project_dir)]
     root_node = tree_from_walkdir(items)
-    tree_state = Ref(TreeState(root_node; open_folders=Set([root_node.name])))
+    tree_state = Ref(TreeState(root_node))
 
     Card(
         "Explorer",
