@@ -48,22 +48,3 @@ function hash_plot_content(elements::Vector{AbstractPlotElement}, state::PlotSta
 
     return h
 end
-
-"""
-Check if plot cache should be invalidated
-"""
-function should_invalidate_plot_cache(view::PlotView, bounds::Tuple{Float32,Float32,Float32,Float32})::Bool
-    # Generate content hash for the plot
-    content_hash = hash_plot_content(view.elements, view.state, view.style)
-
-    # Create cache key based on elements and style (stable across state changes)
-    elements_hash = hash(view.elements)
-    style_hash = hash(view.style)
-    cache_key = (elements_hash, style_hash)
-
-    # Get the cache
-    cache = get_render_cache(cache_key)
-
-    # Use generic cache invalidation logic
-    return should_invalidate_cache(cache, content_hash, bounds)
-end
