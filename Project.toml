@@ -18,6 +18,7 @@ ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
 Tokenize = "0796e94c-ce3b-5d07-9a54-7f471281c624"
 
 [compat]
+julia = "^1.6"
 FileIO = "1.17"
 FreeTypeAbstraction = "0.10"
 GLAbstraction = "0.7"
