@@ -1,11 +1,15 @@
-# Text Buttons
+# TextButton
 
 ``` @example TextButtonExample
 using Fugl
 
 function MyApp()
     Container(
-        TextButton("Some Text", on_click=() -> println("Clicked"))
+        TextButton("Some Text",
+        on_click=() -> println("Clicked"),
+        text_style = TextStyle(),
+        container_style = ContainerStyle()
+        )
     )
 end
 
