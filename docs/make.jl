@@ -32,6 +32,7 @@ makedocs(
                 "Components/layout/split_container.md",
                 "Components/layout/align.md",
                 "Components/layout/sizing.md",
+                "Components/layout/padding.md",
             ],
             "Components/vline_hline.md",
             "Components/text_box.md",

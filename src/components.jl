@@ -15,6 +15,9 @@ export AlignVertical, AlignTop, AlignMiddle, AlignBottom
 include("components/AlignHorizontal.jl")
 export AlignHorizontal, AlignLeft, AlignCenter, AlignRight
 
+include("components/Padding.jl")
+export Padding
+
 include("components/IntrinsicSize.jl")
 export IntrinsicSize
 
