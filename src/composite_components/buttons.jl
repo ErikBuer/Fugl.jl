@@ -1,8 +1,12 @@
 """
 A button containing text only.
 """
-function TextButton(text::String; style=ContainerStyle(), on_click::Function=() -> nothing)
-    return Container(Text(text), style=style, on_click=on_click)
+function TextButton(text::String;
+    on_click::Function=() -> nothing,
+    container_style=ContainerStyle(),
+    text_style=TextStyle()
+)
+    return Container(Text(text, style=text_style), style=container_style, on_click=on_click)
 end
 
 """
