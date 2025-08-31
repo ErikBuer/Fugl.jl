@@ -9,11 +9,11 @@ struct ImageView <: AbstractView
 end
 
 function Image(
-    image_path::String;
+    image_or_path::Union{String,AbstractMatrix{<:RGBA}};
     horizontal_align=:center,
     vertical_align=:middle
 )::ImageView
-    texture = load_image_texture(image_path)
+    texture = load_image_texture(image_or_path)
     return ImageView(horizontal_align, vertical_align, texture)
 end
 

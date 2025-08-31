@@ -1,8 +1,9 @@
 # Image
 
+## Image from file
+
 ``` @example LogoImageExample
 using Fugl
-using Fugl: Text
 
 function MyApp()
     Card(
@@ -16,6 +17,55 @@ nothing #hide
 ```
 
 ![Logo Image](logo_image.png)
+
+## Image from matrix
+
+You can also load matrixes as images.
+
+``` @example MatrixImageExample
+using Fugl
+using ColorTypes
+using FixedPointNumbers
+
+size_x, size_y = 256, 256
+my_matrix = Matrix{Float32}(undef, size_y, size_x)
+center_x, center_y = size_x / 2, size_y / 2
+
+for j in 1:size_y
+    for i in 1:size_x
+        # Distance from center
+        dx = i - center_x
+        dy = j - center_y
+        distance_sq = dx^2 + dy^2
+
+        # Gaussian pattern
+        my_matrix[j, i] = exp(-distance_sq / (2 * (size_x / 6)^2))
+        
+        # Add sinusoidal pattern
+        wave = 0.3 * sin(i * 0.3) * cos(j * 0.3)
+        my_matrix[j, i] += wave
+
+        # Add some noise
+        my_matrix[j, i] += 0.1 * (rand() - 0.5)
+    end
+end
+
+# Clamp values to [0, 1] for N0f8 conversion
+clamped_matrix = clamp.(my_matrix, 0.0f0, 1.0f0)
+rgba_matrix = RGBA{N0f8}.(clamped_matrix, 0.5.*(1.0.-clamped_matrix), clamped_matrix, N0f8(1.0))
+
+function MyApp()
+    Card(
+        "Image", title_align=:center,
+        Image(rgba_matrix)
+    )
+end
+
+screenshot(MyApp, "matrix_image.png", 812, 400);
+nothing #hide
+```
+
+![Matrix as image](matrix_image.png)
 
 ## Intrinsic Size Example
 
