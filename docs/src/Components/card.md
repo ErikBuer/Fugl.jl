@@ -11,7 +11,7 @@ using Fugl: Text
 function MyApp()
     Card(
         "Card Title",
-        Text("Card content.")
+        Text("Card contents")
     )
 end
 
