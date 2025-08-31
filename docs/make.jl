@@ -49,6 +49,7 @@ makedocs(
                 "Components/plot/04_heatmap.md",
                 "Components/plot/05_colorbar.md",
                 "Components/plot/06_plot_style.md",
+                "Components/plot/07_plot_state.md",
             ],
             "Components/tree.md",
         ],

@@ -1,3 +1,15 @@
+"""
+    PlotState(bounds, auto_scale, initial_x_min, initial_x_max, initial_y_min, initial_y_max, current_x_min, current_x_max, current_y_min, current_y_max, cache_id)
+
+Represents the state of a plot, including axis bounds, scaling, and cache information.
+
+Fields:
+- `bounds`: Rect2f, the current plot bounds.
+- `auto_scale`: Bool, whether to automatically scale axes to fit data.
+- `initial_x_min`, `initial_x_max`, `initial_y_min`, `initial_y_max`: Initial axis limits (for zoom/pan reference).
+- `current_x_min`, `current_x_max`, `current_y_min`, `current_y_max`: Current axis limits (after zoom/pan).
+- `cache_id`: Unique identifier for plot cache. Not user managed.
+"""
 struct PlotState
     bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
     auto_scale::Bool
@@ -13,6 +25,37 @@ struct PlotState
     current_y_max::Union{Float32,Nothing}
     # Cache ID for render caching
     cache_id::UInt64
+end
+
+"""
+Create a new PlotState from an existing state with keyword-based modifications.
+"""
+function PlotState(state::PlotState;
+    bounds=state.bounds,
+    auto_scale=state.auto_scale,
+    initial_x_min=state.initial_x_min,
+    initial_x_max=state.initial_x_max,
+    initial_y_min=state.initial_y_min,
+    initial_y_max=state.initial_y_max,
+    current_x_min=state.current_x_min,
+    current_x_max=state.current_x_max,
+    current_y_min=state.current_y_min,
+    current_y_max=state.current_y_max,
+    cache_id=state.cache_id # Not user managed
+)
+    return PlotState(
+        bounds,
+        auto_scale,
+        initial_x_min,
+        initial_x_max,
+        initial_y_min,
+        initial_y_max,
+        current_x_min,
+        current_x_max,
+        current_y_min,
+        current_y_max,
+        cache_id
+    )
 end
 
 """
@@ -103,4 +146,18 @@ function get_effective_bounds(state::PlotState, style::PlotStyle)
     y_max = something(state.current_y_max, state.initial_y_max, state.bounds.y + state.bounds.height)
 
     return Rect2f(x_min, y_min, x_max - x_min, y_max - y_min)
+end
+
+"""
+    reset_plot_view_bounds(state::PlotState)
+
+Returns a copy of the PlotState with current_x_min, current_x_max, current_y_min, current_y_max reset to the initial values.
+"""
+function reset_plot_view_bounds(state::PlotState)
+    return PlotState(state;
+        current_x_min=state.initial_x_min,
+        current_x_max=state.initial_x_max,
+        current_y_min=state.initial_y_min,
+        current_y_max=state.initial_y_max
+    )
 end
