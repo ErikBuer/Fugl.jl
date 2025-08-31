@@ -15,6 +15,9 @@ export AlignVertical, AlignTop, AlignMiddle, AlignBottom
 include("components/AlignHorizontal.jl")
 export AlignHorizontal, AlignLeft, AlignCenter, AlignRight
 
+include("components/Padding.jl")
+export Padding
+
 include("components/IntrinsicSize.jl")
 export IntrinsicSize
 
@@ -81,7 +84,8 @@ export Card
 include("components/AtlasDebug.jl")
 
 include("composite_components/plot/Plot.jl")
-export Plot, PlotView, PlotState, PlotStyle
+export Plot, PlotView, PlotStyle
+export PlotState, reset_plot_view_bounds, calculate_bounds_from_elements
 export LinePlotElement, ScatterPlotElement, StemPlotElement, HeatmapElement
 export AbstractPlotElement
 export LineStyle, SOLID, DASH, DOT, DASHDOT

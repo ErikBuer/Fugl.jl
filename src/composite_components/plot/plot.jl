@@ -538,19 +538,12 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
     new_min_y = mouse_data_y - (mouse_data_y - min_y) * zoom_factor
     new_max_y = mouse_data_y + (max_y - mouse_data_y) * zoom_factor
 
-    # Create new state with updated zoom bounds
-    new_state = PlotState(
-        current_state.bounds,
-        false,  # Disable auto_scale when user zooms
-        current_state.initial_x_min,
-        current_state.initial_x_max,
-        current_state.initial_y_min,
-        current_state.initial_y_max,
-        new_min_x,
-        new_max_x,
-        new_min_y,
-        new_max_y,
-        current_state.cache_id
+    new_state = PlotState(current_state;
+        current_x_min=new_min_x,
+        current_x_max=new_max_x,
+        current_y_min=new_min_y,
+        current_y_max=new_max_y,
+        auto_scale=false  # Disable auto_scale when user zooms
     )
 
     # Notify callback for state management - user must handle updating the PlotView
@@ -607,23 +600,16 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
             end
         end
 
-        # Store these bounds as initial bounds - PRESERVE the existing current bounds (zoom state)
-        initial_state = PlotState(
-            current_state.bounds,
-            false,  # Disable auto_scale when user drags
-            base_min_x,  # Store drag start bounds in initial fields
-            base_max_x,
-            base_min_y,
-            base_max_y,
-            current_state.current_x_min,  # PRESERVE existing zoom state
-            current_state.current_x_max,
-            current_state.current_y_min,
-            current_state.current_y_max,
-            current_state.cache_id
+        new_state = PlotState(current_state;
+            initial_x_min=base_min_x,
+            initial_x_max=base_max_x,
+            initial_y_min=base_min_y,
+            initial_y_max=base_max_y,
+            auto_scale=false,  # Disable auto_scale when user drags
         )
 
         # Update the plot state to store the initial bounds for drag reference
-        view.on_state_change(initial_state)
+        view.on_state_change(new_state)
         return  # Exit early on first frame to avoid double update
     end
 
@@ -648,25 +634,17 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     new_max_y = base_max_y + delta_y_data
 
     # Create new state with updated pan bounds
-    new_state = PlotState(
-        current_state.bounds,
-        false,  # Disable auto_scale when user pans
-        current_state.initial_x_min,
-        current_state.initial_x_max,
-        current_state.initial_y_min,
-        current_state.initial_y_max,
-        new_min_x,
-        new_max_x,
-        new_min_y,
-        new_max_y,
-        current_state.cache_id
+    new_state = PlotState(current_state;
+        current_x_min=new_min_x,
+        current_x_max=new_max_x,
+        current_y_min=new_min_y,
+        current_y_max=new_max_y,
+        auto_scale=false  # Disable auto_scale when user pans   
     )
 
     # Notify of state change - user must handle updating the PlotView
     view.on_state_change(new_state)
 end
-
-# Data culling functions for efficient viewport rendering
 
 """
 Cull point data to only include points within the specified bounds.
