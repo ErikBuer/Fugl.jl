@@ -64,20 +64,15 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         word_width = measure_word_width(font, word, size_px)
 
         if current_line == ""
-            if word_width > width
-                # Word too long for any line, but we have to place it
-                current_line = word
-                current_width = word_width
-            else
-                current_line = word
-                current_width = word_width
-            end
+            # First word on a line - always place it, even if it doesn't fit (will be clipped)
+            current_line = word
+            current_width = word_width
         else
             # Check if word + space fits on current line
             if current_width + space_width + word_width > width
                 # Move to a new line
                 push!(lines, current_line)
-                current_line = word
+                current_line = word  # Start new line with this word
                 current_width = word_width
             else
                 current_line *= " " * word
