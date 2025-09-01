@@ -10,10 +10,11 @@ struct TextView <: AbstractView
     style::TextStyle
     horizontal_align::Symbol  # :left, :center, :right
     vertical_align::Symbol    # :top, :middle, :bottom
+    rotation_degrees::Float32  # Rotation in degrees
 end
 
-function Text(text::String; style=TextStyle(), horizontal_align=:center, vertical_align=:middle)
-    return TextView(text, style, horizontal_align, vertical_align)
+function Text(text::String; style=TextStyle(), horizontal_align=:center, vertical_align=:middle, rotation_degrees=0.0f0)
+    return TextView(text, style, horizontal_align, vertical_align, Float32(rotation_degrees))
 end
 
 """
@@ -29,7 +30,12 @@ function measure(view::TextView)::Tuple{Float32,Float32}
     text_height = Float32(size_px) + 2.0
     text_width = text_width + 2.0
 
-    return (text_width, text_height)
+    # For rotated text (90 or 270 degrees), swap width and height
+    if abs(view.rotation_degrees - 90.0f0) < 1.0f0 || abs(view.rotation_degrees - 270.0f0) < 1.0f0
+        return (text_height, text_width)  # Swap for vertical text
+    else
+        return (text_width, text_height)
+    end
 end
 
 function apply_layout(view::TextView, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -58,20 +64,15 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         word_width = measure_word_width(font, word, size_px)
 
         if current_line == ""
-            if word_width > width
-                # Word too long for any line, but we have to place it
-                current_line = word
-                current_width = word_width
-            else
-                current_line = word
-                current_width = word_width
-            end
+            # First word on a line - always place it, even if it doesn't fit (will be clipped)
+            current_line = word
+            current_width = word_width
         else
             # Check if word + space fits on current line
             if current_width + space_width + word_width > width
                 # Move to a new line
                 push!(lines, current_line)
-                current_line = word
+                current_line = word  # Start new line with this word
                 current_width = word_width
             else
                 current_line *= " " * word
@@ -93,6 +94,7 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     x_positions = Float32[]
     y_positions = Float32[]
 
+    # Start from the top of the text block (y + vertical_offset gives us the baseline of the first line)
     current_y = y + vertical_offset
     for line in lines
         # Calculate horizontal alignment offset
@@ -119,6 +121,7 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         y_positions,         # Y positions for each line
         size_px,             # Text size
         projection_matrix,   # Projection matrix
-        color                # Text color
+        color;               # Text color
+        rotation_degrees=view.rotation_degrees  # Pass rotation from TextView
     )
 end

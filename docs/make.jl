@@ -35,6 +35,7 @@ makedocs(
                 "Components/layout/padding.md",
             ],
             "Components/vline_hline.md",
+            "Components/text.md",
             "Components/text_box.md",
             "Components/code_editor.md",
             "Components/dropdown.md",
@@ -42,6 +43,7 @@ makedocs(
             "Components/slider.md",
             "Components/number_field.md",
             "Components/text_button.md",
+            "Components/icon_button.md",
             "Plot"=>Any[
                 "Components/plot/01_line_plot.md",
                 "Components/plot/02_stem_plot.md",
