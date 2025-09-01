@@ -94,6 +94,7 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     x_positions = Float32[]
     y_positions = Float32[]
 
+    # Start from the top of the text block (y + vertical_offset gives us the baseline of the first line)
     current_y = y + vertical_offset
     for line in lines
         # Calculate horizontal alignment offset
