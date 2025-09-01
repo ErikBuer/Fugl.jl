@@ -203,7 +203,11 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
             show_x_tick_marks=style.show_x_tick_marks,
             show_y_tick_marks=style.show_y_tick_marks,
             show_x_tick_labels=style.show_x_tick_labels,
-            show_y_tick_labels=style.show_y_tick_labels
+            show_y_tick_labels=style.show_y_tick_labels,
+            x_label=style.x_label,
+            y_label=style.y_label,
+            show_x_label=style.show_x_label,
+            show_y_label=style.show_y_label
         )
     end
 

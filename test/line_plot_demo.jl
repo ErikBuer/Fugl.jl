@@ -36,7 +36,15 @@ function main()
                                 line_style=DASH
                             )
                         ],
-                        PlotStyle(show_grid=true, show_legend=true),
+                        PlotStyle(
+                            show_grid=true,
+                            show_legend=true,
+                            x_label="Time (seconds)",
+                            y_label="Amplitude",
+                            show_x_label=true,
+                            show_y_label=true,
+                            padding=100.0f0  # More padding to accommodate axis labels outside plot area
+                        ),
                         plot1_state[],  # Add state management
                         (new_state) -> plot1_state[] = new_state  # Add callback
                     )
