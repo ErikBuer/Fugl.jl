@@ -105,6 +105,42 @@ nothing #hide
 
 ![Text vertical alignment](text_vertical_align.png)
 
+## Word Wrapping with Vertical Alignment
+
+Word wrapping also respects vertical alignment, centering or positioning the entire wrapped text block as a unit.
+
+``` @example WrappedVerticalAlignment
+using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Row([
+            Container(
+                Text("This long text will wrap to multiple lines and be aligned as a block at the top", 
+                     vertical_align=:top, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.3, 0.3, 0.6, 1.0))
+            ),
+            Container(
+                Text("This long text will wrap to multiple lines and be centered as a complete block in the middle", 
+                     vertical_align=:middle, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.6, 0.4, 0.4, 1.0))
+            ),
+            Container(
+                Text("This long text will wrap to multiple lines and be positioned as a block at the bottom", 
+                     vertical_align=:bottom, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.4, 0.6, 0.4, 1.0))
+            )
+        ]),
+    )
+end
+
+screenshot(MyApp, "wrapped_vertical_align.png", 600, 200);
+nothing #hide
+```
+
+![Wrapped text vertical alignment](wrapped_vertical_align.png)
+
 ## Text Style
 
 Style is handeled by the `TextStyle` struct.

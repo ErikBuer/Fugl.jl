@@ -96,10 +96,11 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     end
 
     # Calculate total text height
-    total_height = length(lines) * size_px
+    line_height = Float32(size_px)
+    total_height = length(lines) * line_height
 
-    # Calculate vertical alignment offset
-    vertical_offset = calculate_text_vertical_offset(height, total_height, view.vertical_align)
+    # Calculate vertical alignment offset with proper multi-line support
+    vertical_offset = calculate_text_vertical_offset(height, total_height, line_height, view.vertical_align)
 
     # Collect positions for all lines for batched rendering
     x_positions = Float32[]
@@ -119,8 +120,8 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         push!(x_positions, Float32(snapped_x))
         push!(y_positions, Float32(snapped_y))
 
-        # Move to the next line
-        current_y += size_px
+        # Move to the next line using consistent line height
+        current_y += line_height
     end
 
     # Render all lines in a single batched call for maximum performance
