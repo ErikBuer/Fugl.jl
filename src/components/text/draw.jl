@@ -5,15 +5,14 @@ function draw_text(
     y_px::Float32,
     pixelsize::Int,
     projection_matrix::Mat4{Float32},
-    color::Vec4{Float32};
-    rotation_degrees::Float32=0.0f0
+    color::Vec4{Float32}
 )
     # Snap position to pixel boundary for crisp text
     snapped_x = Float32(round(x_px))
     snapped_y = Float32(round(y_px))
 
     batch = get_global_text_batch()
-    return draw_text_batched(font_face, text, snapped_x, snapped_y, pixelsize, projection_matrix, color, batch; rotation_degrees=rotation_degrees)
+    return draw_text_batched(font_face, text, snapped_x, snapped_y, pixelsize, projection_matrix, color, batch)
 end
 
 
@@ -209,8 +208,7 @@ function draw_text_batched(
     pixelsize::Int,
     projection_matrix::Mat4{Float32},
     color::Vec4{Float32},
-    batch::GlyphBatch=GlyphBatch();
-    rotation_degrees::Float32=0.0f0
+    batch::GlyphBatch=GlyphBatch()
 )
     atlas = get_glyph_atlas()
     current_x = 0.0f0  # Start at 0, will be transformed relative to origin
@@ -218,11 +216,6 @@ function draw_text_batched(
 
     # Clear the batch for reuse
     clear_batch!(batch)
-
-    # Convert rotation to radians
-    rotation_rad = rotation_degrees * π / 180.0f0
-    cos_rot = cos(rotation_rad)
-    sin_rot = sin(rotation_rad)
 
     # Collect all glyphs in the batch
     for char in text
@@ -237,39 +230,20 @@ function draw_text_batched(
 
         # Add to batch if it has content
         if glyph_uv.width > 0 && glyph_uv.height > 0
-            # Calculate local glyph position relative to text origin
-            local_glyph_x = current_x + glyph_uv.bearing_x
-            local_glyph_y = -glyph_uv.bearing_y  # Negative because glyph bearing_y is upward
-
-            # Apply rotation transformation around text origin
-            rotated_x = local_glyph_x * cos_rot - local_glyph_y * sin_rot
-            rotated_y = local_glyph_x * sin_rot + local_glyph_y * cos_rot
-
-            # Translate to final position
-            final_glyph_x = x_px + rotated_x
-            final_glyph_y = y_px + rotated_y
+            # Calculate glyph position
+            glyph_x = x_px + current_x + glyph_uv.bearing_x
+            glyph_y = y_px - glyph_uv.bearing_y  # Negative because glyph bearing_y is upward
 
             # Snap glyph positions to pixel boundaries for crisp rendering
-            snapped_glyph_x = round(final_glyph_x)
-            snapped_glyph_y = round(final_glyph_y)
+            snapped_glyph_x = round(glyph_x)
+            snapped_glyph_y = round(glyph_y)
 
-            # Choose appropriate batch function based on rotation
-            if abs(rotation_degrees) < 0.1  # No rotation
-                add_glyph_to_batch!(
-                    batch,
-                    Float32(snapped_glyph_x), Float32(snapped_glyph_y),
-                    Float32(glyph_uv.width), Float32(glyph_uv.height),
-                    glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
-                )
-            else  # Rotated
-                add_rotated_glyph_to_batch!(
-                    batch,
-                    Float32(snapped_glyph_x), Float32(snapped_glyph_y),
-                    Float32(glyph_uv.width), Float32(glyph_uv.height),
-                    glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max,
-                    rotation_rad  # Pass rotation for individual glyph rotation
-                )
-            end
+            add_glyph_to_batch!(
+                batch,
+                Float32(snapped_glyph_x), Float32(snapped_glyph_y),
+                Float32(glyph_uv.width), Float32(glyph_uv.height),
+                glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
+            )
         end
 
         # Advance position
@@ -295,20 +269,12 @@ function draw_multiline_text_batched(
     pixelsize::Int,
     projection_matrix::Mat4{Float32},
     color::Vec4{Float32},
-    batch::GlyphBatch=GlyphBatch();
-    rotation_degrees::Float32=0.0f0
+    batch::GlyphBatch=GlyphBatch()
 )
-    rotation_degrees = -rotation_degrees  # Negate for counter-clockwise rotation # TODO make a proper fix later
-
     atlas = get_glyph_atlas()
 
     # Clear the batch for reuse
     clear_batch!(batch)
-
-    # Convert rotation to radians
-    rotation_rad = rotation_degrees * π / 180.0f0
-    cos_rot = cos(rotation_rad)
-    sin_rot = sin(rotation_rad)
 
     # Process all lines and collect all glyphs into the batch
     for (line_idx, line) in enumerate(lines)
@@ -334,39 +300,20 @@ function draw_multiline_text_batched(
 
             # Add to batch if it has content
             if glyph_uv.width > 0 && glyph_uv.height > 0
-                # Calculate local glyph position relative to line origin
-                local_glyph_x = current_x + glyph_uv.bearing_x
-                local_glyph_y = -glyph_uv.bearing_y  # Negative because glyph bearing_y is upward
-
-                # Apply rotation transformation around line origin
-                rotated_x = local_glyph_x * cos_rot - local_glyph_y * sin_rot
-                rotated_y = local_glyph_x * sin_rot + local_glyph_y * cos_rot
-
-                # Translate to final position
-                final_glyph_x = line_origin_x + rotated_x
-                final_glyph_y = line_origin_y + rotated_y
+                # Calculate glyph position
+                glyph_x = line_origin_x + current_x + glyph_uv.bearing_x
+                glyph_y = line_origin_y - glyph_uv.bearing_y  # Negative because glyph bearing_y is upward
 
                 # Snap glyph positions to pixel boundaries for crisp rendering
-                snapped_glyph_x = round(final_glyph_x)
-                snapped_glyph_y = round(final_glyph_y)
+                snapped_glyph_x = round(glyph_x)
+                snapped_glyph_y = round(glyph_y)
 
-                # Choose appropriate batch function based on rotation
-                if abs(rotation_degrees) < 0.1  # No rotation
-                    add_glyph_to_batch!(
-                        batch,
-                        Float32(snapped_glyph_x), Float32(snapped_glyph_y),
-                        Float32(glyph_uv.width), Float32(glyph_uv.height),
-                        glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
-                    )
-                else  # Rotated
-                    add_rotated_glyph_to_batch!(
-                        batch,
-                        Float32(snapped_glyph_x), Float32(snapped_glyph_y),
-                        Float32(glyph_uv.width), Float32(glyph_uv.height),
-                        glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max,
-                        rotation_rad  # Pass rotation for individual glyph rotation
-                    )
-                end
+                add_glyph_to_batch!(
+                    batch,
+                    Float32(snapped_glyph_x), Float32(snapped_glyph_y),
+                    Float32(glyph_uv.width), Float32(glyph_uv.height),
+                    glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
+                )
             end
 
             # Advance position
