@@ -34,6 +34,7 @@ makedocs(
                 "Components/layout/sizing.md",
                 "Components/layout/padding.md",
             ],
+            "Components/Rotate.md",
             "Components/vline_hline.md",
             "Components/text.md",
             "Components/text_box.md",

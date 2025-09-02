@@ -43,7 +43,7 @@ function main()
                             y_label="Amplitude",
                             show_x_label=true,
                             show_y_label=true,
-                            padding=100.0f0  # More padding to accommodate axis labels outside plot area
+                            padding=55.0f0  # More padding to accommodate axis labels outside plot area
                         ),
                         plot1_state[],  # Add state management
                         (new_state) -> plot1_state[] = new_state  # Add callback

@@ -36,6 +36,29 @@ nothing #hide
 
 ![Text wrapping](text_wrap.png)
 
+## Text Clipping
+
+By setting `wrap_text=false`, text will be rendered on a single line and clipped if it exceeds the container width, similar to VS Code's sidebar behavior.
+
+``` @example TextClippingExample
+using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Column([
+            Text("This text will wrap normally because wrap_text is true by default", wrap_text=true),
+            Text("This very long text will be clipped instead of wrapping to multiple lines", wrap_text=false)
+        ], spacing=10.0)
+    )
+end
+
+screenshot(MyApp, "text_clip.png", 400, 150);
+nothing #hide
+```
+
+![Text clipping vs wrapping](text_clip.png)
+
 ## Horizontal Alignement
 
 ``` @example TextAlignement
@@ -82,6 +105,42 @@ nothing #hide
 
 ![Text vertical alignment](text_vertical_align.png)
 
+## Word Wrapping with Vertical Alignment
+
+Word wrapping also respects vertical alignment, centering or positioning the entire wrapped text block as a unit.
+
+``` @example WrappedVerticalAlignment
+using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Row([
+            Container(
+                Text("This long text will wrap to multiple lines and be aligned as a block at the top", 
+                     vertical_align=:top, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.3, 0.3, 0.6, 1.0))
+            ),
+            Container(
+                Text("This long text will wrap to multiple lines and be centered as a complete block in the middle", 
+                     vertical_align=:middle, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.6, 0.4, 0.4, 1.0))
+            ),
+            Container(
+                Text("This long text will wrap to multiple lines and be positioned as a block at the bottom", 
+                     vertical_align=:bottom, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.4, 0.6, 0.4, 1.0))
+            )
+        ]),
+    )
+end
+
+screenshot(MyApp, "wrapped_vertical_align.png", 600, 200);
+nothing #hide
+```
+
+![Wrapped text vertical alignment](wrapped_vertical_align.png)
+
 ## Text Style
 
 Style is handeled by the `TextStyle` struct.
@@ -111,18 +170,18 @@ nothing #hide
 
 ## Text Rotation
 
-Text can be rotated by specifying the `rotation_degrees` parameter. Positive angles rotate counter-clockwise.
+Text can be rotated by wrapping it with the `Rotate` component. Positive angles rotate counter-clockwise.
 
 ``` @example TextRotationExample
 using Fugl
-using Fugl: Text
+using Fugl: Text, Rotate
 
 function MyApp()
     Container(
         Row([
-            Text("0°", rotation_degrees=0.0f0, horizontal_align=:center, vertical_align=:middle),
-            Text("45°", rotation_degrees=45.0f0, horizontal_align=:center, vertical_align=:middle),
-            Text("90°", rotation_degrees=90.0f0, horizontal_align=:center, vertical_align=:middle)
+            Rotate(Text("0°", horizontal_align=:center, vertical_align=:middle), rotation_degrees=0.0f0),
+            Rotate(Text("45°", horizontal_align=:center, vertical_align=:middle), rotation_degrees=45.0f0),
+            Rotate(Text("90°", horizontal_align=:center, vertical_align=:middle), rotation_degrees=90.0f0)
         ], padding=20.0, spacing=20.0)
     )
 end
@@ -132,39 +191,3 @@ nothing #hide
 ```
 
 ![Text Rotation Example](text_rotation.png)
-
-## Text Rotation with Alignment
-
-Text rotation works with all alignment options. The text rotates around its reference point determined by the alignment.
-
-``` @example TextRotationAlignmentExample
-using Fugl
-using Fugl: Text
-
-function MyApp()
-    Container(
-        Column([
-            Row([
-                Text("Left-Top", rotation_degrees=45.0f0, horizontal_align=:left, vertical_align=:top),
-                Text("Center-Top", rotation_degrees=45.0f0, horizontal_align=:center, vertical_align=:top),
-                Text("Right-Top", rotation_degrees=45.0f0, horizontal_align=:right, vertical_align=:top)
-            ], padding=10.0, spacing=20.0),
-            Row([
-                Text("Left-Middle", rotation_degrees=45.0f0, horizontal_align=:left, vertical_align=:middle),
-                Text("Center-Middle", rotation_degrees=45.0f0, horizontal_align=:center, vertical_align=:middle),
-                Text("Right-Middle", rotation_degrees=45.0f0, horizontal_align=:right, vertical_align=:middle)
-            ], padding=10.0, spacing=20.0),
-            Row([
-                Text("Left-Bottom", rotation_degrees=45.0f0, horizontal_align=:left, vertical_align=:bottom),
-                Text("Center-Bottom", rotation_degrees=45.0f0, horizontal_align=:center, vertical_align=:bottom),
-                Text("Right-Bottom", rotation_degrees=45.0f0, horizontal_align=:right, vertical_align=:bottom)
-            ], padding=10.0, spacing=20.0)
-        ], padding=15.0, spacing=15.0)
-    )
-end
-
-screenshot(MyApp, "text_rotation_alignment.png", 600, 300);
-nothing #hide
-```
-
-![Text Rotation with Alignment](text_rotation_alignment.png)

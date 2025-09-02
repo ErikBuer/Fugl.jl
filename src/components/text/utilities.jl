@@ -31,13 +31,18 @@ function calculate_horizontal_offset(container_width::Real, text_width::Real, al
     end
 end
 
-function calculate_text_vertical_offset(container_height::Real, text_height::Real, align::Symbol)::Float32
+function calculate_text_vertical_offset(container_height::Real, total_text_height::Real, line_height::Real, align::Symbol)::Float32
     if align == :top
-        return 0.0f0 + text_height
+        # For top alignment, start from the top (baseline of first line)
+        return line_height
     elseif align == :middle
-        return container_height / 2.0f0
+        # For middle alignment, center the entire text block in the container
+        # The total_text_height represents the height of all lines combined
+        # We want the center of the text block to be at the center of the container
+        return (container_height - total_text_height) / 2.0f0 + line_height
     elseif align == :bottom
-        return container_height - text_height / 2.0f0
+        # For bottom alignment, position so the last line is at the bottom
+        return container_height - total_text_height + line_height
     else
         error("Unsupported vertical alignment: $align")
     end

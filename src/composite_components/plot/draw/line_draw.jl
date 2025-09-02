@@ -440,7 +440,7 @@ function draw_axes_with_labels(
     # Draw axis labels if enabled
     if show_x_label && !isempty(x_label)
         # Create Text component for x-axis label
-        x_label_style = TextStyle(size_px=label_size_px + 2, color=label_color)  # Slightly larger for axis labels
+        x_label_style = TextStyle(size_px=label_size_px + 4, color=label_color)  # Slightly larger for axis labels
         x_label_text = Text(x_label, style=x_label_style, horizontal_align=:center, vertical_align=:top)
         x_label_width, x_label_height = measure(x_label_text)
 
@@ -454,16 +454,15 @@ function draw_axes_with_labels(
     end
 
     if show_y_label && !isempty(y_label)
-        # Create Text component for y-axis label (rotated 90 degrees)
-        y_label_style = TextStyle(size_px=label_size_px + 2, color=label_color)  # Style without rotation
-        y_label_text = Text(y_label, style=y_label_style, horizontal_align=:center, vertical_align=:middle, rotation_degrees=90.0f0)  # Rotation in Text component
+        # Create Text component for y-axis label (rotated -90 degrees using Rotate component)
+        y_label_style = TextStyle(size_px=label_size_px + 4, color=label_color)  # Style without rotation
+        y_label_text = Rotate(Text(y_label, style=y_label_style, horizontal_align=:center, vertical_align=:middle), rotation_degrees=-90.0f0)  # Use Rotate component
         y_label_width, y_label_height = measure(y_label_text)
 
         # Position y-axis label centered to the left of the plot, left of tick labels
         left_edge_screen_x, left_edge_screen_y = transform_func(plot_bounds.x, plot_bounds.y + plot_bounds.height / 2)
 
-        # For rotated text, adjust positioning - the text rotates around its top-left corner
-        # So we need to position it considering the rotated dimensions
+        # For rotated text, adjust positioning
         y_label_x = left_edge_screen_x - tick_length_px - label_offset_px - Float32(label_size_px) * 3.0f0 - label_offset_px  # Left of tick labels
         y_label_y = left_edge_screen_y - y_label_height / 2.0f0  # Center vertically
 

@@ -27,6 +27,9 @@ export IntrinsicHeight
 include("components/IntrinsicWidth.jl")
 export IntrinsicWidth
 
+include("components/Rotate.jl")
+export Rotate
+
 include("components/Row.jl")
 export Row
 

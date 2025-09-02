@@ -274,15 +274,27 @@ function get_render_cache_stats()
 end
 
 """
-Draw a cached texture to screen using a simple textured quad
+Draw a cached texture to screen using a simple textured quad with pixel alignment
 """
 function draw_cached_texture(texture_id::UInt32, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    # Snap position to pixel boundaries for crisp rendering
+    snapped_x = Float32(round(x))
+    snapped_y = Float32(round(y))
+
+    # Scale down to closest whole pixel in each axis to avoid stretching artifacts
+    pixel_aligned_width = Float32(floor(width))
+    pixel_aligned_height = Float32(floor(height))
+
+    # Ensure minimum size of 1 pixel
+    pixel_aligned_width = max(1.0f0, pixel_aligned_width)
+    pixel_aligned_height = max(1.0f0, pixel_aligned_height)
+
     # Create vertices for a quad using Point2f (same as working draw_rectangle)
     positions = Point2f[
-        Point2f(x, y + height),                # Top-left
-        Point2f(x, y),                         # Bottom-left  
-        Point2f(x + width, y),                 # Bottom-right
-        Point2f(x + width, y + height)         # Top-right
+        Point2f(snapped_x, snapped_y + pixel_aligned_height),     # Top-left
+        Point2f(snapped_x, snapped_y),                           # Bottom-left  
+        Point2f(snapped_x + pixel_aligned_width, snapped_y),     # Bottom-right
+        Point2f(snapped_x + pixel_aligned_width, snapped_y + pixel_aligned_height) # Top-right
     ]
 
     # Texture coordinates matching vertex order

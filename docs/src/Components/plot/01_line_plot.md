@@ -40,7 +40,11 @@ function MyApp()
                         grid_color=Vec4{Float32}(0.9, 0.9, 0.9, 1.0),        # Light gray grid
                         axis_color=Vec4{Float32}(1.0, 1.0, 1.0, 1.0),        # White axes
                         show_grid=true,
-                        padding=50.0f0
+                        padding=54.0f0,
+                        x_label="Time (seconds)",
+                        y_label="Amplitude",
+                        show_x_label=true,
+                        show_y_label=true,
                     )
                 )
             ),
