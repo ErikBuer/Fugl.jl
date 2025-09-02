@@ -191,7 +191,7 @@ function gradient_resolution_demo()
     return ui
 end
 
-screenshot(gradient_resolution_demo, "colorbar_resolution.png", 812, 160);
+screenshot(gradient_resolution_demo, "colorbar_resolution.png", 812, 200);
 
 nothing #hide
 ```

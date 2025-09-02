@@ -78,9 +78,11 @@ function interpret_view(view::RotateView, x::Float32, y::Float32, width::Float32
     # Calculate content hash for cache invalidation
     content_hash = hash((view.rotation_degrees, child_width, child_height, hash(view.child)))
 
-    # Cache dimensions
+    # Cache dimensions - use exact pixel dimensions matching the child size
     cache_width = Int32(round(child_width))
-    cache_height = Int32(round(child_height))    # Check if we need to redraw
+    cache_height = Int32(round(child_height))
+
+    # Check if we need to redraw
     bounds = (x, y, Float32(cache_width), Float32(cache_height))
     needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
 
@@ -118,10 +120,10 @@ function render_child_to_framebuffer(view::RotateView, cache::RenderCache, child
         ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
         ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
-        # Create simple projection matrix without oversampling scaling
+        # Create simple projection matrix for exact pixel mapping
         fb_projection = get_orthographic_matrix(0.0f0, child_width, child_height, 0.0f0, -1.0f0, 1.0f0)
 
-        # Render child at logical size
+        # Render child at its natural size for crisp rendering
         interpret_view(view.child, 0.0f0, 0.0f0, child_width, child_height, fb_projection)
     finally
         pop_viewport!()
@@ -172,6 +174,12 @@ function draw_rotated_texture(texture_id::UInt32, rotation_degrees::Float32, x::
         final_x = center_x + rotated_x
         final_y = center_y + rotated_y
 
+        # For 90° rotations, snap to pixel boundaries for crisp rendering
+        if abs(rotation_degrees % 90.0f0) < 0.1f0
+            final_x = round(final_x)
+            final_y = round(final_y)
+        end
+
         push!(positions, Point2f(final_x, final_y))
     end
 
@@ -200,13 +208,19 @@ function draw_rotated_texture(texture_id::UInt32, rotation_degrees::Float32, x::
     GLA.bind(prog[])
     GLA.gluniform(prog[], :use_texture, true)
 
-    # Bind texture with linear filtering
+    # Bind texture with appropriate filtering
     ModernGL.glActiveTexture(ModernGL.GL_TEXTURE0)
     ModernGL.glBindTexture(ModernGL.GL_TEXTURE_2D, texture_id)
 
-    # Enable linear filtering for smooth rotation
-    ModernGL.glTexParameteri(ModernGL.GL_TEXTURE_2D, ModernGL.GL_TEXTURE_MIN_FILTER, ModernGL.GL_LINEAR)
-    ModernGL.glTexParameteri(ModernGL.GL_TEXTURE_2D, ModernGL.GL_TEXTURE_MAG_FILTER, ModernGL.GL_LINEAR)
+    # Use nearest neighbor filtering for exact 90° rotations to maintain crispness
+    # Use linear filtering for other angles to smooth interpolation
+    if abs(rotation_degrees % 90.0f0) < 0.1f0
+        ModernGL.glTexParameteri(ModernGL.GL_TEXTURE_2D, ModernGL.GL_TEXTURE_MIN_FILTER, ModernGL.GL_NEAREST)
+        ModernGL.glTexParameteri(ModernGL.GL_TEXTURE_2D, ModernGL.GL_TEXTURE_MAG_FILTER, ModernGL.GL_NEAREST)
+    else
+        ModernGL.glTexParameteri(ModernGL.GL_TEXTURE_2D, ModernGL.GL_TEXTURE_MIN_FILTER, ModernGL.GL_LINEAR)
+        ModernGL.glTexParameteri(ModernGL.GL_TEXTURE_2D, ModernGL.GL_TEXTURE_MAG_FILTER, ModernGL.GL_LINEAR)
+    end
 
     GLA.gluniform(prog[], :image, Int32(0))
     GLA.gluniform(prog[], :projection, projection_matrix)
