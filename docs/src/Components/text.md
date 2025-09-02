@@ -36,6 +36,29 @@ nothing #hide
 
 ![Text wrapping](text_wrap.png)
 
+## Text Clipping
+
+By setting `wrap_text=false`, text will be rendered on a single line and clipped if it exceeds the container width, similar to VS Code's sidebar behavior.
+
+``` @example TextClippingExample
+using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Column([
+            Text("This text will wrap normally because wrap_text is true by default", wrap_text=true),
+            Text("This very long text will be clipped instead of wrapping to multiple lines", wrap_text=false)
+        ], spacing=10.0)
+    )
+end
+
+screenshot(MyApp, "text_clip.png", 400, 150);
+nothing #hide
+```
+
+![Text clipping vs wrapping](text_clip.png)
+
 ## Horizontal Alignement
 
 ``` @example TextAlignement

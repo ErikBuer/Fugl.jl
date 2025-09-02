@@ -11,24 +11,34 @@ struct TextView <: AbstractView
     horizontal_align::Symbol  # :left, :center, :right
     vertical_align::Symbol    # :top, :middle, :bottom
     rotation_degrees::Float32  # Rotation in degrees
+    wrap_text::Bool           # Whether to wrap text to new lines or clip
 end
 
-function Text(text::String; style=TextStyle(), horizontal_align=:center, vertical_align=:middle, rotation_degrees=0.0f0)
-    return TextView(text, style, horizontal_align, vertical_align, Float32(rotation_degrees))
+function Text(text::String; style=TextStyle(), horizontal_align=:center, vertical_align=:middle, rotation_degrees=0.0f0, wrap_text=true)
+    return TextView(text, style, horizontal_align, vertical_align, Float32(rotation_degrees), wrap_text)
 end
 
 """
     measure(view::TextView)::Tuple{Float32,Float32}
 
-Assumes all text is rendered in a single line.
+For wrap_text=true, assumes text is rendered in a single line.
+For wrap_text=false, measures the actual text width without wrapping.
 """
 function measure(view::TextView)::Tuple{Float32,Float32}
     font = view.style.font
     size_px = view.style.size_px
 
-    text_width = measure_word_width(font, view.text, size_px)
-    text_height = Float32(size_px) + 2.0
-    text_width = text_width + 2.0
+    if view.wrap_text
+        # Original behavior - measure as single line (will wrap based on container width)
+        text_width = measure_word_width(font, view.text, size_px)
+        text_height = Float32(size_px) + 2.0
+        text_width = text_width + 2.0
+    else
+        # No wrapping - measure actual text width (may exceed container)
+        text_width = measure_word_width(font, view.text, size_px)
+        text_height = Float32(size_px) + 2.0
+        text_width = text_width + 2.0
+    end
 
     # For rotated text (90 or 270 degrees), swap width and height
     if abs(view.rotation_degrees - 90.0f0) < 1.0f0 || abs(view.rotation_degrees - 270.0f0) < 1.0f0
@@ -52,37 +62,44 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     # Split text into words
     words = split(view.text, " ")
 
-    # Calculate line breaks
+    # Calculate line breaks based on wrap_text setting
     lines = String[]
-    current_line = ""
-    current_width = 0.0f0
 
-    space_width = measure_word_width(font, " ", size_px)
+    if !view.wrap_text
+        # No wrapping - treat entire text as a single line (will be clipped during rendering)
+        push!(lines, view.text)
+    else
+        # Word wrapping logic
+        current_line = ""
+        current_width = 0.0f0
 
-    for word in words
-        # Measure the width of the word
-        word_width = measure_word_width(font, word, size_px)
+        space_width = measure_word_width(font, " ", size_px)
 
-        if current_line == ""
-            # First word on a line - always place it, even if it doesn't fit (will be clipped)
-            current_line = word
-            current_width = word_width
-        else
-            # Check if word + space fits on current line
-            if current_width + space_width + word_width > width
-                # Move to a new line
-                push!(lines, current_line)
-                current_line = word  # Start new line with this word
+        for word in words
+            # Measure the width of the word
+            word_width = measure_word_width(font, word, size_px)
+
+            if current_line == ""
+                # First word on a line - always place it, even if it doesn't fit (will be clipped)
+                current_line = word
                 current_width = word_width
             else
-                current_line *= " " * word
-                current_width += space_width + word_width
+                # Check if word + space fits on current line
+                if current_width + space_width + word_width > width
+                    # Move to a new line
+                    push!(lines, current_line)
+                    current_line = word  # Start new line with this word
+                    current_width = word_width
+                else
+                    current_line *= " " * word
+                    current_width += space_width + word_width
+                end
             end
         end
-    end
 
-    # Push the last line
-    push!(lines, current_line)
+        # Push the last line
+        push!(lines, current_line)
+    end
 
     # Calculate total text height
     total_height = length(lines) * size_px

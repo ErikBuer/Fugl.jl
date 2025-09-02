@@ -118,7 +118,7 @@ function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Floa
         is_selected = current_path == view.state.selected_item
         style = is_selected ? view.style.selected : view.style.normal
 
-        interpret_view(Text(text; style=style, horizontal_align=:left), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix)
+        interpret_view(Text(text; style=style, horizontal_align=:left, wrap_text=false), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix)
         current_y += 22f0
 
         # Always show children for root node
