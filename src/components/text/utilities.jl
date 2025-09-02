@@ -35,7 +35,7 @@ function calculate_text_vertical_offset(container_height::Real, text_height::Rea
     if align == :top
         return 0.0f0 + text_height
     elseif align == :middle
-        return container_height / 2.0f0
+        return (container_height + text_height) / 2.0f0
     elseif align == :bottom
         return container_height - text_height / 2.0f0
     else
