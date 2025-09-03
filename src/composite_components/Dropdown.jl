@@ -1,4 +1,4 @@
-mutable struct DropdownStyle
+struct DropdownStyle
     text_style::TextStyle
     background_color::Vec4{<:AbstractFloat}
     background_color_hover::Vec4{<:AbstractFloat}

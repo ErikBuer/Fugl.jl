@@ -1,4 +1,4 @@
-mutable struct PlotStyle
+struct PlotStyle
     background_color::Vec4{Float32}
     grid_color::Vec4{Float32}
     grid_width::Float32

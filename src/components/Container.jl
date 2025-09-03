@@ -1,4 +1,4 @@
-mutable struct ContainerStyle
+struct ContainerStyle
     background_color::Vec4{<:AbstractFloat} #RGBA color
     border_color::Vec4{<:AbstractFloat} #RGBA color
     border_width::Float32

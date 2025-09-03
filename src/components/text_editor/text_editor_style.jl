@@ -3,7 +3,7 @@ Unified style structure for text editors (CodeEditor and TextBox).
 This replaces the separate CodeEditorStyle and TextBoxStyle structures.
 """
 
-mutable struct TextEditorStyle
+struct TextEditorStyle
     text_style::TextStyle
     background_color_focused::Vec4{<:AbstractFloat}
     background_color_unfocused::Vec4{<:AbstractFloat}
