@@ -134,6 +134,34 @@ const prog = Ref{GLA.Program}()
 const glyph_prog = Ref{GLA.Program}()
 const rounded_rect_prog = Ref{GLA.Program}()
 
+# External shader registration system
+const EXTERNAL_SHADER_INITIALIZERS = Function[]
+
+"""
+    register_shader_initializer!(init_function::Function)
+
+Register an external shader initialization function to be called during Fugl's shader initialization.
+This allows external packages (like FuglDrawing.jl) to register their shaders.
+
+# Arguments
+- `init_function::Function`: A function that will be called during shader initialization
+
+# Example
+```julia
+# In FuglDrawing.jl
+function initialize_drawing_shaders()
+    # Initialize drawing-specific shaders
+    drawing_prog[] = Program(drawing_vertex_shader, drawing_fragment_shader)
+end
+
+# Register with Fugl
+Fugl.register_shader_initializer!(initialize_drawing_shaders)
+```
+"""
+function register_shader_initializer!(init_function::Function)
+    push!(EXTERNAL_SHADER_INITIALIZERS, init_function)
+end
+
 """
 Initialize the shader program (must be called after OpenGL context is created)
 """
@@ -141,4 +169,13 @@ function initialize_shaders()
     prog[] = GLA.Program(vertex_shader, fragment_shader)
     glyph_prog[] = GLA.Program(glyph_vertex_shader, glyph_fragment_shader)
     rounded_rect_prog[] = GLA.Program(rounded_rect_vertex_shader, rounded_rect_fragment_shader)
+
+    # Initialize external shaders
+    for init_function in EXTERNAL_SHADER_INITIALIZERS
+        try
+            init_function()
+        catch e
+            @warn "Failed to initialize external shader" exception = (e, catch_backtrace())
+        end
+    end
 end
