@@ -1,4 +1,4 @@
-mutable struct TextStyle
+struct TextStyle
     font::FreeTypeAbstraction.FTFont
     size_px::Int
     color::Vec4{Float32}  # RGBA color

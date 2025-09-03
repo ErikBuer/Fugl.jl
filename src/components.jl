@@ -76,7 +76,7 @@ include("composite_components/buttons.jl")
 export TextButton, IconButton
 
 include("composite_components/NumberField.jl")
-export NumberField, NumberFieldState, NumberFieldOptions, NumberFieldStyle
+export NumberField, NumberFieldState, NumberFieldOptions
 
 include("composite_components/Dropdown.jl")
 export Dropdown, DropdownState, DropdownStyle
