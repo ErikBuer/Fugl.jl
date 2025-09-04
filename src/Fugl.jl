@@ -13,7 +13,7 @@ const OPENGL_LOCK = ReentrantLock()
 include("matrices.jl")
 include("gl_context_state.jl")
 include("shaders.jl")
-export initialize_shaders
+export initialize_shaders, register_shader_initializer!
 
 include("input_state.jl")
 export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, mouse_position_callback, char_callback, KeyEvent

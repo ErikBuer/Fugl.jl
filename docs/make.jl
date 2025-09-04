@@ -56,6 +56,7 @@ makedocs(
             ],
             "Components/tree.md",
         ],
+        "adding_shaders.md",
         "interaction.md",
         "api_reference.md",
     ],
