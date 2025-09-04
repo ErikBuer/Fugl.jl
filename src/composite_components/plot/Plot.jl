@@ -494,6 +494,19 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
             handle_middle_button_drag(view, mouse_state, x, y, width, height)
             interaction_occurred = true
         end
+    else
+        # Dragging has ended - clear initial bounds so next drag starts fresh
+        current_state = view.state
+        if !isnothing(current_state.initial_x_min) || !isnothing(current_state.initial_x_max) ||
+           !isnothing(current_state.initial_y_min) || !isnothing(current_state.initial_y_max)
+            new_state = PlotState(current_state;
+                initial_x_min=nothing,
+                initial_x_max=nothing,
+                initial_y_min=nothing,
+                initial_y_max=nothing
+            )
+            view.on_state_change(new_state)
+        end
     end
 
     return
@@ -578,10 +591,12 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
         return  # No significant movement, don't update
     end
 
-    # If this is the first drag frame, store the current bounds as initial bounds
-    # The initial bounds will serve as the drag start reference in the immutable state
-    if isnothing(current_state.initial_x_min) || isnothing(current_state.initial_x_max) ||
-       isnothing(current_state.initial_y_min) || isnothing(current_state.initial_y_max)
+    # Simple drag start detection: if initial bounds are not set, this is a new drag
+    is_drag_start = (isnothing(current_state.initial_x_min) || isnothing(current_state.initial_x_max) ||
+                     isnothing(current_state.initial_y_min) || isnothing(current_state.initial_y_max))
+
+    # If this is the start of a new drag operation, store the current bounds as initial bounds
+    if is_drag_start
 
         # Get the current plot bounds to use as the base for dragging
         if !isnothing(current_state.current_x_min) && !isnothing(current_state.current_x_max) &&
