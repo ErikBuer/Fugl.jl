@@ -6,14 +6,14 @@ Represents the state of a plot, including axis bounds, scaling, and cache inform
 Fields:
 - `bounds`: Rect2f, the current plot bounds.
 - `auto_scale`: Bool, whether to automatically scale axes to fit data.
-- `initial_x_min`, `initial_x_max`, `initial_y_min`, `initial_y_max`: Initial axis limits (for zoom/pan reference).
+- `initial_x_min`, `initial_x_max`, `initial_y_min`, `initial_y_max`: User-defined initial axis limits (preserved during drag operations).
 - `current_x_min`, `current_x_max`, `current_y_min`, `current_y_max`: Current axis limits (after zoom/pan).
 - `cache_id`: Unique identifier for plot cache. Not user managed.
 """
 struct PlotState
-    bounds::Rect2f  # Plot bounds (min_x, min_y, width, height)
+    bounds::Union{Rect2f,Nothing}  # Plot bounds (min_x, min_y, width, height)
     auto_scale::Bool
-    # Initial view bounds (for reset functionality and fixed bounds)
+    # Initial view bounds (user-defined, preserved during drag operations)
     initial_x_min::Union{Float32,Nothing}
     initial_x_max::Union{Float32,Nothing}
     initial_y_min::Union{Float32,Nothing}
@@ -138,7 +138,7 @@ end
 """
 Get effective bounds for plotting (considering zoom state)
 """
-function get_effective_bounds(state::PlotState, style::PlotStyle)
+function get_effective_bounds(state::PlotState)
     # Use current zoom bounds if set, otherwise fall back to initial bounds from state, then auto-calculated bounds
     x_min = something(state.current_x_min, state.initial_x_min, state.bounds.x)
     x_max = something(state.current_x_max, state.initial_x_max, state.bounds.x + state.bounds.width)
