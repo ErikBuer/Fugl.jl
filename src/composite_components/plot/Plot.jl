@@ -73,20 +73,10 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # See comparable code in Tree and Textbox/CodeEditor
     if needs_redraw || !cache.is_valid
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-            if cache_width > 0 && cache_height > 0 # TODO this seems to be the same check as above
-                try
-                    (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
+            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
 
-                    # Update cache with new framebuffer and content hash
-                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
-                catch e
-                    @warn "Failed to create plot framebuffer: $e"
-                    return  # Skip rendering if framebuffer creation fails
-                end
-            else
-                # Invalid size, skip rendering
-                return
-            end
+            # Update cache with new framebuffer and content hash
+            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
         else
             # Update cache with existing framebuffer and new content hash
             update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
