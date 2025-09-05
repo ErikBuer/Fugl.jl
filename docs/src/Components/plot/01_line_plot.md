@@ -91,11 +91,11 @@ function MyApp()
                         padding=50.0f0
                     ),
                     PlotState(
-                        # Fixed axis bounds - only show x from 0 to 8, y from -0.8 to 1.0
-                        initial_x_min=0.0f0,
-                        initial_x_max=8.0f0,
-                        initial_y_min=-0.8f0,
-                        initial_y_max=1.0f0
+                        # Only show x from 0 to 8, y from -0.8 to 1.0
+                        x_min=0.0f0,
+                        x_max=8.0f0,
+                        y_min=-0.8f0,
+                        y_max=1.0f0
                     ),
                 )
             ),
@@ -152,58 +152,6 @@ function MyApp()
                     plot_state[],         # State contains bounds and zoom info  
                     (new_state) -> plot_state[] = new_state
                 )
-            ),
-
-            # Control buttons that modify the plot state
-            IntrinsicHeight(
-                IntrinsicRow([
-                        TextButton("Zoom In Y";
-                            on_click=() -> begin
-                                current_state = plot_state[]
-                                # Get current Y bounds (or use initial if not set)
-                                y_min = something(current_state.current_y_min, current_state.initial_y_min, -1.0f0)
-                                y_max = something(current_state.current_y_max, current_state.initial_y_max, 1.0f0)
-
-                                # Zoom in by 20%
-                                y_center = (y_min + y_max) / 2
-                                y_range = (y_max - y_min) * 0.8f0
-                                new_y_min = y_center - y_range / 2
-                                new_y_max = y_center + y_range / 2
-
-                                # Create new state with updated bounds (clean API - no elements!)
-                                plot_state[] = PlotState(
-                                    current_state.bounds,
-                                    current_state.auto_scale,
-                                    current_state.initial_x_min,
-                                    current_state.initial_x_max,
-                                    current_state.initial_y_min,
-                                    current_state.initial_y_max,
-                                    current_state.current_x_min,
-                                    current_state.current_x_max,
-                                    new_y_min,
-                                    new_y_max
-                                )
-                            end
-                        ),
-                        TextButton("Reset View";
-                            on_click=() -> begin
-                                current_state = plot_state[]
-                                # Reset to initial view bounds
-                                plot_state[] = PlotState(
-                                    current_state.bounds,
-                                    current_state.auto_scale,
-                                    current_state.initial_x_min,
-                                    current_state.initial_x_max,
-                                    current_state.initial_y_min,
-                                    current_state.initial_y_max,
-                                    current_state.initial_x_min,
-                                    current_state.initial_x_max,
-                                    current_state.initial_y_min,
-                                    current_state.initial_y_max
-                                )
-                            end
-                        )
-                    ], padding=0.0, spacing=0.0)
             ),
         ], padding=0.0, spacing=0.0)
 end

@@ -33,10 +33,10 @@ function Plot(
     state::PlotState=PlotState(),
     on_state_change::Function=(new_state) -> nothing
 )::PlotView
-    # If state has default bounds and auto_scale is true, calculate bounds from elements
-    if state.bounds == Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0) && state.auto_scale && !isempty(elements)
+    # If state has no initial bounds and auto_scale is true, calculate bounds from elements
+    if isnothing(state.initial_bounds) && state.auto_scale && !isempty(elements)
         calculated_bounds = calculate_bounds_from_elements(Vector{AbstractPlotElement}(elements))
-        state = PlotState(calculated_bounds, state.auto_scale, state.initial_x_min, state.initial_x_max, state.initial_y_min, state.initial_y_max, state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max, state.cache_id)
+        state = PlotState(state; initial_bounds=calculated_bounds)
     end
     return PlotView(elements, state, style, on_state_change)
 end
@@ -135,7 +135,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
     # Transform data coordinates to screen coordinates
     function data_to_screen(data_x::Float32, data_y::Float32)::Tuple{Float32,Float32}
         # Map from effective bounds (considering zoom state) to plot area
-        effective_bounds = get_effective_bounds(state)
+        effective_bounds = get_effective_bounds(state, elements)
         norm_x = (data_x - effective_bounds.x) / effective_bounds.width
         norm_y = (data_y - effective_bounds.y) / effective_bounds.height
 
@@ -147,7 +147,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 
     # Draw grid if enabled
     if style.show_grid
-        effective_bounds = get_effective_bounds(state)
+        effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
         screen_bounds = Rect2f(x, y, width, height)
@@ -167,7 +167,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 
     # Draw axes and ticks if enabled
     if style.show_left_axis || style.show_right_axis || style.show_top_axis || style.show_bottom_axis || style.show_x_ticks || style.show_y_ticks
-        effective_bounds = get_effective_bounds(state)
+        effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
         screen_bounds = Rect2f(x, y, width, height)
@@ -203,7 +203,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 
     # Draw plot elements with intelligent viewport culling (no scissor test)
     # Get effective bounds for data culling
-    effective_bounds = get_effective_bounds(state)
+    effective_bounds = get_effective_bounds(state, elements)
 
     for element in elements
         draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
@@ -496,25 +496,17 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
     # Get current plot bounds or use auto-calculated bounds
     current_state = view.state
 
-    # If we don't have current bounds set, calculate them from data
-    if isnothing(current_state.current_x_min) || isnothing(current_state.current_x_max) ||
-       isnothing(current_state.current_y_min) || isnothing(current_state.current_y_max)
-        # Calculate bounds from plot elements
-        if !isempty(view.elements)
-            all_bounds = [get_element_bounds(element) for element in view.elements]
-            min_x = minimum(bounds[1] for bounds in all_bounds)
-            max_x = maximum(bounds[2] for bounds in all_bounds)
-            min_y = minimum(bounds[3] for bounds in all_bounds)
-            max_y = maximum(bounds[4] for bounds in all_bounds)
-        else
-            min_x, max_x, min_y, max_y = 0.0f0, 1.0f0, 0.0f0, 1.0f0
-        end
+    # Get current effective bounds
+    effective_bounds = if !isnothing(current_state.current_bounds)
+        current_state.current_bounds
     else
-        min_x = current_state.current_x_min
-        max_x = current_state.current_x_max
-        min_y = current_state.current_y_min
-        max_y = current_state.current_y_max
+        get_effective_bounds(current_state, view.elements)
     end
+
+    min_x = effective_bounds.x
+    max_x = effective_bounds.x + effective_bounds.width
+    min_y = effective_bounds.y
+    max_y = effective_bounds.y + effective_bounds.height
 
     # Convert mouse position to data coordinates
     x_range = max_x - min_x
@@ -532,11 +524,11 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
     new_min_y = mouse_data_y - (mouse_data_y - min_y) * zoom_factor
     new_max_y = mouse_data_y + (max_y - mouse_data_y) * zoom_factor
 
+    # Create new current bounds
+    new_current_bounds = Rect2f(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
+
     new_state = PlotState(current_state;
-        current_x_min=new_min_x,
-        current_x_max=new_max_x,
-        current_y_min=new_min_y,
-        current_y_max=new_max_y,
+        current_bounds=new_current_bounds,
         auto_scale=false  # Disable auto_scale when user zooms
     )
 
@@ -574,18 +566,13 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
 
     # Get the effective bounds at the time drag started
     # We'll calculate this based on what the bounds were when drag began
-    drag_start_bounds = if !isnothing(current_state.current_x_min) && !isnothing(current_state.current_x_max) &&
-       !isnothing(current_state.current_y_min) && !isnothing(current_state.current_y_max)
+    drag_start_bounds = if !isnothing(current_state.current_bounds)
         # Use current bounds as the drag reference (existing zoom state)
-        Rect2f(current_state.current_x_min, current_state.current_y_min,
-            current_state.current_x_max - current_state.current_x_min,
-            current_state.current_y_max - current_state.current_y_min)
+        current_state.current_bounds
     else
         # Use the effective bounds (which considers initial bounds and auto-calculated bounds)
-        get_effective_bounds(current_state)
-    end
-
-    # Extract base bounds from drag reference
+        get_effective_bounds(current_state, view.elements)
+    end    # Extract base bounds from drag reference
     base_min_x = drag_start_bounds.x
     base_max_x = drag_start_bounds.x + drag_start_bounds.width
     base_min_y = drag_start_bounds.y
@@ -605,12 +592,12 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     new_min_y = base_min_y + delta_y_data
     new_max_y = base_max_y + delta_y_data
 
+    # Create new current bounds
+    new_current_bounds = Rect2f(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
+
     # Create new state with updated pan bounds
     new_state = PlotState(current_state;
-        current_x_min=new_min_x,
-        current_x_max=new_max_x,
-        current_y_min=new_min_y,
-        current_y_max=new_max_y,
+        current_bounds=new_current_bounds,
         auto_scale=false  # Disable auto_scale during drag
     )
 

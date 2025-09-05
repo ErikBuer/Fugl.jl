@@ -35,9 +35,7 @@ function hash_plot_content(elements::Vector{AbstractPlotElement}, state::PlotSta
     end
 
     # Hash plot state
-    h = hash((state.bounds, state.auto_scale,
-            state.initial_x_min, state.initial_x_max, state.initial_y_min, state.initial_y_max,
-            state.current_x_min, state.current_x_max, state.current_y_min, state.current_y_max), h)
+    h = hash((state.initial_bounds, state.current_bounds, state.auto_scale), h)
 
     # Hash plot style
     h = hash((style.background_color, style.grid_color, style.axis_color,

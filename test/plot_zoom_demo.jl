@@ -36,7 +36,7 @@ function plot_zoom_demo()
     ]
 
     # Create plot state for zoom control
-    plot_state = Ref(PlotState(initial_y_min=-0.2f0))
+    plot_state = Ref(PlotState(y_min=-0.2f0))
 
     # Define plot style (visual appearance only)
     plot_style = PlotStyle(
