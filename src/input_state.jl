@@ -180,9 +180,20 @@ end
 """
 Mouse position callback to track mouse movement and detect dragging
 """
-function mouse_position_callback(gl_window, xpos, ypos, mouse_state::InputState)
-    mouse_state.x = xpos
-    mouse_state.y = ypos
+function mouse_position_callback(gl_window, x_pos, y_pos, mouse_state::InputState)
+    current_pos = (x_pos, y_pos)
+
+    # For dragging buttons, update last_drag_position to the PREVIOUS position before updating current
+    for button in [LeftButton, RightButton, MiddleButton]
+        if mouse_state.is_dragging[button]
+            # Store the current position as the "last" position before we update to the new position
+            mouse_state.last_drag_position[button] = (mouse_state.x, mouse_state.y)
+        end
+    end
+
+    # Now update current position
+    mouse_state.x = x_pos
+    mouse_state.y = y_pos
 
     # Check if we should start dragging for any pressed button
     for button in [LeftButton, RightButton, MiddleButton]
@@ -190,12 +201,15 @@ function mouse_position_callback(gl_window, xpos, ypos, mouse_state::InputState)
             mouse_state.drag_start_position[button] !== nothing &&
             !mouse_state.is_dragging[button])
 
+            # Check if we should start dragging
             start_pos = mouse_state.drag_start_position[button]
-            distance = sqrt((xpos - start_pos[1])^2 + (ypos - start_pos[2])^2)
+            distance = sqrt((x_pos - start_pos[1])^2 + (y_pos - start_pos[2])^2)
 
             # Start dragging if moved more than threshold
             if distance > 3.0  # 3 pixel threshold
                 mouse_state.is_dragging[button] = true
+                # Set initial last_drag_position when dragging starts (use drag start position)
+                mouse_state.last_drag_position[button] = start_pos
             end
         end
     end

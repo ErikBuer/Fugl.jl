@@ -73,20 +73,10 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # See comparable code in Tree and Textbox/CodeEditor
     if needs_redraw || !cache.is_valid
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-            if cache_width > 0 && cache_height > 0 # TODO this seems to be the same check as above
-                try
-                    (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
+            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
 
-                    # Update cache with new framebuffer and content hash
-                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
-                catch e
-                    @warn "Failed to create plot framebuffer: $e"
-                    return  # Skip rendering if framebuffer creation fails
-                end
-            else
-                # Invalid size, skip rendering
-                return
-            end
+            # Update cache with new framebuffer and content hash
+            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
         else
             # Update cache with existing framebuffer and new content hash
             update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
@@ -145,7 +135,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
     # Transform data coordinates to screen coordinates
     function data_to_screen(data_x::Float32, data_y::Float32)::Tuple{Float32,Float32}
         # Map from effective bounds (considering zoom state) to plot area
-        effective_bounds = get_effective_bounds(state, style)
+        effective_bounds = get_effective_bounds(state)
         norm_x = (data_x - effective_bounds.x) / effective_bounds.width
         norm_y = (data_y - effective_bounds.y) / effective_bounds.height
 
@@ -157,7 +147,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 
     # Draw grid if enabled
     if style.show_grid
-        effective_bounds = get_effective_bounds(state, style)
+        effective_bounds = get_effective_bounds(state)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
         screen_bounds = Rect2f(x, y, width, height)
@@ -177,7 +167,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 
     # Draw axes and ticks if enabled
     if style.show_left_axis || style.show_right_axis || style.show_top_axis || style.show_bottom_axis || style.show_x_ticks || style.show_y_ticks
-        effective_bounds = get_effective_bounds(state, style)
+        effective_bounds = get_effective_bounds(state)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
         screen_bounds = Rect2f(x, y, width, height)
@@ -213,7 +203,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 
     # Draw plot elements with intelligent viewport culling (no scissor test)
     # Get effective bounds for data culling
-    effective_bounds = get_effective_bounds(state, style)
+    effective_bounds = get_effective_bounds(state)
 
     for element in elements
         draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
@@ -555,73 +545,51 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
 end
 
 function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot_x::Float32, plot_y::Float32, plot_width::Float32, plot_height::Float32)
-    # Get the drag start position
-    drag_start = mouse_state.drag_start_position[MiddleButton]
-    current_mouse_x = Float32(mouse_state.x)
-    current_mouse_y = Float32(mouse_state.y)
-
     # Get current plot state
     current_state = view.state
 
-    # Calculate drag vector from start position to current position
+    # Calculate drag movement using InputState
+    if isnothing(mouse_state.last_drag_position[MiddleButton])
+        return  # No valid drag positions
+    end
+
+    # Get drag positions relative to plot area
+    drag_start = mouse_state.last_drag_position[MiddleButton]
+    current_mouse = (Float32(mouse_state.x), Float32(mouse_state.y))
+
     start_x_screen = Float32(drag_start[1]) - plot_x
     start_y_screen = Float32(drag_start[2]) - plot_y
-    current_x_screen = current_mouse_x - plot_x
-    current_y_screen = current_mouse_y - plot_y
+    current_x_screen = current_mouse[1] - plot_x
+    current_y_screen = current_mouse[2] - plot_y
 
-    # Calculate screen space drag vector from drag start
+    # Calculate total drag vector from drag start
     delta_x_screen = current_x_screen - start_x_screen
     delta_y_screen = current_y_screen - start_y_screen
 
-    # Only proceed if there's actually some movement (avoid unnecessary updates)
+    # Only proceed if there's actually some movement.
+    # This prevents drift
     if abs(delta_x_screen) < 0.5 && abs(delta_y_screen) < 0.5
         return  # No significant movement, don't update
     end
 
-    # If this is the first drag frame, store the current bounds as initial bounds
-    # The initial bounds will serve as the drag start reference in the immutable state
-    if isnothing(current_state.initial_x_min) || isnothing(current_state.initial_x_max) ||
-       isnothing(current_state.initial_y_min) || isnothing(current_state.initial_y_max)
-
-        # Get the current plot bounds to use as the base for dragging
-        if !isnothing(current_state.current_x_min) && !isnothing(current_state.current_x_max) &&
-           !isnothing(current_state.current_y_min) && !isnothing(current_state.current_y_max)
-            # Use current bounds as the drag start reference (preserve existing zoom)
-            base_min_x = current_state.current_x_min
-            base_max_x = current_state.current_x_max
-            base_min_y = current_state.current_y_min
-            base_max_y = current_state.current_y_max
-        else
-            # Calculate bounds from plot elements
-            if !isempty(view.elements)
-                all_bounds = [get_element_bounds(element) for element in view.elements]
-                base_min_x = minimum(bounds[1] for bounds in all_bounds)
-                base_max_x = maximum(bounds[2] for bounds in all_bounds)
-                base_min_y = minimum(bounds[3] for bounds in all_bounds)
-                base_max_y = maximum(bounds[4] for bounds in all_bounds)
-            else
-                base_min_x, base_max_x, base_min_y, base_max_y = 0.0f0, 1.0f0, 0.0f0, 1.0f0
-            end
-        end
-
-        new_state = PlotState(current_state;
-            initial_x_min=base_min_x,
-            initial_x_max=base_max_x,
-            initial_y_min=base_min_y,
-            initial_y_max=base_max_y,
-            auto_scale=false,  # Disable auto_scale when user drags
-        )
-
-        # Update the plot state to store the initial bounds for drag reference
-        view.on_state_change(new_state)
-        return  # Exit early on first frame to avoid double update
+    # Get the effective bounds at the time drag started
+    # We'll calculate this based on what the bounds were when drag began
+    drag_start_bounds = if !isnothing(current_state.current_x_min) && !isnothing(current_state.current_x_max) &&
+       !isnothing(current_state.current_y_min) && !isnothing(current_state.current_y_max)
+        # Use current bounds as the drag reference (existing zoom state)
+        Rect2f(current_state.current_x_min, current_state.current_y_min,
+            current_state.current_x_max - current_state.current_x_min,
+            current_state.current_y_max - current_state.current_y_min)
+    else
+        # Use the effective bounds (which considers initial bounds and auto-calculated bounds)
+        get_effective_bounds(current_state)
     end
 
-    # Use the stored initial bounds as the drag start reference (these are the bounds when drag started)
-    base_min_x = current_state.initial_x_min
-    base_max_x = current_state.initial_x_max
-    base_min_y = current_state.initial_y_min
-    base_max_y = current_state.initial_y_max
+    # Extract base bounds from drag reference
+    base_min_x = drag_start_bounds.x
+    base_max_x = drag_start_bounds.x + drag_start_bounds.width
+    base_min_y = drag_start_bounds.y
+    base_max_y = drag_start_bounds.y + drag_start_bounds.height
 
     # Convert screen space drag to data space using the base bounds range
     x_range = base_max_x - base_min_x
@@ -631,7 +599,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     delta_x_data = -(delta_x_screen / plot_width) * x_range
     delta_y_data = (delta_y_screen / plot_height) * y_range  # Note: Y is flipped in screen coords
 
-    # Apply drag vector to the BASE bounds (stored in initial fields) for 1:1 movement
+    # Apply drag vector to the base bounds for 1:1 movement
     new_min_x = base_min_x + delta_x_data
     new_max_x = base_max_x + delta_x_data
     new_min_y = base_min_y + delta_y_data
@@ -643,10 +611,10 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
         current_x_max=new_max_x,
         current_y_min=new_min_y,
         current_y_max=new_max_y,
-        auto_scale=false  # Disable auto_scale when user pans   
+        auto_scale=false  # Disable auto_scale during drag
     )
 
-    # Notify of state change - user must handle updating the PlotView
+    # Update the plot state
     view.on_state_change(new_state)
 end
 
