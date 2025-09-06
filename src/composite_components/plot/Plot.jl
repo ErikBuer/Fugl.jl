@@ -148,7 +148,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
         effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
-        screen_bounds = Rect2f(x, y, width, height)
+        screen_bounds = Rectangle(x, y, width, height)
 
         draw_grid(
             effective_bounds,
@@ -168,7 +168,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
         effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
-        screen_bounds = Rect2f(x, y, width, height)
+        screen_bounds = Rectangle(x, y, width, height)
 
         draw_axes_with_labels(
             effective_bounds,
@@ -209,7 +209,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 end
 
 # Drawing functions for different plot element types with viewport culling
-function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     if length(element.x_data) >= 2 && length(element.y_data) >= 2
         # Use a small margin for data culling to include points just outside viewport
         # but clip lines to exact axis bounds
@@ -252,7 +252,7 @@ function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Func
     end
 end
 
-function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
         # Use margin for data selection but exact bounds for final culling
         margin_x = effective_bounds.width * 0.02f0  # 2% margin for markers
@@ -297,7 +297,7 @@ function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::F
     end
 end
 
-function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
         # Use margin for data selection but exact bounds for final culling
         margin_x = effective_bounds.width * 0.02f0
@@ -398,7 +398,7 @@ function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Func
     end
 end
 
-function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     # Check if image overlaps with viewport
     x_min, x_max = element.x_range
     y_min, y_max = element.y_range
@@ -419,7 +419,7 @@ function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Funct
     )
 end
 
-function draw_plot_element_culled(element::VerticalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::VerticalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     # For vertical colorbar, use the full height and the value range
     min_val, max_val = element.value_range
 
@@ -436,7 +436,7 @@ function draw_plot_element_culled(element::VerticalColorbar, data_to_screen::Fun
         data_to_screen, projection_matrix, effective_bounds)
 end
 
-function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     # For horizontal colorbar, use the full width and the value range
     min_val, max_val = element.value_range
 
@@ -523,7 +523,7 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
     new_max_y = mouse_data_y + (max_y - mouse_data_y) * zoom_factor
 
     # Create new current bounds
-    new_current_bounds = Rect2f(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
+    new_current_bounds = Rectangle(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
 
     new_state = PlotState(current_state;
         current_bounds=new_current_bounds,
@@ -591,7 +591,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     new_max_y = base_max_y + delta_y_data
 
     # Create new current bounds
-    new_current_bounds = Rect2f(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
+    new_current_bounds = Rectangle(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
 
     # Create new state with updated pan bounds
     new_state = PlotState(current_state;
@@ -613,7 +613,7 @@ function draw_colorbar_gradient(
     data_x_max::Float32, data_y_max::Float32,
     data_to_screen::Function,
     projection_matrix::Mat4{Float32},
-    effective_bounds::Rect2f
+    effective_bounds::Rectangle
 )
     # Create gradient data that maps to the coordinate range
     if orientation == :vertical

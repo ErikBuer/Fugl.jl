@@ -14,16 +14,16 @@ end
 Represents the state of a plot, including axis bounds, scaling, and cache information.
 
 Fields:
-- `initial_bounds`: User-defined initial view bounds (preserved during drag operations). Can be Rect2f, PartialBounds, or Nothing.
+- `initial_bounds`: User-defined initial view bounds (preserved during drag operations). Can be Rectangle, PartialBounds, or Nothing.
 - `current_bounds`: Current view bounds (after zoom/pan). If nothing, falls back to initial_bounds or auto-scale.
 - `auto_scale`: Bool, whether to automatically scale axes to fit data when no bounds are specified.
 - `cache_id`: Unique identifier for plot cache. Not user managed.
 """
 struct PlotState
     # User-defined initial view bounds (preserved during drag operations)
-    initial_bounds::Union{Rect2f,PartialBounds,Nothing}
+    initial_bounds::Union{Rectangle,PartialBounds,Nothing}
     # Current zoom/view bounds (for user-controlled zooming)
-    current_bounds::Union{Rect2f,Nothing}
+    current_bounds::Union{Rectangle,Nothing}
     auto_scale::Bool
     # Cache ID for render caching
     cache_id::UInt64
@@ -49,7 +49,7 @@ end
 """
 Create PlotState with explicit bounds
 """
-function PlotState(bounds::Rect2f; auto_scale::Bool=false)
+function PlotState(bounds::Rectangle; auto_scale::Bool=false)
     return PlotState(bounds, nothing, auto_scale, generate_cache_id())
 end
 
@@ -63,16 +63,16 @@ function PlotState(;
     y_min::Union{Float32,Nothing}=nothing,
     y_max::Union{Float32,Nothing}=nothing
 )
-    initial_bounds::Union{Rect2f,PartialBounds,Nothing} = nothing
+    initial_bounds::Union{Rectangle,PartialBounds,Nothing} = nothing
 
     # Convert individual x_min/x_max/y_min/y_max params to initial_bounds if provided
     if !isnothing(x_min) || !isnothing(x_max) ||
        !isnothing(y_min) || !isnothing(y_max)
 
-        # Check if we have complete bounds for a Rect2f
+        # Check if we have complete bounds for a Rectangle
         if !isnothing(x_min) && !isnothing(x_max) &&
            !isnothing(y_min) && !isnothing(y_max)
-            initial_bounds = Rect2f(x_min, y_min,
+            initial_bounds = Rectangle(x_min, y_min,
                 x_max - x_min,
                 y_max - y_min)
         else
@@ -87,9 +87,9 @@ end
 """
 Calculate bounds from a vector of plot elements
 """
-function calculate_bounds_from_elements(elements::Vector{AbstractPlotElement})::Rect2f
+function calculate_bounds_from_elements(elements::Vector{AbstractPlotElement})::Rectangle
     if isempty(elements)
-        return Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds for empty elements
+        return Rectangle(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds for empty elements
     end
 
     # Find overall bounds across all elements
@@ -126,14 +126,14 @@ function calculate_bounds_from_elements(elements::Vector{AbstractPlotElement})::
             max_y = y_center + y_range / 2
         end
 
-        return Rect2f(
+        return Rectangle(
             min_x,
             min_y,
             (max_x - min_x),
             (max_y - min_y)
         )
     else
-        return Rect2f(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
+        return Rectangle(0.0f0, 0.0f0, 1.0f0, 1.0f0)  # Default bounds
     end
 end
 
@@ -149,7 +149,7 @@ function get_effective_bounds(state::PlotState, elements::Vector{AbstractPlotEle
 
     # Priority 2: Initial bounds (user-defined)
     if !isnothing(state.initial_bounds)
-        if state.initial_bounds isa Rect2f
+        if state.initial_bounds isa Rectangle
             # Complete bounds specified
             return state.initial_bounds
         elseif state.initial_bounds isa PartialBounds
@@ -169,7 +169,7 @@ function get_effective_bounds(state::PlotState, elements::Vector{AbstractPlotEle
             final_y_min = isnothing(partial.y_min) ? auto_y_min : partial.y_min
             final_y_max = isnothing(partial.y_max) ? auto_y_max : partial.y_max
 
-            return Rect2f(
+            return Rectangle(
                 final_x_min,
                 final_y_min,
                 final_x_max - final_x_min,
