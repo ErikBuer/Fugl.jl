@@ -69,8 +69,6 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # Check if we need to invalidate cache
     needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
 
-    # TODO: the below section seems to be overly complicated, and can likelybe simplified and made more readable.
-    # See comparable code in Tree and Textbox/CodeEditor
     if needs_redraw || !cache.is_valid
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
             (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
@@ -150,7 +148,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
         effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
-        screen_bounds = Rect2f(x, y, width, height)
+        screen_bounds = Rectangle(x, y, width, height)
 
         draw_grid(
             effective_bounds,
@@ -170,7 +168,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
         effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
-        screen_bounds = Rect2f(x, y, width, height)
+        screen_bounds = Rectangle(x, y, width, height)
 
         draw_axes_with_labels(
             effective_bounds,
@@ -211,7 +209,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
 end
 
 # Drawing functions for different plot element types with viewport culling
-function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     if length(element.x_data) >= 2 && length(element.y_data) >= 2
         # Use a small margin for data culling to include points just outside viewport
         # but clip lines to exact axis bounds
@@ -254,7 +252,7 @@ function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Func
     end
 end
 
-function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
         # Use margin for data selection but exact bounds for final culling
         margin_x = effective_bounds.width * 0.02f0  # 2% margin for markers
@@ -299,7 +297,7 @@ function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::F
     end
 end
 
-function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
         # Use margin for data selection but exact bounds for final culling
         margin_x = effective_bounds.width * 0.02f0
@@ -400,7 +398,7 @@ function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Func
     end
 end
 
-function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     # Check if image overlaps with viewport
     x_min, x_max = element.x_range
     y_min, y_max = element.y_range
@@ -421,7 +419,7 @@ function draw_plot_element_culled(element::HeatmapElement, data_to_screen::Funct
     )
 end
 
-function draw_plot_element_culled(element::VerticalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::VerticalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     # For vertical colorbar, use the full height and the value range
     min_val, max_val = element.value_range
 
@@ -438,7 +436,7 @@ function draw_plot_element_culled(element::VerticalColorbar, data_to_screen::Fun
         data_to_screen, projection_matrix, effective_bounds)
 end
 
-function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rect2f)
+function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     # For horizontal colorbar, use the full width and the value range
     min_val, max_val = element.value_range
 
@@ -525,7 +523,7 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
     new_max_y = mouse_data_y + (max_y - mouse_data_y) * zoom_factor
 
     # Create new current bounds
-    new_current_bounds = Rect2f(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
+    new_current_bounds = Rectangle(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
 
     new_state = PlotState(current_state;
         current_bounds=new_current_bounds,
@@ -593,7 +591,7 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
     new_max_y = base_max_y + delta_y_data
 
     # Create new current bounds
-    new_current_bounds = Rect2f(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
+    new_current_bounds = Rectangle(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
 
     # Create new state with updated pan bounds
     new_state = PlotState(current_state;
@@ -606,183 +604,6 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
 end
 
 """
-Cull point data to only include points within the specified bounds.
-Returns culled x and y data arrays.
-"""
-function cull_point_data(x_data::Vector{Float32}, y_data::Vector{Float32},
-    x_min::Float32, x_max::Float32, y_min::Float32, y_max::Float32)
-    if length(x_data) != length(y_data)
-        return Float32[], Float32[]
-    end
-
-    culled_x = Float32[]
-    culled_y = Float32[]
-
-    for i in 1:length(x_data)
-        x_val = x_data[i]
-        y_val = y_data[i]
-
-        # Include point if it's within bounds
-        if x_val >= x_min && x_val <= x_max && y_val >= y_min && y_val <= y_max
-            push!(culled_x, x_val)
-            push!(culled_y, y_val)
-        end
-    end
-
-    return culled_x, culled_y
-end
-
-"""
-Cull line data and clip line segments to viewport bounds using proper interpolation.
-This function clips line segments at the exact viewport boundaries to prevent 
-lines from extending outside the visible area.
-Returns culled x and y data arrays with clipped segments.
-"""
-function cull_line_data(x_data::Vector{Float32}, y_data::Vector{Float32},
-    x_min::Float32, x_max::Float32, y_min::Float32, y_max::Float32)
-    if length(x_data) != length(y_data) || length(x_data) < 2
-        return Float32[], Float32[]
-    end
-
-    culled_x = Float32[]
-    culled_y = Float32[]
-
-    # Helper function to check if a point is inside bounds
-    function point_in_bounds(x::Float32, y::Float32)::Bool
-        return x >= x_min && x <= x_max && y >= y_min && y <= y_max
-    end
-
-    # Cohen-Sutherland line clipping algorithm
-    # Compute outcode for a point relative to the clipping rectangle
-    function compute_outcode(x::Float32, y::Float32)::UInt8
-        code = 0x00
-        if x < x_min
-            code |= 0x01  # LEFT
-        elseif x > x_max
-            code |= 0x02  # RIGHT
-        end
-        if y < y_min
-            code |= 0x04  # BOTTOM
-        elseif y > y_max
-            code |= 0x08  # TOP
-        end
-        return code
-    end
-
-    # Clip a line segment to the viewport bounds
-    function clip_line_segment(x1::Float32, y1::Float32, x2::Float32, y2::Float32)
-        outcode1 = compute_outcode(x1, y1)
-        outcode2 = compute_outcode(x2, y2)
-
-        accept = false
-
-        while true
-            if (outcode1 | outcode2) == 0  # Both points inside
-                accept = true
-                break
-            elseif (outcode1 & outcode2) != 0  # Both points on same side outside
-                break  # Trivially reject
-            else
-                # At least one point is outside - clip it
-                x = 0.0f0
-                y = 0.0f0
-
-                # Pick the point that is outside
-                outcode_out = outcode1 != 0 ? outcode1 : outcode2
-
-                # Find intersection point using line equation
-                # y = y1 + slope * (x - x1), where slope = (y2 - y1) / (x2 - x1)
-                if (outcode_out & 0x08) != 0  # TOP
-                    x = x1 + (x2 - x1) * (y_max - y1) / (y2 - y1)
-                    y = y_max
-                elseif (outcode_out & 0x04) != 0  # BOTTOM
-                    x = x1 + (x2 - x1) * (y_min - y1) / (y2 - y1)
-                    y = y_min
-                elseif (outcode_out & 0x02) != 0  # RIGHT
-                    y = y1 + (y2 - y1) * (x_max - x1) / (x2 - x1)
-                    x = x_max
-                elseif (outcode_out & 0x01) != 0  # LEFT
-                    y = y1 + (y2 - y1) * (x_min - x1) / (x2 - x1)
-                    x = x_min
-                end
-
-                # Update the point that was outside and its outcode
-                if outcode_out == outcode1
-                    x1 = x
-                    y1 = y
-                    outcode1 = compute_outcode(x1, y1)
-                else
-                    x2 = x
-                    y2 = y
-                    outcode2 = compute_outcode(x2, y2)
-                end
-            end
-        end
-
-        if accept
-            return true, x1, y1, x2, y2
-        else
-            return false, 0.0f0, 0.0f0, 0.0f0, 0.0f0
-        end
-    end
-
-    # Process line segments
-    for i in 1:(length(x_data)-1)
-        x1, y1 = x_data[i], y_data[i]
-        x2, y2 = x_data[i+1], y_data[i+1]
-
-        # Skip if either point is NaN
-        if isnan(x1) || isnan(y1) || isnan(x2) || isnan(y2)
-            if !isempty(culled_x) && !isnan(culled_x[end])
-                # Add NaN to break line continuity
-                push!(culled_x, NaN32)
-                push!(culled_y, NaN32)
-            end
-            continue
-        end
-
-        # Clip the line segment to viewport bounds
-        clipped, cx1, cy1, cx2, cy2 = clip_line_segment(x1, y1, x2, y2)
-
-        if clipped
-            # Check if we need to start a new line segment
-            need_new_segment = false
-            if isempty(culled_x) || isnan(culled_x[end])
-                need_new_segment = true
-            else
-                # Check if this segment connects to the previous one
-                last_x, last_y = culled_x[end], culled_y[end]
-                if abs(last_x - cx1) > 1e-6 || abs(last_y - cy1) > 1e-6
-                    need_new_segment = true
-                end
-            end
-
-            if need_new_segment
-                # Start new segment
-                if !isempty(culled_x) && !isnan(culled_x[end])
-                    push!(culled_x, NaN32)
-                    push!(culled_y, NaN32)
-                end
-                push!(culled_x, cx1)
-                push!(culled_y, cy1)
-            end
-
-            # Add the end point
-            push!(culled_x, cx2)
-            push!(culled_y, cy2)
-        else
-            # Segment is completely outside - break line continuity
-            if !isempty(culled_x) && !isnan(culled_x[end])
-                push!(culled_x, NaN32)
-                push!(culled_y, NaN32)
-            end
-        end
-    end
-
-    return culled_x, culled_y
-end
-
-"""
 Draw a colorbar gradient using the existing heatmap drawing system with proper coordinate transform.
 """
 function draw_colorbar_gradient(
@@ -792,7 +613,7 @@ function draw_colorbar_gradient(
     data_x_max::Float32, data_y_max::Float32,
     data_to_screen::Function,
     projection_matrix::Mat4{Float32},
-    effective_bounds::Rect2f
+    effective_bounds::Rectangle
 )
     # Create gradient data that maps to the coordinate range
     if orientation == :vertical

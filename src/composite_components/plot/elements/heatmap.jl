@@ -39,7 +39,7 @@ function draw_image_plot_clipped(
     element::HeatmapElement,
     data_to_screen::Function,
     projection_matrix::Mat4{Float32},
-    effective_bounds::Rect2f;
+    effective_bounds::Rectangle;
     anti_aliasing_width::Float32=1.5f0
 )
     # Image data bounds

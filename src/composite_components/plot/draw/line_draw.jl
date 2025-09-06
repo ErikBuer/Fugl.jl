@@ -229,7 +229,7 @@ end
 Draw a grid with specified parameters using the enhanced line shader
 """
 function draw_grid(
-    plot_bounds::Rect2f,
+    plot_bounds::Rectangle,
     x_ticks::Vector{Float32},
     y_ticks::Vector{Float32},
     transform_func::Function,
@@ -275,11 +275,11 @@ Draw axes with labels and tick marks using both lines and Text components
 Axis lines, tick marks, and labels are positioned at plot edges (left/bottom), not at zero lines
 """
 function draw_axes_with_labels(
-    plot_bounds::Rect2f,
+    plot_bounds::Rectangle,
     x_ticks::Vector{Float32},
     y_ticks::Vector{Float32},
     transform_func::Function,
-    screen_bounds::Rect2f,
+    screen_bounds::Rectangle,
     color::Vec4{Float32},
     width::Float32,
     projection_matrix::Mat4{Float32};

@@ -29,8 +29,21 @@ include("components.jl")
 include("test_utilitites.jl")
 export screenshot
 
+export PeriodicCallback
+
 """
-    run(ui_ref[]::AbstractView; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false)
+Represents a periodic callback that executes every N frames
+"""
+struct PeriodicCallback
+    func::Function
+    interval::Int
+    last_executed::Ref{Int}
+end
+
+PeriodicCallback(func::Function, interval::Int) = PeriodicCallback(func, interval, Ref(0))
+
+"""
+    run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[])
 
 Run the main loop for the GUI application.
 This function handles the rendering and event processing for the GUI.
@@ -41,8 +54,20 @@ This function handles the rendering and event processing for the GUI.
 - `window_width_px::Integer=1920`: Initial window width
 - `window_height_px::Integer=1080`: Initial window height
 - `fps_overlay::Bool=false`: Show frame count and FPS in upper right corner
+- `periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[]`: Periodic callbacks to execute at specified frame intervals
+
+# Examples
+```julia
+# Create a callback that runs every 60 frames (approximately once per second at 60fps)
+file_check_callback = PeriodicCallback(() -> check_files(), 60)
+
+# Create a callback that runs every 300 frames (every 5 seconds at 60fps)
+data_update_callback = PeriodicCallback(() -> update_data(), 300)
+
+run(MyApp, periodic_callbacks=[file_check_callback, data_update_callback])
+```
 """
-function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false)
+function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[])
     # Initialize the GLFW window
     gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
     GLA.set_context!(gl_window)
@@ -170,6 +195,18 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                 # Periodic GC management
                 if frame_count % 300 == 0
                     GC.gc(false)
+                end
+
+                # Execute periodic callbacks
+                for callback in periodic_callbacks
+                    if frame_count - callback.last_executed[] >= callback.interval
+                        try
+                            callback.func()
+                            callback.last_executed[] = frame_count
+                        catch e
+                            @warn "Error in periodic callback" exception = (e, catch_backtrace())
+                        end
+                    end
                 end
 
                 # Swap buffers and poll events
