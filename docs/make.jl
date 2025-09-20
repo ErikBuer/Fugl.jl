@@ -54,6 +54,7 @@ makedocs(
                 "Components/plot/06_plot_style.md",
                 "Components/plot/07_plot_state.md",
             ],
+            "Components/table.md",
             "Components/tree.md",
         ],
         "adding_shaders.md",
