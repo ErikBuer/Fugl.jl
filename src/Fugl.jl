@@ -16,9 +16,10 @@ include("shaders.jl")
 export initialize_shaders, register_shader_initializer!
 
 include("input_state.jl")
-export MouseButton, ButtonState, IsReleased, IsPressed, InputState, mouse_button_callback, mouse_position_callback, char_callback, KeyEvent
+export MouseButton, LeftButton, RightButton, MiddleButton
+export InputState, mouse_position_callback, char_callback, KeyEvent
 export ButtonState, IsPressed, IsReleased
-export mouse_state, mouse_button_callback, InputState
+export mouse_button_callback
 export ModifierKeys, is_command_key, has_any_modifier
 
 include("abstract_view.jl")
