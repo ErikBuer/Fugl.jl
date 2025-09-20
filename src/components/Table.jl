@@ -31,7 +31,6 @@ struct TableStyle
 
     # Text wrapping and clipping
     max_wrapped_rows::Int  # 0 = no wrapping (single row), >0 = max number of wrapped rows
-    wrap_text::Bool        # Whether to wrap text at all
 
     # Grid styling
     show_grid::Bool
@@ -53,7 +52,6 @@ function TableStyle(;
     cell_text_style::TextStyle=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
     cell_height::Float32=25.0f0,
     max_wrapped_rows::Int=0,
-    wrap_text::Bool=false,
     show_grid::Bool=true,
     grid_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0),
     grid_width::Float32=1.0f0, cell_padding::Float32=8.0f0, border_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0),
@@ -62,7 +60,7 @@ function TableStyle(;
     return TableStyle(
         header_background_color, header_text_style, header_height,
         cell_background_color, cell_text_style, cell_height,
-        max_wrapped_rows, wrap_text,
+        max_wrapped_rows,
         show_grid, grid_color, grid_width,
         cell_padding,
         border_color, border_width
@@ -108,13 +106,14 @@ function Table(
 end
 
 """
-    wrap_cell_text(text, font, size_px, available_width, max_rows, wrap_enabled)
+    wrap_cell_text(text, font, size_px, available_width, max_rows)
 
 Wrap text for a table cell, respecting max_rows limit and clipping if necessary.
 Returns a vector of strings representing the lines to display.
+max_rows = 0 means no wrapping (single line).
 """
-function wrap_cell_text(text::String, font, size_px::Int, available_width::Float32, max_rows::Int, wrap_enabled::Bool)::Vector{String}
-    if !wrap_enabled || max_rows == 0
+function wrap_cell_text(text::String, font, size_px::Int, available_width::Float32, max_rows::Int)::Vector{String}
+    if max_rows == 0
         # No wrapping - return single line (will be clipped during rendering)
         return [text]
     end
@@ -348,8 +347,7 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
                     view.style.cell_text_style.font,
                     view.style.cell_text_style.size_px,
                     available_text_width,
-                    view.style.max_wrapped_rows,
-                    view.style.wrap_text
+                    view.style.max_wrapped_rows
                 )
 
                 # Render each line of wrapped text

@@ -23,8 +23,7 @@ function test_table_text_wrapping()
             cell_height=60.0f0,  # Taller cells to accommodate wrapped text
 
             # Text wrapping settings
-            max_wrapped_rows=3,  # Allow up to 3 lines of wrapped text
-            wrap_text=true,      # Enable text wrapping
+            max_wrapped_rows=3,  # Allow up to 3 lines of wrapped text (0 = no wrapping)
             show_grid=true,
             grid_color=Vec4f(0.6, 0.6, 0.6, 1.0),
             grid_width=1.0f0, cell_padding=8.0f0, border_color=Vec4f(0.3, 0.3, 0.3, 1.0),

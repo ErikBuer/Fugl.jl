@@ -15,7 +15,6 @@ function test_wrapping_modes()
         # Create table styles for different wrapping modes
         no_wrap_style = TableStyle(
             max_wrapped_rows=0,  # No wrapping
-            wrap_text=false,
             cell_height=30.0f0,
             cell_padding=8.0f0,
             show_grid=true,
@@ -26,7 +25,6 @@ function test_wrapping_modes()
 
         two_row_style = TableStyle(
             max_wrapped_rows=2,  # Max 2 rows
-            wrap_text=true,
             cell_height=50.0f0,  # Taller for 2 rows
             cell_padding=8.0f0,
             show_grid=true,
@@ -37,7 +35,6 @@ function test_wrapping_modes()
 
         three_row_style = TableStyle(
             max_wrapped_rows=3,  # Max 3 rows
-            wrap_text=true,
             cell_height=70.0f0,  # Taller for 3 rows
             cell_padding=8.0f0,
             show_grid=true,
