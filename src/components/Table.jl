@@ -26,6 +26,7 @@ struct TableStyle
 
     # Cell styling
     cell_background_color::Vec4f
+    cell_alternate_background_color::Vec4f  # Color for alternating rows
     cell_text_style::TextStyle
     cell_height::Float32
 
@@ -48,7 +49,9 @@ end
 function TableStyle(;
     header_background_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0),
     header_text_style::TextStyle=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
-    header_height::Float32=30.0f0, cell_background_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),
+    header_height::Float32=30.0f0,
+    cell_background_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),
+    cell_alternate_background_color::Vec4f=Vec4f(0.95, 0.95, 0.95, 1.0),
     cell_text_style::TextStyle=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
     cell_height::Float32=25.0f0,
     max_wrapped_rows::Int=0,
@@ -59,7 +62,7 @@ function TableStyle(;
 )
     return TableStyle(
         header_background_color, header_text_style, header_height,
-        cell_background_color, cell_text_style, cell_height,
+        cell_background_color, cell_alternate_background_color, cell_text_style, cell_height,
         max_wrapped_rows,
         show_grid, grid_color, grid_width,
         cell_padding,
@@ -372,19 +375,38 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
         current_y += grid_width
     end
 
+    # Fill entire remaining table area with default background color first
+    remaining_area_height = y + height - border_width - current_y
+    if remaining_area_height > 0
+        fill_bg_vertices = [
+            Point2f(x + border_width, current_y),
+            Point2f(x + border_width, y + height - border_width),
+            Point2f(x + width - border_width, y + height - border_width),
+            Point2f(x + width - border_width, current_y)
+        ]
+        draw_rectangle(fill_bg_vertices, view.style.cell_background_color, projection_matrix)
+    end
+
     # Draw data rows
     for (row_idx, row) in enumerate(view.data)
         row_y = current_y
 
-        # Draw cell background (alternating colors could be added here)
-        if view.style.cell_background_color[4] > 0.0  # Only if not transparent
+        # Determine background color (alternating rows)
+        row_bg_color = if row_idx % 2 == 1
+            view.style.cell_background_color
+        else
+            view.style.cell_alternate_background_color
+        end
+
+        # Draw cell background for this specific row (will override the fill)
+        if row_bg_color[4] > 0.0  # Only if not transparent
             row_bg_vertices = [
                 Point2f(x + border_width, row_y),
                 Point2f(x + border_width, row_y + view.style.cell_height),
                 Point2f(x + width - border_width, row_y + view.style.cell_height),
                 Point2f(x + width - border_width, row_y)
             ]
-            draw_rectangle(row_bg_vertices, view.style.cell_background_color, projection_matrix)
+            draw_rectangle(row_bg_vertices, row_bg_color, projection_matrix)
         end
 
         # Draw cells in this row

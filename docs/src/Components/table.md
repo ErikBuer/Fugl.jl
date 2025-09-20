@@ -31,7 +31,7 @@ nothing # hide
 
 ![Basic Table](table_basic.png)
 
-## Styled Table with Colors
+## Styled Table with Alternating Row Colors
 
 ```@example table_styled
 using Fugl
@@ -44,10 +44,12 @@ function MyApp()
         ["Alice Johnson", "Engineering", "Active"],
         ["Bob Smith", "Design", "Active"],
         ["Carol Davis", "Management", "On Leave"],
-        ["David Wilson", "Engineering", "Active"]
+        ["David Wilson", "Engineering", "Active"],
+        ["Eve Brown", "Engineering", "Active"],
+        ["Frank Miller", "Design", "Active"]
     ]
     
-    # Create styled table
+    # Create styled table with alternating row colors
     styled_table = Table(
         headers, 
         data,
@@ -56,7 +58,8 @@ function MyApp()
             header_text_style=TextStyle(size_px=16, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
             header_height=35.0f0,
             
-            cell_background_color=Vec4f(0.98, 0.98, 0.98, 1.0),
+            cell_background_color=Vec4f(1.0, 1.0, 1.0, 1.0),  # White for odd rows
+            cell_alternate_background_color=Vec4f(0.95, 0.95, 0.95, 1.0),  # Light gray for even rows
             cell_text_style=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
             cell_height=30.0f0,
             
