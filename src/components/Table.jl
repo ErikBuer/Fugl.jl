@@ -110,15 +110,15 @@ end
 
 Wrap text for a table cell, respecting max_rows limit and clipping if necessary.
 Returns a vector of strings representing the lines to display.
-max_rows = 0 means no wrapping (single line).
+max_rows = 0 means no wrapping (single line with character-level clipping and ellipsis).
 """
 function wrap_cell_text(text::String, font, size_px::Int, available_width::Float32, max_rows::Int)::Vector{String}
     if max_rows == 0
-        # No wrapping - return single line (will be clipped during rendering)
-        return [text]
+        # No wrapping - clip at character level with ellipsis
+        return [clip_text_with_ellipsis(text, font, size_px, available_width)]
     end
 
-    # Split text into words
+    # Split text into words for wrapping
     words = split(text, " ")
     lines = String[]
     current_line = ""
@@ -140,6 +140,12 @@ function wrap_cell_text(text::String, font, size_px::Int, available_width::Float
 
                 # Check if we've reached max rows
                 if length(lines) >= max_rows
+                    # Clip the last line with ellipsis if there are more words
+                    remaining_words = words[(findfirst(x -> x == word, words)):end]
+                    remaining_text = join(remaining_words, " ")
+                    if !isempty(remaining_text)
+                        lines[end] = clip_text_with_ellipsis(lines[end] * " " * remaining_text, font, size_px, available_width)
+                    end
                     break  # Stop processing more words
                 end
 
@@ -158,6 +164,55 @@ function wrap_cell_text(text::String, font, size_px::Int, available_width::Float
     end
 
     return lines
+end
+
+"""
+    clip_text_with_ellipsis(text, font, size_px, available_width)
+
+Clip text at character level to fit within available width, adding "..." if clipped.
+"""
+function clip_text_with_ellipsis(text::String, font, size_px::Int, available_width::Float32)::String
+    # Measure the full text width
+    full_width = measure_word_width(font, text, size_px)
+
+    if full_width <= available_width
+        # Text fits completely
+        return text
+    end
+
+    # Text needs clipping - measure ellipsis width
+    ellipsis = "..."
+    ellipsis_width = measure_word_width(font, ellipsis, size_px)
+
+    # Available width for actual text (minus ellipsis)
+    text_width_budget = available_width - ellipsis_width
+
+    if text_width_budget <= 0
+        # Not enough space even for ellipsis, return empty or just dots
+        return available_width > ellipsis_width ? ellipsis : ""
+    end
+
+    # Find the maximum number of characters that fit
+    current_width = 0.0f0
+    char_count = 0
+
+    for char in text
+        char_width = measure_word_width(font, string(char), size_px)
+
+        if current_width + char_width > text_width_budget
+            break
+        end
+
+        current_width += char_width
+        char_count += 1
+    end
+
+    # Return clipped text with ellipsis
+    if char_count == 0
+        return ellipsis
+    else
+        return text[1:char_count] * ellipsis
+    end
 end
 
 function measure(view::TableView)::Tuple{Float32,Float32}
