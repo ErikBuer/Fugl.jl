@@ -29,6 +29,10 @@ struct TableStyle
     cell_text_style::TextStyle
     cell_height::Float32
 
+    # Text wrapping and clipping
+    max_wrapped_rows::Int  # 0 = no wrapping (single row), >0 = max number of wrapped rows
+    wrap_text::Bool        # Whether to wrap text at all
+
     # Grid styling
     show_grid::Bool
     grid_color::Vec4f
@@ -47,7 +51,10 @@ function TableStyle(;
     header_text_style::TextStyle=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
     header_height::Float32=30.0f0, cell_background_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),
     cell_text_style::TextStyle=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
-    cell_height::Float32=25.0f0, show_grid::Bool=true,
+    cell_height::Float32=25.0f0,
+    max_wrapped_rows::Int=0,
+    wrap_text::Bool=false,
+    show_grid::Bool=true,
     grid_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0),
     grid_width::Float32=1.0f0, cell_padding::Float32=8.0f0, border_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0),
     border_width::Float32=1.0f0
@@ -55,6 +62,7 @@ function TableStyle(;
     return TableStyle(
         header_background_color, header_text_style, header_height,
         cell_background_color, cell_text_style, cell_height,
+        max_wrapped_rows, wrap_text,
         show_grid, grid_color, grid_width,
         cell_padding,
         border_color, border_width
@@ -97,6 +105,60 @@ function Table(
     on_cell_click::Function=(row, col) -> nothing
 )
     return TableView(headers, data, style, on_cell_click)
+end
+
+"""
+    wrap_cell_text(text, font, size_px, available_width, max_rows, wrap_enabled)
+
+Wrap text for a table cell, respecting max_rows limit and clipping if necessary.
+Returns a vector of strings representing the lines to display.
+"""
+function wrap_cell_text(text::String, font, size_px::Int, available_width::Float32, max_rows::Int, wrap_enabled::Bool)::Vector{String}
+    if !wrap_enabled || max_rows == 0
+        # No wrapping - return single line (will be clipped during rendering)
+        return [text]
+    end
+
+    # Split text into words
+    words = split(text, " ")
+    lines = String[]
+    current_line = ""
+    current_width = 0.0f0
+    space_width = measure_word_width(font, " ", size_px)
+
+    for word in words
+        word_width = measure_word_width(font, word, size_px)
+
+        if current_line == ""
+            # First word on a line
+            current_line = word
+            current_width = word_width
+        else
+            # Check if word + space fits on current line
+            if current_width + space_width + word_width > available_width
+                # Move to new line
+                push!(lines, current_line)
+
+                # Check if we've reached max rows
+                if length(lines) >= max_rows
+                    break  # Stop processing more words
+                end
+
+                current_line = word
+                current_width = word_width
+            else
+                current_line *= " " * word
+                current_width += space_width + word_width
+            end
+        end
+    end
+
+    # Push the last line if we haven't exceeded max rows
+    if current_line != "" && length(lines) < max_rows
+        push!(lines, current_line)
+    end
+
+    return lines
 end
 
 function measure(view::TableView)::Tuple{Float32,Float32}
@@ -277,21 +339,44 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
             if col_idx <= num_cols  # Don't exceed number of columns
                 cell_x = current_x + (col_idx - 1) * (col_width + grid_width)
 
-                # Create text view for cell
-                cell_text_view = Text(cell_text,
-                    style=view.style.cell_text_style,
-                    horizontal_align=:left,
-                    vertical_align=:middle,
-                    wrap_text=false
+                # Calculate available width for text (minus padding)
+                available_text_width = col_width - 2 * view.style.cell_padding
+
+                # Wrap the cell text based on table settings
+                wrapped_lines = wrap_cell_text(
+                    cell_text,
+                    view.style.cell_text_style.font,
+                    view.style.cell_text_style.size_px,
+                    available_text_width,
+                    view.style.max_wrapped_rows,
+                    view.style.wrap_text
                 )
 
-                interpret_view(cell_text_view,
-                    cell_x + view.style.cell_padding,
-                    row_y,
-                    col_width - 2 * view.style.cell_padding,
-                    view.style.cell_height,
-                    projection_matrix
-                )
+                # Render each line of wrapped text
+                line_height = Float32(view.style.cell_text_style.size_px)
+                for (line_idx, line) in enumerate(wrapped_lines)
+                    # Calculate vertical position for this line
+                    line_y = row_y + (line_idx - 1) * line_height
+
+                    # Only render if the line fits within the cell height
+                    if line_y + line_height <= row_y + view.style.cell_height
+                        # Create text view for this line
+                        line_text_view = Text(line,
+                            style=view.style.cell_text_style,
+                            horizontal_align=:left,
+                            vertical_align=:top,  # Use top alignment for multi-line
+                            wrap_text=false  # Already wrapped, don't wrap again
+                        )
+
+                        interpret_view(line_text_view,
+                            cell_x + view.style.cell_padding,
+                            line_y,
+                            available_text_width,
+                            min(line_height, view.style.cell_height - (line_y - row_y)),
+                            projection_matrix
+                        )
+                    end
+                end
             end
         end
 
