@@ -126,10 +126,10 @@ function wrap_cell_text(text::String, font, size_px::Int, available_width::Float
     lines = String[]
     current_line = ""
     current_width = 0.0f0
-    space_width = measure_word_width(font, " ", size_px)
+    space_width = measure_word_width_cached(font, " ", size_px)
 
     for word in words
-        word_width = measure_word_width(font, word, size_px)
+        word_width = measure_word_width_cached(font, word, size_px)
 
         if current_line == ""
             # First word on a line
@@ -176,7 +176,7 @@ Clip text at character level to fit within available width, adding "..." if clip
 """
 function clip_text_with_ellipsis(text::String, font, size_px::Int, available_width::Float32)::String
     # Measure the full text width
-    full_width = measure_word_width(font, text, size_px)
+    full_width = measure_word_width_cached(font, text, size_px)
 
     if full_width <= available_width
         # Text fits completely
@@ -185,7 +185,7 @@ function clip_text_with_ellipsis(text::String, font, size_px::Int, available_wid
 
     # Text needs clipping - measure ellipsis width
     ellipsis = "..."
-    ellipsis_width = measure_word_width(font, ellipsis, size_px)
+    ellipsis_width = measure_word_width_cached(font, ellipsis, size_px)
 
     # Available width for actual text (minus ellipsis)
     text_width_budget = available_width - ellipsis_width
@@ -200,7 +200,7 @@ function clip_text_with_ellipsis(text::String, font, size_px::Int, available_wid
     char_count = 0
 
     for char in text
-        char_width = measure_word_width(font, string(char), size_px)
+        char_width = measure_word_width_cached(font, string(char), size_px)
 
         if current_width + char_width > text_width_budget
             break
@@ -230,7 +230,7 @@ function measure(view::TableView)::Tuple{Float32,Float32}
     # Estimate minimum column widths based on header text
     min_col_widths = Float32[]
     for header in view.headers
-        header_width = measure_word_width(view.style.header_text_style.font, header, view.style.header_text_style.size_px)
+        header_width = measure_word_width_cached(view.style.header_text_style.font, header, view.style.header_text_style.size_px)
         push!(min_col_widths, header_width + 2 * view.style.cell_padding)
     end
 
@@ -238,7 +238,7 @@ function measure(view::TableView)::Tuple{Float32,Float32}
     for row in view.data
         for (col_idx, cell) in enumerate(row)
             if col_idx <= length(min_col_widths)
-                cell_width = measure_word_width(view.style.cell_text_style.font, cell, view.style.cell_text_style.size_px)
+                cell_width = measure_word_width_cached(view.style.cell_text_style.font, cell, view.style.cell_text_style.size_px)
                 min_col_widths[col_idx] = max(min_col_widths[col_idx], cell_width + 2 * view.style.cell_padding)
             end
         end

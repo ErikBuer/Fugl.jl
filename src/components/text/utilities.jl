@@ -11,16 +11,22 @@ function create_text_texture(mat::Matrix{Float32})::GLAbstraction.Texture
 end
 
 """
-    estimate_word_width(word::AbstractString, size_px::Int)::Float32
+    measure_word_width_cached(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
 
-Estimate the width of a word based on character count and font size.
-This is a fast approximation and is not pixel-perfect.
+Measure the width of a word using cached glyph advance widths from the glyph atlas.
+This is faster than measure_word_width since it avoids re-rendering glyphs that are already cached.
 """
-function estimate_word_width(word::AbstractString, size_px::Int)::Float32
-    # Simple estimate: assume average character width is about 0.6 * font_size
-    # This works reasonably well for most fonts and is much faster
-    avg_char_width = size_px * 0.6f0
-    return Float32(length(word)) * avg_char_width
+function measure_word_width_cached(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
+    atlas = get_glyph_atlas()
+    width = 0.0f0
+
+    for char in word
+        # Get or cache the glyph - this will store the advance width in the atlas
+        glyph_uv = get_or_insert_glyph!(atlas, font, char, size_px)
+        width += glyph_uv.advance
+    end
+
+    return width
 end
 
 """
