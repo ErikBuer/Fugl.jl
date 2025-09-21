@@ -20,24 +20,16 @@ end
 """
     measure(view::TextView)::Tuple{Float32,Float32}
 
-For wrap_text=true, assumes text is rendered in a single line.
-For wrap_text=false, measures the actual text width without wrapping.
+Assumes text is rendered in a single line.
 """
 function measure(view::TextView)::Tuple{Float32,Float32}
     font = view.style.font
     size_px = view.style.size_px
 
-    if view.wrap_text
-        # Original behavior - measure as single line (will wrap based on container width)
-        text_width = measure_word_width(font, view.text, size_px)
-        text_height = Float32(size_px) + 2.0
-        text_width = text_width + 2.0
-    else
-        # No wrapping - measure actual text width (may exceed container)
-        text_width = measure_word_width(font, view.text, size_px)
-        text_height = Float32(size_px) + 2.0
-        text_width = text_width + 2.0
-    end
+    # Original behavior - measure as single line (will wrap based on container width)
+    text_width = measure_word_width(font, view.text, size_px)
+    text_height = Float32(size_px) + 2.0
+    text_width = text_width + 2.0
 
     return (text_width, text_height)
 end
