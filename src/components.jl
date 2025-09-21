@@ -6,7 +6,9 @@ include("components/common/rectangle.jl")
 include("components/Empty.jl")
 export Empty
 
-include("components/FixedSize.jl")
+include("components/fixed_sizes/FixedSize.jl")
+include("components/fixed_sizes/FixedWidth.jl")
+include("components/fixed_sizes/FixedHeight.jl")
 export FixedSize, FixedWidth, FixedHeight
 
 include("components/AlignVertical.jl")
@@ -68,6 +70,9 @@ export clear_texture_cache!
 include("components/separator_line/HorizontalLine.jl")
 include("components/separator_line/VerticalLine.jl")
 export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
+
+include("components/ScrollArea.jl")
+export ScrollArea, ScrollAreaState, ScrollAreaStyle
 
 include("components/SplitContainer.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState

@@ -36,19 +36,47 @@ function detect_click(view::AbstractView, mouse_state::InputState, x::AbstractFl
     nothing
 end
 
+"""
+Measure the intrinsic size of a component.
+"""
 function measure(view::AbstractView)::Tuple{Float32,Float32}
     # Default implementation: components occupy the parent's size
     return (Inf32, Inf32)  # Width and height
 end
 
+"""
+Measure the intrinsic height of a component given an available width.
+"""
+function measure_height(view::AbstractView, available_width::Float32)::Float32
+    error("measure_height is not implemented for $(typeof(view))")
+    return NaN32
+end
+
+"""
+Measure the intrinsic width of a component given an available height.
+"""
+function measure_width(view::AbstractView, available_height::Float32)::Float32
+    error("measure_width is not implemented for $(typeof(view))")
+    return NaN32
+end
+
+"""
+Check if the component has a preferred width.
+"""
 function preferred_width(view::AbstractView)::Bool
     return false
 end
 
+"""
+Check if the component has a preferred height.
+"""
 function preferred_height(view::AbstractView)::Bool
     return false
 end
 
+"""
+Check if the component has a preferred size.
+"""
 @inline function preferred_size(view::AbstractView)::Bool
     return preferred_width(view) || preferred_height(view)
 end

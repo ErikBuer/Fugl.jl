@@ -10,6 +10,31 @@ function create_text_texture(mat::Matrix{Float32})::GLAbstraction.Texture
     return texture
 end
 
+"""
+    measure_word_width_cached(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
+
+Measure the width of a word using cached glyph advance widths from the glyph atlas.
+This is faster than measure_word_width since it avoids re-rendering glyphs that are already cached.
+"""
+function measure_word_width_cached(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
+    atlas = get_glyph_atlas()
+    width = 0.0f0
+
+    for char in word
+        # Get or cache the glyph - this will store the advance width in the atlas
+        glyph_uv = get_or_insert_glyph!(atlas, font, char, size_px)
+        width += glyph_uv.advance
+    end
+
+    return width
+end
+
+"""
+    measure_word_width(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
+
+Measure the width of a word using FreeType for accurate rendering metrics.
+This is more accurate but slower than estimate_word_width.
+"""
 function measure_word_width(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
     width = 0.0f0
     for char in word
