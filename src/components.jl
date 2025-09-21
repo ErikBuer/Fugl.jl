@@ -72,6 +72,9 @@ export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
 include("components/SplitContainer.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 
+include("components/Table.jl")
+export Table, TableStyle
+
 include("composite_components/buttons.jl")
 export TextButton, IconButton
 
