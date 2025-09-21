@@ -42,6 +42,24 @@ function measure(view::ContainerView)::Tuple{Float32,Float32}
     return (child_width + 2 * padding, child_height + 2 * padding)
 end
 
+function measure_width(view::ContainerView, available_height::Float32)::Float32
+    # Measure the width of the child component
+    child_width = measure_width(view.child, available_height)
+
+    # Add padding
+    padding = view.style.padding
+    return child_width + 2 * padding
+end
+
+function measure_height(view::ContainerView, available_width::Float32)::Float32
+    # Measure the height of the child component
+    child_height = measure_height(view.child, available_width)
+
+    # Add padding
+    padding = view.style.padding
+    return child_height + 2 * padding
+end
+
 """
 Calculate layout to the container and its child.
 """

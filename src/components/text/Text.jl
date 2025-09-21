@@ -93,7 +93,7 @@ function measure_height(view::TextView, available_width::Float32)::Float32
     push!(lines, current_line)
 
     # Calculate total text height
-    total_height = length(lines) * line_height
+    total_height = length(lines) * line_height + 2.0
 
     return total_height
 end

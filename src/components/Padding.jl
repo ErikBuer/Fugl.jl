@@ -15,6 +15,16 @@ function measure(view::PaddingView)::Tuple{Float32,Float32}
     return (child_width + 2 * view.padding, child_height + 2 * view.padding)
 end
 
+function measure_width(view::PaddingView, available_height::Float32)::Float32
+    child_width = measure_width(view.child, available_height)
+    return child_width + 2 * view.padding
+end
+
+function measure_height(view::PaddingView, available_width::Float32)::Float32
+    child_height = measure_height(view.child, available_width)
+    return child_height + 2 * view.padding
+end
+
 function apply_layout(view::PaddingView, x::Float32, y::Float32, width::Float32, height::Float32)
     padded_x = x + view.padding
     padded_y = y + view.padding
