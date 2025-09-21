@@ -69,6 +69,9 @@ include("components/separator_line/HorizontalLine.jl")
 include("components/separator_line/VerticalLine.jl")
 export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
 
+include("components/ScrollArea.jl")
+export ScrollArea, ScrollAreaState, ScrollAreaStyle
+
 include("components/SplitContainer.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 
