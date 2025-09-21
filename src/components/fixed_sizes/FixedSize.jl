@@ -14,13 +14,6 @@ function FixedSize(child::AbstractView, width::Real, height::Real)::FixedSizeVie
     FixedSizeView(child, Float32(width), Float32(height))
 end
 
-# FixedSize implementation (existing)
-function apply_layout(view::FixedSizeView, x::Float32, y::Float32, width::Float32, height::Float32)
-    final_width = min(view.width, width)
-    final_height = min(view.height, height)
-    return (x, y, final_width, final_height)
-end
-
 function interpret_view(view::FixedSizeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     final_width = min(view.width, width)
     final_height = min(view.height, height)

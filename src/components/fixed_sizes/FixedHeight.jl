@@ -31,11 +31,6 @@ function FixedHeight(child::AbstractView, height::Real)::FixedHeightView
     FixedHeightView(child, Float32(height))
 end
 
-function apply_layout(view::FixedHeightView, x::Float32, y::Float32, width::Float32, height::Float32)
-    final_height = min(view.height, height)
-    return (x, y, width, final_height)
-end
-
 function interpret_view(view::FixedHeightView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     final_height = min(view.height, height)
     interpret_view(view.child, x, y, width, final_height, projection_matrix)
