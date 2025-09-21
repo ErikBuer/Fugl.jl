@@ -37,6 +37,16 @@ function measure(view::FixedSizeView)::Tuple{Float32,Float32}
     return (view.width, view.height)
 end
 
+function measure_width(view::FixedSizeView, available_height::Float32)::Float32
+    # Fixed size views have a set width, no matter the available height
+    return view.width
+end
+
+function measure_height(view::FixedSizeView, available_width::Float32)::Float32
+    # Fixed size views have a set height, no matter the available width
+    return view.height
+end
+
 function preferred_width(view::FixedSizeView)::Bool
     return true
 end

@@ -51,6 +51,14 @@ function measure(view::FixedHeightView)::Tuple{Float32,Float32}
     return (child_width, view.height)
 end
 
+function measure_width(view::FixedHeightView, available_height::Float32)::Float32
+    return measure_width(view.child, view.height)
+end
+
+function measure_height(view::FixedHeightView, available_width::Float32)::Float32
+    return view.height
+end
+
 function preferred_width(view::FixedHeightView)::Bool
     return preferred_width(view.child)
 end
