@@ -10,6 +10,25 @@ function create_text_texture(mat::Matrix{Float32})::GLAbstraction.Texture
     return texture
 end
 
+"""
+    estimate_word_width(word::AbstractString, size_px::Int)::Float32
+
+Estimate the width of a word based on character count and font size.
+This is a fast approximation and is not pixel-perfect.
+"""
+function estimate_word_width(word::AbstractString, size_px::Int)::Float32
+    # Simple estimate: assume average character width is about 0.6 * font_size
+    # This works reasonably well for most fonts and is much faster
+    avg_char_width = size_px * 0.6f0
+    return Float32(length(word)) * avg_char_width
+end
+
+"""
+    measure_word_width(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
+
+Measure the width of a word using FreeType for accurate rendering metrics.
+This is more accurate but slower than estimate_word_width.
+"""
 function measure_word_width(font::FreeTypeAbstraction.FTFont, word::AbstractString, size_px::Int)::Float32
     width = 0.0f0
     for char in word
