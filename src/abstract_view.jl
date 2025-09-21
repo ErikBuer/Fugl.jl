@@ -48,7 +48,7 @@ end
 Measure the intrinsic height of a component given an available width.
 """
 function measure_height(view::AbstractView, available_width::Float32)::Float32
-    # Undefined by default
+    error("measure_height is not implemented for $(typeof(view))")
     return NaN32
 end
 
@@ -56,7 +56,7 @@ end
 Measure the intrinsic width of a component given an available height.
 """
 function measure_width(view::AbstractView, available_height::Float32)::Float32
-    # Undefined by default
+    error("measure_width is not implemented for $(typeof(view))")
     return NaN32
 end
 
