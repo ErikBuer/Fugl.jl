@@ -20,7 +20,9 @@ DocMeta.setdocmeta!(Fugl, :DocTestSetup, :(using Fugl); recursive=true)
 
 makedocs(
     modules=[Fugl],
-    format=Documenter.HTML(),
+    format=Documenter.HTML(
+        size_threshold=500 * 1024,  # 500 KiB threshold (default is 200 KiB)
+    ),
     sitename="Fugl.jl",
     pages=Any[
         "index.md",

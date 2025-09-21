@@ -6,7 +6,9 @@ include("components/common/rectangle.jl")
 include("components/Empty.jl")
 export Empty
 
-include("components/FixedSize.jl")
+include("components/fixed_sizes/FixedSize.jl")
+include("components/fixed_sizes/FixedWidth.jl")
+include("components/fixed_sizes/FixedHeight.jl")
 export FixedSize, FixedWidth, FixedHeight
 
 include("components/AlignVertical.jl")
