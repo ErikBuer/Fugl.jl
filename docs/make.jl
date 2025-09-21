@@ -29,13 +29,11 @@ makedocs(
         "Components"=>Any[
             "Components/container.md",
             "Components/card.md",
-            "Layout"=>Any[
-                "Components/layout/row_col.md",
-                "Components/layout/split_container.md",
-                "Components/layout/align.md",
-                "Components/layout/sizing.md",
-                "Components/layout/padding.md",
-            ],
+            "Components/row_col.md",
+            "Components/split_container.md",
+            "Components/align.md",
+            "Components/padding.md",
+            "Components/sizing.md",
             "Components/Rotate.md",
             "Components/vline_hline.md",
             "Components/text.md",
