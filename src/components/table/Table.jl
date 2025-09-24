@@ -1,81 +1,5 @@
-"""
-Table component for displaying tabular data with headers and rows.
-
-The Table component provides:
-- Column headers with customizable text and styling
-- Dynamic number of rows based on data
-- Cell-based text content
-- Customizable styling for headers, cells, borders, and spacing
-- Grid lines between rows and columns
-
-Usage:
-    headers = ["Name", "Age", "City"]
-    data = [
-        ["Alice", "25", "New York"],
-        ["Bob", "30", "London"],
-        ["Carol", "28", "Tokyo"]
-    ]
-    Table(headers, data)
-"""
-
-struct TableStyle
-    # Header styling
-    header_background_color::Vec4f
-    header_text_style::TextStyle
-    header_height::Float32
-
-    # Cell styling
-    cell_background_color::Vec4f
-    cell_alternate_background_color::Vec4f  # Color for alternating rows
-    cell_text_style::TextStyle
-    cell_height::Float32
-
-    # Text wrapping and clipping
-    max_wrapped_rows::Int  # 0 = no wrapping (single row), >0 = max number of wrapped rows
-
-    # Grid styling
-    show_grid::Bool
-    grid_color::Vec4f
-    grid_width::Float32
-
-    # Padding and spacing
-    cell_padding::Float32
-
-    # Border styling
-    border_color::Vec4f
-    border_width::Float32
-end
-
-function TableStyle(;
-    header_background_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0),
-    header_text_style::TextStyle=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
-    header_height::Float32=30.0f0,
-    cell_background_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),
-    cell_alternate_background_color::Vec4f=Vec4f(0.95, 0.95, 0.95, 1.0),
-    cell_text_style::TextStyle=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
-    cell_height::Float32=25.0f0,
-    max_wrapped_rows::Int=0,
-    show_grid::Bool=true,
-    grid_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0),
-    grid_width::Float32=1.0f0, cell_padding::Float32=8.0f0, border_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0),
-    border_width::Float32=1.0f0
-)
-    return TableStyle(
-        header_background_color, header_text_style, header_height,
-        cell_background_color, cell_alternate_background_color, cell_text_style, cell_height,
-        max_wrapped_rows,
-        show_grid, grid_color, grid_width,
-        cell_padding,
-        border_color, border_width
-    )
-end
-
-struct TableView <: AbstractView
-    headers::Vector{String}
-    data::Vector{Vector{String}}  # Vector of rows, each row is a vector of cell strings
-    style::TableStyle
-    on_cell_click::Function  # Callback for cell clicks: (row_index, col_index) -> nothing
-end
+include("table_state.jl")
+include("table_style.jl")
 
 """
     Table(headers, data; kwargs...)
@@ -86,7 +10,9 @@ Create a table component with column headers and row data.
 - `headers::Vector{String}`: Column header names
 - `data::Vector{Vector{String}}`: Table data as rows of strings
 - `style::TableStyle=TableStyle()`: Table styling options
+- `state::TableState=TableState()`: Table state for column widths and sizing
 - `on_cell_click::Function=(row, col) -> nothing`: Callback for cell clicks
+- `on_state_change::Function=(new_state) -> nothing`: Callback for state changes
 
 # Example
 ```julia
@@ -103,9 +29,11 @@ function Table(
     headers::Vector{String},
     data::Vector{Vector{String}};
     style::TableStyle=TableStyle(),
-    on_cell_click::Function=(row, col) -> nothing
+    state::TableState=TableState(),
+    on_cell_click::Function=(row, col) -> nothing,
+    on_state_change::Function=(new_state) -> nothing
 )
-    return TableView(headers, data, style, on_cell_click)
+    return TableView(headers, data, style, state, on_cell_click, on_state_change)
 end
 
 """
@@ -276,12 +204,21 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
         return
     end
 
-    # Calculate column widths (equal distribution for now)
+    # Calculate column widths using state
     border_width = view.style.border_width
     grid_width = view.style.show_grid ? view.style.grid_width : 0.0f0
+    available_width = width - 2 * border_width
 
-    available_width = width - 2 * border_width - (num_cols - 1) * grid_width
-    col_width = available_width / num_cols
+    # Get effective column widths (from state or auto-calculated)
+    col_widths = get_effective_column_widths(view, available_width)
+
+    # Check if we need to auto-calculate widths on first render
+    if isnothing(view.state.column_widths) && view.state.auto_size
+        # Auto-calculate and update state on first render
+        calculate_and_update_column_widths!(view, available_width)
+        # Use the newly calculated widths
+        col_widths = get_effective_column_widths(view, available_width)
+    end
 
     # Draw outer border using multiple rectangles (top, bottom, left, right)
     if border_width > 0
@@ -341,8 +278,9 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
     end
 
     # Draw header text
+    current_x = x + border_width
     for (col_idx, header) in enumerate(view.headers)
-        cell_x = current_x + (col_idx - 1) * (col_width + grid_width)
+        col_width = col_widths[col_idx]
 
         # Create text view for header
         header_text = Text(header,
@@ -353,12 +291,15 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
         )
 
         interpret_view(header_text,
-            cell_x + view.style.cell_padding,
+            current_x + view.style.cell_padding,
             header_y,
             col_width - 2 * view.style.cell_padding,
             view.style.header_height,
             projection_matrix
         )
+
+        # Move to next column
+        current_x += col_width + grid_width
     end
 
     current_y += view.style.header_height
@@ -413,7 +354,7 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
         current_x = x + border_width
         for (col_idx, cell_text) in enumerate(row)
             if col_idx <= num_cols  # Don't exceed number of columns
-                cell_x = current_x + (col_idx - 1) * (col_width + grid_width)
+                col_width = col_widths[col_idx]
 
                 # Calculate available width for text (minus padding)
                 available_text_width = col_width - 2 * view.style.cell_padding
@@ -444,7 +385,7 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
                         )
 
                         interpret_view(line_text_view,
-                            cell_x + view.style.cell_padding,
+                            current_x + view.style.cell_padding,
                             line_y,
                             available_text_width,
                             min(line_height, view.style.cell_height - (line_y - row_y)),
@@ -452,6 +393,9 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
                         )
                     end
                 end
+
+                # Move to next column
+                current_x += col_width + grid_width
             end
         end
 
@@ -474,14 +418,20 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
     if view.style.show_grid
         current_x = x + border_width
         for col_idx in 1:(num_cols-1)
-            line_x = current_x + col_idx * col_width + (col_idx - 1) * grid_width
+            # Move to the end of current column
+            current_x += col_widths[col_idx]
+
+            # Draw grid line
             line_vertices = [
-                Point2f(line_x, y + border_width),
-                Point2f(line_x + grid_width, y + border_width),
-                Point2f(line_x + grid_width, y + height - border_width),
-                Point2f(line_x, y + height - border_width)
+                Point2f(current_x, y + border_width),
+                Point2f(current_x + grid_width, y + border_width),
+                Point2f(current_x + grid_width, y + height - border_width),
+                Point2f(current_x, y + height - border_width)
             ]
             draw_rectangle(line_vertices, view.style.grid_color, projection_matrix)
+
+            # Move past the grid line for next iteration
+            current_x += grid_width
         end
     end
 end
@@ -504,8 +454,10 @@ function detect_click(view::TableView, input_state::InputState, x::Float32, y::F
     # Calculate dimensions
     border_width = view.style.border_width
     grid_width = view.style.show_grid ? view.style.grid_width : 0.0f0
-    available_width = width - 2 * border_width - (num_cols - 1) * grid_width
-    col_width = available_width / num_cols
+    available_width = width - 2 * border_width
+
+    # Get column widths
+    col_widths = get_effective_column_widths(view, available_width)
 
     # Adjust mouse coordinates for border
     adjusted_mouse_x = mouse_x - border_width
@@ -534,14 +486,115 @@ function detect_click(view::TableView, input_state::InputState, x::Float32, y::F
         return
     end
 
-    # Calculate which column was clicked
-    col_width_with_grid = col_width + grid_width
-    col_idx = Int(floor(adjusted_mouse_x / col_width_with_grid)) + 1
+    # Calculate which column was clicked using variable column widths
+    current_x = 0.0f0
+    col_idx = 0
 
-    if col_idx > num_cols || col_idx < 1
-        return
+    for (i, col_width) in enumerate(col_widths)
+        if adjusted_mouse_x >= current_x && adjusted_mouse_x < current_x + col_width
+            col_idx = i
+            break
+        end
+        current_x += col_width + grid_width
+    end
+
+    if col_idx == 0 || col_idx > num_cols
+        return  # Click in grid line or outside
     end
 
     # Call the cell click callback
     view.on_cell_click(row_idx, col_idx)
+end
+
+"""
+    calculate_column_widths(view::TableView, available_width::Float32)::Vector{Float32}
+
+Calculate optimal column widths based on content and available space.
+Uses a simple algorithm that:
+1. Calculates minimum width needed for each column based on content
+2. If total minimum width < available width, distributes extra space proportionally
+3. If total minimum width > available width, scales all columns down proportionally
+"""
+function calculate_column_widths(view::TableView, available_width::Float32)::Vector{Float32}
+    num_cols = length(view.headers)
+
+    if num_cols == 0
+        return Float32[]
+    end
+
+    # Calculate minimum width needed for each column
+    min_col_widths = Float32[]
+
+    # Start with header widths
+    for header in view.headers
+        header_width = measure_word_width_cached(view.style.header_text_style.font, header, view.style.header_text_style.size_px)
+        push!(min_col_widths, header_width + 2 * view.style.cell_padding)
+    end
+
+    # Check data rows for wider content
+    for row in view.data
+        for (col_idx, cell) in enumerate(row)
+            if col_idx <= length(min_col_widths)
+                cell_width = measure_word_width_cached(view.style.cell_text_style.font, cell, view.style.cell_text_style.size_px)
+                min_col_widths[col_idx] = max(min_col_widths[col_idx], cell_width + 2 * view.style.cell_padding)
+            end
+        end
+    end
+
+    # Account for grid lines in available width
+    grid_width = view.style.show_grid ? view.style.grid_width : 0.0f0
+    content_available_width = available_width - (num_cols - 1) * grid_width
+
+    total_min_width = sum(min_col_widths)
+
+    if total_min_width <= content_available_width
+        # We have extra space - distribute proportionally based on content
+        if total_min_width > 0
+            scale_factor = content_available_width / total_min_width
+            return min_col_widths .* scale_factor
+        else
+            # All columns are empty, distribute equally
+            equal_width = content_available_width / num_cols
+            return fill(equal_width, num_cols)
+        end
+    else
+        # Not enough space - scale down proportionally (content may be clipped)
+        scale_factor = content_available_width / total_min_width
+        return min_col_widths .* scale_factor
+    end
+end
+
+"""
+    get_effective_column_widths(view::TableView, available_width::Float32)::Vector{Float32}
+
+Get effective column widths for rendering.
+Priority: state.column_widths -> auto-calculated widths
+"""
+function get_effective_column_widths(view::TableView, available_width::Float32)::Vector{Float32}
+    # Priority 1: Explicit column widths from state
+    if !isnothing(view.state.column_widths) && length(view.state.column_widths) == length(view.headers)
+        return view.state.column_widths
+    end
+
+    # Priority 2: Auto-calculate based on content
+    return calculate_column_widths(view, available_width)
+end
+
+"""
+    calculate_and_update_column_widths!(view::TableView, available_width::Float32)
+
+Calculate new column widths and update the table state via callback.
+This function can be called by the user when they want to recalculate column sizing.
+"""
+function calculate_and_update_column_widths!(view::TableView, available_width::Float32)
+    new_widths = calculate_column_widths(view, available_width)
+
+    # Create new state with calculated widths
+    new_state = TableState(view.state;
+        column_widths=new_widths,
+        cache_id=rand(UInt64)  # Generate new cache ID for state change
+    )
+
+    # Notify via callback
+    view.on_state_change(new_state)
 end
