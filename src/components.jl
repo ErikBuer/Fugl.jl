@@ -77,8 +77,8 @@ export ScrollArea, ScrollAreaState, ScrollAreaStyle
 include("components/SplitContainer.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
 
-include("components/Table.jl")
-export Table, TableStyle
+include("components/table/Table.jl")
+export Table, TableStyle, TableState
 
 include("composite_components/buttons.jl")
 export TextButton, IconButton

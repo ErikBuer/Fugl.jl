@@ -1,106 +1,5 @@
-"""
-    TableState(column_widths, cache_id)
-
-Represents the state of a table, including column widths.
-
-Fields:
-- `column_widths`: Vector of column widths in pixels. If nothing, will be auto-calculated based on content.
-- `cache_id`: Unique identifier for table cache. Not user managed.
-"""
-struct TableState
-    column_widths::Union{Vector{Float32},Nothing}
-    cache_id::UInt64
-end
-
-"""
-Create a new TableState from an existing state with keyword-based modifications.
-"""
-function TableState(state::TableState;
-    column_widths=state.column_widths,
-    cache_id=state.cache_id # Not user managed
-)
-    return TableState(
-        column_widths,
-        cache_id
-    )
-end
-
-"""
-Create TableState with explicit column widths
-"""
-function TableState(column_widths::Vector{Float32})
-    return TableState(column_widths, rand(UInt64))
-end
-
-"""
-Create TableState with sensible defaults
-"""
-function TableState(;
-    column_widths::Union{Vector{Float32},Nothing}=nothing
-)
-    return TableState(column_widths, rand(UInt64))
-end
-
-struct TableStyle
-    # Header styling
-    header_background_color::Vec4f
-    header_text_style::TextStyle
-    header_height::Float32
-
-    # Cell styling
-    cell_background_color::Vec4f
-    cell_alternate_background_color::Vec4f  # Color for alternating rows
-    cell_text_style::TextStyle
-    cell_height::Float32
-
-    # Text wrapping and clipping
-    max_wrapped_rows::Int  # 0 = no wrapping (single row), >0 = max number of wrapped rows
-
-    # Grid styling
-    show_grid::Bool
-    grid_color::Vec4f
-    grid_width::Float32
-
-    # Padding and spacing
-    cell_padding::Float32
-
-    # Border styling
-    border_color::Vec4f
-    border_width::Float32
-end
-
-function TableStyle(;
-    header_background_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0),
-    header_text_style::TextStyle=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
-    header_height::Float32=30.0f0,
-    cell_background_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),
-    cell_alternate_background_color::Vec4f=Vec4f(0.95, 0.95, 0.95, 1.0),
-    cell_text_style::TextStyle=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
-    cell_height::Float32=25.0f0,
-    max_wrapped_rows::Int=0,
-    show_grid::Bool=true,
-    grid_color::Vec4f=Vec4f(0.7, 0.7, 0.7, 1.0),
-    grid_width::Float32=1.0f0, cell_padding::Float32=8.0f0, border_color::Vec4f=Vec4f(0.5, 0.5, 0.5, 1.0),
-    border_width::Float32=1.0f0
-)
-    return TableStyle(
-        header_background_color, header_text_style, header_height,
-        cell_background_color, cell_alternate_background_color, cell_text_style, cell_height,
-        max_wrapped_rows,
-        show_grid, grid_color, grid_width,
-        cell_padding,
-        border_color, border_width
-    )
-end
-
-struct TableView <: AbstractView
-    headers::Vector{String}
-    data::Vector{Vector{String}}  # Vector of rows, each row is a vector of cell strings
-    style::TableStyle
-    state::TableState
-    on_cell_click::Function  # Callback for cell clicks: (row_index, col_index) -> nothing
-    on_state_change::Function  # Callback for state changes: (new_state) -> nothing
-end
+include("table_state.jl")
+include("table_style.jl")
 
 """
     Table(headers, data; kwargs...)
@@ -313,8 +212,8 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
     # Get effective column widths (from state or auto-calculated)
     col_widths = get_effective_column_widths(view, available_width)
 
-    # Auto-calculate widths if not specified in state
-    if isnothing(view.state.column_widths)
+    # Check if we need to auto-calculate widths on first render
+    if isnothing(view.state.column_widths) && view.state.auto_size
         # Auto-calculate and update state on first render
         calculate_and_update_column_widths!(view, available_width)
         # Use the newly calculated widths

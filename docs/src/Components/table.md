@@ -177,3 +177,65 @@ nothing # hide
 ```
 
 ![Interactive Table](table_interactive.png)
+
+## Table with Custom Column Widths
+
+```@example table_state
+using Fugl
+
+function MyApp()
+    # Product data with varying content lengths
+    headers = ["ID", "Product Name", "Description", "Price"]
+    data = [
+        ["1", "Laptop", "High-performance gaming laptop with RGB keyboard", "\$1299"],
+        ["2", "Mouse", "Wireless optical mouse", "\$29"],
+        ["3", "Monitor", "4K Ultra HD display", "\$449"],
+        ["4", "Keyboard", "Mechanical gaming keyboard", "\$129"],
+        ["5", "Headphones", "Noise-cancelling wireless headphones", "\$199"]
+    ]
+    
+    # Auto-sizing table (default behavior - no column widths specified)
+    auto_state = Ref(TableState())  # column_widths=nothing, so auto-calculate
+    
+    auto_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            header_background_color=Vec4f(0.2, 0.4, 0.8, 1.0),
+            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            cell_padding=8.0f0,
+            show_grid=true
+        ),
+        state=auto_state[],
+        on_state_change=(new_state) -> auto_state[] = new_state
+    )
+    
+    # Custom column widths table
+    custom_state = Ref(TableState([50.0f0, 120.0f0, 300.0f0, 80.0f0]))  # Explicit widths
+    
+    custom_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            header_background_color=Vec4f(0.8, 0.2, 0.4, 1.0),
+            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            cell_padding=8.0f0,
+            show_grid=true,
+            max_wrapped_rows=2  # Allow text wrapping in description column
+        ),
+        state=custom_state[],
+        on_state_change=(new_state) -> custom_state[] = new_state
+    )
+   
+    
+    IntrinsicColumn([
+        Card("Auto-sized Columns (TableState())", auto_table),
+        Card("Custom Column Widths [50, 120, 300, 80]", custom_table),
+    ], spacing=15.0f0, padding=0.0f0)
+end
+
+screenshot(MyApp, "table_state.png", 812, 800)
+nothing # hide
+```
+
+![Table with Custom Column Widths](table_state.png)
