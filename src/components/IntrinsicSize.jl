@@ -41,6 +41,16 @@ function measure(view::IntrinsicSizeView)::Tuple{Float32,Float32}
     return measure(view.child)
 end
 
+function measure_height(view::IntrinsicSizeView, available_width::Float32)::Float32
+    # Measure the intrinsic height of the child
+    return measure_height(view.child, available_width)
+end
+
+function measure_width(view::IntrinsicSizeView, available_height::Float32)::Float32
+    # Measure the intrinsic width of the child
+    return measure_width(view.child, available_height)
+end
+
 function preferred_size(view::IntrinsicSizeView)::Bool
     return true
 end
