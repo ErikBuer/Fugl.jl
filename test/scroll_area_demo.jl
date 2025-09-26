@@ -43,20 +43,10 @@ function create_simple_large_content()
     return table
 end
 
-mutable struct ScrollDemo
-    table_height::Float32  # Cache calculated table height
-end
-
-
 # Create large content
 content = create_simple_large_content()
 
-# Calculate expected table height: header + (num_rows * cell_height)
-expected_table_height = 30.0f0 + (50 * 25.0f0)  # header_height + (rows * cell_height)
-
-app_state = ScrollDemo(expected_table_height)
-
-scroll_state = Ref(ScrollAreaState())
+vertical_scroll_state = Ref(VerticalScrollState())
 
 # Create scroll area style
 scroll_style = ScrollAreaStyle(
@@ -70,15 +60,13 @@ scroll_style = ScrollAreaStyle(
 
 function test_scroll_area()
     Card(
-        "ScrollArea Demo - Use mouse wheel to scroll",
-        ScrollArea(
+        "VerticalScrollArea Demo - Use mouse wheel to scroll",
+        VerticalScrollArea(
             content,
-            scroll_state=scroll_state[],
+            scroll_state=vertical_scroll_state[],
             style=scroll_style,
-            enable_horizontal=false,  # Start with vertical only
-            enable_vertical=true,
-            show_scrollbars=true,
-            on_scroll_change=(new_state) -> scroll_state[] = new_state,
+            show_scrollbar=true,
+            on_scroll_change=(new_state) -> vertical_scroll_state[] = new_state,
             on_click=(x, y) -> println("Clicked in scroll area at: ($x, $y)")
         )
     )
@@ -87,7 +75,7 @@ end
 
 # Run the scroll area demo
 Fugl.run(test_scroll_area,
-    title="ScrollArea Demo - Use mouse wheel to scroll",
+    title="VerticalScrollArea Demo - Use mouse wheel to scroll",
     window_width_px=700,
     window_height_px=500,
     fps_overlay=true
