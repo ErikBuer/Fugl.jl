@@ -34,6 +34,18 @@ function measure(view::AlignHorizontalView)::Tuple{Float32,Float32}
     return measure(view.child)
 end
 
+function measure_width(view::AlignHorizontalView, available_height::Float32)::Float32
+    # Measure the child's width at the given height
+    child_width = measure_width(view.child, available_height)
+    return child_width
+end
+
+function measure_height(view::AlignHorizontalView, available_width::Float32)::Float32
+    # Measure the child's height at the given width
+    child_height = measure_height(view.child, available_width)
+    return child_height
+end
+
 function apply_layout(view::AlignHorizontalView, x::Float32, y::Float32, width::Float32, height::Float32)
     # Get the child's preferred size
     child_width, child_height = measure(view.child)
