@@ -1,4 +1,4 @@
-include("scroll_area_state.jl")
+include("scroll_state.jl")
 include("scroll_area_style.jl")
 
 """
@@ -151,8 +151,7 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
     # Update scroll state if measurements changed
     updated_state = if abs(content_height - view.scroll_state.content_height) > 1.0f0 ||
                        abs(viewport_height - view.scroll_state.viewport_height) > 1.0f0
-        new_state = VerticalScrollState(
-            scroll_offset=view.scroll_state.scroll_offset,
+        new_state = VerticalScrollState(view.scroll_state;
             content_height=content_height,
             viewport_height=viewport_height
         )
@@ -198,8 +197,7 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
     # Update scroll state if measurements changed
     updated_state = if abs(content_width - view.scroll_state.content_width) > 1.0f0 ||
                        abs(viewport_width - view.scroll_state.viewport_width) > 1.0f0
-        new_state = HorizontalScrollState(
-            scroll_offset=view.scroll_state.scroll_offset,
+        new_state = HorizontalScrollState(view.scroll_state;
             content_width=content_width,
             viewport_width=viewport_width
         )
@@ -466,10 +464,8 @@ function handle_vertical_scroll_wheel(view::VerticalScrollAreaView, wheel_delta_
 
         # Only update if scroll position actually changed
         if new_offset != view.scroll_state.scroll_offset
-            new_state = VerticalScrollState(
-                scroll_offset=new_offset,
-                content_height=view.scroll_state.content_height,
-                viewport_height=view.scroll_state.viewport_height
+            new_state = VerticalScrollState(view.scroll_state;
+                scroll_offset=new_offset
             )
             view.on_scroll_change(new_state)
             return new_state
@@ -493,10 +489,8 @@ function handle_horizontal_scroll_wheel(view::HorizontalScrollAreaView, wheel_de
 
         # Only update if scroll position actually changed
         if new_offset != view.scroll_state.scroll_offset
-            new_state = HorizontalScrollState(
-                scroll_offset=new_offset,
-                content_width=view.scroll_state.content_width,
-                viewport_width=view.scroll_state.viewport_width
+            new_state = HorizontalScrollState(view.scroll_state;
+                scroll_offset=new_offset
             )
             view.on_scroll_change(new_state)
             return new_state
