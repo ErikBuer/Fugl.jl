@@ -1,74 +1,5 @@
-"""
-State for tracking vertical scroll area scrolling information
-"""
-mutable struct VerticalScrollState
-    scroll_offset::Float32
-    content_height::Float32
-    viewport_height::Float32
-    max_scroll::Float32
-end
-
-"""
-State for tracking horizontal scroll area scrolling information
-"""
-mutable struct HorizontalScrollState
-    scroll_offset::Float32
-    content_width::Float32
-    viewport_width::Float32
-    max_scroll::Float32
-end
-
-"""
-Create a new VerticalScrollState
-"""
-function VerticalScrollState(;
-    scroll_offset::Float32=0.0f0,
-    content_height::Float32=0.0f0,
-    viewport_height::Float32=0.0f0
-)
-    max_scroll = max(0.0f0, content_height - viewport_height)
-    clamped_offset = clamp(scroll_offset, 0.0f0, max_scroll)
-
-    return VerticalScrollState(clamped_offset, content_height, viewport_height, max_scroll)
-end
-
-"""
-Create a new HorizontalScrollState
-"""
-function HorizontalScrollState(;
-    scroll_offset::Float32=0.0f0,
-    content_width::Float32=0.0f0,
-    viewport_width::Float32=0.0f0
-)
-    max_scroll = max(0.0f0, content_width - viewport_width)
-    clamped_offset = clamp(scroll_offset, 0.0f0, max_scroll)
-
-    return HorizontalScrollState(clamped_offset, content_width, viewport_width, max_scroll)
-end
-
-"""
-Style for scroll area appearance
-"""
-struct ScrollAreaStyle
-    scrollbar_width::Float32
-    scrollbar_color::Vec4f
-    scrollbar_background_color::Vec4f
-    scrollbar_hover_color::Vec4f
-    corner_color::Vec4f  # Color for the corner where scrollbars meet
-end
-
-function ScrollAreaStyle(;
-    scrollbar_width::Float32=12.0f0,
-    scrollbar_color::Vec4f=Vec4f(0.6, 0.6, 0.6, 1.0),
-    scrollbar_background_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0),
-    scrollbar_hover_color::Vec4f=Vec4f(0.4, 0.4, 0.4, 1.0),
-    corner_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0)
-)
-    return ScrollAreaStyle(
-        scrollbar_width, scrollbar_color, scrollbar_background_color,
-        scrollbar_hover_color, corner_color
-    )
-end
+include("scroll_state.jl")
+include("scroll_area_style.jl")
 
 """
 VerticalScrollArea view that wraps content and provides vertical scrolling
@@ -220,8 +151,7 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
     # Update scroll state if measurements changed
     updated_state = if abs(content_height - view.scroll_state.content_height) > 1.0f0 ||
                        abs(viewport_height - view.scroll_state.viewport_height) > 1.0f0
-        new_state = VerticalScrollState(
-            scroll_offset=view.scroll_state.scroll_offset,
+        new_state = VerticalScrollState(view.scroll_state;
             content_height=content_height,
             viewport_height=viewport_height
         )
@@ -267,8 +197,7 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
     # Update scroll state if measurements changed
     updated_state = if abs(content_width - view.scroll_state.content_width) > 1.0f0 ||
                        abs(viewport_width - view.scroll_state.viewport_width) > 1.0f0
-        new_state = HorizontalScrollState(
-            scroll_offset=view.scroll_state.scroll_offset,
+        new_state = HorizontalScrollState(view.scroll_state;
             content_width=content_width,
             viewport_width=viewport_width
         )
@@ -535,10 +464,8 @@ function handle_vertical_scroll_wheel(view::VerticalScrollAreaView, wheel_delta_
 
         # Only update if scroll position actually changed
         if new_offset != view.scroll_state.scroll_offset
-            new_state = VerticalScrollState(
-                scroll_offset=new_offset,
-                content_height=view.scroll_state.content_height,
-                viewport_height=view.scroll_state.viewport_height
+            new_state = VerticalScrollState(view.scroll_state;
+                scroll_offset=new_offset
             )
             view.on_scroll_change(new_state)
             return new_state
@@ -562,10 +489,8 @@ function handle_horizontal_scroll_wheel(view::HorizontalScrollAreaView, wheel_de
 
         # Only update if scroll position actually changed
         if new_offset != view.scroll_state.scroll_offset
-            new_state = HorizontalScrollState(
-                scroll_offset=new_offset,
-                content_width=view.scroll_state.content_width,
-                viewport_width=view.scroll_state.viewport_width
+            new_state = HorizontalScrollState(view.scroll_state;
+                scroll_offset=new_offset
             )
             view.on_scroll_change(new_state)
             return new_state
