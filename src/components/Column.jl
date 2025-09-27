@@ -78,3 +78,33 @@ function measure(view::ColumnView)::Tuple{Float32,Float32}
     total_height += 2 * view.padding
     return (max_width, total_height)
 end
+
+"""
+Measure the width of the column when constrained by available height.
+"""
+function measure_width(view::ColumnView, available_height::Float32)::Float32
+    if isempty(view.children)
+        return 0f0
+    end
+
+    height_per_child = (available_height - 2 * view.padding - (length(view.children) - 1) * view.spacing) / length(view.children)
+
+    child_widths = [measure_width(child, height_per_child) for child in view.children]
+    max_width = maximum(child_widths)
+    max_width += 2 * view.padding
+    return max_width
+end
+
+"""
+Measure the height of the column when constrained by available width.
+"""
+function measure_height(view::ColumnView, available_width::Float32)::Float32
+    if isempty(view.children)
+        return 0f0
+    end
+
+    child_heights = [measure_height(child, available_width) for child in view.children]
+    total_height = sum(child_heights) + (length(view.children) - 1) * view.spacing
+    total_height += 2 * view.padding
+    return total_height
+end
