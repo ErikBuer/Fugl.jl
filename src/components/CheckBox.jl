@@ -13,7 +13,7 @@ end
 function CheckBoxStyle(;
     size::Float32=20.0f0,
     background_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),  # White background
-    background_color_checked::Vec4f=Vec4f(0.2, 0.6, 1.0, 1.0),  # Blue when checked
+    background_color_checked::Vec4f=Vec4f(0.2, 0.8, 0.2, 1.0),  # Green when checked
     border_color::Vec4f=Vec4f(0.6, 0.6, 0.6, 1.0),  # Gray border
     border_width::Float32=1.5f0,
     check_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),  # White checkmark
@@ -203,7 +203,7 @@ function detect_click(view::CheckBoxView, mouse_state::InputState, x::Float32, y
 end
 
 """
-Draw a checkmark symbol inside the checkbox
+Draw a checkmark symbol inside the checkbox using the new line drawing system
 """
 function draw_checkmark(x::Float32, y::Float32, size::Float32, color::Vec4f, projection_matrix::Mat4{Float32})
     # Create checkmark path (simple checkmark shape)
@@ -216,64 +216,37 @@ function draw_checkmark(x::Float32, y::Float32, size::Float32, color::Vec4f, pro
     start_y = y + size * padding_factor
 
     # Checkmark coordinates (relative to inner area)
-    # First line: from bottom-left to middle-bottom
-    line1_start_x = start_x + inner_size * 0.2f0
-    line1_start_y = start_y + inner_size * 0.5f0
-    line1_end_x = start_x + inner_size * 0.45f0
-    line1_end_y = start_y + inner_size * 0.2f0
+    # In UI coordinates, Y increases downward, so we need to flip the checkmark
+    # First line: from left-middle to middle-bottom
+    line1_start = Point2f(start_x + inner_size * 0.2f0, start_y + inner_size * 0.5f0)
+    line1_end = Point2f(start_x + inner_size * 0.45f0, start_y + inner_size * 0.75f0)
 
-    # Second line: from middle-bottom to top-right
-    line2_start_x = line1_end_x
-    line2_start_y = line1_end_y
-    line2_end_x = start_x + inner_size * 0.8f0
-    line2_end_y = start_y + inner_size * 0.8f0
+    # Second line: from middle-bottom to top-right  
+    line2_start = line1_end
+    line2_end = Point2f(start_x + inner_size * 0.8f0, start_y + inner_size * 0.2f0)
 
-    # Draw checkmark as thick lines
-    line_width = size * 0.15f0  # Line thickness proportional to checkbox size
+    # Line thickness proportional to checkbox size
+    line_width = size * 0.15f0
 
-    # Draw first line segment
-    draw_thick_line(
-        line1_start_x, line1_start_y,
-        line1_end_x, line1_end_y,
-        line_width,
+    # Draw first line segment using the new line drawing system
+    draw_simple_line(
+        line1_start,
+        line1_end,
         color,
-        projection_matrix
+        line_width,
+        projection_matrix;
+        line_style=SOLID,
+        anti_aliasing_width=1.5f0
     )
 
-    # Draw second line segment
-    draw_thick_line(
-        line2_start_x, line2_start_y,
-        line2_end_x, line2_end_y,
-        line_width,
+    # Draw second line segment using the new line drawing system
+    draw_simple_line(
+        line2_start,
+        line2_end,
         color,
-        projection_matrix
+        line_width,
+        projection_matrix;
+        line_style=SOLID,
+        anti_aliasing_width=1.5f0
     )
-end
-
-"""
-Draw a thick line between two points
-"""
-function draw_thick_line(x1::Float32, y1::Float32, x2::Float32, y2::Float32, width::Float32, color::Vec4f, projection_matrix::Mat4{Float32})
-    # Calculate the perpendicular direction for line thickness
-    dx = x2 - x1
-    dy = y2 - y1
-    length = sqrt(dx * dx + dy * dy)
-
-    if length < 1e-6
-        return  # Skip degenerate lines
-    end
-
-    # Normalize and create perpendicular vector
-    perp_x = -dy / length * width / 2
-    perp_y = dx / length * width / 2
-
-    # Create rectangle vertices for the thick line
-    vertices = [
-        Point2f(x1 + perp_x, y1 + perp_y),  # Bottom-left
-        Point2f(x1 - perp_x, y1 - perp_y),  # Top-left
-        Point2f(x2 - perp_x, y2 - perp_y),  # Top-right
-        Point2f(x2 + perp_x, y2 + perp_y)   # Bottom-right
-    ]
-
-    draw_rectangle(vertices, color, projection_matrix)
 end
