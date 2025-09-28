@@ -67,6 +67,9 @@ include("components/image/Image.jl")
 export Image
 export clear_texture_cache!
 
+include("components/CheckBox.jl")
+export CheckBox, CheckBoxStyle, CheckBoxView
+
 include("components/separator_line/HorizontalLine.jl")
 include("components/separator_line/VerticalLine.jl")
 export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
