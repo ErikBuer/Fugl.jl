@@ -56,7 +56,7 @@ function draw_matrix_with_colormap(
         # Generate buffers and create a Vertex Array Object (VAO)
         vao = GLA.VertexArray(
             GLA.generate_buffers(
-                image_plot_prog[],  # Use extended heatmap shader
+                plot_image_prog[],  # Use extended heatmap shader
                 position=positions,
                 color=colors,
                 texcoord=texcoords
@@ -65,22 +65,22 @@ function draw_matrix_with_colormap(
         )
 
         # Use the extended heatmap shader
-        GLA.bind(image_plot_prog[])
+        GLA.bind(plot_image_prog[])
 
         # Set all uniforms including extended ones
-        GLA.gluniform(image_plot_prog[], :use_texture, true)
-        GLA.gluniform(image_plot_prog[], :image, 0, texture)
-        GLA.gluniform(image_plot_prog[], :projection, projection_matrix)
-        GLA.gluniform(image_plot_prog[], :value_range, Vec2f(value_range))
-        GLA.gluniform(image_plot_prog[], :nan_color, Vec4f(nan_color))
-        GLA.gluniform(image_plot_prog[], :background_color, Vec4f(background_color))
-        GLA.gluniform(image_plot_prog[], :colormap_type, colormap_to_int(colormap))
+        GLA.gluniform(plot_image_prog[], :use_texture, true)
+        GLA.gluniform(plot_image_prog[], :image, 0, texture)
+        GLA.gluniform(plot_image_prog[], :projection, projection_matrix)
+        GLA.gluniform(plot_image_prog[], :value_range, Vec2f(value_range))
+        GLA.gluniform(plot_image_prog[], :nan_color, Vec4f(nan_color))
+        GLA.gluniform(plot_image_prog[], :background_color, Vec4f(background_color))
+        GLA.gluniform(plot_image_prog[], :colormap_type, colormap_to_int(colormap))
 
         # Draw the quad
         GLA.bind(vao)
         GLA.draw(vao)
         GLA.unbind(vao)
-        GLA.unbind(image_plot_prog[])
+        GLA.unbind(plot_image_prog[])
 
     catch e
         @warn "Failed to draw textured quad: $e"
