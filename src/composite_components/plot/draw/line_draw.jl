@@ -91,11 +91,11 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
     end
 
     # Use the existing line shader program that works
-    GLA.bind(line_prog[])
+    GLA.bind(plot_line_prog[])
 
     # Set uniforms
-    GLA.gluniform(line_prog[], :projection, projection_matrix)
-    GLA.gluniform(line_prog[], :anti_aliasing_width, anti_aliasing_width)
+    GLA.gluniform(plot_line_prog[], :projection, projection_matrix)
+    GLA.gluniform(plot_line_prog[], :anti_aliasing_width, anti_aliasing_width)
 
     # Use the much more efficient approach: fewer triangles, batch processing
     all_positions = Vector{Point2f}()
@@ -137,13 +137,13 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
     end
 
     if isempty(all_positions)
-        GLA.unbind(line_prog[])
+        GLA.unbind(plot_line_prog[])
         return
     end
 
     # Generate buffers using GLAbstraction
     buffers = GLA.generate_buffers(
-        line_prog[],
+        plot_line_prog[],
         position=all_positions,
         direction=all_directions,
         width=all_widths,
@@ -161,7 +161,7 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
     GLA.unbind(vao)
 
     # Unbind shader program
-    GLA.unbind(line_prog[])
+    GLA.unbind(plot_line_prog[])
 end
 
 # Generate efficient line geometry - minimal triangles, optimized for performance

@@ -2,6 +2,10 @@ include("components/common/utilities.jl")
 include("components/common/draw.jl")
 include("components/common/render_cache.jl")
 include("components/common/rectangle.jl")
+export Rectangle
+include("components/common/line_style.jl")
+export LineStyle, SOLID, DASH, DOT, DASHDOT
+include("components/common/line_draw.jl")
 
 include("components/Empty.jl")
 export Empty
@@ -67,6 +71,9 @@ include("components/image/Image.jl")
 export Image
 export clear_texture_cache!
 
+include("components/CheckBox.jl")
+export CheckBox, CheckBoxStyle, CheckBoxView
+
 include("components/separator_line/HorizontalLine.jl")
 include("components/separator_line/VerticalLine.jl")
 export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
@@ -99,8 +106,8 @@ export Plot, PlotView, PlotStyle
 export PlotState, reset_plot_view_bounds, calculate_bounds_from_elements
 export LinePlotElement, ScatterPlotElement, StemPlotElement, HeatmapElement
 export AbstractPlotElement
-export LineStyle, SOLID, DASH, DOT, DASHDOT
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE
+export SimpleLine, draw_line, draw_lines, draw_simple_line
 export VerticalColorbar, HorizontalColorbar
 
 include("composite_components/tree/Tree.jl")

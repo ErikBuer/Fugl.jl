@@ -1,4 +1,4 @@
-const line_vertex_shader = GLA.vert"""
+const plot_line_vertex_shader = GLA.vert"""
 #version 330 core
 layout (location = 0) in vec2 position;
 layout (location = 1) in vec2 direction;
@@ -59,7 +59,7 @@ void main() {
 }
 """
 
-const line_fragment_shader = GLA.frag"""
+const plot_line_fragment_shader = GLA.frag"""
 #version 330 core
 in vec4 v_color;
 in vec2 v_local_pos;
@@ -126,7 +126,7 @@ void main() {
 """
 
 # Global variable for plot shader program
-const line_prog = Ref{GLA.Program}()
+const plot_line_prog = Ref{GLA.Program}()
 
 
 const marker_vertex_shader = GLA.vert"""
@@ -413,13 +413,13 @@ void main() {
 }
 """
 
-const image_plot_prog = Ref{GLA.Program}()
+const plot_image_prog = Ref{GLA.Program}()
 
 """
 Initialize the plot shader programs (must be called after OpenGL context is created)
 """
 function initialize_plot_shaders()
-    line_prog[] = GLA.Program(line_vertex_shader, line_fragment_shader)
+    plot_line_prog[] = GLA.Program(plot_line_vertex_shader, plot_line_fragment_shader)
     marker_prog[] = GLA.Program(marker_vertex_shader, marker_fragment_shader)
-    image_plot_prog[] = GLA.Program(image_plot_vertex_shader, image_plot_fragment_shader)
+    plot_image_prog[] = GLA.Program(image_plot_vertex_shader, image_plot_fragment_shader)
 end

@@ -45,6 +45,7 @@ makedocs(
             "Components/number_field.md",
             "Components/text_button.md",
             "Components/icon_button.md",
+            "Components/checkbox.md",
             "Plot"=>Any[
                 "Components/plot/01_line_plot.md",
                 "Components/plot/02_stem_plot.md",
