@@ -34,3 +34,5 @@ screenshot(MyApp, "row.png", 812, 300);
 ## Demo Application
 
 ![Line Plot](docs/src/assets/ArrayApp_demo.gif)
+
+<img width="1200" height="800" alt="image" src="https://github.com/user-attachments/assets/283e1f58-5a1a-4521-b362-576c6cebb155" />
