@@ -485,6 +485,10 @@ function key_event_to_action(key_event::KeyEvent)
     ctrl_held = (mods & GLFW.MOD_CONTROL) != 0
     cmd_held = (mods & GLFW.MOD_SUPER) != 0  # Command key on Mac
 
+    # On Linux/Windows, use Ctrl for command operations; on Mac use Cmd
+    # For now, accept either Ctrl or Cmd for clipboard operations
+    command_key = ctrl_held || cmd_held
+
     # Movement actions - compare with integer values
     if key == Int(GLFW.KEY_LEFT)
         if cmd_held
@@ -521,18 +525,14 @@ function key_event_to_action(key_event::KeyEvent)
 
         # Delete actions
     elseif key == Int(GLFW.KEY_BACKSPACE)
-        if cmd_held
-            return DeleteText(:line_start)  # Command+Backspace = Delete to line start
-        elseif ctrl_held
-            return DeleteText(:word_backspace)  # Ctrl+Backspace = Delete word backward
+        if command_key
+            return DeleteText(:word_delete)  # Ctrl/Cmd+Backspace = Delete to word start
         else
             return DeleteText(:backspace)  # Simple backspace
         end
     elseif key == Int(GLFW.KEY_DELETE)
-        if cmd_held
-            return DeleteText(:line_end)  # Command+Delete = Delete to line end
-        elseif ctrl_held
-            return DeleteText(:word_delete)  # Ctrl+Delete = Delete word forward
+        if command_key
+            return DeleteText(:word_delete)  # Ctrl/Cmd+Delete = Delete to word end
         else
             return DeleteText(:delete)  # Simple delete
         end
@@ -543,14 +543,14 @@ function key_event_to_action(key_event::KeyEvent)
     elseif key == Int(GLFW.KEY_TAB) && !shift_held
         return InsertText("    ")  # 4 spaces for tab
 
-    # Clipboard actions (for future implementation)
-    elseif key == Int(GLFW.KEY_C) && cmd_held
+    # Clipboard actions (use command_key to support both Ctrl and Cmd)
+    elseif key == Int(GLFW.KEY_C) && command_key
         return ClipboardAction(:copy)
-    elseif key == Int(GLFW.KEY_X) && cmd_held
+    elseif key == Int(GLFW.KEY_X) && command_key
         return ClipboardAction(:cut)
-    elseif key == Int(GLFW.KEY_V) && cmd_held
+    elseif key == Int(GLFW.KEY_V) && command_key
         return ClipboardAction(:paste)
-    elseif key == Int(GLFW.KEY_A) && cmd_held
+    elseif key == Int(GLFW.KEY_A) && command_key
         return SelectAll()
     end
 
