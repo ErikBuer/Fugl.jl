@@ -8,7 +8,9 @@ It is intended to be a simple library with few depencdencies, suitable for makin
 
 Fugl has a short distance from component to shader, enabling fast and intuitive user interfaces.
 
-## Example
+<img width="1080" height="1080" alt="SA and codeEditor shot" src="https://github.com/user-attachments/assets/6119e8dd-9bd4-48ae-a8a1-e7d81b15f97a" />
+
+## Simple Funcitonal API
 
 ```julia
 using Fugl
@@ -31,8 +33,12 @@ screenshot(MyApp, "row.png", 812, 300);
 
 ![Line Plot](docs/src/assets/row.png)
 
+## Real-Time Performance
+
+Fugl is written with real-time applications in mind.
+
+![realtime plot](https://github.com/user-attachments/assets/5c0e1d61-dce3-4156-83ea-5eb35f298638)
+
 ## Demo Application
 
 ![Line Plot](docs/src/assets/ArrayApp_demo.gif)
-
-<img width="1200" height="800" alt="image" src="https://github.com/user-attachments/assets/283e1f58-5a1a-4521-b362-576c6cebb155" />
