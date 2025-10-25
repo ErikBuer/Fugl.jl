@@ -20,12 +20,12 @@ Create a TextEditorStyle with default values suitable for CodeEditor (dark theme
 """
 function CodeEditorStyle(;
     text_style=TextStyle(),
-    background_color_focused=Vec4{Float32}(0.05f0, 0.05f0, 0.1f0, 1.0f0),  # Dark blue when focused
-    background_color_unfocused=Vec4{Float32}(0.1f0, 0.1f0, 0.15f0, 1.0f0), # Darker when not focused
-    border_color=Vec4{Float32}(0.5f0, 0.5f0, 0.5f0, 1.0f0),
-    border_width=1.0f0,
-    corner_radius=8.0f0,
-    padding=10.0f0,
+    background_color_focused=Vec4{Float32}(0.06f0, 0.08f0, 0.12f0, 1.0f0),  # Much darker with blue tone
+    background_color_unfocused=Vec4{Float32}(0.08f0, 0.10f0, 0.14f0, 1.0f0), # Slightly lighter when not focused
+    border_color=Vec4{Float32}(0.15f0, 0.18f0, 0.25f0, 1.0f0),              # Darker border with blue tone
+    border_width=1.5f0,
+    corner_radius=6.0f0,
+    padding=12.0f0,
     cursor_color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 0.8f0),  # White cursor for visibility on dark background
     selection_color=Vec4{Float32}(0.4f0, 0.6f0, 0.9f0, 0.5f0)  # Light blue selection color
 )
