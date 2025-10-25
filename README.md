@@ -4,11 +4,12 @@
 
 `Fugl.jl` is a functional GUI library written in Julia using OpenGL.
 
-It is intended to be a simple library with few depencdencies, suitable for making engineering applications.
+It is intended to be a simple library with few dependencies, suitable for making engineering applications.
 
 Fugl has a short distance from component to shader, enabling fast and intuitive user interfaces.
 
-<img width="1080" height="1080" alt="SA and codeEditor shot" src="https://github.com/user-attachments/assets/6119e8dd-9bd4-48ae-a8a1-e7d81b15f97a" />
+<img width="1080" height="1080" alt="Shot with name and subtitle" src="https://github.com/user-attachments/assets/bfdb3123-1972-4736-b686-2124bbcbd08d" />
+
 
 ## Simple Funcitonal API
 
