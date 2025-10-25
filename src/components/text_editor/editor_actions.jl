@@ -252,6 +252,80 @@ function apply_delete_text(state::EditorState, action::DeleteText)
             deleteat!(lines, cursor.line)
             new_cursor = CursorPosition(cursor.line - 1, new_cursor_column)
         end
+    elseif action.direction == :word_backspace
+        # Delete backward to start of word
+        if cursor.line <= length(lines)
+            current_line = lines[cursor.line]
+            chars = collect(current_line)
+            char_pos = cursor.column - 1
+
+            if char_pos > 0
+                # Find start of word
+                word_start = char_pos
+                # Skip trailing whitespace
+                while word_start > 0 && isspace(chars[word_start])
+                    word_start -= 1
+                end
+                # Skip word characters
+                while word_start > 0 && !isspace(chars[word_start])
+                    word_start -= 1
+                end
+
+                # Delete from word_start to cursor
+                new_chars = [chars[1:word_start]; chars[char_pos+1:end]]
+                lines[cursor.line] = join(new_chars)
+                new_cursor = CursorPosition(cursor.line, word_start + 1)
+            end
+        end
+    elseif action.direction == :word_delete
+        # Delete forward to end of word
+        if cursor.line <= length(lines)
+            current_line = lines[cursor.line]
+            chars = collect(current_line)
+            char_pos = cursor.column - 1
+
+            if char_pos < length(chars)
+                # Find end of word
+                word_end = char_pos + 1
+                # Skip leading whitespace
+                while word_end <= length(chars) && isspace(chars[word_end])
+                    word_end += 1
+                end
+                # Skip word characters
+                while word_end <= length(chars) && !isspace(chars[word_end])
+                    word_end += 1
+                end
+
+                # Delete from cursor to word_end
+                new_chars = [chars[1:char_pos]; chars[word_end:end]]
+                lines[cursor.line] = join(new_chars)
+            end
+        end
+    elseif action.direction == :line_start
+        # Delete from start of line to cursor
+        if cursor.line <= length(lines)
+            current_line = lines[cursor.line]
+            chars = collect(current_line)
+            char_pos = cursor.column - 1
+
+            if char_pos > 0
+                new_chars = chars[char_pos+1:end]
+                lines[cursor.line] = join(new_chars)
+                new_cursor = CursorPosition(cursor.line, 1)
+            end
+        end
+    elseif action.direction == :line_end
+        # Delete from cursor to end of line
+        if cursor.line <= length(lines)
+            current_line = lines[cursor.line]
+            chars = collect(current_line)
+            char_pos = cursor.column - 1
+
+            if char_pos < length(chars)
+                new_chars = chars[1:char_pos]
+                lines[cursor.line] = join(new_chars)
+            end
+        end
     elseif action.direction == :delete
         if cursor.line <= length(lines)
             current_line = lines[cursor.line]

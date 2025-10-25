@@ -32,6 +32,8 @@ function tokenize_julia_line(line::String)
     # Define colors for different token types
     colors = Dict{Tokenize.Tokens.Kind,Vec4{Float32}}(
         Tokenize.Tokens.FUNCTION => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),    # Purple for keywords
+        Tokenize.Tokens.STRUCT => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),      # Purple for struct keyword
+        Tokenize.Tokens.MUTABLE => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),     # Purple for mutable keyword
         Tokenize.Tokens.END => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),        # Purple for keywords
         Tokenize.Tokens.RETURN => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),     # Purple for keywords
         Tokenize.Tokens.IF => Vec4{Float32}(0.8f0, 0.4f0, 0.8f0, 1.0f0),         # Purple for keywords
@@ -51,7 +53,10 @@ function tokenize_julia_line(line::String)
     )
 
     # Color for function calls
-    function_call_color = Vec4{Float32}(1.0f0, 1.0f0, 0.4f0, 1.0f0)  # Yellow for function calls
+    function_call_color = Vec4{Float32}(0.86f0, 0.86f0, 0.43f0, 1.0f0)  # Yellow for function calls
+
+    # Color for struct names
+    struct_name_color = Vec4{Float32}(0.3f0, 0.8f0, 0.8f0, 1.0f0)  # Cyan for struct names
 
     try
         # Start timing for timeout protection
@@ -69,7 +74,11 @@ function tokenize_julia_line(line::String)
         token_data = []
         char_pos = 1
 
-        for token in tokens
+        # Track context for special highlighting
+        prev_token_kind = nothing
+        is_after_struct = false
+
+        for (i, token) in enumerate(tokens)
             # Check timeout periodically
             if time() - start_time > MAX_PROCESSING_TIME
                 return ([], [(1, line, default_color)])
@@ -80,11 +89,52 @@ function tokenize_julia_line(line::String)
                     # Simple token text extraction - if it fails, skip
                     token_text = String(line[max(1, token.startbyte + 1):min(length(line), token.endbyte + 1)])
 
-                    # Simple color assignment
-                    color = get(colors, token.kind, default_color)
+                    # Determine color based on context
+                    color = default_color
+
+                    # Check if this is a struct name (identifier after struct/mutable keyword)
+                    if token.kind == Tokenize.Tokens.IDENTIFIER && is_after_struct
+                        color = struct_name_color
+                        is_after_struct = false
+                        # Check if this is a function call (identifier followed by opening paren)
+                    elseif token.kind == Tokenize.Tokens.IDENTIFIER && i < length(tokens)
+                        # Look ahead to see if next non-whitespace token is LPAREN
+                        next_token = nothing
+                        for j in (i+1):length(tokens)
+                            if tokens[j].kind != Tokenize.Tokens.WHITESPACE
+                                next_token = tokens[j]
+                                break
+                            end
+                        end
+                        if next_token !== nothing && next_token.kind == Tokenize.Tokens.LPAREN
+                            color = function_call_color
+                        else
+                            color = get(colors, token.kind, default_color)
+                        end
+                    else
+                        color = get(colors, token.kind, default_color)
+                    end
+
+                    # Track if we just saw struct or mutable keyword
+                    if token.kind == Tokenize.Tokens.STRUCT
+                        is_after_struct = true
+                    elseif token.kind == Tokenize.Tokens.MUTABLE
+                        # Check if next is STRUCT
+                        for j in (i+1):length(tokens)
+                            if tokens[j].kind == Tokenize.Tokens.STRUCT
+                                is_after_struct = true
+                                break
+                            elseif tokens[j].kind != Tokenize.Tokens.WHITESPACE
+                                break
+                            end
+                        end
+                    elseif token.kind != Tokenize.Tokens.WHITESPACE && token.kind != Tokenize.Tokens.IDENTIFIER
+                        is_after_struct = false
+                    end
 
                     push!(token_data, (char_pos, token_text, color))
                     char_pos += length(collect(token_text))
+                    prev_token_kind = token.kind
                 catch
                     # If any error occurs, just skip this token
                     continue
@@ -435,6 +485,10 @@ function key_event_to_action(key_event::KeyEvent)
     ctrl_held = (mods & GLFW.MOD_CONTROL) != 0
     cmd_held = (mods & GLFW.MOD_SUPER) != 0  # Command key on Mac
 
+    # On Linux/Windows, use Ctrl for command operations; on Mac use Cmd
+    # For now, accept either Ctrl or Cmd for clipboard operations
+    command_key = ctrl_held || cmd_held
+
     # Movement actions - compare with integer values
     if key == Int(GLFW.KEY_LEFT)
         if cmd_held
@@ -471,18 +525,18 @@ function key_event_to_action(key_event::KeyEvent)
 
         # Delete actions
     elseif key == Int(GLFW.KEY_BACKSPACE)
-        if cmd_held
-            return DeleteText(:line_start)  # Command+Backspace = Delete to line start
-        elseif ctrl_held
+        if ctrl_held
             return DeleteText(:word_backspace)  # Ctrl+Backspace = Delete word backward
+        elseif cmd_held
+            return DeleteText(:line_start)  # Cmd+Backspace = Delete to line start
         else
             return DeleteText(:backspace)  # Simple backspace
         end
     elseif key == Int(GLFW.KEY_DELETE)
-        if cmd_held
-            return DeleteText(:line_end)  # Command+Delete = Delete to line end
-        elseif ctrl_held
+        if ctrl_held
             return DeleteText(:word_delete)  # Ctrl+Delete = Delete word forward
+        elseif cmd_held
+            return DeleteText(:line_end)  # Cmd+Delete = Delete to line end
         else
             return DeleteText(:delete)  # Simple delete
         end
@@ -493,14 +547,14 @@ function key_event_to_action(key_event::KeyEvent)
     elseif key == Int(GLFW.KEY_TAB) && !shift_held
         return InsertText("    ")  # 4 spaces for tab
 
-    # Clipboard actions (for future implementation)
-    elseif key == Int(GLFW.KEY_C) && cmd_held
+    # Clipboard actions (use command_key to support both Ctrl and Cmd)
+    elseif key == Int(GLFW.KEY_C) && command_key
         return ClipboardAction(:copy)
-    elseif key == Int(GLFW.KEY_X) && cmd_held
+    elseif key == Int(GLFW.KEY_X) && command_key
         return ClipboardAction(:cut)
-    elseif key == Int(GLFW.KEY_V) && cmd_held
+    elseif key == Int(GLFW.KEY_V) && command_key
         return ClipboardAction(:paste)
-    elseif key == Int(GLFW.KEY_A) && cmd_held
+    elseif key == Int(GLFW.KEY_A) && command_key
         return SelectAll()
     end
 
