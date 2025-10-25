@@ -525,14 +525,18 @@ function key_event_to_action(key_event::KeyEvent)
 
         # Delete actions
     elseif key == Int(GLFW.KEY_BACKSPACE)
-        if command_key
-            return DeleteText(:word_delete)  # Ctrl/Cmd+Backspace = Delete to word start
+        if ctrl_held
+            return DeleteText(:word_backspace)  # Ctrl+Backspace = Delete word backward
+        elseif cmd_held
+            return DeleteText(:line_start)  # Cmd+Backspace = Delete to line start
         else
             return DeleteText(:backspace)  # Simple backspace
         end
     elseif key == Int(GLFW.KEY_DELETE)
-        if command_key
-            return DeleteText(:word_delete)  # Ctrl/Cmd+Delete = Delete to word end
+        if ctrl_held
+            return DeleteText(:word_delete)  # Ctrl+Delete = Delete word forward
+        elseif cmd_held
+            return DeleteText(:line_end)  # Cmd+Delete = Delete to line end
         else
             return DeleteText(:delete)  # Simple delete
         end
