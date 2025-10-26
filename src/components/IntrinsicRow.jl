@@ -78,3 +78,23 @@ function measure(view::IntrinsicRowView)::Tuple{Float32,Float32}
     total_width += 2 * view.padding
     return (total_width, max_height + 2 * view.padding)
 end
+
+"""
+Measure the width of the component when constrained by available height.
+"""
+function measure_width(view::IntrinsicRowView, available_height::Float32)::Float32
+    if isempty(view.children)
+        return 2 * view.padding  # Just padding if no children
+    end
+
+    # Account for padding in available height
+    padded_height = available_height - 2 * view.padding
+
+    # Measure each child's width given the available height
+    child_widths = [measure_width(child, padded_height) for child in view.children]
+
+    # Total width is sum of child widths plus spacing plus padding
+    total_width = sum(child_widths) + (length(view.children) - 1) * view.spacing + 2 * view.padding
+
+    return total_width
+end
