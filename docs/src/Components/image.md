@@ -28,31 +28,39 @@ using ColorTypes
 using FixedPointNumbers
 
 size_x, size_y = 256, 256
-my_matrix = Matrix{Float32}(undef, size_y, size_x)
+
+rgba_matrix = Matrix{RGBA{N0f8}}(undef, size_y, size_x)
 center_x, center_y = size_x / 2, size_y / 2
 
 for j in 1:size_y
     for i in 1:size_x
-        # Distance from center
-        dx = i - center_x
-        dy = j - center_y
-        distance_sq = dx^2 + dy^2
-
-        # Gaussian pattern
-        my_matrix[j, i] = exp(-distance_sq / (2 * (size_x / 6)^2))
+        # Normalized coordinates from -1 to 1
+        x = (i - center_x) / (size_x / 2)
+        y = (j - center_y) / (size_y / 2)
         
-        # Add sinusoidal pattern
-        wave = 0.3 * sin(i * 0.3) * cos(j * 0.3)
-        my_matrix[j, i] += wave
-
-        # Add some noise
-        my_matrix[j, i] += 0.1 * (rand() - 0.5)
+        # Distance from center
+        r = sqrt(x^2 + y^2)
+        
+        # Angle for radial patterns
+        θ = atan(y, x)
+        
+        # Create a smooth radial gradient with subtle spiral pattern
+        intensity = exp(-r^2 / 0.8) * (1 + 0.3 * sin(6 * θ + 2 * r))
+        intensity = clamp(intensity, 0.0, 1.0)
+        
+        # Create appealing color gradients
+        red = intensity * 0.8 + 0.1
+        green = intensity * 0.4 + 0.2 * sin(4 * θ)
+        blue = intensity * 0.9 + 0.1 * cos(8 * θ)
+        
+        # Clamp and convert to N0f8
+        red = clamp(red, 0.0, 1.0)
+        green = clamp(green, 0.0, 1.0)  
+        blue = clamp(blue, 0.0, 1.0)
+        
+        rgba_matrix[j, i] = RGBA{N0f8}(red, green, blue, 1.0)
     end
 end
-
-# Clamp values to [0, 1] for N0f8 conversion
-clamped_matrix = clamp.(my_matrix, 0.0f0, 1.0f0)
-rgba_matrix = RGBA{N0f8}.(clamped_matrix, 0.5.*(1.0.-clamped_matrix), clamped_matrix, N0f8(1.0))
 
 function MyApp()
     Card(
