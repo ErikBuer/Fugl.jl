@@ -2,7 +2,7 @@
 
 ## Column
 
-`Column` is a component for creating linear layout.
+`Column` is a component for creating linear layout. Each child is given an equal part of the available height.
 
 ``` @example ColumnExample
 using Fugl
@@ -25,7 +25,7 @@ nothing #hide
 
 ## Row
 
-`Row` is a component for creating linear layout.
+`Row` is a component for creating linear layout. Each child is given an equal part of the available width.
 
 Note how we have omitted the vector in the `Row` argument. Either way is fine.
 
@@ -50,6 +50,8 @@ nothing #hide
 
 ## IntrinsicColumn
 
+The `IntrinsicColumn` component uses the children's intrinsic heights while distributing remaining space among flexible children.
+
 ``` @example IntrinsicColumnExample
 using Fugl
 using Fugl: Text
@@ -71,6 +73,8 @@ nothing #hide
 ![Intrinsic Column](intrinsic_column.png)
 
 ## IntrinsicRow
+
+The `IntrinsicRow` component uses the children's intrinsic width while distributing remaining space among flexible children.
 
 ``` @example IntrinsicColumnExample
 using Fugl

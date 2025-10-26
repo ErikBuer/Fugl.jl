@@ -84,10 +84,13 @@ Measure the width of the component when constrained by available height.
 """
 function measure_width(view::RowView, available_height::Float32)::Float32
     if isempty(view.children)
-        return 0f0
+        return 2 * view.padding  # Just padding if no children
     end
 
-    child_widths = [measure_width(child, available_height) for child in view.children]
+    # Account for padding in available height
+    padded_height = available_height - 2 * view.padding
+
+    child_widths = [measure_width(child, padded_height) for child in view.children]
     total_width = sum(s for s in child_widths) + (length(view.children) - 1) * view.spacing
     total_width += 2 * view.padding
     return total_width
@@ -99,9 +102,13 @@ Measure the height of the component when constrained by available height.
 """
 function measure_height(view::RowView, available_width::Float32)::Float32
     if isempty(view.children)
-        return 0f0
+        return 2 * view.padding  # Just padding if no children
     end
-    width_per_child = (available_width - 2 * view.padding - (length(view.children) - 1) * view.spacing) / length(view.children)
+
+    # Account for padding in available height
+    padded_width = available_width - 2 * view.padding
+
+    width_per_child = (padded_width - (length(view.children) - 1) * view.spacing) / length(view.children)
 
     child_heights = [measure_height(child, width_per_child) for child in view.children]
     max_height = maximum(child_heights)

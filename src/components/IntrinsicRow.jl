@@ -98,3 +98,24 @@ function measure_width(view::IntrinsicRowView, available_height::Float32)::Float
 
     return total_width
 end
+
+"""
+Measure the height of the component when constrained by available width.
+"""
+function measure_height(view::IntrinsicRowView, available_width::Float32)::Float32
+    if isempty(view.children)
+        return 2 * view.padding  # Just padding if no children
+    end
+
+    # Account for padding in available width
+    padded_width = available_width - 2 * view.padding
+
+    # Measure each child's height given the available width_per_child
+    # Every child gets the full padded width since its an intrinsic row
+    child_heights = [measure_height(child, padded_width) for child in view.children]
+
+    # For a row, height is the maximum height of any child, plus padding
+    max_height = maximum(child_heights) + 2 * view.padding
+
+    return max_height
+end
