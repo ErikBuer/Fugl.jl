@@ -1,6 +1,7 @@
 # Fugl.jl
 
 [![docs badge](https://img.shields.io/badge/docs-latest-blue.svg)](https://erikbuer.github.io/Fugl.jl/dev/)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://erikbuer.github.io/Fugl.jl/stable/)
 
 `Fugl.jl` is a functional GUI library written in Julia using OpenGL.
 
