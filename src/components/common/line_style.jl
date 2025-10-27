@@ -5,6 +5,6 @@
     DASHDOT = 3
 end
 
-function Float32(arg::Fugl.LineStyle)
+function Base.Float32(arg::Fugl.LineStyle)
     return Float32(Int(arg))
 end

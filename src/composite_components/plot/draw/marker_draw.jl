@@ -4,7 +4,7 @@
     RECTANGLE = 2
 end
 
-function Float32(arg::Fugl.MarkerType)
+function Base.Float32(arg::Fugl.MarkerType)
     return Float32(Int(arg))
 end
 

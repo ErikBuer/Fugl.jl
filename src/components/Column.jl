@@ -84,10 +84,13 @@ Measure the width of the column when constrained by available height.
 """
 function measure_width(view::ColumnView, available_height::Float32)::Float32
     if isempty(view.children)
-        return 0f0
+        return 2 * view.padding  # Just padding if no children
     end
 
-    height_per_child = (available_height - 2 * view.padding - (length(view.children) - 1) * view.spacing) / length(view.children)
+    # Account for padding in available height
+    padded_height = available_height - 2 * view.padding
+
+    height_per_child = (padded_height - (length(view.children) - 1) * view.spacing) / length(view.children)
 
     child_widths = [measure_width(child, height_per_child) for child in view.children]
     max_width = maximum(child_widths)
@@ -100,10 +103,13 @@ Measure the height of the column when constrained by available width.
 """
 function measure_height(view::ColumnView, available_width::Float32)::Float32
     if isempty(view.children)
-        return 0f0
+        return 2 * view.padding  # Just padding if no children
     end
 
-    child_heights = [measure_height(child, available_width) for child in view.children]
+    # Account for padding in available width
+    padded_width = available_width - 2 * view.padding
+
+    child_heights = [measure_height(child, padded_width) for child in view.children]
     total_height = sum(child_heights) + (length(view.children) - 1) * view.spacing
     total_height += 2 * view.padding
     return total_height

@@ -88,3 +88,44 @@ function measure(view::IntrinsicColumnView)::Tuple{Float32,Float32}
     total_height += 2 * view.padding
     return (max_width + 2 * view.padding, total_height)
 end
+
+"""
+Measure the width of the component when constrained by available height.
+"""
+function measure_width(view::IntrinsicColumnView, available_height::Float32)::Float32
+    if isempty(view.children)
+        return 2 * view.padding  # Just padding if no children
+    end
+
+    # Account for padding in available height
+    padded_height = available_height - 2 * view.padding
+
+    # Measure each child's width given the available height
+    # Every child gets the full padded height since its an intrinsic column
+    child_widths = [measure_width(child, padded_height) for child in view.children]
+
+    # For a column, width is the maximum width of any child, plus padding
+    max_width = maximum(child_widths) + 2 * view.padding
+
+    return max_width
+end
+
+"""
+Measure the height of the component when constrained by available width.
+"""
+function measure_height(view::IntrinsicColumnView, available_width::Float32)::Float32
+    if isempty(view.children)
+        return 2 * view.padding  # Just padding if no children
+    end
+
+    # Account for padding in available width
+    padded_width = available_width - 2 * view.padding
+
+    # Measure each child's height given the available width
+    child_heights = [measure_height(child, padded_width) for child in view.children]
+
+    # Total height is sum of child heights plus spacing plus padding
+    total_height = sum(child_heights) + (length(view.children) - 1) * view.spacing + 2 * view.padding
+
+    return total_height
+end
