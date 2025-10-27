@@ -27,7 +27,27 @@ function measure(view::DropdownView)::Tuple{Float32,Float32}
     return (Inf32, button_height)
 end
 
+"""
+Measure the width of the component when constrained by available height.
+"""
+function measure_width(view::DropdownView, available_height::Float32)::Float32
+    # Base the width on the contents of the current selection.
+    padding = 2 * view.style.padding + 20.0f0  # Extra space for arrow (arrow size is ~16px + padding)
 
+    # Get the text to measure
+    selected_text = if view.state.selected_index > 0 && view.state.selected_index <= length(view.state.options)
+        view.state.options[view.state.selected_index]
+    else
+        view.placeholder_text
+    end
+
+    # Measure the width of the selected text using the same method as Text component
+    font = view.style.text_style.font
+    size_px = view.style.text_style.size_px
+    text_width = measure_word_width_cached(font, selected_text, size_px)
+
+    return text_width + padding
+end
 
 
 function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
