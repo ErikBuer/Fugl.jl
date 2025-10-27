@@ -93,7 +93,7 @@ export TextButton, IconButton
 include("composite_components/NumberField.jl")
 export NumberField, NumberFieldState, NumberFieldOptions
 
-include("composite_components/Dropdown.jl")
+include("composite_components/dropdown/Dropdown.jl")
 export Dropdown, DropdownState, DropdownStyle
 
 include("composite_components/Card.jl")
