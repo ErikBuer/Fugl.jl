@@ -62,10 +62,29 @@ for j in 1:size_y
     end
 end
 
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark background
+    border_color=Vec4f(0.25, 0.25, 0.30, 1.0),      # Subtle border
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0,
+    anti_aliasing_width=1.0f0
+)
+
+# Dark theme title style
+dark_title_style = TextStyle(
+    size_px=18,
+    color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
+)
+
 function MyApp()
     Card(
-        "Image", title_align=:center,
-        Image(rgba_matrix)
+        "Matrix Image - Dark Theme", 
+        title_align=:center,
+        Image(rgba_matrix),
+        style=dark_card_style,
+        title_style=dark_title_style
     )
 end
 
