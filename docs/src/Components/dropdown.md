@@ -100,3 +100,46 @@ nothing #hide
 
 ![Dark Dropdown](dark_dropdown.png)
 
+
+## IntrinsicColumn with Multiple Dropdowns
+
+```@example DarkDropdown
+
+# Initialize states for multiple dropdowns
+size_options = ["Small", "Medium", "Large", "Extra Large"]
+color_options = ["Red", "Green", "Blue", "Yellow", "Purple"]
+
+size_dropdown_state = Ref(DropdownState(size_options; selected_index=2))
+color_dropdown_state = Ref(DropdownState(color_options; selected_index=1))
+
+
+
+function MyColumnApp()
+    return Card(
+        "Multiple Dropdowns in IntrinsicColumn:",
+        IntrinsicColumn([
+            Dropdown(
+                size_dropdown_state[];
+                style=dark_dropdown_style,
+                placeholder_text="Select size...",
+                on_state_change=(new_state) -> size_dropdown_state[] = new_state,
+                on_select=(value, index) -> println("Size selected: $value")
+            ),
+            Dropdown(
+                color_dropdown_state[];
+                style=dark_dropdown_style,
+                placeholder_text="Select color...",
+                on_state_change=(new_state) -> color_dropdown_state[] = new_state,
+                on_select=(value, index) -> println("Color selected: $value")
+            )
+        ], spacing=8.0f0),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyColumnApp, "dark_dropdown_column.png", 812, 400);
+nothing #hide
+```
+
+![Dark Dropdown Column](dark_dropdown_column.png)

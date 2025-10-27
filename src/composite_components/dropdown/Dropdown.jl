@@ -49,6 +49,18 @@ function measure_width(view::DropdownView, available_height::Float32)::Float32
     return text_width + padding
 end
 
+function preferred_height(view::DropdownView)::Bool
+    return true
+end
+
+"""
+Measure the height of the component when constrained by available width.
+"""
+function measure_height(view::DropdownView, available_width::Float32)::Float32
+    # The dropdown height is just the button height - the dropdown list overlays outside bounds
+    button_height = view.style.text_style.size_px + 2 * view.style.padding
+    return button_height
+end
 
 function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Calculate button height
