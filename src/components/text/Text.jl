@@ -13,6 +13,9 @@ struct TextView <: AbstractView
     wrap_text::Bool           # Whether to wrap text to new lines or clip
 end
 
+# Declare that we're creating a new generic function, not extending Base.Text
+function Text end
+
 """
     Text(text::String; style=TextStyle(), horizontal_align=:center, vertical_align=:middle, wrap_text=true)
 

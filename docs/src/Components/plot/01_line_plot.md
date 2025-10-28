@@ -11,44 +11,60 @@ function MyApp()
     y2_data = cos.(x_data)
     y3_data = sin.(x_data .* 2) .* 0.5
 
-    # Create multiple plot elements with different colors and styles
+    # Dark theme card style
+    dark_card_style = ContainerStyle(
+        background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark background
+        border_color=Vec4f(0.25, 0.25, 0.30, 1.0),      # Subtle border
+        border_width=1.5f0,
+        padding=12.0f0,
+        corner_radius=6.0f0,
+        anti_aliasing_width=1.0f0
+    )
+
+    # Dark theme title style
+    dark_title_style = TextStyle(
+        size_px=18,
+        color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
+    )
+
+    # Create multiple plot elements with dark theme compatible colors
     elements = [
         LinePlotElement(y1_data; x_data=x_data,
-            color=Vec4{Float32}(0.2, 0.6, 0.8, 1.0),
+            color=Vec4{Float32}(0.4, 0.6, 0.9, 1.0),  # Bright blue for dark background
             width=3.0f0,
             line_style=SOLID,
             )
         LinePlotElement(y2_data; x_data=x_data,
-            color=Vec4{Float32}(0.8, 0.2, 0.2, 1.0),
+            color=Vec4{Float32}(0.9, 0.4, 0.4, 1.0),  # Bright red for dark background
             width=2.5f0,
             line_style=DASH,
         )
         LinePlotElement(y3_data; x_data=x_data,
-            color=Vec4{Float32}(0.2, 0.8, 0.2, 1.0),
+            color=Vec4{Float32}(0.4, 0.9, 0.4, 1.0),  # Bright green for dark background
             width=2.0f0,
             line_style=DOT,
         )
     ]
 
-    IntrinsicColumn([
-            IntrinsicHeight(Container(Text("Plot Example"))),
-            Container(
-                Plot(
-                    elements,
-                    PlotStyle(
-                        background_color=Vec4{Float32}(0.3, 0.3, 0.3, 1.0),  # Gray background
-                        grid_color=Vec4{Float32}(0.9, 0.9, 0.9, 1.0),        # Light gray grid
-                        axis_color=Vec4{Float32}(1.0, 1.0, 1.0, 1.0),        # White axes
-                        show_grid=true,
-                        padding=54.0f0,
-                        x_label="Time (seconds)",
-                        y_label="Amplitude",
-                        show_x_label=true,
-                        show_y_label=true,
-                    )
-                )
-            ),
-        ], padding=0.0, spacing=0.0)
+    Card(
+        "Dark Theme Plot Example",
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.08, 0.10, 0.14, 1.0),  # Very dark background matching TextBox
+                grid_color=Vec4{Float32}(0.25, 0.25, 0.30, 1.0),        # Subtle grid matching border colors
+                axis_color=Vec4{Float32}(0.9, 0.9, 0.95, 1.0),          # Light axes matching text color
+                show_grid=true,
+                padding=54.0f0,
+                x_label="Time (seconds)",
+                y_label="Amplitude",
+                show_x_label=true,
+                show_y_label=true,
+            )
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
 end
 
 screenshot(MyApp, "linePlot.png", 812, 400);
