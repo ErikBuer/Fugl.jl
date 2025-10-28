@@ -23,11 +23,12 @@ function calculate_line_progress(points::Vector{Point2f})
         return Float32[]
     end
 
-    progress = Float32[0.0f0]
+    progress = Vector{Float32}(undef, length(points))
+    progress[1] = 0.0f0
 
     for i in 2:length(points)
-        distance = sqrt((points[i][1] - points[i-1][1])^2 + (points[i][2] - points[i-1][2])^2)
-        push!(progress, progress[end] + distance)
+        segment_length = norm(points[i] - points[i-1])
+        progress[i] = progress[i-1] + segment_length
     end
 
     return progress
