@@ -12,7 +12,7 @@ Fugl has a short distance from component to shader, enabling fast and intuitive 
 <img width="1080" height="1080" alt="Shot with name and subtitle" src="https://github.com/user-attachments/assets/bfdb3123-1972-4736-b686-2124bbcbd08d" />
 
 
-## Simple Funcitonal API
+## Simple Functional API
 
 ```julia
 using Fugl
