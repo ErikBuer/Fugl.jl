@@ -25,25 +25,6 @@ function get_element_bounds(element::AbstractPlotElement)::Tuple{Float32,Float32
 end
 
 """
-Calculate cumulative distance along a line defined by points.
-"""
-function calculate_line_progress(points::Vector{Point2f})::Vector{Float32}
-    if length(points) < 2
-        return Float32[]
-    end
-
-    progress = Vector{Float32}(undef, length(points))
-    progress[1] = 0.0f0
-
-    for i in 2:length(points)
-        segment_length = norm(points[i] - points[i-1])
-        progress[i] = progress[i-1] + segment_length
-    end
-
-    return progress
-end
-
-"""
 Generate reasonable tick positions for a given range
 """
 function generate_tick_positions(min_val::Float32, max_val::Float32, approx_num_ticks::Int=8)::Vector{Float32}
