@@ -4,16 +4,6 @@ struct FixedHeightView <: SizedView
 end
 
 """
-    FixedSize(child::AbstractView, width::Real, height::Real)
-
-Creates a view that has a fixed size, regardless of the child's intrinsic size.
-The child will be rendered at the specified width and height.
-"""
-function FixedSize(child::AbstractView, width::Real, height::Real)::FixedSizeView
-    FixedSizeView(child, Float32(width), Float32(height))
-end
-
-"""
     FixedWidth(child::AbstractView, width::Real)
 
 Creates a view that has a fixed width but uses the child's intrinsic height.
