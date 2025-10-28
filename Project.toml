@@ -1,6 +1,6 @@
 name = "Fugl"
 uuid = "a78eb1c3-f9be-4b1a-a708-e7053b7f16d7"
-version = "0.5.3"
+version = "0.5.4"
 authors = ["Erik Buer <buer94@gmail.com>"]
 
 [deps]
