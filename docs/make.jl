@@ -26,6 +26,7 @@ makedocs(
     sitename="Fugl.jl",
     pages=Any[
         "index.md",
+        "running_apps.md",
         "Components"=>Any[
             "Components/container.md",
             "Components/card.md",

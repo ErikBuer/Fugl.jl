@@ -33,7 +33,23 @@ export screenshot
 export PeriodicCallback
 
 """
-Represents a periodic callback that executes every N frames
+    PeriodicCallback(func::Function, interval::Int)
+
+!!! warning "Experimental"
+    This feature is experimental and the API may change in future versions.
+
+Represents a periodic callback that executes every N frames.
+
+# Arguments
+- `func::Function`: Function to execute periodically
+- `interval::Int`: Execute every N frames
+
+# Examples
+```julia
+# Run every 60 frames (~1 second at 60fps)
+callback = PeriodicCallback(() -> println("Hello!"), 60)
+run(MyApp, periodic_callbacks=[callback])
+```
 """
 struct PeriodicCallback
     func::Function
@@ -55,7 +71,7 @@ This function handles the rendering and event processing for the GUI.
 - `window_width_px::Integer=1920`: Initial window width
 - `window_height_px::Integer=1080`: Initial window height
 - `fps_overlay::Bool=false`: Show frame count and FPS in upper right corner
-- `periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[]`: Periodic callbacks to execute at specified frame intervals
+- `periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[]`: **[Experimental]** Periodic callbacks to execute at specified frame intervals
 
 # Examples
 ```julia
