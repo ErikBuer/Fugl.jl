@@ -3,6 +3,7 @@ mutable struct HoverInfo
     hover_start_time::Float64
     hover_duration::Float64
     last_frame_hovered::Int
+    last_frame_updated::Int  # Track when this component was last seen/updated
     hover_count::Int
     is_pressed::Bool  # Track if mouse is currently pressed down on this component
 end
@@ -27,6 +28,20 @@ function start_frame_hover!(frame::Int, current_time::Float64)
     registry.current_time = current_time
     empty!(registry.newly_hovered)
     empty!(registry.newly_unhovered)
+
+    # Cleanup stale entries (not updated in 1000 frames)
+    cleanup_stale_entries!(registry, frame)
+end
+
+function cleanup_stale_entries!(registry::HoverRegistry, current_frame::Int)
+    stale_threshold = current_frame - 1000
+
+    # Find and remove stale entries
+    stale_ids = [comp_id for (comp_id, info) in registry.hover_map if info.last_frame_updated < stale_threshold]
+
+    for comp_id in stale_ids
+        delete!(registry.hover_map, comp_id)
+    end
 end
 
 @inline function component_id(x::Float32, y::Float32, width::Float32, height::Float32)::UInt64
@@ -57,6 +72,7 @@ function update_hover_state!(comp_id::UInt64, is_currently_hovered::Bool)
 
         info.is_hovered = is_currently_hovered
         info.last_frame_hovered = is_currently_hovered ? registry.current_frame : info.last_frame_hovered
+        info.last_frame_updated = registry.current_frame  # Always update this field
     else
         # First time seeing this component
         registry.hover_map[comp_id] = HoverInfo(
@@ -64,6 +80,7 @@ function update_hover_state!(comp_id::UInt64, is_currently_hovered::Bool)
             is_currently_hovered ? registry.current_time : 0.0,
             0.0,
             is_currently_hovered ? registry.current_frame : 0,
+            registry.current_frame,  # last_frame_updated
             is_currently_hovered ? 1 : 0,
             false  # is_pressed starts as false
         )
@@ -82,7 +99,7 @@ end
     if haskey(registry.hover_map, comp_id)
         return registry.hover_map[comp_id]
     else
-        return HoverInfo(false, 0.0, 0.0, 0, 0, false)  # include is_pressed=false
+        return HoverInfo(false, 0.0, 0.0, 0, 0, 0, false)  # include last_frame_updated=0 and is_pressed=false
     end
 end
 
@@ -122,9 +139,10 @@ function update_pressed_state!(comp_id::UInt64, is_currently_pressed::Bool)
 
     if haskey(registry.hover_map, comp_id)
         registry.hover_map[comp_id].is_pressed = is_currently_pressed
+        registry.hover_map[comp_id].last_frame_updated = registry.current_frame
     else
         # Create new entry if it doesn't exist
-        registry.hover_map[comp_id] = HoverInfo(false, 0.0, 0.0, 0, 0, is_currently_pressed)
+        registry.hover_map[comp_id] = HoverInfo(false, 0.0, 0.0, 0, registry.current_frame, 0, is_currently_pressed)
     end
 end
 
