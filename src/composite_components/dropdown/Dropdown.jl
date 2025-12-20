@@ -62,12 +62,12 @@ function measure_height(view::DropdownView, available_width::Float32)::Float32
     return button_height
 end
 
-function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Calculate button height
     button_height = view.style.text_style.size_px + 2 * view.style.padding
 
     # Draw the main dropdown button
-    draw_dropdown_button(view, x, y, width, button_height, projection_matrix)
+    draw_dropdown_button(view, x, y, width, button_height, projection_matrix, mouse_x, mouse_y)
 
     # Draw the dropdown list if open
     if view.state.is_open

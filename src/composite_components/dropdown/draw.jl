@@ -1,4 +1,4 @@
-function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Choose background color based on state
     bg_color = if view.state.is_open
         view.style.background_color_open
@@ -26,7 +26,7 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
     display_text = if view.state.selected_index > 0 && view.state.selected_index <= length(view.state.options)
         view.state.options[view.state.selected_index]
     else
-        placeholder_text
+        view.placeholder_text
     end
 
     text_component = Text(
@@ -42,7 +42,7 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
     available_text_width = width - 2 * view.style.padding - 20.0f0  # Reserve space for arrow
     text_height = height - 2 * view.style.padding
 
-    interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix)
+    interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix, mouse_x, mouse_y)
 
     # Draw dropdown arrow
     draw_dropdown_arrow(view, x + width - view.style.padding - 10.0f0, y + height / 2.0f0, projection_matrix)
@@ -105,7 +105,7 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
         available_text_width = width - 2 * view.style.padding
         text_height = item_height
 
-        interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix)
+        interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix, 0.0f0, 0.0f0)
     end
 end
 
@@ -125,5 +125,5 @@ function draw_dropdown_arrow(view::DropdownView, x::Float32, y::Float32, project
     arrow_x = x - arrow_size / 2.0f0
     arrow_y = y - arrow_size / 2.0f0
 
-    interpret_view(arrow_component, arrow_x, arrow_y, arrow_size, arrow_size, projection_matrix)
+    interpret_view(arrow_component, arrow_x, arrow_y, arrow_size, arrow_size, projection_matrix, 0.0f0, 0.0f0)
 end

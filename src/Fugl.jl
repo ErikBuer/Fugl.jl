@@ -12,6 +12,8 @@ const OPENGL_LOCK = ReentrantLock()
 
 include("matrices.jl")
 include("gl_context_state.jl")
+include("hover_registry.jl")
+export init_hover_registry!, is_hovered, is_pressed, hover_duration, just_hovered, just_unhovered, update_hover_state!, update_pressed_state!
 include("shaders.jl")
 export initialize_shaders, register_shader_initializer!
 
@@ -23,7 +25,7 @@ export mouse_button_callback
 export ModifierKeys, is_command_key, has_any_modifier
 
 include("abstract_view.jl")
-export AbstractView, SizedView
+export AbstractView, SizedView, interpret_view
 
 include("components.jl")
 
@@ -97,6 +99,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     initialize_shaders()
     initialize_plot_shaders()
     initialize_gl_state!()
+    init_hover_registry!()
 
     # Initialize local states
     mouse_state = InputState()
@@ -138,6 +141,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         while !GLFW.WindowShouldClose(gl_window)
             frame_start_time = time()
             frame_count += 1
+
+            # Start hover tracking for this frame
+            start_frame_hover!(frame_count, frame_start_time)
 
             # Update debug overlay stats using compile-time selected function
             current_fps_value = update_debug_stats(debug_frame_count, debug_last_time, frame_start_time, debug_fps_update_interval, debug_fps)
@@ -192,7 +198,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     last_ui = ui  # Keep reference to prevent GC during this frame
 
                     detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
-                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
+                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, locked_state.x, locked_state.y)
 
                     # Render overlay using compile-time selected function
                     overlay_function(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)
@@ -202,7 +208,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     # Keep the last working UI alive
                     if last_ui !== nothing
                         try
-                            interpret_view(last_ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix)
+                            interpret_view(last_ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, 0.0f0, 0.0f0)
                         catch
                             # If even the last UI fails, just continue
                         end

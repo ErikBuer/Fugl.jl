@@ -36,7 +36,7 @@ function apply_layout(view::TreeView, x::Float32, y::Float32, width::Float32, he
     return (x, y, width, height)
 end
 
-function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     bounds = (x, y, width, height)
     cache_width = Int32(round(width))
     cache_height = Int32(round(height))
@@ -64,7 +64,7 @@ function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, 
             @warn "Failed to create plot framebuffer: $e"
             return  # Skip rendering if framebuffer creation fails
         end
-        render_tree_to_framebuffer(view, cache, width, height, projection_matrix)
+        render_tree_to_framebuffer(view, cache, width, height, projection_matrix, mouse_x, mouse_y)
         cache.is_valid = true
     end
 
@@ -75,7 +75,7 @@ function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, 
     end
 end
 
-function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Push framebuffer and viewport
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
@@ -89,7 +89,7 @@ function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width::F
         fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
 
         # Draw the tree into the framebuffer using shared function
-        render_tree_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+        render_tree_content(view, 0.0f0, 0.0f0, width, height, fb_projection, mouse_x, mouse_y)
     finally
         pop_viewport!()
         pop_framebuffer!()
@@ -99,7 +99,7 @@ end
 """
 Render the tree content (shared between direct and framebuffer drawing)
 """
-function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     current_y = y
     function draw_node(node::TreeNode, depth::Int, parent_path::String="")
         # Build the current path, but skip the root folder name
@@ -118,7 +118,7 @@ function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Floa
         is_selected = current_path == view.state.selected_item
         style = is_selected ? view.style.selected : view.style.normal
 
-        interpret_view(Text(text; style=style, horizontal_align=:left, wrap_text=false), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix)
+        interpret_view(Text(text; style=style, horizontal_align=:left, wrap_text=false), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix, mouse_x, mouse_y)
         current_y += 22f0
 
         # Always show children for root node
