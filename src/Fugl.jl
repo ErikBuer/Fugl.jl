@@ -198,7 +198,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     last_ui = ui  # Keep reference to prevent GC during this frame
 
                     detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
-                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, locked_state.x, locked_state.y)
+                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, Float32(locked_state.x), Float32(locked_state.y))
 
                     # Render overlay using compile-time selected function
                     overlay_function(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)

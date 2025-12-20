@@ -1,3 +1,13 @@
+# Hover Registry System
+#
+# Tracks hover and pressed state for GUI components.
+# Components are identified by their position and size (x, y, width, height) hashed to a unique ID.
+#
+# Intended to enable:
+# - Hover duration tracking for delayed tooltips
+# - "Just hovered" / "just unhovered" animation triggers
+# - Pressed state tracking for visual feedback during mouse-down events
+
 mutable struct HoverInfo
     is_hovered::Bool
     hover_start_time::Float64
