@@ -33,9 +33,9 @@ function apply_layout(view::PaddingView, x::Float32, y::Float32, width::Float32,
     return (padded_x, padded_y, padded_width, padded_height)
 end
 
-function interpret_view(view::PaddingView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::PaddingView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     child_x, child_y, child_width, child_height = apply_layout(view, x, y, width, height)
-    interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix)
+    interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
 end
 
 function detect_click(view::PaddingView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)

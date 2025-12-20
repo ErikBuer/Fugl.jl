@@ -87,6 +87,11 @@ end
 end
 
 @inline function is_hovered(x::Float32, y::Float32, width::Float32, height::Float32)::Bool
+    # Return false if registry not initialized
+    if !isassigned(HOVER_REGISTRY)
+        return false
+    end
+
     comp_id = component_id(x, y, width, height)
     registry = HOVER_REGISTRY[]
 
@@ -124,6 +129,11 @@ function update_pressed_state!(comp_id::UInt64, is_currently_pressed::Bool)
 end
 
 @inline function is_pressed(x::Float32, y::Float32, width::Float32, height::Float32)::Bool
+    # Return false if registry not initialized
+    if !isassigned(HOVER_REGISTRY)
+        return false
+    end
+
     comp_id = component_id(x, y, width, height)
     registry = HOVER_REGISTRY[]
 

@@ -23,13 +23,13 @@ function apply_layout(view::IntrinsicSizeView, x::Float32, y::Float32, width::Fl
     return apply_layout(view.child, x, y, final_width, final_height)
 end
 
-function interpret_view(view::IntrinsicSizeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::IntrinsicSizeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Render the child view using its intrinsic size
     intrinsic_width, intrinsic_height = measure(view.child)
     final_width = min(intrinsic_width, width)
     final_height = min(intrinsic_height, height)
 
-    interpret_view(view.child, x, y, final_width, final_height, projection_matrix)
+    interpret_view(view.child, x, y, final_width, final_height, projection_matrix, mouse_x, mouse_y)
 end
 
 function detect_click(view::IntrinsicSizeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)

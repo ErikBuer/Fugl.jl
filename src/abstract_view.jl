@@ -8,12 +8,12 @@ Examples: IntrinsicSize, FixedSize, IntrinsicWidth, IntrinsicHeight, etc.
 abstract type SizedView <: AbstractView end
 
 """
-    interpret_view(component::AbstractView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+    interpret_view(component::AbstractView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
 
 Interpret the view of a GUI component.
 This function is responsible for interpreting the view of a GUI component based on its layout and properties.
 """
-function interpret_view(component::AbstractView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(component::AbstractView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     error("interpret_view not implemented for component of type $(typeof(component))")
 end
 

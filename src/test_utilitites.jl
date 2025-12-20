@@ -49,9 +49,12 @@ function screenshot(ui_function::Function, output_file::String, width::Int, heig
     push_viewport!(Int32(0), Int32(0), Int32(width), Int32(height))
     ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
+    # Initialize hover registry for screenshot
+    init_hover_registry!()
+
     projection_matrix = get_orthographic_matrix(0.0f0, Float32(width), Float32(height), 0.0f0, -1.0f0, 1.0f0)
 
-    interpret_view(root_view, 0.0f0, 0.0f0, Float32(width), Float32(height), projection_matrix)
+    interpret_view(root_view, 0.0f0, 0.0f0, Float32(width), Float32(height), projection_matrix, 0.0f0, 0.0f0)
 
     buffer = Array{UInt8}(undef, 3, width, height)  # RGB format
     ModernGL.glReadPixels(0, 0, width, height, ModernGL.GL_RGB, ModernGL.GL_UNSIGNED_BYTE, buffer)

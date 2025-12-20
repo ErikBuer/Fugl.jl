@@ -6,12 +6,12 @@ function IntrinsicWidth(child::AbstractView=EmptyView())
     return IntrinsicWidthView(child)
 end
 
-function interpret_view(view::IntrinsicWidthView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::IntrinsicWidthView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Render the child view using its intrinsic size
     intrinsic_width = measure_width(view.child, height)
     final_width = min(intrinsic_width, width)
 
-    interpret_view(view.child, x, y, final_width, height, projection_matrix)
+    interpret_view(view.child, x, y, final_width, height, projection_matrix, mouse_x, mouse_y)
 end
 
 function detect_click(view::IntrinsicWidthView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)

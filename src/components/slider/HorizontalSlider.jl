@@ -43,7 +43,7 @@ function apply_layout(view::HorizontalSliderView, x::Float32, y::Float32, width:
     return (slider_x, slider_y, slider_width, slider_height, handle_x, handle_y, handle_width, handle_height)
 end
 
-function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Compute the layout for the slider
     (slider_x, slider_y, slider_width, slider_height, handle_x, handle_y, handle_width, handle_height) = apply_layout(view, x, y, width, height)
 

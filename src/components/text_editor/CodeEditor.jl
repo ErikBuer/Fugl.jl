@@ -26,7 +26,7 @@ function apply_layout(view::CodeEditorView, x::Float32, y::Float32, width::Float
     return (x, y, width, height)
 end
 
-function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Use render caching for CodeEditor to improve performance with syntax highlighting
     bounds = (x, y, width, height)
     cache_width = Int32(round(width))

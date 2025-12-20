@@ -122,7 +122,7 @@ function apply_layout(view::CheckBoxView, x::Float32, y::Float32, width::Float32
     return (x, y, width, height)
 end
 
-function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     checkbox_size = view.style.size
     padding = view.style.padding
 

@@ -49,10 +49,10 @@ function apply_layout(view::IntrinsicRowView, x, y, width, height)
     return child_layouts
 end
 
-function interpret_view(view::IntrinsicRowView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(view::IntrinsicRowView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     child_layouts = apply_layout(view, x, y, width, height)
     for (child, (child_x, child_y, child_width, child_height)) in zip(view.children, child_layouts)
-        interpret_view(child, child_x, child_y, child_width, child_height, projection_matrix)
+        interpret_view(child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
     end
 end
 

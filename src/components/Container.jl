@@ -86,7 +86,7 @@ end
 """
 Render the container and its child.
 """
-function interpret_view(container::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function interpret_view(container::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Compute the layout for the container
     (child_x, child_y, child_width, child_height) = apply_layout(container, x, y, width, height)
 
@@ -111,7 +111,7 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     )
 
     # Render the child
-    interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix)
+    interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
 end
 
 """
