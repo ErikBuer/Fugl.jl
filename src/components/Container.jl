@@ -117,6 +117,7 @@ function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractF
         end
     end
 
-    # Recursively check the child
+    # Recursively check the child.
+    # Some components have focus behavior, and therefore must register clicks even if outside their bounds.
     detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
 end
