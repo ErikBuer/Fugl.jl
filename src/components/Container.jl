@@ -21,6 +21,8 @@ end
 struct ContainerView <: AbstractView
     child::AbstractView  # Single child view
     style::ContainerStyle
+    hover_style::Union{Nothing,ContainerStyle}
+    pressed_style::Union{Nothing,ContainerStyle}
     on_click::Function
     on_mouse_down::Function
 end
@@ -29,8 +31,8 @@ end
 The `Container` is the most basic GUI component that can contain another component.
 It is the most basic building block of the GUI system.
 """
-function Container(child::AbstractView=EmptyView(); style=ContainerStyle(), on_click::Function=() -> nothing, on_mouse_down::Function=() -> nothing)
-    return ContainerView(child, style, on_click, on_mouse_down)
+function Container(child::AbstractView=EmptyView(); style=ContainerStyle(), hover_style::Union{Nothing,ContainerStyle}=nothing, pressed_style::Union{Nothing,ContainerStyle}=nothing, on_click::Function=() -> nothing, on_mouse_down::Function=() -> nothing)
+    return ContainerView(child, style, hover_style, pressed_style, on_click, on_mouse_down)
 end
 
 function measure(view::ContainerView)::Tuple{Float32,Float32}
@@ -88,14 +90,24 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     # Compute the layout for the container
     (child_x, child_y, child_width, child_height) = apply_layout(container, x, y, width, height)
 
+    # Choose style based on interaction state
+    # Priority: pressed > hover > normal (pressed takes precedence over hover)
+    active_style = if container.pressed_style !== nothing && is_pressed(x, y, width, height)
+        container.pressed_style
+    elseif container.hover_style !== nothing && is_hovered(x, y, width, height)
+        container.hover_style
+    else
+        container.style
+    end
+
     vertex_positions = generate_rectangle_vertices(x, y, width, height)
     draw_rounded_rectangle(vertex_positions, width, height,
-        container.style.background_color,
-        container.style.border_color,
-        container.style.border_width,
-        container.style.corner_radius,
+        active_style.background_color,
+        active_style.border_color,
+        active_style.border_width,
+        active_style.corner_radius,
         projection_matrix,
-        container.style.anti_aliasing_width
+        active_style.anti_aliasing_width
     )
 
     # Render the child
@@ -107,6 +119,23 @@ Detect clicks on the container and its child.
 """
 function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
     (child_x, child_y, child_width, child_height) = apply_layout(view, x, y, width, height)
+
+    # Update hover and pressed state if styling is enabled
+    if view.hover_style !== nothing || view.pressed_style !== nothing
+        comp_id = component_id(Float32(x), Float32(y), Float32(width), Float32(height))
+        is_mouse_inside = inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+
+        # Update hover state
+        if view.hover_style !== nothing
+            update_hover_state!(comp_id, is_mouse_inside)
+        end
+
+        # Update pressed state
+        if view.pressed_style !== nothing
+            is_mouse_pressed = is_mouse_inside && mouse_state.button_state[LeftButton] == IsPressed
+            update_pressed_state!(comp_id, is_mouse_pressed)
+        end
+    end
 
     # Check if the mouse is inside the component
     if inside_component(view, child_x, child_y, child_width, child_height, mouse_state.x, mouse_state.y)
