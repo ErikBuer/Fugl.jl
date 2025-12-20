@@ -1,19 +1,36 @@
 using Fugl
 
 function HoverDemo()
+    # Default hover and pressed styles
+    default_hover_style = ContainerStyle(
+        background_color=Vec4f(0.9, 0.9, 0.92, 1.0),
+        border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
+        border_width=1.0f0,
+        padding=6.0f0,
+        corner_radius=5.0f0
+    )
+
+    default_pressed_style = ContainerStyle(
+        background_color=Vec4f(0.7, 0.7, 0.72, 1.0),
+        border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
+        border_width=2.0f0,
+        padding=6.0f0,
+        corner_radius=5.0f0
+    )
+
     # Create buttons with different hover styles
-    normal_button = TextButton("Hover + Press"; enable_hover=true, enable_pressed=true)
+    normal_button = TextButton("Hover + Press"; hover_style=default_hover_style, pressed_style=default_pressed_style)
 
-    hover_only_button = TextButton("Hover Only"; enable_hover=true, enable_pressed=false)
+    hover_only_button = TextButton("Hover Only"; hover_style=default_hover_style)
 
-    pressed_only_button = TextButton("Press Only"; enable_hover=false, enable_pressed=true)
+    pressed_only_button = TextButton("Press Only"; pressed_style=default_pressed_style)
 
-    disabled_effects_button = TextButton("No Effects"; enable_hover=false, enable_pressed=false)
+    disabled_effects_button = TextButton("No Effects")
 
     # Button with on_mouse_down callback
     mouse_down_button = TextButton("Mouse Down Demo";
-        enable_hover=true,
-        enable_pressed=true,
+        hover_style=default_hover_style,
+        pressed_style=default_pressed_style,
         on_click=() -> println("Button clicked!"),
         on_mouse_down=() -> println("Mouse pressed down on button!")
     )
@@ -43,11 +60,11 @@ function HoverDemo()
         corner_radius=8.0f0
     )
 
-    custom_button = Container(
-        Fugl.Text("Custom Styles", style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
-        style=custom_style,
+    custom_button = TextButton("Custom Styles",
+        container_style=custom_style,
         hover_style=custom_hover_style,
         pressed_style=custom_pressed_style,
+        text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0)),
         on_mouse_down=() -> println("Custom button mouse down!")
     )
 
