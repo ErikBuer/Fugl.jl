@@ -26,6 +26,37 @@ function measure(view::TextBoxView)::Tuple{Float32,Float32}
     return (Inf32, Inf32)
 end
 
+function measure_width(view::TextBoxView, available_height::Float32)::Float32
+    # TextBox width is determined by the longest line (no wrapping)
+    font = view.style.text_style.font
+    size_px = view.style.text_style.size_px
+    padding = view.style.padding
+
+    lines = get_lines(view.state)
+    max_width = 0.0f0
+
+    for line in lines
+        line_width = measure_word_width_cached(font, line, size_px)
+        max_width = max(max_width, line_width)
+    end
+
+    # Add padding on both sides, plus small buffer like Text component
+    return max_width + 2 * padding + 2.0f0
+end
+
+function measure_height(view::TextBoxView, available_width::Float32)::Float32
+    # TextBox height is determined by the number of lines (no wrapping)
+    font = view.style.text_style.font
+    size_px = view.style.text_style.size_px
+    padding = view.style.padding
+    line_height = Float32(size_px * 1.2)  # Same line spacing as in render_textbox_content
+
+    lines = get_lines(view.state)
+    total_height = length(lines) * line_height + 2 * padding
+
+    return total_height
+end
+
 function apply_layout(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32)
     # The TextBox occupies the entire area provided by the parent
     return (x, y, width, height)
