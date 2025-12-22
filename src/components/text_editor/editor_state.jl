@@ -47,12 +47,6 @@ struct EditorState
 end
 
 """
-Create a new EditorState with explicit parameters for all fields.
-This is the default struct constructor - it's automatically generated.
-"""
-# No need for explicit constructor - Julia provides it automatically
-
-"""
 Create a new EditorState with old 5-parameter signature (for backward compatibility).
 """
 function EditorState(
