@@ -290,7 +290,8 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
                     nothing,  # Clear selection on click
                     nothing,
                     view.state.cached_lines,
-                    view.state.text_hash
+                    view.state.text_hash,
+                    view.state.cache_id
                 )
                 view.on_state_change(new_state)
             else
@@ -302,7 +303,8 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
                     nothing,  # Clear selection on click
                     nothing,
                     view.state.cached_lines,
-                    view.state.text_hash
+                    view.state.text_hash,
+                    view.state.cache_id
                 )
                 view.on_state_change(new_state)
             end
