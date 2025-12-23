@@ -45,11 +45,54 @@ function slider_demo()
         handle_color=Vec4f(0.6, 0.7, 0.8, 1.0),
         border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
         border_width=1.0f0,
-        radius=4.0f0
+        radius=4.0f0,
+        fill_color=Vec4f(0.4, 0.6, 0.8, 0.6),
+        marker_color=Vec4f(0.6, 0.6, 0.6, 0.8)
+    )
+    
+    # Focused style - lighter colors for hover state
+    focused_slider_style = SliderStyle(
+        background_color=Vec4f(0.25, 0.25, 0.3, 1.0),
+        handle_color=Vec4f(0.7, 0.8, 0.9, 1.0),
+        border_color=Vec4f(0.6, 0.6, 0.7, 1.0),
+        border_width=1.5f0,
+        radius=4.0f0,
+        fill_color=Vec4f(0.5, 0.7, 0.9, 0.8),
+        marker_color=Vec4f(0.8, 0.8, 0.8, 1.0)
+    )
+    
+    # Dragging style - blue accent for active dragging
+    dragging_slider_style = SliderStyle(
+        background_color=Vec4f(0.2, 0.25, 0.35, 1.0),
+        handle_color=Vec4f(0.3, 0.6, 1.0, 1.0),
+        border_color=Vec4f(0.4, 0.6, 0.8, 1.0),
+        border_width=2.0f0,
+        radius=4.0f0,
+        fill_color=Vec4f(0.3, 0.6, 1.0, 0.8),
+        marker_color=Vec4f(0.9, 0.9, 1.0, 1.0)
     )
     
     Container(
         IntrinsicColumn([
+            # Continuous slider with interaction styles
+            Card(
+                "Interactive Slider with State Styles",
+                Column([
+                    HorizontalSlider(
+                        continuous_state[];
+                        style=dark_slider_style,
+                        focused_style=focused_slider_style,
+                        dragging_style=dragging_slider_style,
+                        on_state_change=(new_state) -> continuous_state[] = new_state,
+                        on_change=(new_value) -> println("Continuous: ", new_value)
+                    ),
+                    Text("Value: $(round(continuous_state[].value, digits=3))", style=dark_text_style),
+                    Text("Hover and drag to see different styles!", style=TextStyle(color=Vec4f(0.7, 0.7, 0.7, 1.0), size_px=12))
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            ),
+            
             # Continuous slider
             Card(
                 "Continuous Slider",
@@ -104,7 +147,7 @@ function slider_demo()
     )
 end
 
-screenshot(slider_demo, "slider.png", 812, 400);
+screenshot(slider_demo, "slider.png", 812, 500);
 nothing #hide
 ```
 

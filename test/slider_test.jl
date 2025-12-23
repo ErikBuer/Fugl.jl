@@ -82,12 +82,12 @@ function main()
                                 style=default_dark_slider,
                                 on_state_change=(new_state) -> begin
                                     basic_slider_state[] = new_state
-                                    focused = new_state.interaction_state !== nothing ? new_state.interaction_state.is_focused : false
+                                    focused = new_state.interaction_state.is_focused
                                     println("Basic slider: value=$(new_state.value), focused=$(focused)")
                                 end,
                                 on_change=(new_value) -> println("Basic value: ", new_value)
                             ),
-                            Fugl.Text("Value: $(round(basic_slider_state[].value, digits=3)) | Focused: $(basic_slider_state[].interaction_state !== nothing ? basic_slider_state[].interaction_state.is_focused : false)", style=dark_text_style)
+                            Fugl.Text("Value: $(round(basic_slider_state[].value, digits=3)) | Focused: $(basic_slider_state[].interaction_state.is_focused)", style=dark_text_style)
                         ]),
                         style=dark_card_style,
                         title_style=dark_card_title_style
@@ -102,12 +102,12 @@ function main()
                                 style=default_dark_slider,
                                 on_state_change=(new_state) -> begin
                                     continuous_state[] = new_state
-                                    focused = new_state.interaction_state !== nothing ? new_state.interaction_state.is_focused : false
+                                    focused = new_state.interaction_state.is_focused
                                     println("Continuous state: value=$(new_state.value), focused=$(focused), dragging=$(new_state.is_dragging)")
                                 end,
                                 on_change=(new_value) -> println("Continuous value: ", new_value)
                             ),
-                            Fugl.Text("Value: $(round(continuous_state[].value, digits=3)) | Focused: $(continuous_state[].interaction_state !== nothing ? continuous_state[].interaction_state.is_focused : false) | Dragging: $(continuous_state[].is_dragging)", style=dark_text_style)
+                            Fugl.Text("Value: $(round(continuous_state[].value, digits=3)) | Focused: $(continuous_state[].interaction_state.is_focused) | Dragging: $(continuous_state[].is_dragging)", style=dark_text_style)
                         ]),
                         style=dark_card_style,
                         title_style=dark_card_title_style

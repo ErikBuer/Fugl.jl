@@ -13,7 +13,9 @@ HorizontalSlider with state management and discrete step support.
 struct HorizontalSliderView{T<:Real} <: SizedView
     state::SliderState{T}
     steps::Union{Nothing,Int,T}     # Step snapping: nothing=continuous, Int=num_steps, Real=step_size
-    style::SliderStyle              # Style for the slider
+    style::SliderStyle              # Normal style for the slider
+    focused_style::Union{Nothing,SliderStyle}  # Style when focused
+    dragging_style::Union{Nothing,SliderStyle} # Style when dragging
     on_state_change::Function       # Callback for state changes
     on_change::Function             # Callback for value changes only
     on_interaction_state_change::Function  # Callback for interaction state changes
@@ -23,11 +25,13 @@ function HorizontalSlider(
     state::SliderState{T};
     steps::Union{Nothing,Int,T}=nothing,
     style=SliderStyle(),
+    focused_style::Union{Nothing,SliderStyle}=nothing,
+    dragging_style::Union{Nothing,SliderStyle}=nothing,
     on_state_change::Function=(new_state) -> nothing,
     on_change::Function=(new_value) -> nothing,
     on_interaction_state_change::Function=(new_interaction_state) -> nothing
 ) where T<:Real
-    return HorizontalSliderView(state, steps, style, on_state_change, on_change, on_interaction_state_change)
+    return HorizontalSliderView(state, steps, style, focused_style, dragging_style, on_state_change, on_change, on_interaction_state_change)
 end
 
 function apply_layout(view::HorizontalSliderView, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -53,20 +57,21 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
     # Compute the layout for the slider
     (slider_x, slider_y, slider_width, slider_height, handle_x, handle_y, handle_width, handle_height) = apply_layout(view, x, y, width, height)
 
-    # Choose colors based on focus/drag state
-    is_focused = view.state.interaction_state !== nothing && view.state.interaction_state.is_focused
+    # Determine focus state
+    is_focused = view.state.interaction_state.is_focused
 
-    bg_color = is_focused ?
-               Vec4{Float32}(0.85f0, 0.85f0, 0.9f0, 1.0f0) :
-               view.style.background_color
-
-    handle_color = if view.state.is_dragging
-        Vec4{Float32}(0.5f0, 0.65f0, 0.85f0, 1.0f0)  # Blue when dragging
-    elseif is_focused
-        Vec4{Float32}(0.6f0, 0.75f0, 0.8f0, 1.0f0)   # Lighter when focused
+    # Choose style based on interaction state
+    # Priority: dragging > focused > normal
+    active_style = if view.state.is_dragging && view.dragging_style !== nothing
+        view.dragging_style
+    elseif is_focused && view.focused_style !== nothing
+        view.focused_style
     else
-        view.style.handle_color
+        view.style
     end
+
+    bg_color = active_style.background_color
+    handle_color = active_style.handle_color
 
     # Draw the slider background (track)
     slider_vertices = generate_rectangle_vertices(slider_x, slider_y, slider_width, slider_height)
@@ -75,9 +80,9 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
         slider_width,
         slider_height,
         bg_color,
-        view.style.border_color,
-        view.style.border_width,
-        view.style.radius,
+        active_style.border_color,
+        active_style.border_width,
+        active_style.radius,
         projection_matrix,
         1.5f0
     )
@@ -86,7 +91,7 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
     if view.state.value > view.state.min_value
         fill_width = Float32((view.state.value - view.state.min_value) / (view.state.max_value - view.state.min_value) * slider_width)
         fill_vertices = generate_rectangle_vertices(slider_x, slider_y, fill_width, slider_height)
-        fill_color = Vec4{Float32}(0.4f0, 0.6f0, 0.8f0, 0.6f0)  # Semi-transparent blue
+        fill_color = active_style.fill_color
         draw_rounded_rectangle(
             fill_vertices,
             fill_width,
@@ -94,7 +99,7 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
             fill_color,
             Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0),  # No border
             0.0f0,
-            view.style.radius,
+            active_style.radius,
             projection_matrix,
             1.5f0
         )
@@ -112,9 +117,9 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
         handle_width,
         handle_height,
         handle_color,
-        view.style.border_color,
-        view.style.border_width * 1.5f0,  # Slightly thicker border for handle
-        view.style.radius + 1.0f0,
+        active_style.border_color,
+        active_style.border_width * 1.5f0,  # Slightly thicker border for handle
+        active_style.radius + 1.0f0,
         projection_matrix,
         1.5f0
     )
@@ -136,7 +141,17 @@ function draw_step_markers(view::HorizontalSliderView, slider_x::Float32, slider
         return
     end
 
-    marker_color = Vec4{Float32}(0.6f0, 0.6f0, 0.6f0, 0.8f0)
+    # Choose active style for marker color
+    is_focused = view.state.interaction_state.is_focused
+    active_style = if view.state.is_dragging && view.dragging_style !== nothing
+        view.dragging_style
+    elseif is_focused && view.focused_style !== nothing
+        view.focused_style
+    else
+        view.style
+    end
+
+    marker_color = active_style.marker_color
     marker_width = 2.0f0
     marker_height = slider_height * 1.5f0
 
@@ -171,31 +186,26 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
     end
 
     # Update interaction state
-    if view.state.interaction_state !== nothing
-        is_mouse_inside = inside_slider(mouse_state.x, mouse_state.y)
-        is_mouse_pressed = is_mouse_inside && mouse_state.button_state[LeftButton] == IsPressed
-        current_time = time()
+    is_mouse_inside = inside_slider(mouse_state.x, mouse_state.y)
+    is_mouse_pressed = is_mouse_inside && mouse_state.button_state[LeftButton] == IsPressed
+    current_time = time()
 
-        new_interaction_state = update_interaction_state(
-            view.state.interaction_state,
-            is_mouse_inside,
-            is_mouse_pressed,
-            current_time
-        )
+    new_interaction_state = update_interaction_state(
+        view.state.interaction_state,
+        is_mouse_inside,
+        is_mouse_pressed,
+        current_time
+    )
 
-        # Update the slider state with new interaction state and use for focus
-        is_currently_hovered = new_interaction_state.is_hovered
+    # Update the slider state with new interaction state and use for focus
+    is_currently_hovered = new_interaction_state.is_hovered
 
-        # Notify of interaction state changes
-        if new_interaction_state != view.state.interaction_state
-            view.on_interaction_state_change(new_interaction_state)
-            # Also update the slider state with new interaction state
-            updated_slider_state = SliderState(view.state; interaction_state=new_interaction_state)
-            view.on_state_change(updated_slider_state)
-        end
-    else
-        # No interaction state - disable focus behavior
-        is_currently_hovered = false
+    # Notify of interaction state changes
+    if new_interaction_state != view.state.interaction_state
+        view.on_interaction_state_change(new_interaction_state)
+        # Also update the slider state with new interaction state
+        updated_slider_state = SliderState(view.state; interaction_state=new_interaction_state)
+        view.on_state_change(updated_slider_state)
     end    # Handle drag end
     if view.state.is_dragging && mouse_state.button_state[LeftButton] == IsReleased
         new_state = SliderState(view.state; is_dragging=false)

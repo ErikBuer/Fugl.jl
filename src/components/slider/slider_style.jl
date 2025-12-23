@@ -4,6 +4,8 @@ mutable struct SliderStyle
     border_color::Vec4{Float32}      # RGBA color for the slider border
     border_width::Float32         # Border width in pixels
     radius::Float32               # Corner radius for rounded corners
+    fill_color::Vec4{Float32}     # RGBA color for the filled portion of the track
+    marker_color::Vec4{Float32}   # RGBA color for step markers
 end
 
 function SliderStyle(;
@@ -12,6 +14,8 @@ function SliderStyle(;
     border_color=Vec4{Float32}(0.5f0, 0.5f0, 0.5f0, 1.0f0),
     border_width=1.0f0,
     radius=2.0f0,
+    fill_color=Vec4{Float32}(0.4f0, 0.6f0, 0.8f0, 0.6f0),
+    marker_color=Vec4{Float32}(0.6f0, 0.6f0, 0.6f0, 0.8f0)
 )
-    return SliderStyle(background_color, handle_color, border_color, border_width, radius)
+    return SliderStyle(background_color, handle_color, border_color, border_width, radius, fill_color, marker_color)
 end

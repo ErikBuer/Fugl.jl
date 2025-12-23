@@ -7,13 +7,13 @@ struct SliderState{T<:Real}
     min_value::T
     max_value::T
     is_dragging::Bool
-    interaction_state::Union{Nothing,InteractionState}
+    interaction_state::InteractionState
 end
 
 """
 Create a new SliderState with the given value within the specified range.
 """
-function SliderState(value::T, min_value::T, max_value::T; is_dragging::Bool=false, interaction_state::Union{Nothing,InteractionState}=nothing) where T<:Real
+function SliderState(value::T, min_value::T, max_value::T; is_dragging::Bool=false, interaction_state::InteractionState=InteractionState()) where T<:Real
     clamped_value = clamp(value, min_value, max_value)
     return SliderState(clamped_value, min_value, max_value, is_dragging, interaction_state)
 end
@@ -22,7 +22,7 @@ end
 Create a new SliderState with automatic type conversion to the specified output type.
 Useful for creating sliders that output specific types (e.g., Int for discrete values).
 """
-function SliderState(::Type{T}, value, min_value, max_value; is_dragging::Bool=false, interaction_state::Union{Nothing,InteractionState}=nothing) where T<:Real
+function SliderState(::Type{T}, value, min_value, max_value; is_dragging::Bool=false, interaction_state::InteractionState=InteractionState()) where T<:Real
     converted_value = T(value)
     converted_min = T(min_value)
     converted_max = T(max_value)
