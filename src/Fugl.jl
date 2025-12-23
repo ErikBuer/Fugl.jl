@@ -13,6 +13,7 @@ const OPENGL_LOCK = ReentrantLock()
 include("matrices.jl")
 include("gl_context_state.jl")
 include("interaction_state.jl")
+export InteractionState
 include("shaders.jl")
 export initialize_shaders, register_shader_initializer!
 
