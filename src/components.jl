@@ -52,7 +52,7 @@ include("components/Container.jl")
 export Container, ContainerStyle
 
 include("components/slider/HorizontalSlider.jl")
-export HorizontalSlider
+export HorizontalSlider, SliderState, SliderStyle
 
 include("components/text/Text.jl")
 export Text, TextStyle
