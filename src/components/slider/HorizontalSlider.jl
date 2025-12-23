@@ -36,20 +36,20 @@ function HorizontalSlider(
 end
 
 function apply_layout(view::HorizontalSliderView, x::Float32, y::Float32, width::Float32, height::Float32)
+    # Get sizing from style
+    slider_height = view.style.track_height
+    handle_width = view.style.handle_width
+    handle_height = slider_height + view.style.handle_height_offset
+
     # Compute the layout for the slider background
     slider_x = x
-    slider_y = y + height / 2 - 10.0f0  # Center the slider vertically
+    slider_y = y + height / 2 - slider_height / 2  # Center the slider vertically
     slider_width = width
-    slider_height = 20.0f0              # Fixed height for the slider
-
-    # Compute the layout for the handle
-    handle_width = 12.0f0  # Slightly wider handle for better visibility
-    handle_height = slider_height + 4.0f0  # Slightly taller than track
 
     # Calculate handle position based on value
     value_ratio = Float32((view.state.value - view.state.min_value) / (view.state.max_value - view.state.min_value))
     handle_x = slider_x + value_ratio * (slider_width - handle_width)  # Account for handle width
-    handle_y = slider_y - 2.0f0  # Center handle on track
+    handle_y = slider_y - view.style.handle_height_offset / 2  # Center handle on track
 
     return (slider_x, slider_y, slider_width, slider_height, handle_x, handle_y, handle_width, handle_height)
 end
@@ -139,24 +139,33 @@ function draw_step_markers_as_lines(view::HorizontalSliderView, slider_x::Float3
         Int(round((view.state.max_value - view.state.min_value) / view.steps)) + 1
     end
 
-    if num_markers <= 1
+    # Need at least 3 markers to have intermediate ones (remove first and last)
+    if num_markers <= 2
         return
     end
 
-    # Create batch of lines for all step markers
+    # Create batch of lines for step markers (excluding first and last)
     marker_lines = Vector{SimpleLine}()
 
     marker_color = active_style.marker_color
     marker_width = 2.0f0
-    marker_height = slider_height * 1.5f0
 
-    # Calculate vertical position for markers (centered on track)
-    marker_y_start = slider_y - (marker_height - slider_height) / 2
+    # Make markers fit inside the slider background height
+    marker_height = slider_height * 0.8f0  # 80% of track height to stay inside
+
+    # Calculate vertical position for markers (centered on track, inside background)
+    marker_y_start = slider_y + (slider_height - marker_height) / 2
     marker_y_end = marker_y_start + marker_height
 
-    for i in 0:(num_markers-1)
+    handle_width = view.style.handle_width
+
+    # Draw only intermediate markers (skip i=0 and i=num_markers-1)
+    for i in 1:(num_markers-2)
         marker_ratio = Float32(i / (num_markers - 1))
-        marker_x = slider_x + marker_ratio * slider_width
+
+        # Align with handle center: account for handle width in positioning
+        # Handle center is at: slider_x + marker_ratio * (slider_width - handle_width) + handle_width/2
+        marker_x = slider_x + marker_ratio * (slider_width - handle_width) + handle_width / 2
 
         # Create vertical line points
         start_point = Point2f(marker_x, marker_y_start)
@@ -258,6 +267,31 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
 
 end
 
+function measure(view::HorizontalSliderView)
+    # Calculate required height: handle height (track + offset) plus some margin
+    required_height = view.style.track_height + view.style.handle_height_offset + 4.0f0  # 2px margin top/bottom
+    # Width: use minimum width from style
+    min_width = view.style.min_width
+
+    return (min_width, required_height)
+end
+
+function measure_width(view::HorizontalSliderView, available_height::Float32)::Float32
+    # For horizontal sliders, width is independent of available height
+    # Return minimum width from style
+    return view.style.min_width
+end
+
+function measure_height(view::HorizontalSliderView, available_width::Float32)::Float32
+    # For horizontal sliders, height is independent of available width
+    # Calculate required height: handle height (track + offset) plus some margin
+    return view.style.track_height + view.style.handle_height_offset + 4.0f0  # 2px margin top/bottom
+end
+
 function preferred_height(view::HorizontalSliderView)::Bool
     return true
+end
+
+function preferred_width(view::HorizontalSliderView)::Bool
+    return false  # Slider can expand to fill available width
 end

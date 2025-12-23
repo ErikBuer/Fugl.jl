@@ -76,7 +76,7 @@ function main()
                     # Basic slider (now using SliderState)
                     Card(
                         "Basic Slider with State Management",
-                        Column([
+                        IntrinsicColumn([
                             HorizontalSlider(
                                 basic_slider_state[];
                                 style=default_dark_slider,
@@ -96,7 +96,7 @@ function main()
                     # Continuous slider with state
                     Card(
                         "Continuous Slider with State",
-                        Column([
+                        IntrinsicColumn([
                             HorizontalSlider(
                                 continuous_state[];
                                 style=default_dark_slider,
@@ -116,7 +116,7 @@ function main()
                     # Discrete steps slider
                     Card(
                         "Discrete Steps Slider (11 positions)",
-                        Column([
+                        IntrinsicColumn([
                             HorizontalSlider(
                                 discrete_state[];
                                 steps=11,  # 0-10 in steps of 1
