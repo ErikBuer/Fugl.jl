@@ -166,12 +166,17 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
                py >= slider_y - 5.0f0 && py <= slider_y + slider_height + 5.0f0  # Slightly larger hit area
     end
 
-    # Track focus based on mouse hover
+    # Update hover state for the hover registry
+    comp_id = component_id(slider_x, slider_y, slider_width, slider_height)
     mouse_inside = inside_slider(mouse_state.x, mouse_state.y)
+    update_hover_state!(comp_id, mouse_inside)
+
+    # Use hover registry for focus state (simpler than manual tracking)
+    is_currently_hovered = is_hovered(slider_x, slider_y, slider_width, slider_height)
 
     # Handle drag end
     if view.state.is_dragging && mouse_state.button_state[LeftButton] == IsReleased
-        new_state = SliderState(view.state; is_dragging=false, is_focused=mouse_inside)
+        new_state = SliderState(view.state; is_dragging=false, is_focused=is_currently_hovered)
         view.on_state_change(new_state)
         return
     end
@@ -224,9 +229,9 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
         return
     end
 
-    # Update focus state based on hover
-    if view.state.is_focused != mouse_inside && !view.state.is_dragging
-        new_state = SliderState(view.state; is_focused=mouse_inside)
+    # Update focus state based on hover registry (simplified)
+    if view.state.is_focused != is_currently_hovered && !view.state.is_dragging
+        new_state = SliderState(view.state; is_focused=is_currently_hovered)
         view.on_state_change(new_state)
     end
 end
