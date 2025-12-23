@@ -16,6 +16,7 @@ struct HorizontalSliderView{T<:Real} <: SizedView
     style::SliderStyle              # Style for the slider
     on_state_change::Function       # Callback for state changes
     on_change::Function             # Callback for value changes only
+    on_interaction_state_change::Function  # Callback for interaction state changes
 end
 
 function HorizontalSlider(
@@ -23,9 +24,10 @@ function HorizontalSlider(
     steps::Union{Nothing,Int,T}=nothing,
     style=SliderStyle(),
     on_state_change::Function=(new_state) -> nothing,
-    on_change::Function=(new_value) -> nothing
+    on_change::Function=(new_value) -> nothing,
+    on_interaction_state_change::Function=(new_interaction_state) -> nothing
 ) where T<:Real
-    return HorizontalSliderView(state, steps, style, on_state_change, on_change)
+    return HorizontalSliderView(state, steps, style, on_state_change, on_change, on_interaction_state_change)
 end
 
 function apply_layout(view::HorizontalSliderView, x::Float32, y::Float32, width::Float32, height::Float32)
@@ -52,13 +54,15 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
     (slider_x, slider_y, slider_width, slider_height, handle_x, handle_y, handle_width, handle_height) = apply_layout(view, x, y, width, height)
 
     # Choose colors based on focus/drag state
-    bg_color = view.state.is_focused ?
+    is_focused = view.state.interaction_state !== nothing && view.state.interaction_state.is_focused
+
+    bg_color = is_focused ?
                Vec4{Float32}(0.85f0, 0.85f0, 0.9f0, 1.0f0) :
                view.style.background_color
 
     handle_color = if view.state.is_dragging
         Vec4{Float32}(0.5f0, 0.65f0, 0.85f0, 1.0f0)  # Blue when dragging
-    elseif view.state.is_focused
+    elseif is_focused
         Vec4{Float32}(0.6f0, 0.75f0, 0.8f0, 1.0f0)   # Lighter when focused
     else
         view.style.handle_color
@@ -166,17 +170,35 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
                py >= slider_y - 5.0f0 && py <= slider_y + slider_height + 5.0f0  # Slightly larger hit area
     end
 
-    # Update hover state for the hover registry
-    comp_id = component_id(slider_x, slider_y, slider_width, slider_height)
-    mouse_inside = inside_slider(mouse_state.x, mouse_state.y)
-    update_hover_state!(comp_id, mouse_inside)
+    # Update interaction state
+    if view.state.interaction_state !== nothing
+        is_mouse_inside = inside_slider(mouse_state.x, mouse_state.y)
+        is_mouse_pressed = is_mouse_inside && mouse_state.button_state[LeftButton] == IsPressed
+        current_time = time()
 
-    # Use hover registry for focus state (simpler than manual tracking)
-    is_currently_hovered = is_hovered(slider_x, slider_y, slider_width, slider_height)
+        new_interaction_state = update_interaction_state(
+            view.state.interaction_state,
+            is_mouse_inside,
+            is_mouse_pressed,
+            current_time
+        )
 
-    # Handle drag end
+        # Update the slider state with new interaction state and use for focus
+        is_currently_hovered = new_interaction_state.is_hovered
+
+        # Notify of interaction state changes
+        if new_interaction_state != view.state.interaction_state
+            view.on_interaction_state_change(new_interaction_state)
+            # Also update the slider state with new interaction state
+            updated_slider_state = SliderState(view.state; interaction_state=new_interaction_state)
+            view.on_state_change(updated_slider_state)
+        end
+    else
+        # No interaction state - disable focus behavior
+        is_currently_hovered = false
+    end    # Handle drag end
     if view.state.is_dragging && mouse_state.button_state[LeftButton] == IsReleased
-        new_state = SliderState(view.state; is_dragging=false, is_focused=is_currently_hovered)
+        new_state = SliderState(view.state; is_dragging=false)
         view.on_state_change(new_state)
         return
     end
@@ -198,12 +220,12 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
         end
 
         if snapped_value != view.state.value
-            new_state = SliderState(view.state; value=snapped_value, is_dragging=true, is_focused=true)
+            new_state = SliderState(view.state; value=snapped_value, is_dragging=true)
             view.on_state_change(new_state)
             view.on_change(snapped_value)
         elseif !view.state.is_dragging
             # Start dragging
-            new_state = SliderState(view.state; is_dragging=true, is_focused=true)
+            new_state = SliderState(view.state; is_dragging=true)
             view.on_state_change(new_state)
         end
         return
@@ -223,17 +245,12 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
             apply_step_snapping(raw_value, view.state.min_value, view.state.max_value, view.steps)
         end
 
-        new_state = SliderState(view.state; value=snapped_value, is_focused=true)
+        new_state = SliderState(view.state; value=snapped_value)
         view.on_state_change(new_state)
         view.on_change(snapped_value)
         return
     end
 
-    # Update focus state based on hover registry (simplified)
-    if view.state.is_focused != is_currently_hovered && !view.state.is_dragging
-        new_state = SliderState(view.state; is_focused=is_currently_hovered)
-        view.on_state_change(new_state)
-    end
 end
 
 function preferred_height(view::HorizontalSliderView)::Bool

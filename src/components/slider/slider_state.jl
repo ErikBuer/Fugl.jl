@@ -6,40 +6,28 @@ struct SliderState{T<:Real}
     value::T
     min_value::T
     max_value::T
-    is_focused::Bool
     is_dragging::Bool
+    interaction_state::Union{Nothing,InteractionState}
 end
 
 """
 Create a new SliderState with the given value within the specified range.
 """
-function SliderState(value::T, min_value::T, max_value::T; is_focused::Bool=false, is_dragging::Bool=false) where T<:Real
+function SliderState(value::T, min_value::T, max_value::T; is_dragging::Bool=false, interaction_state::Union{Nothing,InteractionState}=nothing) where T<:Real
     clamped_value = clamp(value, min_value, max_value)
-    return SliderState(clamped_value, min_value, max_value, is_focused, is_dragging)
+    return SliderState(clamped_value, min_value, max_value, is_dragging, interaction_state)
 end
 
 """
 Create a new SliderState with automatic type conversion to the specified output type.
 Useful for creating sliders that output specific types (e.g., Int for discrete values).
 """
-function SliderState(::Type{T}, value, min_value, max_value; is_focused::Bool=false, is_dragging::Bool=false) where T<:Real
+function SliderState(::Type{T}, value, min_value, max_value; is_dragging::Bool=false, interaction_state::Union{Nothing,InteractionState}=nothing) where T<:Real
     converted_value = T(value)
     converted_min = T(min_value)
     converted_max = T(max_value)
     clamped_value = clamp(converted_value, converted_min, converted_max)
-    return SliderState(clamped_value, converted_min, converted_max, is_focused, is_dragging)
-end
-
-"""
-Create a new SliderState with automatic type conversion to the specified output type.
-Useful for creating sliders that output specific types (e.g., Int for discrete values).
-"""
-function SliderState(::Type{T}, value, min_value, max_value; is_focused::Bool=false, is_dragging::Bool=false) where T<:Real
-    converted_value = T(value)
-    converted_min = T(min_value)
-    converted_max = T(max_value)
-    clamped_value = clamp(converted_value, converted_min, converted_max)
-    return SliderState(clamped_value, converted_min, converted_max, is_focused, is_dragging)
+    return SliderState(clamped_value, converted_min, converted_max, is_dragging, interaction_state)
 end
 
 """
@@ -49,11 +37,11 @@ function SliderState(state::SliderState{T};
     value=state.value,
     min_value=state.min_value,
     max_value=state.max_value,
-    is_focused=state.is_focused,
-    is_dragging=state.is_dragging) where T<:Real
+    is_dragging=state.is_dragging,
+    interaction_state=state.interaction_state) where T<:Real
 
     clamped_value = clamp(value, min_value, max_value)
-    return SliderState(clamped_value, min_value, max_value, is_focused, is_dragging)
+    return SliderState(clamped_value, min_value, max_value, is_dragging, interaction_state)
 end
 
 """

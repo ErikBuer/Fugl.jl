@@ -25,14 +25,24 @@ struct ContainerView <: AbstractView
     pressed_style::Union{Nothing,ContainerStyle}
     on_click::Function
     on_mouse_down::Function
+    interaction_state::Union{Nothing,InteractionState}
+    on_interaction_state_change::Function
 end
 
 """
 The `Container` is the most basic GUI component that can contain another component.
 It is the most basic building block of the GUI system.
 """
-function Container(child::AbstractView=EmptyView(); style=ContainerStyle(), hover_style::Union{Nothing,ContainerStyle}=nothing, pressed_style::Union{Nothing,ContainerStyle}=nothing, on_click::Function=() -> nothing, on_mouse_down::Function=() -> nothing)
-    return ContainerView(child, style, hover_style, pressed_style, on_click, on_mouse_down)
+function Container(child::AbstractView=EmptyView();
+    style=ContainerStyle(),
+    hover_style::Union{Nothing,ContainerStyle}=nothing,
+    pressed_style::Union{Nothing,ContainerStyle}=nothing,
+    on_click::Function=() -> nothing,
+    on_mouse_down::Function=() -> nothing,
+    interaction_state::Union{Nothing,InteractionState}=nothing,
+    on_interaction_state_change::Function=(new_state) -> nothing
+)
+    return ContainerView(child, style, hover_style, pressed_style, on_click, on_mouse_down, interaction_state, on_interaction_state_change)
 end
 
 function measure(view::ContainerView)::Tuple{Float32,Float32}
@@ -92,11 +102,17 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
 
     # Choose style based on interaction state
     # Priority: pressed > hover > normal (pressed takes precedence over hover)
-    active_style = if container.pressed_style !== nothing && is_pressed(x, y, width, height)
-        container.pressed_style
-    elseif container.hover_style !== nothing && is_hovered(x, y, width, height)
-        container.hover_style
+    active_style = if container.interaction_state !== nothing
+        # Use pure interaction state
+        if container.pressed_style !== nothing && container.interaction_state.is_pressed
+            container.pressed_style
+        elseif container.hover_style !== nothing && container.interaction_state.is_hovered
+            container.hover_style
+        else
+            container.style
+        end
     else
+        # No interaction state - use default style
         container.style
     end
 
@@ -120,20 +136,24 @@ Detect clicks on the container and its child.
 function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
     (child_x, child_y, child_width, child_height) = apply_layout(view, x, y, width, height)
 
-    # Update hover and pressed state if styling is enabled
-    if view.hover_style !== nothing || view.pressed_style !== nothing
-        comp_id = component_id(Float32(x), Float32(y), Float32(width), Float32(height))
+    # Update interaction state if enabled
+    if view.interaction_state !== nothing
         is_mouse_inside = inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+        is_mouse_pressed = is_mouse_inside && mouse_state.button_state[LeftButton] == IsPressed
 
-        # Update hover state
-        if view.hover_style !== nothing
-            update_hover_state!(comp_id, is_mouse_inside)
-        end
+        # For now, use a simple time (we can enhance this later with proper time management)
+        current_time = time()
 
-        # Update pressed state
-        if view.pressed_style !== nothing
-            is_mouse_pressed = is_mouse_inside && mouse_state.button_state[LeftButton] == IsPressed
-            update_pressed_state!(comp_id, is_mouse_pressed)
+        new_interaction_state = update_interaction_state(
+            view.interaction_state,
+            is_mouse_inside,
+            is_mouse_pressed,
+            current_time
+        )
+
+        # Notify of interaction state changes
+        if new_interaction_state != view.interaction_state
+            view.on_interaction_state_change(new_interaction_state)
         end
     end
 
