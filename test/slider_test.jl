@@ -51,7 +51,8 @@ function main()
             handle_color=Vec4f(1.0, 0.4, 0.4, 1.0),
             border_color=Vec4f(0.6, 0.3, 0.3, 1.0),
             border_width=1.0f0,
-            radius=4.0f0
+            radius=4.0f0,
+            marker_color=nothing
         )
 
         green_slider_style = SliderStyle(
@@ -59,7 +60,8 @@ function main()
             handle_color=Vec4f(0.4, 1.0, 0.4, 1.0),
             border_color=Vec4f(0.3, 0.6, 0.3, 1.0),
             border_width=1.0f0,
-            radius=4.0f0
+            radius=4.0f0,
+            marker_color=nothing
         )
 
         blue_slider_style = SliderStyle(
@@ -67,12 +69,13 @@ function main()
             handle_color=Vec4f(0.4, 0.4, 1.0, 1.0),
             border_color=Vec4f(0.3, 0.3, 0.6, 1.0),
             border_width=1.0f0,
-            radius=4.0f0
+            radius=4.0f0,
+            marker_color=nothing
         )
 
         Card(
             "Slider Test",
-            Column([
+            IntrinsicColumn([
                     # Basic slider (now using SliderState)
                     Card(
                         "Basic Slider with State Management",
@@ -136,7 +139,7 @@ function main()
                     # Fixed step size slider
                     Card(
                         "Fixed Step Size Slider (step=0.25)",
-                        Column([
+                        IntrinsicColumn([
                             HorizontalSlider(
                                 stepped_state[];
                                 steps=0.25,
@@ -156,7 +159,7 @@ function main()
                     # Color picker example
                     Card(
                         "RGB Color Picker Test",
-                        Column([
+                        IntrinsicColumn([
                             # Red slider
                             Row([
                                 Container(
@@ -221,32 +224,29 @@ function main()
                             ]),
 
                             # Color preview
-                            Container(
-                                Fugl.Text("Color Preview",
-                                    style=TextStyle(
-                                        color=Vec4f(1.0, 1.0, 1.0, 1.0),
-                                        size_px=16
+                            FixedHeight(
+                                Container(
+                                    Fugl.Text(
+                                        "Hex: #$(uppercase(string(rgb_r_state[].value, base=16, pad=2)))" *
+                                        "$(uppercase(string(rgb_g_state[].value, base=16, pad=2)))" *
+                                        "$(uppercase(string(rgb_b_state[].value, base=16, pad=2)))",
+                                        style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_px=16)
+                                    ),
+                                    style=ContainerStyle(
+                                        background_color=Vec4f(
+                                            rgb_r_state[].value / 255.0f0,
+                                            rgb_g_state[].value / 255.0f0,
+                                            rgb_b_state[].value / 255.0f0,
+                                            1.0
+                                        ),
+                                        border_color=Vec4f(0.6, 0.6, 0.6, 1.0),
+                                        border_width=2.0f0,
+                                        corner_radius=5.0f0,
+                                        padding=15.0f0
                                     )
                                 ),
-                                style=ContainerStyle(
-                                    background_color=Vec4f(
-                                        rgb_r_state[].value / 255.0f0,
-                                        rgb_g_state[].value / 255.0f0,
-                                        rgb_b_state[].value / 255.0f0,
-                                        1.0
-                                    ),
-                                    border_color=Vec4f(0.6, 0.6, 0.6, 1.0),
-                                    border_width=2.0f0,
-                                    corner_radius=5.0f0,
-                                    padding=15.0f0
-                                )
-                            ),
-
-                            # Hex value display
-                            Fugl.Text("Hex: #$(uppercase(string(rgb_r_state[].value, base=16, pad=2)))" *
-                                      "$(uppercase(string(rgb_g_state[].value, base=16, pad=2)))" *
-                                      "$(uppercase(string(rgb_b_state[].value, base=16, pad=2)))",
-                                style=TextStyle(size_px=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))
+                                50.0f0
+                            )
                         ]),
                         style=dark_card_style,
                         title_style=dark_card_title_style

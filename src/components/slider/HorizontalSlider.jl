@@ -106,8 +106,8 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
         )
     end
 
-    # Draw step markers if steps are defined (using line drawing for performance)
-    if view.steps !== nothing
+    # Draw step markers if steps are defined and markers are enabled (using line drawing for performance)
+    if view.steps !== nothing && active_style.marker_color !== nothing
         draw_step_markers_as_lines(view, slider_x, slider_y, slider_width, slider_height, active_style, projection_matrix)
     end
 
@@ -128,7 +128,7 @@ end
 
 # Draw step markers as lines for better performance
 function draw_step_markers_as_lines(view::HorizontalSliderView, slider_x::Float32, slider_y::Float32, slider_width::Float32, slider_height::Float32, active_style::SliderStyle, projection_matrix::Mat4{Float32})
-    if view.steps === nothing
+    if view.steps === nothing || active_style.marker_color === nothing
         return
     end
 
