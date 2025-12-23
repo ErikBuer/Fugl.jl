@@ -8,8 +8,10 @@ function TextButton(text::String;
     hover_style::Union{Nothing,ContainerStyle}=nothing,
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
     text_style=TextStyle(),
+    interaction_state::Union{Nothing,InteractionState}=nothing,
+    on_interaction_state_change::Function=(new_state) -> nothing
 )
-    return Container(Text(text, style=text_style), style=container_style, hover_style=hover_style, pressed_style=pressed_style, on_click=on_click, on_mouse_down=on_mouse_down)
+    return Container(Text(text, style=text_style), style=container_style, hover_style=hover_style, pressed_style=pressed_style, on_click=on_click, on_mouse_down=on_mouse_down, interaction_state=interaction_state, on_interaction_state_change=on_interaction_state_change)
 end
 
 """
