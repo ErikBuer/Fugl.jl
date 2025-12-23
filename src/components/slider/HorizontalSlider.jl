@@ -1,6 +1,7 @@
 include("slider_style.jl")
 include("slider_state.jl")
 
+
 """
 HorizontalSlider with state management and discrete step support.
 
@@ -105,9 +106,9 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
         )
     end
 
-    # Draw step markers if steps are defined
+    # Draw step markers if steps are defined (using line drawing for performance)
     if view.steps !== nothing
-        draw_step_markers(view, slider_x, slider_y, slider_width, slider_height, projection_matrix)
+        draw_step_markers_as_lines(view, slider_x, slider_y, slider_width, slider_height, active_style, projection_matrix)
     end
 
     # Draw the slider handle
@@ -125,7 +126,8 @@ function interpret_view(view::HorizontalSliderView, x::Float32, y::Float32, widt
     )
 end
 
-function draw_step_markers(view::HorizontalSliderView, slider_x::Float32, slider_y::Float32, slider_width::Float32, slider_height::Float32, projection_matrix::Mat4{Float32})
+# Draw step markers as lines for better performance
+function draw_step_markers_as_lines(view::HorizontalSliderView, slider_x::Float32, slider_y::Float32, slider_width::Float32, slider_height::Float32, active_style::SliderStyle, projection_matrix::Mat4{Float32})
     if view.steps === nothing
         return
     end
@@ -141,38 +143,31 @@ function draw_step_markers(view::HorizontalSliderView, slider_x::Float32, slider
         return
     end
 
-    # Choose active style for marker color
-    is_focused = view.state.interaction_state.is_focused
-    active_style = if view.state.is_dragging && view.dragging_style !== nothing
-        view.dragging_style
-    elseif is_focused && view.focused_style !== nothing
-        view.focused_style
-    else
-        view.style
-    end
+    # Create batch of lines for all step markers
+    marker_lines = Vector{SimpleLine}()
 
     marker_color = active_style.marker_color
     marker_width = 2.0f0
     marker_height = slider_height * 1.5f0
 
+    # Calculate vertical position for markers (centered on track)
+    marker_y_start = slider_y - (marker_height - slider_height) / 2
+    marker_y_end = marker_y_start + marker_height
+
     for i in 0:(num_markers-1)
         marker_ratio = Float32(i / (num_markers - 1))
-        marker_x = slider_x + marker_ratio * slider_width - marker_width / 2
-        marker_y = slider_y - (marker_height - slider_height) / 2
+        marker_x = slider_x + marker_ratio * slider_width
 
-        marker_vertices = generate_rectangle_vertices(marker_x, marker_y, marker_width, marker_height)
-        draw_rounded_rectangle(
-            marker_vertices,
-            marker_width,
-            marker_height,
-            marker_color,
-            Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0),
-            0.0f0,
-            0.5f0,
-            projection_matrix,
-            1.0f0
-        )
+        # Create vertical line points
+        start_point = Point2f(marker_x, marker_y_start)
+        end_point = Point2f(marker_x, marker_y_end)
+
+        # Add line to batch
+        push!(marker_lines, SimpleLine([start_point, end_point], marker_color, marker_width, SOLID))
     end
+
+    # Draw all marker lines in one batch
+    draw_lines(marker_lines, projection_matrix)
 end
 
 function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
