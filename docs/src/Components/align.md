@@ -45,3 +45,34 @@ nothing #hide
 ```
 
 ![Vertical alignment example](vertical_alignment.png)
+
+## Convenience Functions
+
+For shorter code, you can use these convenience functions:
+
+``` @example AlignConvenienceExample
+using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Column(
+            # Horizontal alignment shortcuts
+            AlignLeft(FixedSize(Container(Text("Left")), 100, 30)),
+            AlignCenter(FixedSize(Container(Text("Center")), 100, 30)),
+            AlignRight(FixedSize(Container(Text("Right")), 100, 30)),
+            # Vertical alignment shortcuts
+            Row(
+                AlignTop(IntrinsicSize(Container(Text("Top")))),
+                AlignMiddle(IntrinsicSize(Container(Text("Middle")))),
+                AlignBottom(IntrinsicSize(Container(Text("Bottom")))),
+            )
+        )
+    )
+end
+
+screenshot(MyApp, "alignment_convenience.png", 812, 400);
+nothing #hide
+```
+
+![Alignment convenience functions](alignment_convenience.png)
