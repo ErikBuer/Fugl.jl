@@ -32,8 +32,8 @@ focus_state = Ref("No focus events yet")
 text_box_state = Ref(EditorState("Click me to see focus events"))
 
 function MyApp()
-    Column(
-        Text(focus_state[]),
+    Card(
+        focus_state[],
         TextBox(
             text_box_state[];
             on_state_change=(new_state) -> text_box_state[] = new_state,

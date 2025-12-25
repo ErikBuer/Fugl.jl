@@ -55,8 +55,8 @@ code_editor_state = Ref(EditorState("""# Click here to focus
 print("Hello World!")"""))
 
 function MyApp()
-    Column(
-        Text(focus_status[]; style=TextStyle(size_px=16, color=Vec4f(0.2, 0.4, 0.8, 1.0))),
+    Card(
+        focus_status[],
         CodeEditor(
             code_editor_state[];
             on_state_change=(new_state) -> code_editor_state[] = new_state,
