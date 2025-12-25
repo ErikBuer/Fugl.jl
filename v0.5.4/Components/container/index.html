@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Container · Fugl.jl</title><meta name="title" content="Container · Fugl.jl"/><meta property="og:title" content="Container · Fugl.jl"/><meta property="twitter:title" content="Container · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><span class="tocitem">Components</span><ul><li class="is-active"><a class="tocitem" href>Container</a><ul class="internal"><li><a class="tocitem" href="#Style"><span>Style</span></a></li></ul></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">Sliders</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-2-20" type="checkbox"/><label class="tocitem" for="menuitem-2-20"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Container</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Container</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/container.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Container"><a class="docs-heading-anchor" href="#Container">Container</a><a id="Container-1"></a><a class="docs-heading-anchor-permalink" href="#Container" title="Permalink"></a></h1><p>The most basic UI component.</p><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    Container()
+end
+
+screenshot(MyApp, &quot;container.png&quot;, 400, 300);</code></pre><p><img src="../container.png" alt="Container"/></p><p>You can add a child component to a cointainer, as such:</p><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    Container(
+        Container()
+    )
+end
+
+screenshot(MyApp, &quot;container_child.png&quot;, 400, 300);</code></pre><p><img src="../container_child.png" alt="Container"/></p><h2 id="Style"><a class="docs-heading-anchor" href="#Style">Style</a><a id="Style-1"></a><a class="docs-heading-anchor-permalink" href="#Style" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+my_style = ContainerStyle(;
+    background_color=Vec4{Float32}(0.3f0, 0.7f0, 0.7f0, 1.0f0),
+    border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
+    border_width=1.0f0,
+    padding=25.0f0,
+    corner_radius=25.0f0
+)
+
+my_style2 = ContainerStyle(;
+    background_color=Vec4{Float32}(0.7f0, 0.3f0, 0.3f0, 1.0f0),
+    border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
+    border_width=5.0f0,
+    corner_radius=25.0f0
+)
+
+function MyApp()
+    Container(
+        Container(
+            Container(; style=my_style2);
+            style=my_style
+        )
+    )
+end
+
+screenshot(MyApp, &quot;container_style.png&quot;, 812, 300);</code></pre><p><img src="../container_style.png" alt="Container Style"/></p><h3 id="Corner-Radius"><a class="docs-heading-anchor" href="#Corner-Radius">Corner Radius</a><a id="Corner-Radius-1"></a><a class="docs-heading-anchor-permalink" href="#Corner-Radius" title="Permalink"></a></h3><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    Container(
+        IntrinsicRow([
+            Container(; style=ContainerStyle(corner_radius=0.0f0)),
+            Container(; style=ContainerStyle(corner_radius=15.0f0)),
+            Container(; style=ContainerStyle(corner_radius=40.0f0))
+        ], spacing=20.0f0)
+    )
+end
+
+screenshot(MyApp, &quot;container_corner_radius.png&quot;, 812, 180);</code></pre><p><img src="../container_corner_radius.png" alt="Corner Radius Example"/></p><h3 id="Border-Width"><a class="docs-heading-anchor" href="#Border-Width">Border Width</a><a id="Border-Width-1"></a><a class="docs-heading-anchor-permalink" href="#Border-Width" title="Permalink"></a></h3><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    Container(
+        IntrinsicRow([
+            Container(; style=ContainerStyle(border_width=0.0f0)),
+            Container(; style=ContainerStyle(border_width=4.0f0)),
+            Container(; style=ContainerStyle(border_width=10.0f0))
+        ], spacing=20.0f0)
+    )
+end
+
+screenshot(MyApp, &quot;container_border_width.png&quot;, 812, 180);</code></pre><p><img src="../container_border_width.png" alt="Border Width Example"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Fugl.jl</a><a class="docs-footer-nextpage" href="../card/">Card »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.15.0 on <span class="colophon-date" title="Tuesday 28 October 2025 19:40">Tuesday 28 October 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
