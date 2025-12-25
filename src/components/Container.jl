@@ -23,6 +23,8 @@ struct ContainerView <: AbstractView
     style::ContainerStyle
     hover_style::Union{Nothing,ContainerStyle}
     pressed_style::Union{Nothing,ContainerStyle}
+    disabled::Bool
+    disabled_style::Union{Nothing,ContainerStyle}
     on_click::Function
     on_mouse_down::Function
     interaction_state::Union{Nothing,InteractionState}
@@ -37,12 +39,14 @@ function Container(child::AbstractView=EmptyView();
     style=ContainerStyle(),
     hover_style::Union{Nothing,ContainerStyle}=nothing,
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
+    disabled::Bool=false,
+    disabled_style::Union{Nothing,ContainerStyle}=nothing,
     on_click::Function=() -> nothing,
     on_mouse_down::Function=() -> nothing,
     interaction_state::Union{Nothing,InteractionState}=nothing,
     on_interaction_state_change::Function=(new_state) -> nothing
 )
-    return ContainerView(child, style, hover_style, pressed_style, on_click, on_mouse_down, interaction_state, on_interaction_state_change)
+    return ContainerView(child, style, hover_style, pressed_style, disabled, disabled_style, on_click, on_mouse_down, interaction_state, on_interaction_state_change)
 end
 
 function measure(view::ContainerView)::Tuple{Float32,Float32}
@@ -100,20 +104,21 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     # Compute the layout for the container
     (child_x, child_y, child_width, child_height) = apply_layout(container, x, y, width, height)
 
-    # Choose style based on interaction state
-    # Priority: pressed > hover > normal (pressed takes precedence over hover)
-    active_style = if container.interaction_state !== nothing
-        # Use pure interaction state
-        if container.pressed_style !== nothing && container.interaction_state.is_pressed
-            container.pressed_style
-        elseif container.hover_style !== nothing && container.interaction_state.is_hovered
-            container.hover_style
-        else
-            container.style
+    # Choose style based on state - start with default, then apply interaction styles, then disabled override
+    active_style = container.style
+
+    # Apply interaction styles if not disabled
+    if container.interaction_state !== nothing
+        if container.interaction_state.is_pressed && container.pressed_style !== nothing
+            active_style = container.pressed_style
+        elseif container.interaction_state.is_hovered && container.hover_style !== nothing
+            active_style = container.hover_style
         end
-    else
-        # No interaction state - use default style
-        container.style
+    end
+
+    # Disabled style always takes priority
+    if container.disabled && container.disabled_style !== nothing
+        active_style = container.disabled_style
     end
 
     vertex_positions = generate_rectangle_vertices(x, y, width, height)
@@ -126,7 +131,7 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
         active_style.anti_aliasing_width
     )
 
-    # Render the child
+    # Render the child - disabled only affects container interaction, not child appearance
     interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
 end
 
@@ -135,6 +140,13 @@ Detect clicks on the container and its child.
 """
 function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
     (child_x, child_y, child_width, child_height) = apply_layout(view, x, y, width, height)
+
+    # Skip all interactions if disabled
+    if view.disabled
+        # Still forward to child for non-interactive components
+        detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
+        return
+    end
 
     # Update interaction state if enabled
     if view.interaction_state !== nothing

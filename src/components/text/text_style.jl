@@ -12,3 +12,14 @@ function TextStyle(;
     font = get_font_by_path(font_path)
     return TextStyle(font, size_px, color)
 end
+
+"""
+Copy constructor for TextStyle that allows overriding specific fields.
+"""
+function TextStyle(base::TextStyle;
+    font=base.font,
+    size_px=base.size_px,
+    color=base.color
+)
+    return TextStyle(font, size_px, color)
+end
