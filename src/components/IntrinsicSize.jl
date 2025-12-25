@@ -33,8 +33,13 @@ function interpret_view(view::IntrinsicSizeView, x::Float32, y::Float32, width::
 end
 
 function detect_click(view::IntrinsicSizeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
-    # Forward the click detection to the child
-    detect_click(view.child, mouse_state, x, y, width, height)
+    # Use the same size calculation as interpret_view
+    intrinsic_width, intrinsic_height = measure(view.child)
+    final_width = min(intrinsic_width, width)
+    final_height = min(intrinsic_height, height)
+
+    # Forward the click detection to the child with correct dimensions
+    detect_click(view.child, mouse_state, x, y, final_width, final_height)
 end
 
 function measure(view::IntrinsicSizeView)::Tuple{Float32,Float32}
