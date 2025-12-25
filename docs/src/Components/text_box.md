@@ -23,6 +23,32 @@ nothing #hide
 
 ![Text Box](textBox.png)
 
+## Focus and Blur Events
+
+``` @example FocusBlurTextBoxExample
+using Fugl
+
+focus_state = Ref("No focus events yet")
+text_box_state = Ref(EditorState("Click me to see focus events"))
+
+function MyApp()
+    Card(
+        focus_state[],
+        TextBox(
+            text_box_state[];
+            on_state_change=(new_state) -> text_box_state[] = new_state,
+            on_focus=() -> focus_state[] = "TextBox gained focus! 🎯",
+            on_blur=() -> focus_state[] = "TextBox lost focus 😔"
+        )
+    )
+end
+
+screenshot(MyApp, "textBoxFocusBlur.png", 812, 300);
+nothing #hide
+```
+
+![TextBox Focus/Blur Events](textBoxFocusBlur.png)
+
 ## Dark Theme Example
 
 ``` @example DarkTextBoxExample

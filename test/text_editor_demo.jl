@@ -18,7 +18,9 @@ end"""))
                     CodeEditor(
                         code_editor_state[];
                         on_state_change=(new_state) -> code_editor_state[] = new_state,
-                        on_change=(new_text) -> println("Code changed to: ", new_text[1:min(20, length(new_text))], "...")
+                        on_change=(new_text) -> println("Code changed to: ", new_text[1:min(20, length(new_text))], "..."),
+                        on_focus=() -> println("🎯 Code editor gained focus - start typing!"),
+                        on_blur=() -> println("💤 Code editor lost focus")
                     )
                 ),
 
@@ -28,7 +30,9 @@ end"""))
                     TextBox(
                         text_box_state[];
                         on_state_change=(new_state) -> text_box_state[] = new_state,
-                        on_change=(new_text) -> println("Text changed to: ", new_text[1:min(20, length(new_text))], "...")
+                        on_change=(new_text) -> println("Text changed to: ", new_text[1:min(20, length(new_text))], "..."),
+                        on_focus=() -> println("🎯 TextBox gained focus!"),
+                        on_blur=() -> println("😔 TextBox lost focus")
                     )
                 ),
             ],

@@ -90,6 +90,9 @@ export Table, TableStyle, TableState
 include("composite_components/buttons.jl")
 export TextButton, IconButton
 
+include("composite_components/FormattedTextField.jl")
+export FormattedTextField
+
 include("composite_components/NumberField.jl")
 export NumberField
 

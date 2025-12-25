@@ -12,12 +12,24 @@ function smart_parse(type::Type, text::String)
     end
 end
 
-function filter_input(new_state::EditorState, type::Type)
-    try
-        parsed_value = smart_parse(type, new_state.text)
-        return (EditorState(string(parsed_value)), parsed_value)
-    catch
-        return (EditorState(string(zero(type))), zero(type))
+function create_number_parser(type::Type)
+    return function (text::String)
+        try
+            parsed_value = smart_parse(type, text)
+            return (string(parsed_value), parsed_value)
+        catch
+            default_value = zero(type)
+            return (string(default_value), default_value)
+        end
+    end
+end
+
+function create_number_validator(type::Type)
+    return function (text::String)
+        # Replace comma with decimal point
+        text = replace(text, ',' => '.')
+        # Remove all non-numeric characters except for decimal point, sign, and scientific notation
+        return replace(text, r"[^0-9\.\-e]" => "")
     end
 end
 
@@ -25,8 +37,11 @@ end
     NumberField(
         state::EditorState=EditorState();
         type::Type=Float64,
+        style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
         on_state_change::Function=(new_state::EditorState) -> nothing,
-        on_change::Function=(new_text) -> nothing
+        on_change::Function=(parsed_value) -> nothing,
+        on_focus::Function=() -> nothing,
+        on_blur::Function=() -> nothing
     )
 
 Form field for entering numbers. New values are parsed on focus loss.
@@ -34,59 +49,29 @@ Form field for entering numbers. New values are parsed on focus loss.
 ## Arguments
 - `state::EditorState`: Initial state of the text box.
 - `type::Type`: The numeric type to parse the input as (default is `Float64`).
+- `style::TextEditorStyle`: Style for the text field.
 - `on_state_change::Function`: Callback for when the state changes. Must update a state ref or similar.
-- `on_change::Function`: Optional callback for when the text changes. Passes the new value in specified type.
+- `on_change::Function`: Optional callback for when parsing succeeds. Passes the parsed value in specified type.
+- `on_focus::Function`: Optional callback for when the component gains focus.
+- `on_blur::Function`: Optional callback for when the component loses focus.
 """
 function NumberField(
     state::EditorState=EditorState();
     type::Type=Float64,
     style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
     on_state_change::Function=(new_state::EditorState) -> nothing,
-    on_change::Function=(new_text) -> nothing
+    on_change::Function=(parsed_value) -> nothing,
+    on_focus::Function=() -> nothing,
+    on_blur::Function=() -> nothing
 )
-    height = style.text_style.size_px + 2 * style.padding + 1
-
-    return (
-        FixedHeight(
-        TextBox(
-            state,
-            style=style,
-            on_state_change=(new_state) -> begin
-                text = new_state.text
-                text = replace(text, ',' => '.')
-                # Remove all non-numeric characters except for decimal point and sign and a single "e".
-                text = replace(text, r"[^0-9\.\-e]" => "")
-                cleaned_State = EditorState(new_state; text=text)
-
-                # Check if this is a focus loss (was focused, now not focused)
-                focus_lost = state.is_focused && !new_state.is_focused
-
-                # Apply changes on focus loss
-                if focus_lost
-                    (filtered_state, parsed_value) = filter_input(cleaned_State, type)
-                    on_state_change(filtered_state)
-                    on_change(parsed_value)
-                else
-                    # Just update state without parsing/validating
-                    on_state_change(cleaned_State)
-                end
-            end,
-            on_change=(new_text) -> begin
-                # Check if Enter was pressed by looking for newline in the text change
-                if occursin('\n', new_text)
-                    # Remove the newline and apply validation
-                    clean_text = replace(new_text, '\n' => "")
-                    clean_text = replace(clean_text, ',' => '.')
-                    clean_text = replace(clean_text, r"[^0-9\.\-e]" => "")
-
-                    temp_state = EditorState(clean_text)
-                    (filtered_state, parsed_value) = filter_input(temp_state, type)
-                    on_state_change(filtered_state)
-                    on_change(parsed_value)
-                end
-                # Note: We don't call on_change for regular text changes since 
-                # NumberField only triggers on_change for validated values
-            end
-        ), height)
+    return FormattedTextField(
+        state;
+        parser=create_number_parser(type),
+        validator=create_number_validator(type),
+        style=style,
+        on_state_change=on_state_change,
+        on_change=on_change,
+        on_focus=on_focus,
+        on_blur=on_blur
     )
 end

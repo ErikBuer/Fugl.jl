@@ -44,3 +44,30 @@ nothing #hide
 ```
 
 ![Code Editor](CodeEditor.png)
+
+## Focus and Blur Events
+
+``` @example FocusBlurCodeEditorExample
+using Fugl
+
+focus_status = Ref("Click the code editor below")
+code_editor_state = Ref(EditorState("""# Click here to focus
+print("Hello World!")"""))
+
+function MyApp()
+    Card(
+        focus_status[],
+        CodeEditor(
+            code_editor_state[];
+            on_state_change=(new_state) -> code_editor_state[] = new_state,
+            on_focus=() -> focus_status[] = "🎯 Code editor is focused - start typing!",
+            on_blur=() -> focus_status[] = "💤 Code editor lost focus - click to refocus"
+        )
+    )
+end
+
+screenshot(MyApp, "codeEditorFocusBlur.png", 812, 350);
+nothing #hide
+```
+
+![CodeEditor Focus/Blur Events](codeEditorFocusBlur.png)
