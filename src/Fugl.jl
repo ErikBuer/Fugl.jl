@@ -14,6 +14,8 @@ include("matrices.jl")
 include("gl_context_state.jl")
 include("interaction_state.jl")
 export InteractionState
+include("overlay_system.jl")
+export add_overlay_function, render_overlays, clear_overlays
 include("shaders.jl")
 export initialize_shaders, register_shader_initializer!
 
@@ -195,6 +197,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
 
                     detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
                     interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, Float32(locked_state.x), Float32(locked_state.y))
+
+                    # Render overlays after main content
+                    render_overlays()
 
                     # Render overlay using compile-time selected function
                     overlay_function(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)
