@@ -69,12 +69,14 @@ function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float
     # Draw the main dropdown button
     draw_dropdown_button(view, x, y, width, button_height, projection_matrix, mouse_x, mouse_y)
 
-    # Draw the dropdown list if open
+    # If open, add dropdown list to overlay system, ensuring it draws on top of other UI.
     if view.state.is_open
         dropdown_y = y + button_height
         visible_items = min(length(view.state.options), view.style.max_visible_items)
         dropdown_height = visible_items * view.style.item_height_px
-        draw_dropdown_list(view, x, dropdown_y, width, dropdown_height, projection_matrix)
+
+        # Add overlay function to render dropdown list on top
+        add_overlay_function(() -> draw_dropdown_list(view, x, dropdown_y, width, dropdown_height, projection_matrix))
     end
 end
 
