@@ -26,7 +26,9 @@ end
         state::EditorState=EditorState();
         type::Type=Float64,
         on_state_change::Function=(new_state::EditorState) -> nothing,
-        on_change::Function=(new_text) -> nothing
+        on_change::Function=(new_text) -> nothing,
+        on_focus::Function=() -> nothing,
+        on_blur::Function=() -> nothing
     )
 
 Form field for entering numbers. New values are parsed on focus loss.
@@ -36,13 +38,17 @@ Form field for entering numbers. New values are parsed on focus loss.
 - `type::Type`: The numeric type to parse the input as (default is `Float64`).
 - `on_state_change::Function`: Callback for when the state changes. Must update a state ref or similar.
 - `on_change::Function`: Optional callback for when the text changes. Passes the new value in specified type.
+- `on_focus::Function`: Optional callback for when the component gains focus.
+- `on_blur::Function`: Optional callback for when the component loses focus.
 """
 function NumberField(
     state::EditorState=EditorState();
     type::Type=Float64,
     style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
     on_state_change::Function=(new_state::EditorState) -> nothing,
-    on_change::Function=(new_text) -> nothing
+    on_change::Function=(new_text) -> nothing,
+    on_focus::Function=() -> nothing,
+    on_blur::Function=() -> nothing
 )
     height = style.text_style.size_px + 2 * style.padding + 1
 
@@ -51,6 +57,8 @@ function NumberField(
         TextBox(
             state,
             style=style,
+            on_focus=on_focus,
+            on_blur=on_blur,
             on_state_change=(new_state) -> begin
                 text = new_state.text
                 text = replace(text, ',' => '.')

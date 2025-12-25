@@ -4,7 +4,9 @@
         max_length::Union{Int, Nothing}=nothing,
         style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
         on_state_change::Function=(new_state::EditorState) -> nothing,
-        on_change::Function=(new_text) -> nothing
+        on_change::Function=(new_text) -> nothing,
+        on_focus::Function=() -> nothing,
+        on_blur::Function=() -> nothing
     )
 
 Single-line form field for entering text. Supports optional length limiting.
@@ -15,13 +17,17 @@ Single-line form field for entering text. Supports optional length limiting.
 - `style::TextEditorStyle`: Style for the text field.
 - `on_state_change::Function`: Callback for when the state changes. Must update a state ref or similar.
 - `on_change::Function`: Optional callback for when the text changes. Passes the new text string.
+- `on_focus::Function`: Optional callback for when the component gains focus.
+- `on_blur::Function`: Optional callback for when the component loses focus.
 """
 function TextField(
     state::EditorState=EditorState();
     max_length::Union{Int,Nothing}=nothing,
     style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
     on_state_change::Function=(new_state::EditorState) -> nothing,
-    on_change::Function=(new_text) -> nothing
+    on_change::Function=(new_text) -> nothing,
+    on_focus::Function=() -> nothing,
+    on_blur::Function=() -> nothing
 )
     height = style.text_style.size_px + 2 * style.padding + 1
 
@@ -30,6 +36,8 @@ function TextField(
         TextBox(
             state,
             style=style,
+            on_focus=on_focus,
+            on_blur=on_blur,
             on_state_change=(new_state) -> begin
                 text = new_state.text
 

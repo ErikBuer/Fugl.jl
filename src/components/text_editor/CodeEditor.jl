@@ -5,15 +5,19 @@ struct CodeEditorView <: AbstractTextEditorView
     style::TextEditorStyle       # Style for the CodeEditor (using unified style)
     on_state_change::Function    # Callback for all state changes (focus, text, cursor)
     on_change::Function          # Optional callback for text changes only
+    on_focus::Function           # Optional callback for when component gains focus
+    on_blur::Function            # Optional callback for when component loses focus
 end
 
 function CodeEditor(
     state::EditorState;
     style=CodeEditorStyle(),  # Use the CodeEditor-specific default style
     on_state_change::Function=(new_state) -> nothing,
-    on_change::Function=(new_text) -> nothing
+    on_change::Function=(new_text) -> nothing,
+    on_focus::Function=() -> nothing,
+    on_blur::Function=() -> nothing
 )
-    return CodeEditorView(state, style, on_state_change, on_change)
+    return CodeEditorView(state, style, on_state_change, on_change, on_focus, on_blur)
 end
 
 function measure(view::CodeEditorView)::Tuple{Float32,Float32}
@@ -219,8 +223,12 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
             # Double-click: select word
             action = SelectWord(new_cursor_pos)
             new_state = apply_editor_action(view.state, action)
+            was_unfocused = !view.state.is_focused
             new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
             view.on_state_change(new_state)
+            if was_unfocused
+                view.on_focus()  # Call focus callback if component gained focus
+            end
 
         elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.is_dragging[LeftButton]
             # Mouse drag: extend selection
@@ -234,10 +242,14 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
             new_state = apply_editor_action(view.state, action)
 
             # Also handle focus if needed
+            was_unfocused = !view.state.is_focused
             if !view.state.is_focused
                 new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
             end
             view.on_state_change(new_state)
+            if was_unfocused
+                view.on_focus()  # Call focus callback
+            end
 
         elseif mouse_state.button_state[LeftButton] == IsReleased && has_selection(view.state)
             # Mouse released after dragging with selection: keep selection and don't move cursor
@@ -255,9 +267,11 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
                     nothing,  # Clear selection on click
                     nothing,
                     view.state.cached_lines,
-                    view.state.text_hash
+                    view.state.text_hash,
+                    view.state.cache_id
                 )
                 view.on_state_change(new_state)
+                view.on_focus()  # Call focus callback
             else
                 # Just cursor positioning - clear selection
                 new_state = EditorState(
@@ -267,7 +281,8 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
                     nothing,  # Clear selection on click
                     nothing,
                     view.state.cached_lines,
-                    view.state.text_hash
+                    view.state.text_hash,
+                    view.state.cache_id
                 )
                 view.on_state_change(new_state)
             end
@@ -280,6 +295,7 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
         # Focus change - create new state with focus=false
         new_state = EditorState(view.state; is_focused=false)
         view.on_state_change(new_state)
+        view.on_blur()  # Call blur callback
     end
 end
 
