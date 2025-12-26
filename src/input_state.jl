@@ -224,9 +224,6 @@ function scroll_callback(gl_window, xoffset, yoffset, mouse_state::InputState)
 end
 
 function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Action, mods::Int32, mouse_state::InputState)
-    # Update modifier keys state using the ModifierKeys constructor
-    mouse_state.modifier_keys = ModifierKeys(mods)
-
     if action == GLFW.PRESS || action == GLFW.REPEAT
         # Store raw key events for navigation and shortcuts
         key_event = KeyEvent(Int32(key), scancode, Int32(action), mods)
@@ -240,9 +237,23 @@ function key_callback(gl_window, key::GLFW.Key, scancode::Int32, action::GLFW.Ac
         elseif key == GLFW.KEY_TAB
             push!(mouse_state.key_buffer, '\t')
         end
-    elseif action == GLFW.RELEASE
-        # Update modifier keys on release too
-        mouse_state.modifier_keys = ModifierKeys(mods)
+    end
+
+    # Update modifier keys based on the current key and action, not just mods
+    current_mods = mouse_state.modifier_keys
+
+    if key == GLFW.KEY_LEFT_SHIFT || key == GLFW.KEY_RIGHT_SHIFT
+        new_shift = (action == GLFW.PRESS || action == GLFW.REPEAT)
+        mouse_state.modifier_keys = ModifierKeys(new_shift, current_mods.control, current_mods.alt, current_mods.super, current_mods.caps_lock, current_mods.num_lock)
+    elseif key == GLFW.KEY_LEFT_CONTROL || key == GLFW.KEY_RIGHT_CONTROL
+        new_control = (action == GLFW.PRESS || action == GLFW.REPEAT)
+        mouse_state.modifier_keys = ModifierKeys(current_mods.shift, new_control, current_mods.alt, current_mods.super, current_mods.caps_lock, current_mods.num_lock)
+    elseif key == GLFW.KEY_LEFT_ALT || key == GLFW.KEY_RIGHT_ALT
+        new_alt = (action == GLFW.PRESS || action == GLFW.REPEAT)
+        mouse_state.modifier_keys = ModifierKeys(current_mods.shift, current_mods.control, new_alt, current_mods.super, current_mods.caps_lock, current_mods.num_lock)
+    elseif key == GLFW.KEY_LEFT_SUPER || key == GLFW.KEY_RIGHT_SUPER
+        new_super = (action == GLFW.PRESS || action == GLFW.REPEAT)
+        mouse_state.modifier_keys = ModifierKeys(current_mods.shift, current_mods.control, current_mods.alt, new_super, current_mods.caps_lock, current_mods.num_lock)
     end
 end
 
