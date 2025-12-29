@@ -83,7 +83,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "tree_dark_example.png", 450, 600);
+screenshot(MyApp, "tree_dark_example.png", 400, 600);
 nothing #hide
 ```
 
