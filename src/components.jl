@@ -51,6 +51,9 @@ export IntrinsicRow
 include("components/Container.jl")
 export Container, ContainerStyle
 
+include("components/KeyListener.jl")
+export KeyListener
+
 include("components/slider/HorizontalSlider.jl")
 export HorizontalSlider, SliderState, SliderStyle
 
