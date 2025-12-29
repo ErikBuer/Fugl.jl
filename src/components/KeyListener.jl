@@ -1,25 +1,47 @@
 struct KeyListenerView <: AbstractView
     child::AbstractView  # Wrapped component
-    target_key::Int32  # GLFW key to listen for (e.g., Int32(GLFW.KEY_A), Int32(GLFW.KEY_ENTER))
-    modifiers::Union{Nothing,Int32}  # Optional modifier flags (GLFW.MOD_CONTROL, etc.)
-    on_key_press::Function  # Callback when target key is pressed
+    key_map::Dict{Tuple{Int32,Union{Nothing,Int32}},Function}  # Fast lookup: (key, modifiers) => callback
 end
 
 """
-KeyListener wraps another component and triggers a callback when a specific key is pressed.
+KeyListener wraps another component and triggers callbacks when specific keys are pressed.
 This allows adding keyboard shortcuts to any component.
 
 Usage:
-- `KeyListener(my_component, GLFW.KEY_A, () -> println("A pressed"))`
-- `KeyListener(my_component, GLFW.KEY_ENTER, () -> save_file())`
-- `KeyListener(my_component, GLFW.KEY_S, GLFW.MOD_CONTROL, () -> save_file())` Ctrl+S
+- `KeyListener(my_component, GLFW.KEY_A, () -> println("A pressed"))` Single key
+- `KeyListener(my_component, GLFW.KEY_S, GLFW.MOD_CONTROL, () -> save_file())` Single key with modifier
+- `KeyListener(my_component, [(GLFW.KEY_A, nothing, callback1), (GLFW.KEY_S, GLFW.MOD_CONTROL, callback2)])` Multiple keys
+- `KeyListener(my_component, [(GLFW.KEY_A, callback1), (GLFW.KEY_B, callback2)])` Multiple simple keys
 """
 function KeyListener(child::AbstractView, target_key::GLFW.Key, on_key_press::Function)
-    return KeyListenerView(child, Int32(target_key), nothing, on_key_press)
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
+    key_map[(Int32(target_key), nothing)] = on_key_press
+    return KeyListenerView(child, key_map)
 end
 
+# Single key with modifiers  
 function KeyListener(child::AbstractView, target_key::GLFW.Key, modifiers::Union{Int32,UInt16}, on_key_press::Function)
-    return KeyListenerView(child, Int32(target_key), Int32(modifiers), on_key_press)
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
+    key_map[(Int32(target_key), Int32(modifiers))] = on_key_press
+    return KeyListenerView(child, key_map)
+end
+
+# Multiple keys with optional modifiers
+function KeyListener(child::AbstractView, key_bindings::Vector{Tuple{GLFW.Key,Union{Nothing,Int32},Function}})
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
+    for (key, mods, callback) in key_bindings
+        key_map[(Int32(key), mods)] = callback
+    end
+    return KeyListenerView(child, key_map)
+end
+
+# Multiple keys without modifiers (simple format)
+function KeyListener(child::AbstractView, key_bindings::Vector{Tuple{GLFW.Key,Function}})
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
+    for (key, callback) in key_bindings
+        key_map[(Int32(key), nothing)] = callback
+    end
+    return KeyListenerView(child, key_map)
 end
 
 # Measurement functions - just pass through to child
@@ -41,22 +63,18 @@ function interpret_view(view::KeyListenerView, x::Float32, y::Float32, width::Fl
     interpret_view(view.child, x, y, width, height, projection_matrix, mouse_x, mouse_y)
 end
 
-# Key detection
+# Key detection - optimized single-loop implementation
 function detect_click(view::KeyListenerView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
     # Check for keyboard events in the input_state
     for key_event in input_state.key_events
-        # Check if this is a key press (GLFW.PRESS = 1) for our target key
-        if key_event.key == view.target_key && key_event.action == 1  # GLFW.PRESS
-            # Check modifiers if specified
-            if view.modifiers !== nothing
-                if key_event.mods == view.modifiers
-                    view.on_key_press()
-                    break
-                end
-            else
-                # No modifier requirements, just trigger on key press
-                view.on_key_press()
-                break
+        # Check if this is a key press (GLFW.PRESS = 1) 
+        if key_event.action == 1  # GLFW.PRESS
+            # O(1) hash lookup instead of O(n) linear search
+            key_signature = (key_event.key, key_event.mods == 0 ? nothing : key_event.mods)
+            callback = get(view.key_map, key_signature, nothing)
+            if callback !== nothing
+                callback()
+                break  # Found and executed callback, stop processing this key event
             end
         end
     end

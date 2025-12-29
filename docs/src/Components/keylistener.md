@@ -95,51 +95,51 @@ nothing #hide
 
 ![KeyListener Multiple](keylistener_multiple.png)
 
-## Complete Example with Multiple Shortcuts
+## Multiple Key Bindings Example
 
-``` @example KeyListenerComplete
+You can also define multiple key bindings in a single KeyListener using a vector of tuples:
+
+``` @example KeyListenerMultiple
 using Fugl
 
-message = Ref("Try: 'A' (simple), 'Ctrl+S' (save), 'Ctrl+Shift+O' (open)")
-status = Ref("")
+status = Ref("Ready - try various key combinations")
 
 function MyApp()
+    # Define key bindings with explicit type annotation
+    key_bindings = Tuple{Fugl.GLFW.Key, Union{Nothing, Int32}, Function}[
+        (Fugl.GLFW.KEY_A, nothing, () -> status[] = "A key pressed"),
+        (Fugl.GLFW.KEY_S, Fugl.GLFW.MOD_CONTROL, () -> status[] = "Ctrl+S: Save action"),
+        (Fugl.GLFW.KEY_O, Fugl.GLFW.MOD_CONTROL, () -> status[] = "Ctrl+O: Open action"),
+        (Fugl.GLFW.KEY_N, Fugl.GLFW.MOD_CONTROL | Fugl.GLFW.MOD_SHIFT, () -> status[] = "Ctrl+Shift+N: New window"),
+        (Fugl.GLFW.KEY_ESCAPE, nothing, () -> status[] = "Escape pressed"),
+    ]
+    
     Container(
         KeyListener(
-            KeyListener(
-                KeyListener(
-                    Container(
-                        IntrinsicColumn([
-                            Fugl.Text(message[], style=TextStyle(size_px=14)),
-                            Fugl.Text(status[], style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
-                        ], spacing=8.0f0),
-                        style=ContainerStyle(
-                            padding=20.0f0,
-                            background_color=Vec4f(0.95, 0.95, 0.98, 1.0),
-                            border_color=Vec4f(0.8, 0.8, 0.85, 1.0),
-                            border_width=1.0f0,
-                            corner_radius=8.0f0
-                        )
-                    ),
-                    Fugl.GLFW.KEY_A,
-                    () -> status[] = "Simple 'A' key pressed"
-                ),
-                Fugl.GLFW.KEY_S,
-                Fugl.GLFW.MOD_CONTROL,
-                () -> status[] = "Ctrl+S: Save action triggered"
+            Container(
+                IntrinsicColumn([
+                    Fugl.Text("Multi-Key Demo", style=TextStyle(size_px=16, color=Vec4f(0.2, 0.2, 0.2, 1.0))),
+                    Fugl.Text("Try: A, Ctrl+S, Ctrl+O, Ctrl+Shift+N, Escape", style=TextStyle(size_px=12, color=Vec4f(0.5, 0.5, 0.5, 1.0))),
+                    Fugl.Text(status[], style=TextStyle(size_px=14, color=Vec4f(0.1, 0.4, 0.1, 1.0)))
+                ], spacing=8.0f0),
+                style=ContainerStyle(
+                    padding=20.0f0,
+                    background_color=Vec4f(0.96, 0.97, 0.98, 1.0),
+                    border_color=Vec4f(0.85, 0.85, 0.9, 1.0),
+                    border_width=1.0f0,
+                    corner_radius=8.0f0
+                )
             ),
-            Fugl.GLFW.KEY_O,
-            Fugl.GLFW.MOD_CONTROL | Fugl.GLFW.MOD_SHIFT,
-            () -> status[] = "Ctrl+Shift+O: Open action triggered"
+            key_bindings
         )
     )
 end
 
-screenshot(MyApp, "keylistener_complete.png", 600, 250);
+screenshot(MyApp, "keylistener_multibind.png", 600, 200);
 nothing #hide
 ```
 
-![KeyListener Complete](keylistener_complete.png)
+![Multi-Key Bindings](keylistener_multibind.png)
 
 ## Common Key Combinations
 
