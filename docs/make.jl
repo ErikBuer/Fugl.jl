@@ -60,6 +60,7 @@ makedocs(
             ],
             "Components/table.md",
             "Components/tree.md",
+            "Components/keylistener.md",
         ],
         "adding_shaders.md",
         "interaction.md",
