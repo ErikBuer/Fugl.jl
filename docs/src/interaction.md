@@ -34,7 +34,6 @@ To add key listeners without creating a custom component, use the `KeyListener` 
 
 ``` @example KeyListenerBasic
 using Fugl
-using GLFW
 
 message = Ref("Press 'A' to trigger the callback")
 
@@ -49,7 +48,7 @@ function MyApp()
                     corner_radius=8.0f0
                 )
             ),
-            GLFW.KEY_A,
+            Fugl.GLFW.KEY_A,
             () -> message[] = "You pressed 'A'!"
         )
     )

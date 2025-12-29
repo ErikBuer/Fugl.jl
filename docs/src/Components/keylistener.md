@@ -7,7 +7,6 @@ This allows adding keyboard shortcuts to any component.
 
 ``` @example KeyListenerBasic
 using Fugl
-using GLFW
 
 message = Ref("Press 'A' to trigger the callback")
 
@@ -22,7 +21,7 @@ function MyApp()
                     corner_radius=8.0f0
                 )
             ),
-            GLFW.KEY_A,
+            Fugl.GLFW.KEY_A,
             () -> message[] = "You pressed 'A'!"
         )
     )
@@ -38,7 +37,6 @@ nothing #hide
 
 ``` @example KeyListenerModifier
 using Fugl
-using GLFW
 
 message = Ref("Press 'Ctrl+S' to save")
 
@@ -53,8 +51,8 @@ function MyApp()
                     corner_radius=8.0f0
                 )
             ),
-            GLFW.KEY_S,
-            GLFW.MOD_CONTROL,
+            Fugl.GLFW.KEY_S,
+            Fugl.GLFW.MOD_CONTROL,
             () -> message[] = "File saved!"
         )
     )
@@ -70,7 +68,6 @@ nothing #hide
 
 ``` @example KeyListenerMultiple
 using Fugl
-using GLFW
 
 message = Ref("Press 'Ctrl+Shift+N' for new window")
 
@@ -85,8 +82,8 @@ function MyApp()
                     corner_radius=8.0f0
                 )
             ),
-            GLFW.KEY_N,
-            GLFW.MOD_CONTROL | GLFW.MOD_SHIFT,  # Combine modifiers with bitwise OR
+            Fugl.GLFW.KEY_N,
+            Fugl.GLFW.MOD_CONTROL | Fugl.GLFW.MOD_SHIFT,  # Combine modifiers with bitwise OR
             () -> message[] = "New window opened!"
         )
     )
@@ -102,7 +99,6 @@ nothing #hide
 
 ``` @example KeyListenerComplete
 using Fugl
-using GLFW
 
 message = Ref("Try: 'A' (simple), 'Ctrl+S' (save), 'Ctrl+Shift+O' (open)")
 status = Ref("")
@@ -125,15 +121,15 @@ function MyApp()
                             corner_radius=8.0f0
                         )
                     ),
-                    GLFW.KEY_A,
+                    Fugl.GLFW.KEY_A,
                     () -> status[] = "Simple 'A' key pressed"
                 ),
-                GLFW.KEY_S,
-                GLFW.MOD_CONTROL,
+                Fugl.GLFW.KEY_S,
+                Fugl.GLFW.MOD_CONTROL,
                 () -> status[] = "Ctrl+S: Save action triggered"
             ),
-            GLFW.KEY_O,
-            GLFW.MOD_CONTROL | GLFW.MOD_SHIFT,
+            Fugl.GLFW.KEY_O,
+            Fugl.GLFW.MOD_CONTROL | Fugl.GLFW.MOD_SHIFT,
             () -> status[] = "Ctrl+Shift+O: Open action triggered"
         )
     )
