@@ -23,7 +23,7 @@ function MyApp()
                 )
             ),
             GLFW.KEY_A,
-            () -> message[] = "You pressed 'A'! 🎉"
+            () -> message[] = "You pressed 'A'!"
         )
     )
 end
