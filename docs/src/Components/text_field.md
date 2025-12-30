@@ -104,3 +104,35 @@ nothing #hide
 ```
 
 ![TextField](textField.png)
+
+## Focus and Blur Events
+
+TextField supports `on_focus` and `on_blur` callbacks for handling focus changes.
+This is useful to avoid doing bigger processing tasks for each letter change.
+
+``` @example TextFieldFocusBlur
+using Fugl
+
+status = Ref("Field is unfocused")
+text_state = Ref(EditorState("Click to focus"))
+
+function MyApp()
+    Container(
+        IntrinsicColumn([
+            Fugl.Text("Status: $(status[])", style=TextStyle(size_px=14, color=Vec4f(0.2, 0.6, 0.2, 1.0))),
+            TextField(
+                text_state[];
+                on_state_change=(new_state) -> text_state[] = new_state,
+                on_focus=() -> status[] = "Field is focused!",
+                on_blur=() -> status[] = "Field lost focus"
+            )
+        ], spacing=10.0f0),
+        style=ContainerStyle(padding=20.0f0, background_color=Vec4f(0.95, 0.95, 0.95, 1.0))
+    )
+end
+
+screenshot(MyApp, "textfield_focus_blur.png", 812, 120);
+nothing #hide
+```
+
+![TextField Focus Blur](textfield_focus_blur.png)
