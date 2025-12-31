@@ -54,6 +54,9 @@ function screenshot(ui_function::Function, output_file::String, width::Int, heig
 
     interpret_view(root_view, 0.0f0, 0.0f0, Float32(width), Float32(height), projection_matrix, 0.0f0, 0.0f0)
 
+    # Render overlays after main content (same as in main run function)
+    render_overlays()
+
     buffer = Array{UInt8}(undef, 3, width, height)  # RGB format
     ModernGL.glReadPixels(0, 0, width, height, ModernGL.GL_RGB, ModernGL.GL_UNSIGNED_BYTE, buffer)
 
