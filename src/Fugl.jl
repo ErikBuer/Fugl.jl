@@ -201,7 +201,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     # Render overlays after main content
                     render_overlays()
 
-                    # Render overlay using compile-time selected function
+                    # Render overlay using compile-time-selected function
                     overlay_function(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)
 
                 catch e
