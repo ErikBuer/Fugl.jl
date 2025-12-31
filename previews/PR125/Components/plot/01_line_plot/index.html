@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Line Plot · Fugl.jl</title><meta name="title" content="Line Plot · Fugl.jl"/><meta property="og:title" content="Line Plot · Fugl.jl"/><meta property="twitter:title" content="Line Plot · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Fugl.jl</a></li><li><a class="tocitem" href="../../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../../container/">Container</a></li><li><a class="tocitem" href="../../card/">Card</a></li><li><a class="tocitem" href="../../row_col/">Row/Column</a></li><li><a class="tocitem" href="../../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../../align/">Align</a></li><li><a class="tocitem" href="../../padding/">Padding</a></li><li><a class="tocitem" href="../../sizing/">Sizing</a></li><li><a class="tocitem" href="../../Rotate/">Rotate</a></li><li><a class="tocitem" href="../../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../../text/">Text</a></li><li><a class="tocitem" href="../../text_box/">TextBox</a></li><li><a class="tocitem" href="../../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../../image/">Image</a></li><li><a class="tocitem" href="../../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../../text_field/">TextField</a></li><li><a class="tocitem" href="../../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../../number_field/">NumberField</a></li><li><a class="tocitem" href="../../text_button/">TextButton</a></li><li><a class="tocitem" href="../../icon_button/">IconButton</a></li><li><a class="tocitem" href="../../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-22" type="checkbox" checked/><label class="tocitem" for="menuitem-3-22"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>Line Plot</a><ul class="internal"><li><a class="tocitem" href="#Fixed-Axis-Bounds-Example"><span>Fixed Axis Bounds Example</span></a></li><li><a class="tocitem" href="#State-Management-Example"><span>State Management Example</span></a></li></ul></li><li><a class="tocitem" href="../02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../../table/">Table</a></li><li><a class="tocitem" href="../../tree/">Tree</a></li></ul></li><li><a class="tocitem" href="../../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li><a class="is-disabled">Plot</a></li><li class="is-active"><a href>Line Plot</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Line Plot</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/plot/01_line_plot.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Line-Plot"><a class="docs-heading-anchor" href="#Line-Plot">Line Plot</a><a id="Line-Plot-1"></a><a class="docs-heading-anchor-permalink" href="#Line-Plot" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, LinePlotElement, SOLID, DASH, DOT
+
+function MyApp()
+    # Generate sample data for demonstration
+    x_data = collect(0.0:0.1:10.0)
+    y1_data = sin.(x_data)
+    y2_data = cos.(x_data)
+    y3_data = sin.(x_data .* 2) .* 0.5
+
+    # Dark theme card style
+    dark_card_style = ContainerStyle(
+        background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark background
+        border_color=Vec4f(0.25, 0.25, 0.30, 1.0),      # Subtle border
+        border_width=1.5f0,
+        padding=12.0f0,
+        corner_radius=6.0f0,
+        anti_aliasing_width=1.0f0
+    )
+
+    # Dark theme title style
+    dark_title_style = TextStyle(
+        size_px=18,
+        color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
+    )
+
+    # Create multiple plot elements with dark theme compatible colors
+    elements = [
+        LinePlotElement(y1_data; x_data=x_data,
+            color=Vec4{Float32}(0.4, 0.6, 0.9, 1.0),  # Bright blue for dark background
+            width=3.0f0,
+            line_style=SOLID,
+            )
+        LinePlotElement(y2_data; x_data=x_data,
+            color=Vec4{Float32}(0.9, 0.4, 0.4, 1.0),  # Bright red for dark background
+            width=2.5f0,
+            line_style=DASH,
+        )
+        LinePlotElement(y3_data; x_data=x_data,
+            color=Vec4{Float32}(0.4, 0.9, 0.4, 1.0),  # Bright green for dark background
+            width=2.0f0,
+            line_style=DOT,
+        )
+    ]
+
+    Card(
+        &quot;Dark Theme Plot Example&quot;,
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.08, 0.10, 0.14, 1.0),  # Very dark background matching TextBox
+                grid_color=Vec4{Float32}(0.25, 0.25, 0.30, 1.0),        # Subtle grid matching border colors
+                axis_color=Vec4{Float32}(0.9, 0.9, 0.95, 1.0),          # Light axes matching text color
+                show_grid=true,
+                padding=54.0f0,
+                x_label=&quot;Time (seconds)&quot;,
+                y_label=&quot;Amplitude&quot;,
+                show_x_label=true,
+                show_y_label=true,
+            )
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;linePlot.png&quot;, 812, 400);</code></pre><p><img src="../linePlot.png" alt="Line Plot"/></p><h2 id="Fixed-Axis-Bounds-Example"><a class="docs-heading-anchor" href="#Fixed-Axis-Bounds-Example">Fixed Axis Bounds Example</a><a id="Fixed-Axis-Bounds-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Fixed-Axis-Bounds-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, LinePlotElement, SOLID
+
+function MyApp()
+    # Generate sample data that extends beyond our desired view
+    x_data = collect(-2.0:0.1:12.0)
+    y_data = sin.(x_data) .* exp.(-x_data ./ 10)
+
+    # Create plot element
+    elements = [
+        LinePlotElement(y_data; x_data=x_data,
+            color=Vec4{Float32}(0.0, 0.6, 0.9, 1.0),
+            width=2.5f0,
+            line_style=SOLID,
+        )
+    ]
+
+    IntrinsicColumn(
+        [
+            IntrinsicHeight(Container(Text(&quot;Fixed Axis Bounds Example&quot;))),
+            Container(
+                Plot(
+                    elements,
+                    PlotStyle(
+                        background_color=Vec4{Float32}(0.98, 0.98, 0.98, 1.0),
+                        grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),
+                        axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
+                        show_grid=true,
+                        padding=50.0f0
+                    ),
+                    PlotState(
+                        # Only show x from 0 to 8, y from -0.8 to 1.0
+                        x_min=0.0f0,
+                        x_max=8.0f0,
+                        y_min=-0.8f0,
+                        y_max=1.0f0
+                    ),
+                )
+            ),
+            IntrinsicHeight(Container(Text(&quot;View: X=[0,8], Y=[-0.8,1.0] (data extends beyond view)&quot;))),
+        ], padding=0.0, spacing=0.0
+    )
+end
+
+screenshot(MyApp, &quot;fixedBoundsPlot.png&quot;, 812, 400);</code></pre><p><img src="../fixedBoundsPlot.png" alt="Fixed Bounds Plot"/></p><h2 id="State-Management-Example"><a class="docs-heading-anchor" href="#State-Management-Example">State Management Example</a><a id="State-Management-Example-1"></a><a class="docs-heading-anchor-permalink" href="#State-Management-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, TextButton, LinePlotElement, SOLID
+
+function MyApp()
+    # Generate sample data
+    x_data = collect(0.0:0.2:10.0)
+    y_data = sin.(x_data)
+
+    elements = AbstractPlotElement[
+        LinePlotElement(y_data; x_data=x_data,
+        color=Vec4{Float32}(0.8, 0.2, 0.6, 1.0),
+        width=3.0f0,
+        line_style=SOLID,
+        )
+    ]
+
+    # Create simple plot state for zoom control with initial view bounds
+    plot_state = Ref(PlotState())
+
+    # Define plot style with initial view
+    plot_style = PlotStyle(
+        background_color=Vec4{Float32}(0.95, 0.95, 0.95, 1.0),
+        grid_color=Vec4{Float32}(0.8, 0.8, 0.8, 1.0),
+        axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
+        show_grid=true,
+        padding=40.0f0
+    )
+
+    IntrinsicColumn([
+            IntrinsicHeight(Container(Text(&quot;State Management Example&quot;))),
+
+            # Plot with user-managed state - elements and bounds from state
+            Container(
+                Plot(
+                    elements,              # Elements define what to plot
+                    plot_style,            # Style defines visual appearance
+                    plot_state[],         # State contains bounds and zoom info
+                    (new_state) -&gt; plot_state[] = new_state
+                )
+            ),
+        ], padding=0.0, spacing=0.0)
+end
+
+screenshot(MyApp, &quot;stateManagementPlot.png&quot;, 812, 500);</code></pre><p><img src="../stateManagementPlot.png" alt="State Management Plot"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../checkbox/">« CheckBox</a><a class="docs-footer-nextpage" href="../02_stem_plot/">Stem Plot »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Thursday 25 December 2025 16:52">Thursday 25 December 2025</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

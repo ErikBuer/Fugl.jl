@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Image · Fugl.jl</title><meta name="title" content="Image · Fugl.jl"/><meta property="og:title" content="Image · Fugl.jl"/><meta property="twitter:title" content="Image · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li class="is-active"><a class="tocitem" href>Image</a><ul class="internal"><li><a class="tocitem" href="#Image-from-file"><span>Image from file</span></a></li><li><a class="tocitem" href="#Image-from-matrix"><span>Image from matrix</span></a></li><li><a class="tocitem" href="#Intrinsic-Size-Example"><span>Intrinsic Size Example</span></a></li><li><a class="tocitem" href="#Fixed-Size-Example"><span>Fixed Size Example</span></a></li><li><a class="tocitem" href="#Alignment-Example"><span>Alignment Example</span></a></li><li><a class="tocitem" href="#Missing-Image-Example"><span>Missing Image Example</span></a></li></ul></li><li><a class="tocitem" href="../slider/">Sliders</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-20" type="checkbox"/><label class="tocitem" for="menuitem-3-20"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Image</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Image</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/image.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Image"><a class="docs-heading-anchor" href="#Image">Image</a><a id="Image-1"></a><a class="docs-heading-anchor-permalink" href="#Image" title="Permalink"></a></h1><h2 id="Image-from-file"><a class="docs-heading-anchor" href="#Image-from-file">Image from file</a><a id="Image-from-file-1"></a><a class="docs-heading-anchor-permalink" href="#Image-from-file" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    Card(
+        &quot;Image&quot;, title_align=:center,
+        Image(&quot;../assets/julia_logo.png&quot;)
+    )
+end
+
+screenshot(MyApp, &quot;logo_image.png&quot;, 812, 400);</code></pre><p><img src="../logo_image.png" alt="Logo Image"/></p><h2 id="Image-from-matrix"><a class="docs-heading-anchor" href="#Image-from-matrix">Image from matrix</a><a id="Image-from-matrix-1"></a><a class="docs-heading-anchor-permalink" href="#Image-from-matrix" title="Permalink"></a></h2><p>You can also load matrixes as images.</p><pre><code class="language-julia hljs">using Fugl
+using ColorTypes
+using FixedPointNumbers
+
+size_x, size_y = 256, 256
+
+rgba_matrix = Matrix{RGBA{N0f8}}(undef, size_y, size_x)
+center_x, center_y = size_x / 2, size_y / 2
+
+for j in 1:size_y
+    for i in 1:size_x
+        # Normalized coordinates from -1 to 1
+        x = (i - center_x) / (size_x / 2)
+        y = (j - center_y) / (size_y / 2)
+
+        # Distance from center
+        r = sqrt(x^2 + y^2)
+
+        # Angle for radial patterns
+        θ = atan(y, x)
+
+        # Create a smooth radial gradient with subtle spiral pattern
+        intensity = exp(-r^2 / 0.8) * (1 + 0.3 * sin(6 * θ + 2 * r))
+        intensity = clamp(intensity, 0.0, 1.0)
+
+        # Create appealing color gradients
+        red = intensity * 0.8 + 0.1
+        green = intensity * 0.4 + 0.2 * sin(4 * θ)
+        blue = intensity * 0.9 + 0.1 * cos(8 * θ)
+
+        # Clamp and convert to N0f8
+        red = clamp(red, 0.0, 1.0)
+        green = clamp(green, 0.0, 1.0)
+        blue = clamp(blue, 0.0, 1.0)
+
+        rgba_matrix[j, i] = RGBA{N0f8}(red, green, blue, 1.0)
+    end
+end
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark background
+    border_color=Vec4f(0.25, 0.25, 0.30, 1.0),      # Subtle border
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0,
+    anti_aliasing_width=1.0f0
+)
+
+# Dark theme title style
+dark_title_style = TextStyle(
+    size_px=18,
+    color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
+)
+
+function MyApp()
+    Card(
+        &quot;Matrix Image - Dark Theme&quot;,
+        title_align=:center,
+        Image(rgba_matrix),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;matrix_image.png&quot;, 812, 400);</code></pre><p><img src="../matrix_image.png" alt="Matrix as image"/></p><h2 id="Intrinsic-Size-Example"><a class="docs-heading-anchor" href="#Intrinsic-Size-Example">Intrinsic Size Example</a><a id="Intrinsic-Size-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Intrinsic-Size-Example" title="Permalink"></a></h2><p>Images naturally use their intrinsic size (original dimensions). You can wrap them in <code>IntrinsicSize</code> to ensure they maintain their natural proportions:</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Card(
+        &quot;Intrinsic Size - Original Dimensions&quot;, title_align=:center,
+        IntrinsicSize(Image(&quot;../assets/julia_logo.png&quot;))
+    )
+end
+
+screenshot(MyApp, &quot;intrinsic_image.png&quot;, 812, 400);</code></pre><p><img src="../intrinsic_image.png" alt="Intrinsic Size Image"/></p><h2 id="Fixed-Size-Example"><a class="docs-heading-anchor" href="#Fixed-Size-Example">Fixed Size Example</a><a id="Fixed-Size-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Fixed-Size-Example" title="Permalink"></a></h2><p>You can control the exact size of images using <code>FixedSize</code>. The image will scale proportionally to fit within the specified dimensions:</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Row([
+        Card(
+            &quot;100x100&quot;, title_align=:center,
+            FixedSize(Image(&quot;../assets/julia_logo.png&quot;), 100, 100)
+        ),
+        Card(
+            &quot;200x100&quot;, title_align=:center,
+            FixedSize(Image(&quot;../assets/julia_logo.png&quot;), 200, 100)
+        ),
+        Card(
+            &quot;150x150&quot;, title_align=:center,
+            FixedSize(Image(&quot;../assets/julia_logo.png&quot;), 150, 150)
+        )
+    ], spacing=0.0, padding = 0.0)
+end
+
+screenshot(MyApp, &quot;fixed_size_images.png&quot;, 812, 400);</code></pre><p><img src="../fixed_size_images.png" alt="Fixed Size Images"/></p><h2 id="Alignment-Example"><a class="docs-heading-anchor" href="#Alignment-Example">Alignment Example</a><a id="Alignment-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Alignment-Example" title="Permalink"></a></h2><p>You can control how images are aligned within their containers using <code>AlignVertical</code> and <code>AlignHorizontal</code>:</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Row([
+        Card(
+            &quot;Top&quot;, title_align=:center,
+            AlignVertical(
+                FixedSize(Image(&quot;../assets/julia_logo.png&quot;), 80, 80),
+                :top
+            )
+
+        ),
+        Card(
+            &quot;Middle&quot;, title_align=:center,
+            AlignVertical(
+                FixedSize(Image(&quot;../assets/julia_logo.png&quot;), 80, 80),
+                :middle
+            )
+        ),
+        Card(
+            &quot;Bottom&quot;, title_align=:center,
+            AlignVertical(
+                FixedSize(Image(&quot;../assets/julia_logo.png&quot;), 80, 80),
+                :bottom
+            )
+        )
+    ], spacing=00.0, padding=0.0)
+end
+
+screenshot(MyApp, &quot;aligned_images.png&quot;, 812, 400);</code></pre><p><img src="../aligned_images.png" alt="Aligned Images"/></p><h2 id="Missing-Image-Example"><a class="docs-heading-anchor" href="#Missing-Image-Example">Missing Image Example</a><a id="Missing-Image-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Missing-Image-Example" title="Permalink"></a></h2><p>When an image path is empty or the file doesn&#39;t exist, a placeholder is shown:</p><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    Container(Image(&quot;&quot;))
+end
+
+screenshot(MyApp, &quot;missing_image.png&quot;, 812, 300);</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Failed to load image at path &#39;&#39;: ArgumentError(&quot;No file exists at given path: &quot;)
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Fugl ~/work/Fugl.jl/Fugl.jl/src/components/image/texture_cache.jl:29</span>
+<span class="sgr33"><span class="sgr1">┌ Warning: </span></span>Using a placeholder texture instead.
+<span class="sgr33"><span class="sgr1">└ </span></span><span class="sgr90">@ Fugl ~/work/Fugl.jl/Fugl.jl/src/components/image/texture_cache.jl:30</span></code></pre><p><img src="../missing_image.png" alt="Missing Image"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dropdown/">« Dropdown</a><a class="docs-footer-nextpage" href="../slider/">Sliders »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Saturday 20 December 2025 21:00">Saturday 20 December 2025</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
