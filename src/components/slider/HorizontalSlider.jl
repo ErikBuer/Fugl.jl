@@ -195,10 +195,10 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
     current_time = time()
 
     new_interaction_state = update_interaction_state(
-        view.state.interaction_state,
-        is_mouse_inside,
-        is_mouse_pressed,
-        current_time
+        view.state.interaction_state;
+        is_mouse_inside=is_mouse_inside,
+        is_mouse_pressed=is_mouse_pressed,
+        current_time=current_time
     )
 
     # Update the slider state with new interaction state and use for focus
