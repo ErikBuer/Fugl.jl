@@ -2,9 +2,7 @@
 Interaction state management for GUI components.
 
 Provides a common structure for tracking user interactions like hover, press, focus, etc.
-Can be included as Union{Nothing, InteractionState} in component states for zero-cost abstraction.
 """
-
 struct InteractionState
     is_hovered::Bool
     is_pressed::Bool
@@ -56,12 +54,12 @@ Update interaction state based on current mouse/input state.
 Returns a new InteractionState with updated values.
 """
 function update_interaction_state(
-    current_state::Union{Nothing, InteractionState},
+    current_state::Union{Nothing,InteractionState};
     is_mouse_inside::Bool,
     is_mouse_pressed::Bool,
     current_time::Float64
 )::InteractionState
-    
+
     if current_state === nothing
         # First time - create new state
         if is_mouse_inside
@@ -78,13 +76,13 @@ function update_interaction_state(
             return InteractionState()
         end
     end
-    
+
     # Calculate "just" transitions
     just_hovered = is_mouse_inside && !current_state.is_hovered
     just_unhovered = !is_mouse_inside && current_state.is_hovered
     just_pressed = is_mouse_pressed && !current_state.is_pressed
     just_released = !is_mouse_pressed && current_state.is_pressed
-    
+
     # Calculate hover duration
     new_hover_start_time = if just_hovered
         current_time
@@ -93,13 +91,13 @@ function update_interaction_state(
     else
         0.0
     end
-    
+
     new_hover_duration = if is_mouse_inside
         current_time - new_hover_start_time
     else
         current_state.hover_duration  # Preserve last duration when not hovering
     end
-    
+
     return InteractionState(
         is_hovered=is_mouse_inside,
         is_pressed=is_mouse_pressed,
@@ -116,7 +114,7 @@ end
 """
 Helper function to check if interaction state indicates any active interaction.
 """
-function is_interacting(state::Union{Nothing, InteractionState})::Bool
+function is_interacting(state::Union{Nothing,InteractionState})::Bool
     state === nothing && return false
     return state.is_hovered || state.is_pressed || state.is_focused
 end
@@ -124,7 +122,7 @@ end
 """
 Helper function to get hover duration safely.
 """
-function get_hover_duration(state::Union{Nothing, InteractionState})::Float64
+function get_hover_duration(state::Union{Nothing,InteractionState})::Float64
     state === nothing && return 0.0
     return state.hover_duration
 end

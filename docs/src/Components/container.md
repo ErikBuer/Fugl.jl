@@ -166,6 +166,8 @@ function MyApp()
                 style=CONTAINER_STYLE,
                 hover_style=CONTAINER_HOVER_STYLE,
                 pressed_style=CONTAINER_PRESSED_STYLE,
+                on_mouse_down=() -> println("Lef mouse button pressed down!"),
+                on_mouse_up=() -> println("Lef mouse button released!"),
                 on_click=() -> println("Interactive container clicked!"),
                 interaction_state= button1[],
                 on_interaction_state_change=(new_state) -> button1[] = new_state

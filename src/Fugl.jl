@@ -132,7 +132,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     debug_fps_update_interval = 0.5  # Update FPS every 0.5 seconds
 
     # Choose overlay function at compile time based on fps_overlay flag
-    overlay_function = fps_overlay ? render_fps_overlay : render_no_overlay
+    debug_overlay = fps_overlay ? render_fps_overlay : render_no_overlay
 
     # Choose debug stats update function at compile time based on fps_overlay flag
     update_debug_stats = fps_overlay ? update_fps_stats! : update_no_fps_stats
@@ -185,11 +185,6 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                 empty!(mouse_state.key_buffer)
                 empty!(mouse_state.key_events)
 
-                # Reset click flags
-                for button in keys(mouse_state.was_clicked)
-                    mouse_state.was_clicked[button] = false
-                end
-
                 # Generate the UI dynamically with error handling
                 try
                     ui::AbstractView = ui_function()
@@ -201,8 +196,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     # Render overlays after main content
                     render_overlays()
 
+                    # Framerate debug overlay
                     # Render overlay using compile-time-selected function
-                    overlay_function(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)
+                    debug_overlay(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)
 
                 catch e
                     @error "Error generating UI" exception = (e, catch_backtrace())

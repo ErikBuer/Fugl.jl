@@ -27,6 +27,7 @@ struct ContainerView <: AbstractView
     disabled_style::Union{Nothing,ContainerStyle}
     on_click::Function
     on_mouse_down::Function
+    on_mouse_up::Function
     interaction_state::Union{Nothing,InteractionState}
     on_interaction_state_change::Function
 end
@@ -43,10 +44,11 @@ function Container(child::AbstractView=EmptyView();
     disabled_style::Union{Nothing,ContainerStyle}=nothing,
     on_click::Function=() -> nothing,
     on_mouse_down::Function=() -> nothing,
+    on_mouse_up::Function=() -> nothing,
     interaction_state::Union{Nothing,InteractionState}=nothing,
     on_interaction_state_change::Function=(new_state) -> nothing
 )
-    return ContainerView(child, style, hover_style, pressed_style, disabled, disabled_style, on_click, on_mouse_down, interaction_state, on_interaction_state_change)
+    return ContainerView(child, style, hover_style, pressed_style, disabled, disabled_style, on_click, on_mouse_down, on_mouse_up, interaction_state, on_interaction_state_change)
 end
 
 function measure(view::ContainerView)::Tuple{Float32,Float32}
@@ -141,42 +143,60 @@ Detect clicks on the container and its child.
 function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
     (child_x, child_y, child_width, child_height) = apply_layout(view, x, y, width, height)
 
-    # Skip all interactions if disabled
-    if view.disabled
+    # Skip all interactions if disabled or no interaction state tracking
+    if view.disabled || view.interaction_state === nothing
         # Still forward to child for non-interactive components
         detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
         return
     end
 
-    # Update interaction state if enabled
-    if view.interaction_state !== nothing
-        is_mouse_inside = inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
-        is_mouse_pressed = is_mouse_inside && mouse_state.button_state[LeftButton] == IsPressed
 
-        # For now, use a simple time (we can enhance this later with proper time management)
-        current_time = time()
+    is_mouse_inside = inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
 
-        new_interaction_state = update_interaction_state(
-            view.interaction_state,
-            is_mouse_inside,
-            is_mouse_pressed,
-            current_time
-        )
+    is_mouse_pressed::Bool = view.interaction_state.is_pressed
 
-        # Notify of interaction state changes
-        if new_interaction_state != view.interaction_state
-            view.on_interaction_state_change(new_interaction_state)
-        end
+    if mouse_state.mouse_down[LeftButton] && is_mouse_inside
+        is_mouse_pressed = true
+    elseif mouse_state.mouse_up[LeftButton]
+        is_mouse_pressed = false
     end
 
-    # Check if the mouse is inside the component
-    if inside_component(view, child_x, child_y, child_width, child_height, mouse_state.x, mouse_state.y)
-        if mouse_state.button_state[LeftButton] == IsPressed
+    # For now, use a simple time
+    current_time = time()
+
+    old_interaction_state = view.interaction_state
+    new_interaction_state = update_interaction_state(
+        view.interaction_state;
+        is_mouse_inside=is_mouse_inside,
+        is_mouse_pressed=is_mouse_pressed,
+        current_time=current_time
+    )
+
+    # Notify of interaction state changes
+    if new_interaction_state != view.interaction_state
+        view.on_interaction_state_change(new_interaction_state)
+    end
+
+
+    # Launch callbacks
+    if is_mouse_inside
+        # Mouse down - triggers only when button is first pressed while over component
+        if mouse_state.mouse_down[LeftButton]
             view.on_mouse_down()  # Trigger `on_mouse_down`
-        elseif mouse_state.was_clicked[LeftButton]
+        end
+
+        # Mouse up - triggers when button is released while over component (regardless of where press started)
+        if mouse_state.mouse_up[LeftButton]
+            view.on_mouse_up()  # Trigger `on_mouse_up`
+        end
+
+        # Click - triggers only if press started inside AND release happened inside
+        if old_interaction_state.is_pressed && mouse_state.mouse_up[LeftButton]
             view.on_click()  # Trigger `on_click`
         end
+
     end
+
 
     # Recursively check the child.
     # Some components have focus behavior, and therefore must register clicks even if outside their bounds.
