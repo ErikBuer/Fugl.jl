@@ -66,6 +66,8 @@ function test_disabled_buttons()
                     # Interactive button (enabled)
                     TextButton("Interactive Button",
                         on_click=() -> println("Interactive button clicked!"),
+                        on_mouse_down=() -> println("Interactive button pressed down"),
+                        on_mouse_up=() -> println("Interactive button released"),
                         container_style=BUTTON_STYLE,
                         hover_style=BUTTON_HOVER_STYLE,
                         pressed_style=BUTTON_PRESSED_STYLE,
@@ -78,6 +80,8 @@ function test_disabled_buttons()
                     TextButton("Disabled Button",
                         disabled=true,
                         on_click=() -> println("This shouldn't print - button is disabled"),
+                        on_mouse_down=() -> println("This shouldn't print - button is disabled"),
+                        on_mouse_up=() -> println("This shouldn't print - button is disabled"),
                         container_style=BUTTON_STYLE,
                         hover_style=BUTTON_HOVER_STYLE,
                         pressed_style=BUTTON_PRESSED_STYLE,

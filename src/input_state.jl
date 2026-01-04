@@ -87,7 +87,9 @@ end
 
 mutable struct InputState
     button_state::Dict{MouseButton,ButtonState}  # Current button state
-    was_clicked::Dict{MouseButton,Bool}          # Tracks if the button was clicked
+    was_clicked::Dict{MouseButton,Bool}          # Tracks if the button was clicked (released)
+    mouse_down::Dict{MouseButton,Bool}           # Tracks mouse down events
+    mouse_up::Dict{MouseButton,Bool}             # Tracks mouse up events
     x::Float64                                   # Current mouse X position
     y::Float64                                   # Current mouse Y position
     last_click_time::Float64                     # Time of the last click
@@ -112,6 +114,8 @@ function InputState()
     return InputState(
         Dict(LeftButton => IsReleased, RightButton => IsReleased, MiddleButton => IsReleased),
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # was_pressed_down
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # was_released
         0.0,
         0.0,
         0.0,
@@ -145,6 +149,7 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
 
     if action == GLFW.PRESS
         mouse_state.button_state[mapped_button] = IsPressed
+        mouse_state.mouse_down[mapped_button] = true  # Track that button was just pressed
 
         # Start potential drag for this button
         mouse_state.drag_start_position[mapped_button] = current_pos
@@ -153,6 +158,7 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
 
     elseif action == GLFW.RELEASE
         mouse_state.button_state[mapped_button] = IsReleased
+        mouse_state.mouse_up[mapped_button] = true  # Track that button was just released
 
         # Check for double-click
         time_since_last_click = current_time - mouse_state.last_click_time
@@ -286,6 +292,8 @@ function collect_state!(mouse_state::InputState)::InputState
     locked_state = InputState(
         deepcopy(mouse_state.button_state),
         deepcopy(mouse_state.was_clicked),
+        deepcopy(mouse_state.mouse_down),
+        deepcopy(mouse_state.mouse_up),
         mouse_state.x,
         mouse_state.y,
         mouse_state.last_click_time,
@@ -302,10 +310,16 @@ function collect_state!(mouse_state::InputState)::InputState
         mouse_state.modifier_keys
     )
 
-    # Reset `was_clicked`, `was_double_clicked`, and scroll in the original state
+    # Reset `was_clicked`, `was_double_clicked`, `was_pressed_down`, `was_released`, and scroll in the original state
     for button in keys(mouse_state.was_clicked)
         mouse_state.was_clicked[button] = false
         mouse_state.was_double_clicked[button] = false
+    end
+
+    # Reset mouse down/up event flags
+    for button in keys(mouse_state.mouse_down)
+        mouse_state.mouse_down[button] = false
+        mouse_state.mouse_up[button] = false
     end
 
     # Reset scroll values

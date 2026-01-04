@@ -185,11 +185,6 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                 empty!(mouse_state.key_buffer)
                 empty!(mouse_state.key_events)
 
-                # Reset click flags
-                for button in keys(mouse_state.was_clicked)
-                    mouse_state.was_clicked[button] = false
-                end
-
                 # Generate the UI dynamically with error handling
                 try
                     ui::AbstractView = ui_function()

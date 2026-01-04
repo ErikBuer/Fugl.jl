@@ -2,6 +2,14 @@
 
 User interaction is handled for each component via a `detect_click` method. This method can handle both cursor and keyboard interaction.
 
+## Mouse Interaction Rules
+
+Mouse interactions aims to follow these rules to ensure consistent behavior:
+
+- **Mouse down** - `on_mouse_down` Button pressed (fires when button is first pressed)
+- **Mouse up** - `on_mouse_up` Button released over the component
+- **Click event** - `on_click` Fires only if both down and up occurred on the same element
+
 ## Hooks
 
 The components then handle these and have various hooks that chan be used, such as `on_click`.

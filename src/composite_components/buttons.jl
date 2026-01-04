@@ -4,6 +4,7 @@ A button containing text only.
 function TextButton(text::String;
     on_click::Function=() -> nothing,
     on_mouse_down::Function=() -> nothing,
+    on_mouse_up::Function=() -> nothing,
     container_style=ContainerStyle(),
     hover_style::Union{Nothing,ContainerStyle}=nothing,
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
@@ -30,6 +31,7 @@ function TextButton(text::String;
         disabled_style=disabled_style,
         on_click=on_click,
         on_mouse_down=on_mouse_down,
+        on_mouse_up=on_mouse_up,
         interaction_state=interaction_state,
         on_interaction_state_change=on_interaction_state_change
     )
@@ -41,6 +43,8 @@ A button consisting of the icon only.
 function IconButton(
     image_path::String;
     on_click::Function=() -> nothing,
+    on_mouse_down::Function=() -> nothing,
+    on_mouse_up::Function=() -> nothing,
     container_style::Union{Nothing,ContainerStyle}=nothing,
     hover_style::Union{Nothing,ContainerStyle}=nothing,
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
@@ -63,6 +67,8 @@ function IconButton(
         disabled=disabled,
         disabled_style=disabled_style,
         on_click=on_click,
+        on_mouse_down=on_mouse_down,
+        on_mouse_up=on_mouse_up,
         interaction_state=interaction_state,
         on_interaction_state_change=on_interaction_state_change
     )
