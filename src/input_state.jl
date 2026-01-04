@@ -114,8 +114,8 @@ function InputState()
     return InputState(
         Dict(LeftButton => IsReleased, RightButton => IsReleased, MiddleButton => IsReleased),
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),
-        Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # was_pressed_down
-        Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # was_released
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),
+        Dict(LeftButton => false, RightButton => false, MiddleButton => false),
         0.0,
         0.0,
         0.0,
