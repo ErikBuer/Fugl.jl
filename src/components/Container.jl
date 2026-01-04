@@ -155,6 +155,7 @@ function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractF
 
     is_mouse_pressed::Bool = view.interaction_state.is_pressed
 
+    # TODO this logic should probably be in interaction_state.jl (update_interaction_state)
     if mouse_state.mouse_down[LeftButton] && is_mouse_inside
         is_mouse_pressed = true
     elseif mouse_state.mouse_up[LeftButton]

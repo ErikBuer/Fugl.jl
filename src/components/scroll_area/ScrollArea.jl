@@ -342,27 +342,7 @@ function detect_click(view::VerticalScrollAreaView, mouse_state::InputState, x::
             content_layout = apply_layout(view, x, y, width, height)
             content_x, content_y, content_width, content_height = content_layout[1:4]
 
-            # Forward click to content
-            content_mouse_state = InputState(
-                mouse_state.button_state,
-                mouse_state.was_clicked,
-                mouse_state.x,  # Use original screen coordinates
-                mouse_state.y,  # Use original screen coordinates
-                mouse_state.last_click_time,
-                mouse_state.last_click_position,
-                mouse_state.key_buffer,
-                mouse_state.key_events,
-                mouse_state.drag_start_position,
-                mouse_state.is_dragging,
-                mouse_state.last_drag_position,
-                mouse_state.double_click_threshold,
-                mouse_state.was_double_clicked,
-                mouse_state.scroll_x,
-                mouse_state.scroll_y,
-                mouse_state.modifier_keys
-            )
-
-            content_clicked = detect_click(view.content, content_mouse_state, content_x, content_y, content_width, content_height)
+            content_clicked = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height)
             if content_clicked === true
                 interaction_occurred = true
             end
@@ -414,27 +394,7 @@ function detect_click(view::HorizontalScrollAreaView, mouse_state::InputState, x
             content_layout = apply_layout(view, x, y, width, height)
             content_x, content_y, content_width, content_height = content_layout[1:4]
 
-            # Forward click to content
-            content_mouse_state = InputState(
-                mouse_state.button_state,
-                mouse_state.was_clicked,
-                mouse_state.x,  # Use original screen coordinates
-                mouse_state.y,  # Use original screen coordinates
-                mouse_state.last_click_time,
-                mouse_state.last_click_position,
-                mouse_state.key_buffer,
-                mouse_state.key_events,
-                mouse_state.drag_start_position,
-                mouse_state.is_dragging,
-                mouse_state.last_drag_position,
-                mouse_state.double_click_threshold,
-                mouse_state.was_double_clicked,
-                mouse_state.scroll_x,
-                mouse_state.scroll_y,
-                mouse_state.modifier_keys
-            )
-
-            content_clicked = detect_click(view.content, content_mouse_state, content_x, content_y, content_width, content_height)
+            content_clicked = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height)
             if content_clicked === true
                 interaction_occurred = true
             end
