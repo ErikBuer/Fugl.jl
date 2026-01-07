@@ -1,10 +1,12 @@
 using Fugl
 
 function test_dropdown()
-    # Create dropdown state
+    # Create dropdown state with many options to test scrolling
+    many_options = ["Option $i" for i in 1:20]  # 20 options to test scrolling
     dropdown_state = Ref(DropdownState(
-        ["Option 1", "Option 2", "Option 3", "Very Long Option 4", "Option 5"];
-        selected_index=1
+        many_options;
+        selected_index=1,
+        scroll_offset=0
     ))
 
     function MyApp()
