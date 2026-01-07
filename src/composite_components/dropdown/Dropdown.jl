@@ -72,7 +72,8 @@ function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float
     # If open, add dropdown list to overlay system, ensuring it draws on top of other UI.
     if view.state.is_open
         dropdown_y = y + button_height
-        visible_items = min(length(view.state.options), view.style.max_visible_items)
+        filtered_options = get_filtered_options(view.state)
+        visible_items = min(length(filtered_options), view.style.max_visible_items)
         dropdown_height = visible_items * view.style.item_height_px
 
         # Add overlay function to render dropdown list on top
@@ -83,6 +84,11 @@ end
 function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     button_height = view.style.text_style.size_px + 2 * view.style.padding
     mouse_x, mouse_y = mouse_state.x, mouse_state.y
+
+    # Handle key input when dropdown is open (search functionality)
+    if view.state.is_open
+        handle_search_input(view, mouse_state)
+    end
 
     # Check if mouse is over the dropdown button
     button_hovered = inside_component(view, x, y, width, button_height, mouse_x, mouse_y)
@@ -104,8 +110,9 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
                                mouse_y >= dropdown_y && mouse_y <= dropdown_y + dropdown_height)
 
         if mouse_over_dropdown
-            # Calculate new scroll offset (discrete scrolling)
-            max_scroll = max(0, length(view.state.options) - view.style.max_visible_items)
+            # Calculate new scroll offset (discrete scrolling) based on filtered options
+            filtered_options = get_filtered_options(view.state)
+            max_scroll = max(0, length(filtered_options) - view.style.max_visible_items)
             new_scroll_offset = if mouse_state.scroll_y > 0.0
                 # Scroll up (show earlier items)
                 max(0, view.state.scroll_offset - 1)
@@ -125,38 +132,43 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
     # Handle click events - use was_clicked for better click detection
     if mouse_state.was_clicked[LeftButton]
         if button_hovered
-            # Toggle dropdown open/closed
-            new_state = DropdownState(view.state; is_open=!view.state.is_open, hover_index=0, scroll_offset=0)
+            # Toggle dropdown open/closed, clear search when opening
+            new_state = DropdownState(view.state; is_open=!view.state.is_open, hover_index=0, scroll_offset=0, search_text="")
             view.on_state_change(new_state)
             return
         elseif view.state.is_open
             # Check if click is on dropdown list
             dropdown_y = y + button_height
-            visible_items = min(length(view.state.options), view.style.max_visible_items)
+            filtered_options = get_filtered_options(view.state)
+            visible_items = min(length(filtered_options), view.style.max_visible_items)
             dropdown_height = visible_items * view.style.item_height_px
 
             if (mouse_x >= x && mouse_x <= x + width &&
                 mouse_y >= dropdown_y && mouse_y <= dropdown_y + dropdown_height)
 
-                # Calculate which item was clicked (accounting for scroll offset)
+                # Calculate which item was clicked (accounting for scroll offset and filtering)
                 relative_y = mouse_y - dropdown_y
                 visible_item_index = Int(floor(relative_y / view.style.item_height_px)) + 1
-                actual_item_index = visible_item_index + view.state.scroll_offset
+                filtered_item_index = visible_item_index + view.state.scroll_offset
+                filtered_options = get_filtered_options(view.state)
 
-                if actual_item_index >= 1 && actual_item_index <= length(view.state.options)
+                if filtered_item_index >= 1 && filtered_item_index <= length(filtered_options)
+                    # Get the actual option index from the filtered index
+                    actual_item_index = get_actual_option_index(view.state, filtered_item_index)
                     # Select the item and close dropdown
                     new_state = DropdownState(view.state;
                         selected_index=actual_item_index,
                         is_open=false,
                         hover_index=0,
-                        scroll_offset=0)
+                        scroll_offset=0,
+                        search_text="")
                     view.on_state_change(new_state)
                     view.on_select(view.state.options[actual_item_index], actual_item_index)
                 end
                 return
             else
                 # Click outside dropdown - close it
-                new_state = DropdownState(view.state; is_open=false, hover_index=0, scroll_offset=0)
+                new_state = DropdownState(view.state; is_open=false, hover_index=0, scroll_offset=0, search_text="")
                 view.on_state_change(new_state)
             end
         end
@@ -165,7 +177,8 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
     # Handle hover for dropdown items (accounting for scroll offset)
     if view.state.is_open
         dropdown_y = y + button_height
-        visible_items = min(length(view.state.options), view.style.max_visible_items)
+        filtered_options = get_filtered_options(view.state)
+        visible_items = min(length(filtered_options), view.style.max_visible_items)
         dropdown_height = visible_items * view.style.item_height_px
 
         if (mouse_x >= x && mouse_x <= x + width &&
@@ -173,9 +186,11 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
 
             relative_y = mouse_y - dropdown_y
             visible_item_index = Int(floor(relative_y / view.style.item_height_px)) + 1
-            actual_hover_index = visible_item_index + view.state.scroll_offset
+            filtered_item_index = visible_item_index + view.state.scroll_offset
+            filtered_options = get_filtered_options(view.state)
+            actual_hover_index = get_actual_option_index(view.state, filtered_item_index)
 
-            if actual_hover_index != view.state.hover_index && actual_hover_index >= 1 && actual_hover_index <= length(view.state.options)
+            if actual_hover_index != view.state.hover_index && actual_hover_index >= 1 && actual_hover_index <= length(view.state.options) && filtered_item_index <= length(filtered_options)
                 new_state = DropdownState(view.state; hover_index=actual_hover_index)
                 view.on_state_change(new_state)
             end
@@ -186,5 +201,67 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
                 view.on_state_change(new_state)
             end
         end
+    end
+end
+
+"""
+Handle key input for dropdown search functionality.
+"""
+function handle_search_input(view::DropdownView, mouse_state::InputState)
+    if !view.state.is_open
+        return  # Only handle key input when dropdown is open
+    end
+
+    current_state = view.state
+    search_changed = false
+
+    # Handle backspace key to remove characters from search text
+    for key_event in mouse_state.key_events
+        if Int(key_event.action) == Int(GLFW.PRESS) || Int(key_event.action) == Int(GLFW.REPEAT)
+            if key_event.key == GLFW.KEY_BACKSPACE && !isempty(current_state.search_text)
+                # Remove last character from search text
+                new_search_text = current_state.search_text[1:end-1]
+                current_state = DropdownState(current_state;
+                    search_text=new_search_text,
+                    hover_index=0,
+                    scroll_offset=0)
+                search_changed = true
+            elseif key_event.key == GLFW.KEY_ESCAPE
+                # Clear search and close dropdown on Escape
+                current_state = DropdownState(current_state;
+                    is_open=false,
+                    search_text="",
+                    hover_index=0,
+                    scroll_offset=0)
+                search_changed = true
+            end
+        end
+    end
+
+    # Handle regular character input to add to search text
+    for key in mouse_state.key_buffer
+        if key == '\b'  # Handle backspace character
+            if !isempty(current_state.search_text)
+                # Remove last character from search text
+                new_search_text = current_state.search_text[1:end-1]
+                current_state = DropdownState(current_state;
+                    search_text=new_search_text,
+                    hover_index=0,
+                    scroll_offset=0)
+                search_changed = true
+            end
+        elseif isprint(key)  # Handle printable characters
+            new_search_text = current_state.search_text * string(key)
+            current_state = DropdownState(current_state;
+                search_text=new_search_text,
+                hover_index=0,
+                scroll_offset=0)
+            search_changed = true
+        end
+    end
+
+    # Update state if search text changed
+    if search_changed
+        view.on_state_change(current_state)
     end
 end
