@@ -63,19 +63,20 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
         1.5f0
     )
 
-    # Draw each visible option
-    visible_items = min(length(view.state.options), view.style.max_visible_items)
+    # Draw each visible option (accounting for scroll offset)
+    visible_items = min(length(view.state.options) - view.state.scroll_offset, view.style.max_visible_items)
 
     for i in 1:visible_items
-        if i > length(view.state.options)
+        actual_option_index = i + view.state.scroll_offset
+        if actual_option_index > length(view.state.options)
             break
         end
 
         item_y = y + (i - 1) * view.style.item_height_px
         item_height = view.style.item_height_px
 
-        # Highlight hovered item
-        if view.state.hover_index == i
+        # Highlight hovered item (compare with actual option index)
+        if view.state.hover_index == actual_option_index
             highlight_vertices = generate_rectangle_vertices(x, item_y, width, item_height)
             draw_rounded_rectangle(
                 highlight_vertices,
@@ -90,8 +91,8 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
             )
         end
 
-        # Draw option text
-        option_text = view.state.options[i]
+        # Draw option text (use actual option index)
+        option_text = view.state.options[actual_option_index]
         text_component = Text(
             option_text;
             style=view.style.text_style,
