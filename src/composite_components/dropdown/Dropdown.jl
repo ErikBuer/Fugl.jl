@@ -81,13 +81,13 @@ function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float
     end
 end
 
-function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::DropdownView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)::Bool
     button_height = view.style.text_style.size_px + 2 * view.style.padding
-    mouse_x, mouse_y = mouse_state.x, mouse_state.y
+    mouse_x, mouse_y = input_state.x, input_state.y
 
     # Handle key input when dropdown is open (search functionality)
     if view.state.is_open
-        handle_search_input(view, mouse_state)
+        handle_search_input(view, input_state)
     end
 
     # Check if mouse is over the dropdown button
@@ -100,7 +100,7 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
     end
 
     # Handle scroll wheel events when dropdown is open
-    if view.state.is_open && (mouse_state.scroll_y != 0.0)
+    if view.state.is_open && (input_state.scroll_y != 0.0)
         dropdown_y = y + button_height
         visible_items = min(length(view.state.options), view.style.max_visible_items)
         dropdown_height = visible_items * view.style.item_height_px
@@ -113,7 +113,7 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
             # Calculate new scroll offset (discrete scrolling) based on filtered options
             filtered_options = get_filtered_options(view.state)
             max_scroll = max(0, length(filtered_options) - view.style.max_visible_items)
-            new_scroll_offset = if mouse_state.scroll_y > 0.0
+            new_scroll_offset = if input_state.scroll_y > 0.0
                 # Scroll up (show earlier items)
                 max(0, view.state.scroll_offset - 1)
             else
@@ -130,7 +130,7 @@ function detect_click(view::DropdownView, mouse_state::InputState, x::Float32, y
     end
 
     # Handle click events - use was_clicked for better click detection
-    if mouse_state.was_clicked[LeftButton]
+    if input_state.was_clicked[LeftButton]
         if button_hovered
             # Toggle dropdown open/closed, clear search when opening
             new_state = DropdownState(view.state; is_open=!view.state.is_open, hover_index=0, scroll_offset=0, search_text="")
@@ -207,7 +207,7 @@ end
 """
 Handle key input for dropdown search functionality.
 """
-function handle_search_input(view::DropdownView, mouse_state::InputState)
+function handle_search_input(view::DropdownView, input_state::InputState)
     if !view.state.is_open
         return  # Only handle key input when dropdown is open
     end
@@ -216,7 +216,7 @@ function handle_search_input(view::DropdownView, mouse_state::InputState)
     search_changed = false
 
     # Handle backspace key to remove characters from search text
-    for key_event in mouse_state.key_events
+    for key_event in input_state.key_events
         if Int(key_event.action) == Int(GLFW.PRESS) || Int(key_event.action) == Int(GLFW.REPEAT)
             if key_event.key == GLFW.KEY_BACKSPACE && !isempty(current_state.search_text)
                 # Remove last character from search text
@@ -239,7 +239,7 @@ function handle_search_input(view::DropdownView, mouse_state::InputState)
     end
 
     # Handle regular character input to add to search text
-    for key in mouse_state.key_buffer
+    for key in input_state.key_buffer
         if key == '\b'  # Handle backspace character
             if !isempty(current_state.search_text)
                 # Remove last character from search text
