@@ -17,9 +17,9 @@ function interpret_view(view::FixedHeightView, x::Float32, y::Float32, width::Fl
     interpret_view(view.child, x, y, width, final_height, projection_matrix, mouse_x, mouse_y)
 end
 
-function detect_click(view::FixedHeightView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::FixedHeightView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     final_height = min(view.height, height)
-    detect_click(view.child, mouse_state, x, y, width, final_height)
+    return detect_click(view.child, mouse_state, x, y, width, final_height, Int32(parent_z + 1))
 end
 
 function measure(view::FixedHeightView)::Tuple{Float32,Float32}

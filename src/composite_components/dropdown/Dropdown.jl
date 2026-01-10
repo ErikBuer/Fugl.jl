@@ -81,7 +81,7 @@ function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float
     end
 end
 
-function detect_click(view::DropdownView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)::Bool
+function detect_click(view::DropdownView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     button_height = view.style.text_style.size_px + 2 * view.style.padding
     mouse_x, mouse_y = input_state.x, input_state.y
 
@@ -93,10 +93,17 @@ function detect_click(view::DropdownView, input_state::InputState, x::Float32, y
     # Check if mouse is over the dropdown button
     button_hovered = inside_component(view, x, y, width, button_height, mouse_x, mouse_y)
 
+    # TODO we can only do one state change per frame, so well need to gather up all changes
     # Update hover state for button
     if view.state.is_hovered != button_hovered
         new_state = DropdownState(view.state; is_hovered=button_hovered)
         view.on_state_change(new_state)
+    end
+
+    z = if view.state.is_open
+        parent_z + 1000
+    else
+        parent_z
     end
 
     # Handle scroll wheel events when dropdown is open
@@ -109,34 +116,45 @@ function detect_click(view::DropdownView, input_state::InputState, x::Float32, y
         mouse_over_dropdown = (mouse_x >= x && mouse_x <= x + width &&
                                mouse_y >= dropdown_y && mouse_y <= dropdown_y + dropdown_height)
 
-        if mouse_over_dropdown
-            # Calculate new scroll offset (discrete scrolling) based on filtered options
-            filtered_options = get_filtered_options(view.state)
-            max_scroll = max(0, length(filtered_options) - view.style.max_visible_items)
-            new_scroll_offset = if input_state.scroll_y > 0.0
-                # Scroll up (show earlier items)
-                max(0, view.state.scroll_offset - 1)
-            else
-                # Scroll down (show later items)
-                min(max_scroll, view.state.scroll_offset + 1)
-            end
-
-            if new_scroll_offset != view.state.scroll_offset
-                new_state = DropdownState(view.state; scroll_offset=new_scroll_offset, hover_index=0)
-                view.on_state_change(new_state)
-            end
+        if !mouse_over_dropdown
             return
         end
+
+        # Calculate new scroll offset (discrete scrolling) based on filtered options
+        filtered_options = get_filtered_options(view.state)
+        max_scroll = max(0, length(filtered_options) - view.style.max_visible_items)
+        new_scroll_offset = if input_state.scroll_y > 0.0
+            # Scroll up (show earlier items)
+            max(0, view.state.scroll_offset - 1)
+        else
+            # Scroll down (show later items)
+            min(max_scroll, view.state.scroll_offset + 1)
+        end
+
+        if new_scroll_offset == view.state.scroll_offset
+            return
+        end
+
+        if new_scroll_offset == 0 || new_scroll_offset == max_scroll
+            return
+        end
+
+        new_state = DropdownState(view.state; scroll_offset=new_scroll_offset, hover_index=0)
+        view.on_state_change(new_state)
+
+        return ClickResult(z, () -> view.on_state_change(new_state))
     end
 
-    # Handle click events - use was_clicked for better click detection
-    if input_state.was_clicked[LeftButton]
+    # Handle click events
+    if input_state.mouse_down[LeftButton]
         if button_hovered
             # Toggle dropdown open/closed, clear search when opening
             new_state = DropdownState(view.state; is_open=!view.state.is_open, hover_index=0, scroll_offset=0, search_text="")
-            view.on_state_change(new_state)
-            return
+
+            return ClickResult(z, () -> view.on_state_change(new_state))
+
         elseif view.state.is_open
+
             # Check if click is on dropdown list
             dropdown_y = y + button_height
             filtered_options = get_filtered_options(view.state)
@@ -163,14 +181,16 @@ function detect_click(view::DropdownView, input_state::InputState, x::Float32, y
                         scroll_offset=0,
                         search_text="")
                     view.on_state_change(new_state)
-                    view.on_select(view.state.options[actual_item_index], actual_item_index)
+                    on_select() = view.on_select(view.state.options[actual_item_index], actual_item_index)
+                    return ClickResult(z, () -> on_select())
+
                 end
-                return
             else
                 # Click outside dropdown - close it
                 new_state = DropdownState(view.state; is_open=false, hover_index=0, scroll_offset=0, search_text="")
-                view.on_state_change(new_state)
+                view.on_state_change(new_state) # Not dependent on capturing.
             end
+            return
         end
     end
 
@@ -192,16 +212,18 @@ function detect_click(view::DropdownView, input_state::InputState, x::Float32, y
 
             if actual_hover_index != view.state.hover_index && actual_hover_index >= 1 && actual_hover_index <= length(view.state.options) && filtered_item_index <= length(filtered_options)
                 new_state = DropdownState(view.state; hover_index=actual_hover_index)
-                view.on_state_change(new_state)
+                return ClickResult(z, () -> view.on_state_change(new_state))
             end
         else
             # Mouse not over dropdown items
             if view.state.hover_index != 0
                 new_state = DropdownState(view.state; hover_index=0)
-                view.on_state_change(new_state)
+                view.on_state_change(new_state) # Not dependent on capturing.
             end
         end
     end
+
+    return nothing
 end
 
 """

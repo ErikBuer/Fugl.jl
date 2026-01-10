@@ -452,10 +452,10 @@ function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::F
         data_to_screen, projection_matrix, effective_bounds)
 end
 
-function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     # Get plot render cache using state's cache ID
     cache = get_render_cache(view.state.cache_id)
-    interaction_occurred = false
+    z = Int32(parent_z + 1)
 
     # Check for scroll wheel zoom with Ctrl/Cmd modifier
     if (mouse_state.scroll_y != 0.0) && is_command_key(mouse_state.modifier_keys)
@@ -465,8 +465,8 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
 
         # Check if mouse is within plot bounds
         if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height
-            handle_scroll_zoom(view, mouse_x, mouse_y, width, height, Float32(mouse_state.scroll_y))
-            interaction_occurred = true
+            zoom_action() = handle_scroll_zoom(view, mouse_x, mouse_y, width, height, Float32(mouse_state.scroll_y))
+            return ClickResult(z, () -> zoom_action())
         end
     end
 
@@ -478,12 +478,12 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
 
         # Check if mouse is within plot bounds
         if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height && mouse_state.drag_start_position[MiddleButton] !== nothing
-            handle_middle_button_drag(view, mouse_state, x, y, width, height)
-            interaction_occurred = true
+            pan_action() = handle_middle_button_drag(view, mouse_state, x, y, width, height)
+            return ClickResult(z, () -> pan_action())
         end
     end
 
-    return
+    return nothing
 end
 
 function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, plot_width::Float32, plot_height::Float32, scroll_y::Float32)

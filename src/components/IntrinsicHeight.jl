@@ -14,13 +14,13 @@ function interpret_view(view::IntrinsicHeightView, x::Float32, y::Float32, width
     interpret_view(view.child, x, y, width, final_height, projection_matrix, mouse_x, mouse_y)
 end
 
-function detect_click(view::IntrinsicHeightView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::IntrinsicHeightView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, z_order::Int32=Int32(0))::Union{ClickResult,Nothing}
     # Use the same height calculation as interpret_view
     intrinsic_height = measure_height(view.child, width)
     final_height = min(intrinsic_height, height)
 
     # Forward the click detection to the child with correct dimensions
-    detect_click(view.child, mouse_state, x, y, width, final_height)
+    return detect_click(view.child, mouse_state, x, y, width, final_height, z_order)
 end
 
 function measure(view::IntrinsicHeightView)::Tuple{Float32,Float32}

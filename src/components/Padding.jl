@@ -38,7 +38,7 @@ function interpret_view(view::PaddingView, x::Float32, y::Float32, width::Float3
     interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
 end
 
-function detect_click(view::PaddingView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+function detect_click(view::PaddingView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     child_x, child_y, child_width, child_height = apply_layout(view, x, y, width, height)
     detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
 end

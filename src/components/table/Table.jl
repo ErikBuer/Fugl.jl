@@ -438,7 +438,7 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
     end
 end
 
-function detect_click(view::TableView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::TableView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     if !input_state.was_clicked[LeftButton]
         return
     end
@@ -505,7 +505,8 @@ function detect_click(view::TableView, input_state::InputState, x::Float32, y::F
     end
 
     # Call the cell click callback
-    view.on_cell_click(row_idx, col_idx)
+    on_cell_click() = view.on_cell_click(row_idx, col_idx)
+    return ClickResult(Int32(parent_z + 1), on_cell_click)
 end
 
 """

@@ -190,7 +190,11 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                     ui::AbstractView = ui_function()
                     last_ui = ui  # Keep reference to prevent GC during this frame
 
-                    detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height))
+                    click_result = detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), Int32(0))
+                    if click_result !== nothing # Run captured action
+                        click_result.action()
+                    end
+
                     interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, Float32(locked_state.x), Float32(locked_state.y))
 
                     # Render overlays after main content

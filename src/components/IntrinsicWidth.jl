@@ -14,13 +14,13 @@ function interpret_view(view::IntrinsicWidthView, x::Float32, y::Float32, width:
     interpret_view(view.child, x, y, final_width, height, projection_matrix, mouse_x, mouse_y)
 end
 
-function detect_click(view::IntrinsicWidthView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::IntrinsicWidthView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     # Use the same width calculation as interpret_view
     intrinsic_width = measure_width(view.child, height)
     final_width = min(intrinsic_width, width)
 
     # Forward the click detection to the child with correct dimensions
-    detect_click(view.child, mouse_state, x, y, final_width, height)
+    return detect_click(view.child, mouse_state, x, y, final_width, height, Int32(parent_z + 1))
 end
 
 function measure(view::IntrinsicWidthView)::Tuple{Float32,Float32}

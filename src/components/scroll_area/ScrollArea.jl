@@ -309,8 +309,8 @@ end
 """
 Detect clicks within the vertical scroll area
 """
-function detect_click(view::VerticalScrollAreaView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
-    interaction_occurred = false
+function detect_click(view::VerticalScrollAreaView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
+    z = Int32(parent_z + 1)
 
     # Get mouse position relative to scroll area
     mouse_x = Float32(mouse_state.x) - x
@@ -321,8 +321,8 @@ function detect_click(view::VerticalScrollAreaView, mouse_state::InputState, x::
 
         # Handle mouse wheel scrolling (vertical only)
         if mouse_state.scroll_y != 0.0
-            handle_vertical_scroll_wheel(view, Float32(mouse_state.scroll_y))
-            interaction_occurred = true
+            scroll_action() = handle_vertical_scroll_wheel(view, Float32(mouse_state.scroll_y))
+            return ClickResult(z, () -> scroll_action())
         end
 
         # Calculate viewport dimensions
@@ -342,27 +342,27 @@ function detect_click(view::VerticalScrollAreaView, mouse_state::InputState, x::
             content_layout = apply_layout(view, x, y, width, height)
             content_x, content_y, content_width, content_height = content_layout[1:4]
 
-            content_clicked = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height)
-            if content_clicked === true
-                interaction_occurred = true
+            content_result = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height, z)
+            if content_result !== nothing
+                return content_result  # Forward child's result with higher z
             end
 
-            # Call our own click callback
+            # Call our own click callback if clicked
             if get(mouse_state.was_clicked, LeftButton, false)
-                view.on_click(content_mouse_x, content_mouse_y)
-                interaction_occurred = true
+                click_action() = view.on_click(content_mouse_x, content_mouse_y)
+                return ClickResult(z, () -> click_action())
             end
         end
     end
 
-    return interaction_occurred
+    return nothing
 end
 
 """
 Detect clicks within the horizontal scroll area
 """
-function detect_click(view::HorizontalScrollAreaView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
-    interaction_occurred = false
+function detect_click(view::HorizontalScrollAreaView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
+    z = Int32(parent_z + 1)
 
     # Get mouse position relative to scroll area
     mouse_x = Float32(mouse_state.x) - x
@@ -373,8 +373,8 @@ function detect_click(view::HorizontalScrollAreaView, mouse_state::InputState, x
 
         # Handle mouse wheel scrolling (horizontal only)
         if mouse_state.scroll_x != 0.0
-            handle_horizontal_scroll_wheel(view, Float32(mouse_state.scroll_x))
-            interaction_occurred = true
+            scroll_action() = handle_horizontal_scroll_wheel(view, Float32(mouse_state.scroll_x))
+            return ClickResult(z, () -> scroll_action())
         end
 
         # Calculate viewport dimensions
@@ -394,20 +394,20 @@ function detect_click(view::HorizontalScrollAreaView, mouse_state::InputState, x
             content_layout = apply_layout(view, x, y, width, height)
             content_x, content_y, content_width, content_height = content_layout[1:4]
 
-            content_clicked = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height)
-            if content_clicked === true
-                interaction_occurred = true
+            content_result = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height, z)
+            if content_result !== nothing
+                return content_result  # Forward child's result with higher z
             end
 
-            # Call our own click callback
+            # Call our own click callback if clicked
             if get(mouse_state.was_clicked, LeftButton, false)
-                view.on_click(content_mouse_x, content_mouse_y)
-                interaction_occurred = true
+                click_action() = view.on_click(content_mouse_x, content_mouse_y)
+                return ClickResult(z, () -> click_action())
             end
         end
     end
 
-    return interaction_occurred
+    return nothing
 end
 
 """
