@@ -64,7 +64,7 @@ function interpret_view(view::KeyListenerView, x::Float32, y::Float32, width::Fl
 end
 
 # Key detection - optimized single-loop implementation
-function detect_click(view::KeyListenerView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+function detect_click(view::KeyListenerView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     # Check for keyboard events in the input_state
     for key_event in input_state.key_events
         # Check if this is a key press (GLFW.PRESS = 1) 
@@ -80,5 +80,5 @@ function detect_click(view::KeyListenerView, input_state::InputState, x::Abstrac
     end
 
     # Forward to child for normal interaction handling
-    detect_click(view.child, input_state, x, y, width, height)
+    detect_click(view.child, input_state, x, y, width, height, Int32(parent_z + 1))
 end

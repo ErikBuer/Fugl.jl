@@ -20,10 +20,10 @@ function interpret_view(view::FixedSizeView, x::Float32, y::Float32, width::Floa
     interpret_view(view.child, x, y, final_width, final_height, projection_matrix, mouse_x, mouse_y)
 end
 
-function detect_click(view::FixedSizeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::FixedSizeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     final_width = min(view.width, width)
     final_height = min(view.height, height)
-    detect_click(view.child, mouse_state, x, y, final_width, final_height)
+    return detect_click(view.child, mouse_state, x, y, final_width, final_height, Int32(parent_z + 1))
 end
 
 function measure(view::FixedSizeView)::Tuple{Float32,Float32}

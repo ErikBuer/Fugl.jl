@@ -28,11 +28,11 @@ function apply_layout(component::AbstractView)
     error("apply_layout is not implemented for $(typeof(component))")
 end
 
-function handle_key_input(component::AbstractView, mouse_state::InputState)
+function handle_key_input(component::AbstractView, input_state::InputState)
     error("handle_key_input is not implemented for $(typeof(component))")
 end
 
-function detect_click(view::AbstractView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+function detect_click(view::AbstractView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     nothing
 end
 

@@ -179,7 +179,9 @@ function draw_step_markers_as_lines(view::HorizontalSliderView, slider_x::Float3
     draw_lines(marker_lines, projection_matrix)
 end
 
-function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
+    z = Int32(parent_z + 1)
+
     # Compute the layout for the slider
     (slider_x, slider_y, slider_width, slider_height, handle_x, handle_y, handle_width, handle_height) = apply_layout(view, x, y, width, height)
 
@@ -204,20 +206,28 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
     # Update the slider state with new interaction state and use for focus
     is_currently_hovered = new_interaction_state.is_hovered
 
-    # Notify of interaction state changes
+    # Collect all actions that need to happen this frame
+    actions_to_execute = []
+
+    # Check for interaction state changes
     if new_interaction_state != view.state.interaction_state
-        view.on_interaction_state_change(new_interaction_state)
-        # Also update the slider state with new interaction state
-        updated_slider_state = SliderState(view.state; interaction_state=new_interaction_state)
-        view.on_state_change(updated_slider_state)
-    end    # Handle drag end
-    if view.state.is_dragging && mouse_state.button_state[LeftButton] == IsReleased
-        new_state = SliderState(view.state; is_dragging=false)
-        view.on_state_change(new_state)
-        return
+        push!(actions_to_execute, () -> begin
+            view.on_interaction_state_change(new_interaction_state)
+            # Also update the slider state with new interaction state
+            updated_slider_state = SliderState(view.state; interaction_state=new_interaction_state)
+            view.on_state_change(updated_slider_state)
+        end)
     end
 
-    # If dragging with left button and drag started inside slider, update value
+    # Check for drag end
+    if view.state.is_dragging && mouse_state.button_state[LeftButton] == IsReleased
+        push!(actions_to_execute, () -> begin
+            new_state = SliderState(view.state; is_dragging=false)
+            view.on_state_change(new_state)
+        end)
+    end
+
+    # Check for drag value updates (this was happening after the early return!)
     if mouse_state.is_dragging[LeftButton] &&
        mouse_state.drag_start_position[LeftButton] !== nothing &&
        inside_slider(mouse_state.drag_start_position[LeftButton]...)
@@ -234,15 +244,28 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
         end
 
         if snapped_value != view.state.value
-            new_state = SliderState(view.state; value=snapped_value, is_dragging=true)
-            view.on_state_change(new_state)
-            view.on_change(snapped_value)
+            push!(actions_to_execute, () -> begin
+                new_state = SliderState(view.state; value=snapped_value, is_dragging=true)
+                view.on_state_change(new_state)
+                view.on_change(snapped_value)
+            end)
         elseif !view.state.is_dragging
             # Start dragging
-            new_state = SliderState(view.state; is_dragging=true)
-            view.on_state_change(new_state)
+            push!(actions_to_execute, () -> begin
+                new_state = SliderState(view.state; is_dragging=true)
+                view.on_state_change(new_state)
+            end)
         end
-        return
+    end
+
+    # If we have actions to execute, combine them
+    if !isempty(actions_to_execute)
+        combined_action() = begin
+            for action in actions_to_execute
+                action()
+            end
+        end
+        return ClickResult(z, combined_action)
     end
 
     # Handle click (not drag) inside slider
@@ -259,12 +282,15 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
             apply_step_snapping(raw_value, view.state.min_value, view.state.max_value, view.steps)
         end
 
-        new_state = SliderState(view.state; value=snapped_value)
-        view.on_state_change(new_state)
-        view.on_change(snapped_value)
-        return
+        click_action() = begin
+            new_state = SliderState(view.state; value=snapped_value)
+            view.on_state_change(new_state)
+            view.on_change(snapped_value)
+        end
+        return ClickResult(z, () -> click_action())
     end
 
+    return nothing
 end
 
 function measure(view::HorizontalSliderView)

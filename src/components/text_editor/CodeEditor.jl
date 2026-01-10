@@ -198,105 +198,122 @@ end
 """
 Detect click events and handle focus, cursor positioning, drag selection, and double-clicks.
 """
-function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     if view.state.is_focused
-        handle_key_input(view, mouse_state)  # Handle key input if focused
+        handle_key_input(view, mouse_state)  # Handle key input if focused. Key input is uaffected by capturing.
     end
 
     # Check if mouse is inside component
     mouse_inside = inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
 
-    if mouse_inside
-        # Calculate cursor position from mouse coordinates
-        new_cursor_pos = mouse_to_cursor_position(
-            view.state,
-            view.style.text_style.font,
-            view.style.text_style.size_px,
-            view.style.padding,
-            mouse_state.x,
-            mouse_state.y,
-            x, y, width, height
-        )
+    if !mouse_inside
+        # Mouse clicked outside component
+        if view.state.is_focused && (mouse_state.was_clicked[LeftButton] || mouse_state.was_double_clicked[LeftButton])
+            # Focus change - create new state with focus=false
+            new_state = EditorState(view.state; is_focused=false)
+            view.on_state_change(new_state)
+            view.on_blur()  # Call blur callback
+        end
+        return nothing # Independent of click capturing
+    end
 
-        # Handle different mouse events
-        if mouse_state.was_double_clicked[LeftButton]
-            # Double-click: select word
-            action = SelectWord(new_cursor_pos)
-            new_state = apply_editor_action(view.state, action)
-            was_unfocused = !view.state.is_focused
-            new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
+    z = Int32(parent_z + 1)
+
+    # Calculate cursor position from mouse coordinates
+    new_cursor_pos = mouse_to_cursor_position(
+        view.state,
+        view.style.text_style.font,
+        view.style.text_style.size_px,
+        view.style.padding,
+        mouse_state.x,
+        mouse_state.y,
+        x, y, width, height
+    )
+
+    # Handle different mouse events
+    if mouse_state.was_double_clicked[LeftButton]
+        # Double-click: select word
+        action = SelectWord(new_cursor_pos)
+        new_state = apply_editor_action(view.state, action)
+        was_unfocused = !view.state.is_focused
+        new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
+
+        handle_double_click() = begin
             view.on_state_change(new_state)
             if was_unfocused
                 view.on_focus()  # Call focus callback if component gained focus
             end
+        end
+        return ClickResult(z, () -> handle_double_click())
 
-        elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.is_dragging[LeftButton]
-            # Mouse drag: extend selection
-            action = ExtendMouseSelection(new_cursor_pos)
-            new_state = apply_editor_action(view.state, action)
-            view.on_state_change(new_state)
+    elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.is_dragging[LeftButton]
+        # Mouse drag: extend selection
+        action = ExtendMouseSelection(new_cursor_pos)
+        new_state = apply_editor_action(view.state, action)
+        update_dragging_state() = view.on_state_change(new_state)
+        return ClickResult(z, () -> update_dragging_state())
 
-        elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.drag_start_position[LeftButton] !== nothing && !mouse_state.is_dragging[LeftButton]
-            # Mouse press (start of potential drag): start selection
-            action = StartMouseSelection(new_cursor_pos)
-            new_state = apply_editor_action(view.state, action)
+    elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.drag_start_position[LeftButton] !== nothing && !mouse_state.is_dragging[LeftButton]
+        # Mouse press (start of potential drag): start selection
+        action = StartMouseSelection(new_cursor_pos)
+        new_state = apply_editor_action(view.state, action)
 
-            # Also handle focus if needed
-            was_unfocused = !view.state.is_focused
-            if !view.state.is_focused
-                new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
-            end
+        # Also handle focus if needed
+        was_unfocused = !view.state.is_focused
+        if !view.state.is_focused
+            new_state = EditorState(new_state.text, new_state.cursor, true, new_state.selection_start, new_state.selection_end, new_state.cached_lines, new_state.text_hash, new_state.cache_id)
+        end
+
+        handle_click_or_drag() = begin
             view.on_state_change(new_state)
             if was_unfocused
                 view.on_focus()  # Call focus callback
             end
+        end
+        return ClickResult(z, () -> handle_click_or_drag())
 
-        elseif mouse_state.button_state[LeftButton] == IsReleased && has_selection(view.state)
-            # Mouse released after dragging with selection: keep selection and don't move cursor
-            # No state change needed - selection and cursor position are already correct from the drag operation
-            return
+    elseif mouse_state.button_state[LeftButton] == IsReleased && has_selection(view.state)
+        # Mouse released after dragging with selection: keep selection and don't move cursor
+        # No state change needed - selection and cursor position are already correct from the drag operation
+        return nothing
 
-        elseif mouse_state.was_clicked[LeftButton]
-            # Simple click: move cursor and clear selection
-            if !view.state.is_focused
-                # Focus change and cursor positioning
-                new_state = EditorState(
-                    view.state.text,
-                    new_cursor_pos,
-                    true,
-                    nothing,  # Clear selection on click
-                    nothing,
-                    view.state.cached_lines,
-                    view.state.text_hash,
-                    view.state.cache_id
-                )
+    elseif mouse_state.was_clicked[LeftButton]
+        # Simple click: move cursor and clear selection
+        if !view.state.is_focused
+            # Focus change and cursor positioning
+            new_state = EditorState(
+                view.state.text,
+                new_cursor_pos,
+                true,
+                nothing,  # Clear selection on click
+                nothing,
+                view.state.cached_lines,
+                view.state.text_hash,
+                view.state.cache_id
+            )
+            handle_focus_and_click() = begin
                 view.on_state_change(new_state)
                 view.on_focus()  # Call focus callback
-            else
-                # Just cursor positioning - clear selection
-                new_state = EditorState(
-                    view.state.text,
-                    new_cursor_pos,
-                    view.state.is_focused,
-                    nothing,  # Clear selection on click
-                    nothing,
-                    view.state.cached_lines,
-                    view.state.text_hash,
-                    view.state.cache_id
-                )
-                view.on_state_change(new_state)
             end
+            return ClickResult(z, () -> handle_focus_and_click())
+
+        else
+            # Just cursor positioning - clear selection
+            new_state = EditorState(
+                view.state.text,
+                new_cursor_pos,
+                view.state.is_focused,
+                nothing,  # Clear selection on click
+                nothing,
+                view.state.cached_lines,
+                view.state.text_hash,
+                view.state.cache_id
+            )
+            return ClickResult(z, () -> view.on_state_change(new_state))
         end
-        return
     end
 
-    # Mouse clicked outside component
-    if view.state.is_focused && (mouse_state.was_clicked[LeftButton] || mouse_state.was_double_clicked[LeftButton])
-        # Focus change - create new state with focus=false
-        new_state = EditorState(view.state; is_focused=false)
-        view.on_state_change(new_state)
-        view.on_blur()  # Call blur callback
-    end
+    return nothing
 end
 
 function handle_key_input(view::CodeEditorView, mouse_state::InputState)

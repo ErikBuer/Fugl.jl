@@ -50,21 +50,48 @@ function interpret_view(view::ColumnView, x::Float32, y::Float32, width::Float32
     end
 end
 
-function detect_click(view::ColumnView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
-    if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
-        if mouse_state.was_clicked[LeftButton]
-            view.on_click()  # Call the on_click function of the clicked child
-        end
-    end
-
+"""
+Detect clicks on the Column and its children.
+The method returns the click result with the highest z-height.
+"""
+function detect_click(view::ColumnView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     # Get the layout for the immediate children
     child_layouts = apply_layout(view, x, y, width, height)
+
+    click_result::Union{ClickResult,Nothing} = nothing
 
     # Traverse each child and check for clicks
     for (child, (child_x, child_y, child_width, child_height)) in zip(view.children, child_layouts)
         # Recursively check the child
-        detect_click(child, mouse_state, child_x, child_y, child_width, child_height)
+        child_click_result = detect_click(child, mouse_state, child_x, child_y, child_width, child_height, Int32(parent_z + 1))
+
+        if child_click_result === nothing
+            continue
+        end
+
+        if click_result === nothing
+            click_result = child_click_result
+            continue
+        end
+
+        if click_result.z_height < child_click_result.z_height
+            click_result = child_click_result
+        end
     end
+
+    if click_result !== nothing
+        return click_result
+    end
+
+    if !inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+        return nothing
+    end
+
+    if mouse_state.was_clicked[LeftButton]
+        return ClickResult(Int32(parent_z + 1), () -> view.on_click())  # Call the on_click function of the column
+    end
+
+    return nothing
 end
 
 function measure(view::ColumnView)::Tuple{Float32,Float32}

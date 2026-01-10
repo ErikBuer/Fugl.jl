@@ -140,14 +140,24 @@ end
 """
 Detect clicks on the container and its child.
 """
-function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat)
+function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     (child_x, child_y, child_width, child_height) = apply_layout(view, x, y, width, height)
+
+    z::Int32 = parent_z + 1
 
     # Skip all interactions if disabled or no interaction state tracking
     if view.disabled || view.interaction_state === nothing
         # Still forward to child for non-interactive components
-        detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
-        return
+        return detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height, z)
+    end
+
+    # Recursively check the child.
+    # Some components have focus behavior, and therefore must register clicks even if outside their bounds.
+    child_click_result = detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height, z)
+
+    # Event captured by child
+    if child_click_result !== nothing
+        return child_click_result
     end
 
 
@@ -173,14 +183,22 @@ function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractF
         current_time=current_time
     )
 
-    # Notify of interaction state changes
-    if new_interaction_state != view.interaction_state
-        view.on_interaction_state_change(new_interaction_state)
+    # TODO Bit of a hotfix to decouple blur from capturing. Some cleanup required. 
+    if !is_mouse_inside
+        # Notify of interaction state changes
+        if new_interaction_state != view.interaction_state
+            view.on_interaction_state_change(new_interaction_state)
+        end
+        return nothing
     end
 
-
     # Launch callbacks
-    if is_mouse_inside
+    container_callbacks() = begin
+        # Notify of interaction state changes
+        if new_interaction_state != view.interaction_state
+            view.on_interaction_state_change(new_interaction_state)
+        end
+
         # Mouse down - triggers only when button is first pressed while over component
         if mouse_state.mouse_down[LeftButton]
             view.on_mouse_down()  # Trigger `on_mouse_down`
@@ -198,8 +216,5 @@ function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractF
 
     end
 
-
-    # Recursively check the child.
-    # Some components have focus behavior, and therefore must register clicks even if outside their bounds.
-    detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
+    return ClickResult(z, container_callbacks)
 end

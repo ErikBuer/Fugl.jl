@@ -182,24 +182,26 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
     end
 end
 
-function detect_click(view::CheckBoxView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::CheckBoxView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     # Check if mouse is within the component bounds
     if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
         if get(mouse_state.was_clicked, LeftButton, false)
             # Toggle the checkbox value
             new_value = !view.checked
 
-            # Call the change callback
-            view.on_change(new_value)
+            runn_callbacks = () -> begin
+                # Call the change callback
+                view.on_change(new_value)
 
-            # Call additional click callback
-            view.on_click()
+                # Call additional click callback
+                view.on_click()
+            end
 
-            return true
+            return ClickResult(Int32(parent_z + 1), runn_callbacks)
         end
     end
 
-    return false
+    return nothing
 end
 
 """

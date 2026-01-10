@@ -102,7 +102,9 @@ function VerticalSplitContainer(
     return VerticalSplitContainerView(top, bottom, style, state, on_state_change)
 end
 
-function detect_click(container::HorizontalSplitContainerView, input_state::InputState, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32)
+function detect_click(container::HorizontalSplitContainerView, input_state::InputState, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
+    z = Int32(parent_z + 1)
+
     mouse_x = Float32(input_state.x) - x_offset
     mouse_y = Float32(input_state.y) - y_offset
 
@@ -126,7 +128,8 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
             drag_start_split=container.state.drag_start_split,
             is_hovering=is_over_handle
         )
-        container.on_state_change(new_state)
+        update_hover() = container.on_state_change(new_state)
+        return ClickResult(z, () -> update_hover())
     end
 
     # Handle dragging
@@ -139,8 +142,8 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
             drag_start_split=container.state.split_position,
             is_hovering=is_over_handle
         )
-        container.on_state_change(new_state)
-        return # Don't propagate to children when starting drag
+        start_drag() = container.on_state_change(new_state)
+        return ClickResult(z, () -> start_drag())
     end
 
     if container.state.is_dragging && input_state.button_state[LeftButton] == IsPressed
@@ -164,8 +167,8 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
             drag_start_split=container.state.drag_start_split,
             is_hovering=container.state.is_hovering
         )
-        container.on_state_change(new_state)
-        return # Don't propagate to children while dragging
+        update_drag() = container.on_state_change(new_state)
+        return ClickResult(z, () -> update_drag())
     end
 
     if container.state.is_dragging && input_state.button_state[LeftButton] == IsReleased
@@ -177,7 +180,8 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
             drag_start_split=container.state.drag_start_split,
             is_hovering=container.state.is_hovering
         )
-        container.on_state_change(new_state)
+        stop_drag() = container.on_state_change(new_state)
+        return ClickResult(z, () -> stop_drag())
     end
 
     # If not interacting with handle, propagate to children
@@ -189,17 +193,19 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
 
         # Check left child
         if mouse_x >= 0.0f0 && mouse_x <= left_width && mouse_y >= 0.0f0 && mouse_y <= height
-            detect_click(container.left, input_state, x_offset, y_offset, left_width, height)
+            return detect_click(container.left, input_state, x_offset, y_offset, left_width, height, z)
         end
 
         # Check right child
         if mouse_x >= right_x && mouse_x <= width && mouse_y >= 0.0f0 && mouse_y <= height
-            detect_click(container.right, input_state, x_offset + right_x, y_offset, right_width, height)
+            return detect_click(container.right, input_state, x_offset + right_x, y_offset, right_width, height, z)
         end
     end
 end
 
-function detect_click(container::VerticalSplitContainerView, input_state::InputState, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32)
+function detect_click(container::VerticalSplitContainerView, input_state::InputState, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
+    z = Int32(parent_z + 1)
+
     mouse_x = Float32(input_state.x) - x_offset
     mouse_y = Float32(input_state.y) - y_offset
 
@@ -223,7 +229,8 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
             drag_start_split=container.state.drag_start_split,
             is_hovering=is_over_handle
         )
-        container.on_state_change(new_state)
+        update_hover() = container.on_state_change(new_state)
+        return ClickResult(z, () -> update_hover())
     end
 
     # Handle dragging
@@ -236,8 +243,8 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
             drag_start_split=container.state.split_position,
             is_hovering=is_over_handle
         )
-        container.on_state_change(new_state)
-        return # Don't propagate to children when starting drag
+        start_drag() = container.on_state_change(new_state)
+        return ClickResult(z, () -> start_drag())
     end
 
     if container.state.is_dragging && input_state.button_state[LeftButton] == IsPressed
@@ -263,8 +270,8 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
             drag_start_split=container.state.drag_start_split,
             is_hovering=container.state.is_hovering
         )
-        container.on_state_change(new_state)
-        return # Don't propagate to children while dragging
+        update_drag() = container.on_state_change(new_state)
+        return ClickResult(z, () -> update_drag())
     end
 
     if container.state.is_dragging && input_state.button_state[LeftButton] == IsReleased
@@ -276,7 +283,8 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
             drag_start_split=container.state.drag_start_split,
             is_hovering=container.state.is_hovering
         )
-        container.on_state_change(new_state)
+        stop_drag() = container.on_state_change(new_state)
+        return ClickResult(z, () -> stop_drag())
     end
 
     # If not interacting with handle, propagate to children
@@ -288,12 +296,12 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
 
         # Check top child
         if mouse_y >= 0.0f0 && mouse_y <= top_height && mouse_x >= 0.0f0 && mouse_x <= width
-            detect_click(container.top, input_state, x_offset, y_offset, width, top_height)
+            return detect_click(container.top, input_state, x_offset, y_offset, width, top_height, z)
         end
 
         # Check bottom child
         if mouse_y >= bottom_y && mouse_y <= height && mouse_x >= 0.0f0 && mouse_x <= width
-            detect_click(container.bottom, input_state, x_offset, y_offset + bottom_y, width, bottom_height)
+            return detect_click(container.bottom, input_state, x_offset, y_offset + bottom_y, width, bottom_height, z)
         end
     end
 end

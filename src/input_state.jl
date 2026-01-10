@@ -328,3 +328,11 @@ function collect_state!(mouse_state::InputState)::InputState
 
     return locked_state
 end
+
+"""
+Struct with Mouse click function with z-height for layering.
+"""
+struct ClickResult
+    z_height::Int32
+    action::Function
+end

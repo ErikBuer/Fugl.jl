@@ -63,13 +63,22 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
         1.5f0
     )
 
-    # Draw each visible option (accounting for scroll offset)
-    visible_items = min(length(view.state.options) - view.state.scroll_offset, view.style.max_visible_items)
+    # Get filtered options based on search text
+    filtered_options = get_filtered_options(view.state)
+
+    # Draw each visible option (accounting for scroll offset and filtering)
+    visible_items = min(length(filtered_options) - view.state.scroll_offset, view.style.max_visible_items)
 
     for i in 1:visible_items
-        actual_option_index = i + view.state.scroll_offset
-        if actual_option_index > length(view.state.options)
+        filtered_option_index = i + view.state.scroll_offset
+        if filtered_option_index > length(filtered_options)
             break
+        end
+
+        # Get the actual option index for this filtered item
+        actual_option_index = get_actual_option_index(view.state, filtered_option_index)
+        if actual_option_index == 0
+            continue  # Skip invalid indices
         end
 
         item_y = y + (i - 1) * view.style.item_height_px

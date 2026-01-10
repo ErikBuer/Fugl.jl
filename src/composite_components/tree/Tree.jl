@@ -141,12 +141,13 @@ function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Floa
     end
 end
 
-function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     current_y = y
+    z = Int32(parent_z + 1)
 
     # Guard: do nothing if tree is missing or empty
     if view.state.tree === nothing || isempty(view.state.tree.children)
-        return
+        return nothing
     end
 
     function click_node(node::TreeNode, depth::Int, parent_path::String="")
@@ -158,9 +159,12 @@ function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Fl
             current_y += 22f0
             for child in node.children
                 # For children of root, parent_path is "" so path starts from here
-                click_node(child, depth + 1, "")
+                result = click_node(child, depth + 1, "")
+                if result !== nothing
+                    return result
+                end
             end
-            return
+            return nothing
         end
 
         # Check if mouse is within this row
@@ -169,32 +173,42 @@ function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Fl
 
             # Folder: toggle open/closed in immutable state
             if node.is_folder && mouse_state.was_clicked[LeftButton]
-                new_open = copy(view.state.open_folders)
-                if node.name in new_open
-                    delete!(new_open, node.name)
-                else
-                    push!(new_open, node.name)
+                toggle_folder() = begin
+                    new_open = copy(view.state.open_folders)
+                    if node.name in new_open
+                        delete!(new_open, node.name)
+                    else
+                        push!(new_open, node.name)
+                    end
+                    new_state = TreeState(view.state.tree; open_folders=new_open, selected_item=view.state.selected_item)
+                    view.on_state_change(new_state)
                 end
-                new_state = TreeState(view.state.tree; open_folders=new_open, selected_item=view.state.selected_item)
-                view.on_state_change(new_state)
+                return ClickResult(z, () -> toggle_folder())
             end
 
             # File: select item in immutable state
             if !node.is_folder && mouse_state.was_clicked[LeftButton]
-                new_state = TreeState(view.state.tree; open_folders=view.state.open_folders, selected_item=current_path)
-                view.on_state_change(new_state)
-                # Call on_select hook with (path, name)
-                view.on_select(current_path, node.name)
+                select_file() = begin
+                    new_state = TreeState(view.state.tree; open_folders=view.state.open_folders, selected_item=current_path)
+                    view.on_state_change(new_state)
+                    # Call on_select hook with (path, name)
+                    view.on_select(current_path, node.name)
+                end
+                return ClickResult(z, () -> select_file())
             end
         end
 
         current_y += 22f0
         if node.is_folder && (node.name in view.state.open_folders)
             for child in node.children
-                click_node(child, depth + 1, current_path)
+                result = click_node(child, depth + 1, current_path)
+                if result !== nothing
+                    return result
+                end
             end
         end
+        return nothing
     end
 
-    click_node(view.state.tree, 0)
+    return click_node(view.state.tree, 0)
 end
