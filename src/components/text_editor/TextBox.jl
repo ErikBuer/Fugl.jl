@@ -244,7 +244,7 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
 
     if !mouse_inside
         # Mouse clicked outside component
-        if view.state.is_focused && (mouse_state.was_clicked[LeftButton] || mouse_state.was_double_clicked[LeftButton])
+        if view.state.is_focused && (mouse_state.mouse_down[LeftButton])
             # Focus change - create new state with focus=false
             blur_action() = begin
                 new_state = EditorState(view.state; is_focused=false)

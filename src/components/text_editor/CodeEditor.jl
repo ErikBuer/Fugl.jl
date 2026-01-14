@@ -208,7 +208,7 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
 
     if !mouse_inside
         # Mouse clicked outside component
-        if view.state.is_focused && (mouse_state.was_clicked[LeftButton] || mouse_state.was_double_clicked[LeftButton])
+        if view.state.is_focused && (mouse_state.mouse_down[LeftButton])
             # Focus change - create new state with focus=false
             new_state = EditorState(view.state; is_focused=false)
             view.on_state_change(new_state)
