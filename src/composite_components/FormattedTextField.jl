@@ -144,7 +144,8 @@ function FormattedTextField(
                         on_change(clean_text)
                     end
                 end
-            end
+            end,
+            cache_rendering=false
         ), height)
     )
 end

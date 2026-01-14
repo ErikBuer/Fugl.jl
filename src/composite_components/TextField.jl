@@ -83,7 +83,8 @@ function TextField(
                 end
                 # Note: We don't call on_change for regular text changes during typing
                 # to avoid focus disruption. on_change is only called on focus loss or Enter.
-            end
+            end,
+            cache_rendering=false
         ), height)
     )
 end

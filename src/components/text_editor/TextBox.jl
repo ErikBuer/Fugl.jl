@@ -13,6 +13,7 @@ struct TextBoxView <: AbstractTextEditorView
     on_change::Function          # Optional callback for text changes only
     on_focus::Function           # Optional callback for when component gains focus
     on_blur::Function            # Optional callback for when component loses focus
+    cache_rendering::Bool        # Whether to use render caching for performance
 end
 
 function TextBox(
@@ -21,9 +22,10 @@ function TextBox(
     on_state_change::Function=(new_state) -> nothing,
     on_change::Function=(new_text) -> nothing,
     on_focus::Function=() -> nothing,
-    on_blur::Function=() -> nothing
+    on_blur::Function=() -> nothing,
+    cache_rendering::Bool=true
 )::TextBoxView
-    return TextBoxView(state, style, on_state_change, on_change, on_focus, on_blur)
+    return TextBoxView(state, style, on_state_change, on_change, on_focus, on_blur, cache_rendering)
 end
 
 function measure(view::TextBoxView)::Tuple{Float32,Float32}
@@ -67,6 +69,12 @@ function apply_layout(view::TextBoxView, x::Float32, y::Float32, width::Float32,
 end
 
 function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+    # Skip caching when inside clipped contexts to avoid rendering issues
+    if !view.cache_rendering
+        render_textbox_immediate(view, x, y, width, height, projection_matrix)
+        return
+    end
+
     # Use render caching for TextBox to improve performance with large text content
     bounds = (x, y, width, height)
     cache_width = Int32(round(width))
@@ -85,17 +93,10 @@ function interpret_view(view::TextBoxView, x::Float32, y::Float32, width::Float3
         # Create new framebuffer if needed
         if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
             if cache_width > 0 && cache_height > 0
-                try
-                    (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
+                (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
 
-                    # Update cache with new framebuffer and content hash
-                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
-                catch e
-                    @warn "Failed to create text framebuffer: $e"
-                    # Fall back to immediate rendering
-                    render_textbox_immediate(view, x, y, width, height, projection_matrix)
-                    return
-                end
+                # Update cache with new framebuffer and content hash
+                update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
             else
                 # Invalid size, skip rendering
                 return
