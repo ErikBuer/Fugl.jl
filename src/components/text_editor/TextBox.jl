@@ -242,6 +242,35 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
     # Check if mouse is inside component
     mouse_inside = inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
 
+    # Check if we're currently dragging from inside the component (like HorizontalSlider)
+    is_dragging_from_inside = mouse_state.is_dragging[LeftButton] &&
+                              mouse_state.drag_start_position[LeftButton] !== nothing &&
+                              inside_component(view, x, y, width, height,
+                                  mouse_state.drag_start_position[LeftButton]...)
+
+    # Handle selection dragging even when mouse is outside component
+    if is_dragging_from_inside && !mouse_inside
+        z = Int32(parent_z + 1)
+
+        # Calculate cursor position from mouse coordinates (allow outside bounds)
+        new_cursor_pos = mouse_to_cursor_position(
+            view.state,
+            view.style.text_style.font,
+            view.style.text_style.size_px,
+            view.style.padding,
+            mouse_state.x,
+            mouse_state.y,
+            x, y, width, height
+        )
+
+        # Extend selection during drag
+        action = ExtendMouseSelection(new_cursor_pos)
+        new_state = apply_editor_action(view.state, action)
+
+        handle_drag_outside() = view.on_state_change(new_state)
+        return ClickResult(z, () -> handle_drag_outside())
+    end
+
     if !mouse_inside
         # Mouse clicked outside component
         if view.state.is_focused && (mouse_state.mouse_down[LeftButton])
@@ -290,8 +319,8 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
         action = ExtendMouseSelection(new_cursor_pos)
         new_state = apply_editor_action(view.state, action)
 
-        handle_drag() = view.on_state_change(new_state)
-        return ClickResult(z, () -> handle_drag())
+        handle_drag_inside() = view.on_state_change(new_state)
+        return ClickResult(z, () -> handle_drag_inside())
 
     elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.drag_start_position[LeftButton] !== nothing && !mouse_state.is_dragging[LeftButton]
         # Mouse press (start of potential drag): start selection

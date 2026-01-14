@@ -14,7 +14,7 @@ function test_delete_key()
                     state[];
                     on_state_change=(new_state) -> begin
                         state[] = new_state
-                        println("TextBox: '$(new_state.text)' focused: $(new_state.is_focused)")
+                        #println("TextBox: '$(new_state.text)' focused: $(new_state.is_focused)")
                     end
                 )
             ),
@@ -26,7 +26,7 @@ function test_delete_key()
                     type=Float32,
                     on_state_change=(new_state) -> begin
                         numberstate[] = new_state
-                        println("NumberField: '$(new_state.text)' focused: $(new_state.is_focused)")
+                        #println("NumberField: '$(new_state.text)' focused: $(new_state.is_focused)")
                     end,
                     on_change=(value) -> println("NumberField parsed: $value")
                 )
