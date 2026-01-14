@@ -80,5 +80,5 @@ function detect_click(view::KeyListenerView, input_state::InputState, x::Abstrac
     end
 
     # Forward to child for normal interaction handling
-    detect_click(view.child, input_state, x, y, width, height, Int32(parent_z + 1))
+    return detect_click(view.child, input_state, x, y, width, height, Int32(parent_z + 1))
 end
