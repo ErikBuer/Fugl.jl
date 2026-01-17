@@ -5,30 +5,38 @@ layout (location = 1) in vec2 direction;
 layout (location = 2) in float width;
 layout (location = 3) in vec4 color;
 layout (location = 4) in float vertex_type;
-layout (location = 5) in float line_style;    // 0.0=solid, 1.0=dash, 2.0=dot, 3.0=dashdot
+layout (location = 5) in float line_pattern;  // 0.0=solid, 1.0=dash, 2.0=dot, 3.0=dashdot
 layout (location = 6) in float line_progress; // Progress along the line (for pattern calculation)
+layout (location = 7) in float line_cap_type; // 0.0=butt, 1.0=square, 2.0=round
 
 uniform mat4 projection;
 
 out vec4 v_color;
 out vec2 v_local_pos;
-flat out float v_line_style;
+flat out float v_line_pattern;
 out float v_line_progress;
 out float v_line_width;
+flat out float v_line_cap_type;
+out vec2 v_line_pos; // position along line: x=distance from start, y=distance from center
+flat out float v_line_length; // actual line length
 
 void main() {
     v_color = color;
-    v_line_style = line_style;
+    v_line_pattern = line_pattern;
     v_line_progress = line_progress;
     v_line_width = width;
+    v_line_cap_type = line_cap_type;
     
     float half_width = width * 0.5;
     
     // Calculate normalized direction and perpendicular
     float dir_length = length(direction);
+    v_line_length = dir_length;  // pass line length to fragment shader
+    
     if (dir_length == 0.0) {
         gl_Position = projection * vec4(position, 0.0, 1.0);
         v_local_pos = vec2(0.0, 0.0);
+        v_line_pos = vec2(0.0, 0.0);
         return;
     }
     
@@ -37,22 +45,29 @@ void main() {
     
     vec2 final_position;
     
+    // Always extend by half-width on both ends (like square caps)
+    vec2 extension = dir_norm * half_width;
+    
     if (vertex_type < 0.5) {
-        // Bottom-left vertex
-        final_position = position - perp;
-        v_local_pos = vec2(0.0, -1.0);
+        // Bottom-left vertex (extended)
+        final_position = position - perp - extension;
+        v_local_pos = vec2(-1.0, -1.0);
+        v_line_pos = vec2(-half_width, -half_width);
     } else if (vertex_type < 1.5) {
-        // Bottom-right vertex  
-        final_position = position + direction - perp;
+        // Bottom-right vertex (extended)
+        final_position = position + direction - perp + extension;
         v_local_pos = vec2(1.0, -1.0);
+        v_line_pos = vec2(dir_length + half_width, -half_width);
     } else if (vertex_type < 2.5) {
-        // Top-left vertex
-        final_position = position + perp;
-        v_local_pos = vec2(0.0, 1.0);
+        // Top-left vertex (extended)
+        final_position = position + perp - extension;
+        v_local_pos = vec2(-1.0, 1.0);
+        v_line_pos = vec2(-half_width, half_width);
     } else {
-        // Top-right vertex
-        final_position = position + direction + perp;
+        // Top-right vertex (extended)
+        final_position = position + direction + perp + extension;
         v_local_pos = vec2(1.0, 1.0);
+        v_line_pos = vec2(dir_length + half_width, half_width);
     }
     
     gl_Position = projection * vec4(final_position, 0.0, 1.0);
@@ -63,9 +78,12 @@ const plot_line_fragment_shader = GLA.frag"""
 #version 330 core
 in vec4 v_color;
 in vec2 v_local_pos;
-flat in float v_line_style;
+flat in float v_line_pattern;
 in float v_line_progress;
 in float v_line_width;
+flat in float v_line_cap_type;
+in vec2 v_line_pos;
+flat in float v_line_length;
 
 uniform float anti_aliasing_width;
 
@@ -108,17 +126,48 @@ float dash_pattern(float progress, float style, float line_width) {
 }
 
 void main() {
-    // Distance from center line along the width
-    float dist = abs(v_local_pos.y);
+    float half_width = v_line_width * 0.5;
+    float aa_width = max(0.001, anti_aliasing_width / v_line_width);
     
-    // Configurable anti-aliasing - when anti_aliasing_width is 0.0, this becomes sharp
-    float aa_width = max(0.001, anti_aliasing_width / v_line_width); // Normalize to line width, minimum to avoid division issues
-    float edge_alpha = 1.0 - smoothstep(1.0 - aa_width, 1.0, dist);
+    // Distance along the line (x) and from center line (y)
+    float line_dist = v_line_pos.x;  // distance from line start
+    float perp_dist = abs(v_line_pos.y);  // distance from center line
     
-    // Calculate line style pattern - no conversion needed now
-    float pattern_alpha = dash_pattern(v_line_progress, v_line_style, v_line_width);
+    float sdf;
     
-    // Combine edge anti-aliasing with pattern
+    // Handle different cap types using SDF
+    if (abs(v_line_cap_type - 0.0) < 0.1) {
+        // BUTT_CAP - cut off at line ends (no extension)
+        sdf = max(max(-line_dist, line_dist - v_line_length), perp_dist - half_width);
+    } else if (abs(v_line_cap_type - 1.0) < 0.1) {
+        // SQUARE_CAP - extend by half_width on both ends
+        sdf = max(max(-line_dist - half_width, line_dist - v_line_length - half_width), perp_dist - half_width);
+    } else {
+        // ROUND_CAP - circular ends
+        float body_sdf = max(max(-line_dist, line_dist - v_line_length), perp_dist - half_width);
+        
+        if (line_dist < 0.0) {
+            // Start cap region - circle centered at line start
+            float cap_sdf = length(vec2(line_dist, v_line_pos.y)) - half_width;
+            sdf = min(cap_sdf, body_sdf);
+        } else if (line_dist > v_line_length) {
+            // End cap region - circle centered at line end
+            float cap_sdf = length(vec2(line_dist - v_line_length, v_line_pos.y)) - half_width;
+            sdf = min(cap_sdf, body_sdf);
+        } else {
+            // Line body - just perpendicular distance
+            sdf = perp_dist - half_width;
+        }
+    }
+    
+    // Apply line pattern only to line body (not extended cap areas)
+    float pattern_alpha = 1.0;
+    if (line_dist >= 0.0 && line_dist <= v_line_length) {  // only in line body
+        pattern_alpha = dash_pattern(v_line_progress, v_line_pattern, v_line_width);
+    }
+    
+    // Combine SDF with pattern and anti-aliasing
+    float edge_alpha = 1.0 - smoothstep(-aa_width, aa_width, sdf);
     float final_alpha = v_color.a * edge_alpha * pattern_alpha;
     
     FragColor = vec4(v_color.rgb, final_alpha);

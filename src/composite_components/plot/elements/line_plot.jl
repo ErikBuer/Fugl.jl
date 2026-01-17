@@ -4,7 +4,7 @@ struct LinePlotElement <: AbstractPlotElement
     y_data::Vector{Float32}
     color::Vec4{Float32}
     width::Float32
-    line_style::LineStyle
+    line_style::LinePattern
     label::String
 end
 
@@ -13,7 +13,7 @@ function LinePlotElement(
     x_data::Union{Vector{<:Real},Nothing}=nothing,
     color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.6f0, 0.8f0, 1.0f0),
     width::Float32=2.0f0,
-    line_style::LineStyle=SOLID,
+    line_style::LinePattern=SOLID,
     label::String=""
 )
     y_f32 = Float32.(y_data)
