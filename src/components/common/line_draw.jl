@@ -40,7 +40,7 @@ end
 Generate geometry for a single line using triangles.
 Returns arrays for positions, directions, widths, colors, vertex_types, line_styles, and line_progresses.
 """
-function generate_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::LinePattern, line_cap::LineCap=ROUND_CAP)
+function generate_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::LinePattern)
     positions = Vector{Point2f}()
     directions = Vector{Point2f}()
     widths = Vector{Float32}()
@@ -48,10 +48,9 @@ function generate_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, w
     vertex_types = Vector{Float32}()
     line_styles = Vector{Float32}()
     line_progresses_out = Vector{Float32}()
-    line_cap_types = Vector{Float32}()
 
     if length(points) < 2
-        return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out, line_cap_types
+        return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out
     end
 
     # Calculate progress along the line
@@ -59,7 +58,6 @@ function generate_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, w
 
     # Convert enum to Float32 for shader compatibility
     line_style_f32 = Float32(line_style)
-    line_cap_f32 = Float32(line_cap)
 
     # Pre-allocate for efficiency (2 triangles = 6 vertices per segment)
     num_segments = length(points) - 1
@@ -70,7 +68,6 @@ function generate_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, w
     sizehint!(vertex_types, num_segments * 6)
     sizehint!(line_styles, num_segments * 6)
     sizehint!(line_progresses_out, num_segments * 6)
-    sizehint!(line_cap_types, num_segments * 6)
 
     # Generate geometry for each segment 
     for i in 1:(length(points)-1)
@@ -91,7 +88,6 @@ function generate_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, w
         append!(vertex_types, [0.0f0, 1.0f0, 2.0f0])  # bottom-left, bottom-right, top-left
         append!(line_styles, [line_style_f32, line_style_f32, line_style_f32])
         append!(line_progresses_out, [start_progress, end_progress, start_progress])
-        append!(line_cap_types, [line_cap_f32, line_cap_f32, line_cap_f32])
 
         # Triangle 2: bottom-right, top-right, top-left
         append!(positions, [start_point, start_point, start_point])
@@ -101,10 +97,9 @@ function generate_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, w
         append!(vertex_types, [1.0f0, 3.0f0, 2.0f0])  # bottom-right, top-right, top-left
         append!(line_styles, [line_style_f32, line_style_f32, line_style_f32])
         append!(line_progresses_out, [end_progress, end_progress, start_progress])
-        append!(line_cap_types, [line_cap_f32, line_cap_f32, line_cap_f32])
     end
 
-    return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out, line_cap_types
+    return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out
 end
 
 """
@@ -118,7 +113,6 @@ function draw_line(
     width::Float32,
     line_style::LinePattern,
     projection_matrix::Mat4{Float32};
-    line_cap::LineCap=ROUND_CAP,
     anti_aliasing_width::Float32=1.5f0
 )
     if length(points) < 2
@@ -126,8 +120,8 @@ function draw_line(
     end
 
     # Generate geometry
-    positions, directions, widths, colors, vertex_types, line_styles, line_progresses, line_cap_types =
-        generate_line_geometry(points, color, width, line_style, line_cap)
+    positions, directions, widths, colors, vertex_types, line_styles, line_progresses =
+        generate_line_geometry(points, color, width, line_style)
 
     if isempty(positions)
         return
@@ -149,8 +143,7 @@ function draw_line(
         color=colors,
         vertex_type=vertex_types,
         line_style=line_styles,
-        line_progress=line_progresses,
-        line_cap_type=line_cap_types
+        line_progress=line_progresses
     )
 
     # Create VAO and draw
@@ -186,12 +179,11 @@ function draw_lines(
     all_vertex_types = Vector{Float32}()
     all_line_styles = Vector{Float32}()
     all_line_progresses = Vector{Float32}()
-    all_line_cap_types = Vector{Float32}()
 
     # Process each line
     for line in lines
         if length(line.points) >= 2
-            positions, directions, widths, colors, vertex_types, line_styles, line_progresses, line_cap_types =
+            positions, directions, widths, colors, vertex_types, line_styles, line_progresses =
                 generate_line_geometry(line.points, line.color, line.width, line.line_style)
 
             append!(all_positions, positions)
@@ -201,7 +193,6 @@ function draw_lines(
             append!(all_vertex_types, vertex_types)
             append!(all_line_styles, line_styles)
             append!(all_line_progresses, line_progresses)
-            append!(all_line_cap_types, line_cap_types)
         end
     end
 
@@ -225,8 +216,7 @@ function draw_lines(
         color=all_colors,
         vertex_type=all_vertex_types,
         line_style=all_line_styles,
-        line_progress=all_line_progresses,
-        line_cap_type=all_line_cap_types
+        line_progress=all_line_progresses
     )
 
     # Create VAO and draw
@@ -252,9 +242,8 @@ function draw_simple_line(
     width::Float32,
     projection_matrix::Mat4{Float32};
     line_style::LinePattern=SOLID,
-    line_cap::LineCap=ROUND_CAP,
     anti_aliasing_width::Float32=1.5f0
 )
     points = [start_point, end_point]
-    draw_line(points, color, width, line_style, projection_matrix; line_cap=line_cap, anti_aliasing_width=anti_aliasing_width)
+    draw_line(points, color, width, line_style, projection_matrix; anti_aliasing_width=anti_aliasing_width)
 end
