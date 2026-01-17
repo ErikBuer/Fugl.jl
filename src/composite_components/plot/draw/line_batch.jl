@@ -12,27 +12,6 @@ struct LineBatch
     segment_lengths::Vector{Int32}   # Length of each line segment
 end
 
-"""
-    calculate_line_progress(points::Vector{Point2f})
-
-Calculate cumulative distance along the line for pattern calculations.
-"""
-function calculate_line_progress(points::Vector{Point2f})
-    if length(points) < 2
-        return Float32[]
-    end
-
-    progress = Vector{Float32}(undef, length(points))
-    progress[1] = 0.0f0
-
-    for i in 2:length(points)
-        segment_length = norm(points[i] - points[i-1])
-        progress[i] = progress[i-1] + segment_length
-    end
-
-    return progress
-end
-
 function LineBatch()
     return LineBatch(
         Point2f[],
