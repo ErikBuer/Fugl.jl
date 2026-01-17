@@ -5,7 +5,7 @@ layout (location = 1) in float size;         // Size of marker (radius/half-widt
 layout (location = 2) in vec4 fill_color;    // Fill color
 layout (location = 3) in vec4 border_color;  // Border color
 layout (location = 4) in float border_width; // Border width in pixels
-layout (location = 5) in int marker_type;    // 0=circle, 1=triangle, 2=rectangle
+layout (location = 5) in float marker_type;   // 0=circle, 1=triangle, 2=rectangle (as Float32 for compatibility)
 layout (location = 6) in float vertex_id;    // Vertex ID for quad (0,1,2,3)
 
 uniform mat4 projection;
@@ -13,7 +13,7 @@ uniform mat4 projection;
 out vec4 v_fill_color;
 out vec4 v_border_color;
 out float v_border_width;
-flat out int v_marker_type;
+flat out float v_marker_type;
 out float v_size;
 out vec2 v_local_pos;  // Local position within marker quad (-1 to 1)
 
@@ -56,7 +56,7 @@ const marker_fragment_shader = GLA.frag"""
 in vec4 v_fill_color;
 in vec4 v_border_color;
 in float v_border_width;
-flat in int v_marker_type;
+flat in float v_marker_type;
 in float v_size;
 in vec2 v_local_pos;  // Local position within marker quad (-1 to 1)
 
@@ -94,9 +94,9 @@ void main() {
     float rect_dist = rect_sdf(p);
     
     // Create weights for each marker type (exactly one will be 1.0, others 0.0)
-    float circle_weight = float(v_marker_type == 0);
-    float triangle_weight = float(v_marker_type == 1);
-    float rect_weight = float(v_marker_type == 2);
+    float circle_weight = float(abs(v_marker_type - 0.0) < 0.1);
+    float triangle_weight = float(abs(v_marker_type - 1.0) < 0.1);
+    float rect_weight = float(abs(v_marker_type - 2.0) < 0.1);
     
     // Blend distances using weights (branchless selection)
     float dist = circle_dist * circle_weight + 
@@ -110,22 +110,25 @@ void main() {
     // Calculate border thickness in local coordinates
     float border_thickness = v_border_width / v_size;
     
-    // Calculate fill alpha (inside shape)
-    float fill_alpha = 1.0 - smoothstep(-aa_width, aa_width, dist);
+    // Use SDF approach like line shader
+    // Outer edge of shape
+    float outer_alpha = 1.0 - smoothstep(-aa_width, aa_width, dist);
     
-    // Calculate border alpha (at edge of shape)
-    float border_outer = dist + border_thickness * 0.5;
-    float border_inner = dist - border_thickness * 0.5;
-    float border_alpha = smoothstep(-aa_width, aa_width, -border_outer) * 
-                        (1.0 - smoothstep(-aa_width, aa_width, -border_inner));
+    // Inner edge of border (shape shrunk by border thickness)
+    float inner_dist = dist + border_thickness;
+    float inner_alpha = 1.0 - smoothstep(-aa_width, aa_width, inner_dist);
     
-    // Combine fill and border
+    // Border region: outside inner edge but inside outer edge
+    float border_alpha = outer_alpha * (1.0 - inner_alpha);
+    
+    // Fill region: inside inner edge
+    float fill_alpha = inner_alpha;
+    
+    // Combine fill and border colors
     vec4 final_color = v_fill_color * fill_alpha + v_border_color * border_alpha;
+    float total_alpha = max(fill_alpha, border_alpha);
     
-    // Overall shape alpha (for discarding pixels outside the marker)
-    float shape_alpha = max(fill_alpha, border_alpha);
-    
-    FragColor = vec4(final_color.rgb, final_color.a * shape_alpha);
+    FragColor = vec4(final_color.rgb, final_color.a * total_alpha);
 }
 """
 
