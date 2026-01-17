@@ -18,7 +18,7 @@ function initialize_plot_shaders()
 end
 
 
-# include("draw/line_draw.jl")  # Included on Fugl level, due to reuse.
+include("draw/line_draw.jl")
 include("draw/marker_draw.jl")
 include("draw/texture_draw.jl")
 

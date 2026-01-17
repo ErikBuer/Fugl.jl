@@ -10,8 +10,8 @@ export LinePattern, SOLID, DASH, DOT, DASHDOT
 include("components/common/LineCap.jl")
 export LineCap, BUTT_CAP, SQUARE_CAP, ROUND_CAP
 
-# Line drawing shaders are used by both plot and common line drawing components
-include("composite_components/plot/draw/line_draw.jl")
+include("components/common/line_draw.jl")
+export draw_simple_line, draw_line, draw_lines, SimpleLine
 
 include("components/Empty.jl")
 export Empty
