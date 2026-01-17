@@ -28,7 +28,7 @@ function MyApp()
 end
 
 # Launch interactive window
-run(MyApp, title="My App", window_width_px=400, window_height_px=300)
+Fugl.run(MyApp, title="My App", window_width_px=400, window_height_px=300)
 ```
 
 ### run() Options
