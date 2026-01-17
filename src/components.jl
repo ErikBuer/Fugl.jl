@@ -3,9 +3,15 @@ include("components/common/draw.jl")
 include("components/common/render_cache.jl")
 include("components/common/rectangle.jl")
 export Rectangle
-include("components/common/line_style.jl")
-export LineStyle, SOLID, DASH, DOT, DASHDOT
-include("components/common/line_draw.jl")
+
+include("components/common/enum_utils.jl")
+include("components/common/LinePattern.jl")
+export LinePattern, SOLID, DASH, DOT, DASHDOT
+include("components/common/LineCap.jl")
+export LineCap, BUTT_CAP, SQUARE_CAP, ROUND_CAP
+
+# Line drawing shaders are used by both plot and common line drawing components
+include("composite_components/plot/draw/line_draw.jl")
 
 include("components/Empty.jl")
 export Empty

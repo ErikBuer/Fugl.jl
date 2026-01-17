@@ -48,7 +48,7 @@ function draw_line_plot(
     transform_func::Function,
     color::Vec4{Float32},
     width::Float32,
-    line_style::LineStyle,
+    line_style::LinePattern,
     projection_matrix::Mat4{Float32};
     anti_aliasing_width::Float32=1.5f0
 )
@@ -103,8 +103,9 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
     all_widths = Vector{Float32}()
     all_colors = Vector{Vec4{Float32}}()
     all_vertex_types = Vector{Float32}()
-    all_line_styles = Vector{Float32}()
+    all_line_patterns = Vector{Float32}()
     all_line_progresses = Vector{Float32}()
+    all_line_cap_types = Vector{Float32}()
 
     # Process all segments in one go (more efficient)
     for seg_idx in 1:length(batch.segment_starts)
@@ -119,21 +120,24 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
         line_points = batch.points[start_idx:end_idx]
         line_color = batch.colors[start_idx]
         line_width = batch.widths[start_idx]
-        line_style_f32 = batch.line_styles[start_idx]
-        line_style = LineStyle(Int(line_style_f32))  # Convert back to enum for function call
+        line_pattern_f32 = batch.line_patterns[start_idx]
+        line_pattern = LinePattern(Int(line_pattern_f32))  # Convert back to enum for function call
         line_progresses = batch.line_progresses[start_idx:end_idx]
+        line_cap_f32 = batch.line_caps[start_idx]
+        line_cap = LineCap(Int(line_cap_f32))  # Convert back to enum for function call
 
         # Generate efficient line geometry (minimal triangles)
-        seg_positions, seg_directions, seg_widths, seg_colors, seg_vertex_types, seg_line_styles, seg_progresses =
-            generate_efficient_line_geometry(line_points, line_color, line_width, line_style, line_progresses)
+        seg_positions, seg_directions, seg_widths, seg_colors, seg_vertex_types, seg_line_patterns, seg_progresses, seg_line_cap_types =
+            generate_efficient_line_geometry(line_points, line_color, line_width, line_pattern, line_progresses, line_cap)
 
         append!(all_positions, seg_positions)
         append!(all_directions, seg_directions)
         append!(all_widths, seg_widths)
         append!(all_colors, seg_colors)
         append!(all_vertex_types, seg_vertex_types)
-        append!(all_line_styles, seg_line_styles)
+        append!(all_line_patterns, seg_line_patterns)
         append!(all_line_progresses, seg_progresses)
+        append!(all_line_cap_types, seg_line_cap_types)
     end
 
     if isempty(all_positions)
@@ -149,8 +153,9 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
         width=all_widths,
         color=all_colors,
         vertex_type=all_vertex_types,
-        line_style=all_line_styles,
-        line_progress=all_line_progresses
+        line_pattern=all_line_patterns,
+        line_progress=all_line_progresses,
+        line_cap_type=all_line_cap_types
     )
 
     # Create VAO and draw
@@ -165,22 +170,24 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
 end
 
 # Generate efficient line geometry - minimal triangles, optimized for performance
-function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_style::LineStyle, line_progresses::Vector{Float32})
+function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{Float32}, width::Float32, line_pattern::LinePattern, line_progresses::Vector{Float32}, line_cap::LineCap=BUTT_CAP)
     positions = Vector{Point2f}()
     directions = Vector{Point2f}()
     widths = Vector{Float32}()
     colors = Vector{Vec4{Float32}}()
     vertex_types = Vector{Float32}()
-    line_styles = Vector{Float32}()
+    line_patterns = Vector{Float32}()
     line_progresses_out = Vector{Float32}()
+    line_cap_types = Vector{Float32}()
 
     if length(points) < 2 || length(line_progresses) != length(points)
-        return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out
+        return positions, directions, widths, colors, vertex_types, line_patterns, line_progresses_out, line_cap_types
     end
 
     # Convert enum to Float32 for shader compatibility
     # Int somehow doesn't work on all targets.
-    line_style_f32 = Float32(line_style)
+    line_pattern_f32 = Float32(line_pattern)
+    line_cap_f32 = Float32(line_cap)
 
     # Pre-allocate for efficiency (2 triangles = 6 vertices per segment)
     num_segments = length(points) - 1
@@ -189,10 +196,11 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
     sizehint!(widths, num_segments * 6)
     sizehint!(colors, num_segments * 6)
     sizehint!(vertex_types, num_segments * 6)
-    sizehint!(line_styles, num_segments * 6)
+    sizehint!(line_patterns, num_segments * 6)
     sizehint!(line_progresses_out, num_segments * 6)
+    sizehint!(line_cap_types, num_segments * 6)
 
-    # Efficiently generate geometry for each segment 
+    # Generate geometry for each segment 
     for i in 1:(length(points)-1)
         start_point = points[i]
         end_point = points[i+1]
@@ -202,15 +210,16 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
         # Calculate direction vector for current segment
         direction_vec = Point2f(end_point[1] - start_point[1], end_point[2] - start_point[2])
 
-        # Generate 2 triangles (6 vertices) for this segment - no overlap needed for efficiency
+        # Generate 2 triangles (6 vertices) for this segment
         # Triangle 1: bottom-left, bottom-right, top-left
         append!(positions, [start_point, start_point, start_point])
         append!(directions, [direction_vec, direction_vec, direction_vec])
         append!(widths, [width, width, width])
         append!(colors, [color, color, color])
         append!(vertex_types, [0.0f0, 1.0f0, 2.0f0])  # bottom-left, bottom-right, top-left
-        append!(line_styles, [line_style_f32, line_style_f32, line_style_f32])
+        append!(line_patterns, [line_pattern_f32, line_pattern_f32, line_pattern_f32])
         append!(line_progresses_out, [start_progress, end_progress, start_progress])
+        append!(line_cap_types, [line_cap_f32, line_cap_f32, line_cap_f32])
 
         # Triangle 2: bottom-right, top-right, top-left
         append!(positions, [start_point, start_point, start_point])
@@ -218,11 +227,14 @@ function generate_efficient_line_geometry(points::Vector{Point2f}, color::Vec4{F
         append!(widths, [width, width, width])
         append!(colors, [color, color, color])
         append!(vertex_types, [1.0f0, 3.0f0, 2.0f0])  # bottom-right, top-right, top-left
-        append!(line_styles, [line_style_f32, line_style_f32, line_style_f32])
+        append!(line_patterns, [line_pattern_f32, line_pattern_f32, line_pattern_f32])
         append!(line_progresses_out, [end_progress, end_progress, start_progress])
+        append!(line_cap_types, [line_cap_f32, line_cap_f32, line_cap_f32])
     end
 
-    return positions, directions, widths, colors, vertex_types, line_styles, line_progresses_out
+    # Note: Line caps are handled in the shader.
+
+    return positions, directions, widths, colors, vertex_types, line_patterns, line_progresses_out, line_cap_types
 end
 
 """
@@ -235,7 +247,7 @@ function draw_grid(
     transform_func::Function,
     color::Vec4{Float32},
     width::Float32,
-    line_style::LineStyle,
+    line_style::LinePattern,
     projection_matrix::Mat4{Float32};
     anti_aliasing_width::Float32=1.5f0
 )

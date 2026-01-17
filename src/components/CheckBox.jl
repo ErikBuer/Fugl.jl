@@ -238,6 +238,7 @@ function draw_checkmark(x::Float32, y::Float32, size::Float32, color::Vec4f, pro
         line_width,
         projection_matrix;
         line_style=SOLID,
+        line_cap=BUTT_CAP,
         anti_aliasing_width=1.5f0
     )
 
@@ -249,6 +250,7 @@ function draw_checkmark(x::Float32, y::Float32, size::Float32, color::Vec4f, pro
         line_width,
         projection_matrix;
         line_style=SOLID,
+        line_cap=BUTT_CAP,
         anti_aliasing_width=1.5f0
     )
 end

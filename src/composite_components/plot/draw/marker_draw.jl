@@ -25,22 +25,13 @@ function draw_markers(batch::MarkerBatch, projection_matrix::Mat4{Float32}; anti
     GLA.gluniform(marker_prog[], :projection, projection_matrix)
     GLA.gluniform(marker_prog[], :anti_aliasing_width, anti_aliasing_width)
 
-    # Create vertex data for quads (4 vertices per marker)
+    # Create vertex data for triangles (6 vertices per marker for 2 triangles)
     all_positions = Vector{Point2f}()
     all_sizes = Vector{Float32}()
     all_fill_colors = Vector{Vec4{Float32}}()
     all_border_colors = Vector{Vec4{Float32}}()
     all_border_widths = Vector{Float32}()
     all_marker_types = Vector{Float32}()
-    all_vertex_ids = Vector{Float32}()
-
-    # For each marker, generate 4 vertices (quad corners) with 4 instances per marker
-    all_positions = Vector{Point2f}()
-    all_sizes = Vector{Float32}()
-    all_fill_colors = Vector{Vec4{Float32}}()
-    all_border_colors = Vector{Vec4{Float32}}()
-    all_border_widths = Vector{Float32}()
-    all_marker_types = Vector{Int32}()
     all_vertex_ids = Vector{Float32}()
 
     for i in 1:length(batch.positions)
@@ -51,7 +42,9 @@ function draw_markers(batch::MarkerBatch, projection_matrix::Mat4{Float32}; anti
             push!(all_fill_colors, batch.fill_colors[i])
             push!(all_border_colors, batch.border_colors[i])
             push!(all_border_widths, batch.border_widths[i])
-            push!(all_marker_types, batch.marker_types[i])
+            # Convert marker type to Float32 for shader compatibility
+            # Int somehow doesn't work on all targets.
+            push!(all_marker_types, Float32(batch.marker_types[i]))
             push!(all_vertex_ids, Float32(vertex_id))
         end
     end
@@ -67,34 +60,6 @@ function draw_markers(batch::MarkerBatch, projection_matrix::Mat4{Float32}; anti
         marker_type=all_marker_types,
         vertex_id=all_vertex_ids
     )
-
-    # Create VAO and draw
-    vao = GLA.VertexArray(buffers)
-
-    # Generate buffers using GLAbstraction
-    buffers = GLA.generate_buffers(
-        marker_prog[],
-        position=all_positions,
-        size=all_sizes,
-        fill_color=all_fill_colors,
-        border_color=all_border_colors,
-        border_width=all_border_widths,
-        marker_type=all_marker_types,
-        vertex_id=all_vertex_ids
-    )
-
-    # Create index buffer for quads (2 triangles per quad)
-    num_markers = length(batch.positions)
-    indices = Vector{UInt32}()
-    for i in 0:(num_markers-1)
-        base = i * 4
-        # First triangle (0, 1, 2)
-        push!(indices, base, base + 1, base + 2)
-        # Second triangle (1, 2, 3)
-        push!(indices, base + 1, base + 3, base + 2)
-    end
-
-    index_buffer = GLA.Buffer(indices)
 
     # Create VAO and draw
     vao = GLA.VertexArray(buffers)

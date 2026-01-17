@@ -3,8 +3,22 @@ abstract type AbstractPlotElement end
 include("utilities.jl")
 include("plot_style.jl")
 include("plot_state.jl")
-include("shaders.jl")
-include("draw/line_draw.jl")
+
+include("shaders/marker.jl")
+include("shaders/line.jl")
+include("shaders/texture.jl")
+
+"""
+Initialize the plot shader programs (must be called after OpenGL context is created)
+"""
+function initialize_plot_shaders()
+    plot_line_prog[] = GLA.Program(plot_line_vertex_shader, plot_line_fragment_shader)
+    marker_prog[] = GLA.Program(marker_vertex_shader, marker_fragment_shader)
+    plot_image_prog[] = GLA.Program(image_plot_vertex_shader, image_plot_fragment_shader)
+end
+
+
+# include("draw/line_draw.jl")  # Included on Fugl level, due to reuse.
 include("draw/marker_draw.jl")
 include("draw/texture_draw.jl")
 
