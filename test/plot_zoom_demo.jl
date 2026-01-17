@@ -44,8 +44,8 @@ function plot_zoom_demo()
             x_data=scatter_x,
             fill_color=Vec4{Float32}(0.2, 0.6, 0.8, 0.8),    # Blue
             border_color=Vec4{Float32}(0.1, 0.3, 0.4, 1.0),
-            marker_size=6.0f0,
-            border_width=1.5f0,
+            marker_size=8.0f0,
+            border_width=2f0,
             marker_type=CIRCLE,
             label="Scatter Circles"
         ),
