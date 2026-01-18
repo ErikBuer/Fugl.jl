@@ -11,17 +11,21 @@ function main()
     right_clicks = Ref(0)
     top_clicks = Ref(0)
 
-    # Add interaction states for buttons
+    # Add interaction states for buttons and dropdown
     left_button_state = Ref(InteractionState())
     right_button_state = Ref(InteractionState())
     top_button_state = Ref(InteractionState())
     reset_button_state = Ref(InteractionState())
 
+    # Dropdown state for testing focus behavior
+    dropdown_options = ["Option 1", "Option 2", "Option 3", "Test Focus", "Close Me"]
+    dropdown_state = Ref(DropdownState(dropdown_options, selected_index=1))
+
     function SplitDemo()
         # Create some simple content for the splits
         left_content = Container(
             Column([
-                    Text("Click and drag the gray bar to resize!"),
+                    Fugl.Text("Click and drag the gray bar to resize!"),
                     TextButton(
                         "Left Button",
                         on_click=() -> begin
@@ -31,7 +35,7 @@ function main()
                         interaction_state=left_button_state[],
                         on_interaction_state_change=(new_state) -> left_button_state[] = new_state
                     ),
-                    Text("Clicks: $(left_clicks[])", style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
+                    Fugl.Text("Clicks: $(left_clicks[])", style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
                 ], spacing=10.0f0),
             style=ContainerStyle(
                 background_color=Vec4f(0.9, 0.9, 1.0, 1.0),  # Light blue
@@ -41,7 +45,7 @@ function main()
 
         right_content = Container(
             Column([
-                    Text("This side can be resized by dragging the splitter handle."),
+                    Fugl.Text("This side can be resized by dragging the splitter handle."),
                     TextButton(
                         "Right Button",
                         on_click=() -> begin
@@ -51,7 +55,7 @@ function main()
                         interaction_state=right_button_state[],
                         on_interaction_state_change=(new_state) -> right_button_state[] = new_state
                     ),
-                    Text("Clicks: $(right_clicks[])", style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
+                    Fugl.Text("Clicks: $(right_clicks[])", style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
                 ], spacing=10.0f0),
             style=ContainerStyle(
                 background_color=Vec4f(1.0, 0.9, 0.9, 1.0),  # Light red
@@ -71,7 +75,7 @@ function main()
         # Create some content for vertical split
         top_content = Container(
             Column([
-                    Text("This demonstrates vertical splitting"),
+                    Fugl.Text("This demonstrates vertical splitting"),
                     Row([
                             TextButton(
                                 "Top Button",
@@ -94,7 +98,15 @@ function main()
                                 on_interaction_state_change=(new_state) -> reset_button_state[] = new_state
                             )
                         ], spacing=10.0f0),
-                    Text("Top clicks: $(top_clicks[]) | Total: $(left_clicks[] + right_clicks[] + top_clicks[])",
+                    Fugl.Text("Dropdown test (should overlay bottom when open):"),
+                    Dropdown(
+                        dropdown_state[],
+                        on_state_change=(new_state) -> dropdown_state[] = new_state,
+                        on_select=(value, index) -> println("Dropdown selected: $value (index: $index)")
+                    ),
+                    Fugl.Text("Selected: $(dropdown_state[].options[dropdown_state[].selected_index])",
+                        style=TextStyle(size_px=12, color=Vec4f(0.4, 0.4, 0.4, 1.0))),
+                    Fugl.Text("Top clicks: $(top_clicks[]) | Total: $(left_clicks[] + right_clicks[] + top_clicks[])",
                         style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
                 ], spacing=10.0f0),
             style=ContainerStyle(
