@@ -16,6 +16,9 @@ export draw_simple_line, draw_line, draw_lines, SimpleLine
 include("components/Empty.jl")
 export Empty
 
+include("components/Focus.jl")
+export Focus
+
 include("components/fixed_sizes/FixedSize.jl")
 include("components/fixed_sizes/FixedWidth.jl")
 include("components/fixed_sizes/FixedHeight.jl")

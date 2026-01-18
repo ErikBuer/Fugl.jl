@@ -36,6 +36,10 @@ function detect_click(view::AbstractView, input_state::InputState, x::AbstractFl
     nothing
 end
 
+function detect_click(view::AbstractView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32, is_focused::Bool)::Union{ClickResult,Nothing}
+    nothing
+end
+
 """
 Measure the intrinsic size of a component.
 """
