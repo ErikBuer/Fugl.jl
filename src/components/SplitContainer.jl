@@ -1,5 +1,5 @@
 # Style for split container appearance
-mutable struct SplitContainerStyle
+struct SplitContainerStyle
     handle_thickness::Float32   # Thickness of the resize handle in pixels
     handle_color::Vec4f         # Color of the resize handle
     handle_hover_color::Vec4f   # Color when hovering over handle
@@ -191,16 +191,21 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
         right_x = split_pixel + container.style.handle_thickness
         right_width = width - right_x
 
-        # Check left child
-        if mouse_x >= 0.0f0 && mouse_x <= left_width && mouse_y >= 0.0f0 && mouse_y <= height
-            return detect_click(container.left, input_state, x_offset, y_offset, left_width, height, z)
-        end
+        # Always call detect_click on both children (for focus/blur/cleanup)
+        left_result = detect_click(container.left, input_state, x_offset, y_offset, left_width, height, z)
+        right_result = detect_click(container.right, input_state, x_offset + right_x, y_offset, right_width, height, z)
 
-        # Check right child
-        if mouse_x >= right_x && mouse_x <= width && mouse_y >= 0.0f0 && mouse_y <= height
-            return detect_click(container.right, input_state, x_offset + right_x, y_offset, right_width, height, z)
+        # Return the result with the highest z-height
+        if left_result !== nothing && right_result !== nothing
+            return left_result.z_height > right_result.z_height ? left_result : right_result
+        elseif left_result !== nothing
+            return left_result
+        elseif right_result !== nothing
+            return right_result
         end
     end
+
+    return nothing
 end
 
 function detect_click(container::VerticalSplitContainerView, input_state::InputState, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
@@ -294,16 +299,21 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
         bottom_y = split_pixel + container.style.handle_thickness
         bottom_height = height - bottom_y
 
-        # Check top child
-        if mouse_y >= 0.0f0 && mouse_y <= top_height && mouse_x >= 0.0f0 && mouse_x <= width
-            return detect_click(container.top, input_state, x_offset, y_offset, width, top_height, z)
-        end
+        # Always call detect_click on both children (for focus/blur/cleanup)
+        top_result = detect_click(container.top, input_state, x_offset, y_offset, width, top_height, z)
+        bottom_result = detect_click(container.bottom, input_state, x_offset, y_offset + bottom_y, width, bottom_height, z)
 
-        # Check bottom child
-        if mouse_y >= bottom_y && mouse_y <= height && mouse_x >= 0.0f0 && mouse_x <= width
-            return detect_click(container.bottom, input_state, x_offset, y_offset + bottom_y, width, bottom_height, z)
+        # Return the result with the highest z-height
+        if top_result !== nothing && bottom_result !== nothing
+            return top_result.z_height > bottom_result.z_height ? top_result : bottom_result
+        elseif top_result !== nothing
+            return top_result
+        elseif bottom_result !== nothing
+            return bottom_result
         end
     end
+
+    return nothing
 end
 
 
