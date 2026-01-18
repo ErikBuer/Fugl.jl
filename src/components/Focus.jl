@@ -57,19 +57,23 @@ end
 function detect_click(view::FocusView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     is_mouse_inside = inside_component(view, x, y, width, height, input_state.x, input_state.y)
 
+    is_focused = view.is_focused
+
     # Handle focus changes on left mouse button down
-    if get(input_state.mouse_down, LeftButton, false)
+    if input_state.mouse_down[LeftButton]
         if is_mouse_inside && !view.is_focused
             # Gain focus - mouse down inside and not currently focused
             view.on_focus_change(true)
             view.on_focus()
+            is_focused = true
         elseif !is_mouse_inside && view.is_focused
             # Lose focus - mouse down outside and currently focused
             view.on_focus_change(false)
             view.on_blur()
+            is_focused = false
         end
     end
 
     # Forward to child with is_focused kwarg
-    return detect_click(view.child, input_state, x, y, width, height, Int32(parent_z + 1); is_focused=view.is_focused)
+    return detect_click(view.child, input_state, x, y, width, height, Int32(parent_z + 1); is_focused=is_focused)
 end
