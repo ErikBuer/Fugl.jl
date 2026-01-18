@@ -40,5 +40,5 @@ end
 
 function detect_click(view::PaddingView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     child_x, child_y, child_width, child_height = apply_layout(view, x, y, width, height)
-    detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height)
+    detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height, Int32(parent_z + 1))
 end
