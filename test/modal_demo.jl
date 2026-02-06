@@ -2,10 +2,10 @@ using Fugl
 using Fugl: Text, TextButton
 
 
-# Modal state for position tracking
+# Modal state for position tracking (nothing = centered)
 modal_state = Ref(ModalState(
-    offset_x=50.0f0,
-    offset_y=50.0f0
+    offset_x=nothing,
+    offset_y=nothing
 ))
 
 # Dark mode style for modal background overlay
@@ -81,11 +81,9 @@ function MyApp()
                         TextButton(
                             "Reset Position";
                             on_click=() -> begin
-                                println("Resetting modal position...")
-
                                 modal_state[] = ModalState(
-                                    offset_x=50.0f0,
-                                    offset_y=50.0f0
+                                    offset_x=nothing,
+                                    offset_y=nothing
                                 )
                             end,
                             text_style=light_text_style,

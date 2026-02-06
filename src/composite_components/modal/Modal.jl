@@ -36,6 +36,27 @@ function apply_layout(view::ModalView, x::Float32, y::Float32, width::Float32, h
     return (x, y, width, height)
 end
 
+# Helper function to calculate modal position (centers if offset is nothing)
+function calculate_modal_position(view::ModalView, x::Float32, y::Float32, width::Float32, height::Float32)::Tuple{Float32,Float32}
+    modal_width = view.child_width
+    modal_height = view.child_height
+
+    # Calculate offset, centering if nothing
+    offset_x = if isnothing(view.state.offset_x)
+        (width - modal_width) / 2.0f0
+    else
+        view.state.offset_x
+    end
+
+    offset_y = if isnothing(view.state.offset_y)
+        (height - modal_height) / 2.0f0
+    else
+        view.state.offset_y
+    end
+
+    return (x + offset_x, y + offset_y)
+end
+
 function interpret_view(view::ModalView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # First, render the background content
     interpret_view(view.background, x, y, width, height, projection_matrix, mouse_x, mouse_y)
@@ -44,9 +65,8 @@ function interpret_view(view::ModalView, x::Float32, y::Float32, width::Float32,
     background_vertices = generate_rectangle_vertices(x, y, width, height)
     draw_rectangle(background_vertices, view.style.background_color, projection_matrix)
 
-    # Calculate modal position constrained within parent bounds
-    modal_x = x + view.state.offset_x
-    modal_y = y + view.state.offset_y
+    # Calculate modal position (centers if offset is nothing)
+    modal_x, modal_y = calculate_modal_position(view, x, y, width, height)
     modal_width = view.child_width
     modal_height = view.child_height
 
@@ -62,9 +82,8 @@ end
 function detect_click(view::ModalView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     mouse_x, mouse_y = Float32(input_state.x), Float32(input_state.y)
 
-    # Calculate modal position
-    modal_x = x + view.state.offset_x
-    modal_y = y + view.state.offset_y
+    # Calculate modal position (centers if offset is nothing)
+    modal_x, modal_y = calculate_modal_position(view, x, y, width, height)
     modal_width = view.child_width
     modal_height = view.child_height
 
