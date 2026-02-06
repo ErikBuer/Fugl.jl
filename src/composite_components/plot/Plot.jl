@@ -28,6 +28,9 @@ include("elements/stem_plot.jl")
 include("elements/heatmap.jl")
 include("elements/colorbar.jl")
 
+include("Legend.jl")
+
+
 struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}
     state::PlotState
