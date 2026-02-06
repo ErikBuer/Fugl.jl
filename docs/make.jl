@@ -30,6 +30,7 @@ makedocs(
         "Components"=>Any[
             "Components/container.md",
             "Components/card.md",
+            "Components/modal.md",
             "Components/row_col.md",
             "Components/split_container.md",
             "Components/align.md",

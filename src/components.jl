@@ -117,6 +117,9 @@ export Dropdown, DropdownState, DropdownStyle
 include("composite_components/Card.jl")
 export Card
 
+include("composite_components/modal/Modal.jl")
+export Modal, ModalState, ModalStyle
+
 include("components/AtlasDebug.jl")
 
 include("composite_components/plot/Plot.jl")
