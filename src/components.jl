@@ -130,6 +130,7 @@ export AbstractPlotElement
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE
 export SimpleLine, draw_line, draw_lines, draw_simple_line
 export VerticalColorbar, HorizontalColorbar
+export Legend
 
 include("composite_components/tree/Tree.jl")
 export Tree, TreeNode, TreeStyle, TreeState
