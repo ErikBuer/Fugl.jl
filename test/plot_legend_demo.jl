@@ -10,6 +10,18 @@ legend_modal_state = Ref(ModalState(
 # Plot state for zoom/pan interaction
 plot_state = Ref(PlotState())
 
+plot_style = PlotStyle(
+    background_color=Vec4{Float32}(0.08, 0.10, 0.14, 1.0),
+    grid_color=Vec4{Float32}(0.25, 0.25, 0.30, 1.0),
+    axis_color=Vec4{Float32}(0.9, 0.9, 0.95, 1.0),
+    show_grid=true,
+    padding=54.0f0,
+    x_label="Time (s)",
+    y_label="Amplitude",
+    show_x_label=true,
+    show_y_label=true,
+)
+
 # Dark mode styles
 modal_style = ModalStyle(
     background_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0)
@@ -72,17 +84,7 @@ function MyApp()
             "Plot with Draggable Legend",
             Plot(
                 elements,
-                PlotStyle(
-                    background_color=Vec4{Float32}(0.08, 0.10, 0.14, 1.0),
-                    grid_color=Vec4{Float32}(0.25, 0.25, 0.30, 1.0),
-                    axis_color=Vec4{Float32}(0.9, 0.9, 0.95, 1.0),
-                    show_grid=true,
-                    padding=54.0f0,
-                    x_label="Time (s)",
-                    y_label="Amplitude",
-                    show_x_label=true,
-                    show_y_label=true,
-                ),
+                plot_style,
                 plot_state[],
                 (new_state) -> plot_state[] = new_state
             ),

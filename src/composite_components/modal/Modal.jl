@@ -22,7 +22,7 @@ function Modal(
     style::ModalStyle=ModalStyle(),
     on_state_change::Function=(new_state) -> nothing,
     on_click_outside::Function=() -> nothing,
-    capture_clicks_outside::Bool=false
+    capture_clicks_outside::Bool=true
 )
     return ModalView(background, child, Float32(child_width), Float32(child_height), state, style, on_state_change, on_click_outside, capture_clicks_outside)
 end
@@ -112,41 +112,66 @@ function detect_click(view::ModalView, input_state::InputState, x::Float32, y::F
         view.on_state_change(new_state)
     end
 
-    # Handle dragging
-    if input_state.button_state[LeftButton] == IsPressed && input_state.is_dragging[LeftButton]
-        if mouse_over_modal || !isnothing(input_state.last_drag_position[LeftButton])
-            # Calculate new modal position maintaining the drag offset
-            new_offset_x = mouse_x - x - view.state.drag_offset_x
-            new_offset_y = mouse_y - y - view.state.drag_offset_y
+    # Set dragging flag when drag actually starts while over modal
+    if mouse_over_modal && input_state.is_dragging[LeftButton] && view.state.is_dragging_modal == false
+        new_state = ModalState(view.state;
+            is_dragging_modal=true
+        )
 
-            # Constrain to parent bounds
-            new_offset_x = clamp(new_offset_x, 0.0f0, width - modal_width)
-            new_offset_y = clamp(new_offset_y, 0.0f0, height - modal_height)
+        view.on_state_change(new_state)
+    end
 
-            # Update state only if position changed
-            if new_offset_x != view.state.offset_x || new_offset_y != view.state.offset_y
-                new_state = ModalState(view.state;
-                    offset_x=new_offset_x,
-                    offset_y=new_offset_y
-                )
+    modal_action = nothing
 
-                return ClickResult(z, () -> view.on_state_change(new_state))
-            end
+    # Handle dragging - only if drag was initiated over the modal
+    # input_state.button_state[LeftButton] == IsPressed && 
+    if input_state.is_dragging[LeftButton] && view.state.is_dragging_modal
+        # Calculate new modal position maintaining the drag offset
+        new_offset_x = mouse_x - x - view.state.drag_offset_x
+        new_offset_y = mouse_y - y - view.state.drag_offset_y
+
+        # Constrain to parent bounds
+        new_offset_x = clamp(new_offset_x, 0.0f0, width - modal_width)
+        new_offset_y = clamp(new_offset_y, 0.0f0, height - modal_height)
+
+        # Update state only if position changed
+        if new_offset_x != view.state.offset_x || new_offset_y != view.state.offset_y
+            new_state = ModalState(view.state;
+                offset_x=new_offset_x,
+                offset_y=new_offset_y
+            )
+
+            modal_action = ClickResult(z, () -> view.on_state_change(new_state))
         end
     end
 
-    child_result = detect_click(view.child, input_state, modal_x, modal_y, modal_width, modal_height, z)
-    if !isnothing(child_result)
-        unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
-        return child_result
+    # Reset dragging state when mouse button is released
+    if input_state.mouse_up[LeftButton] && view.state.is_dragging_modal
+        new_state = ModalState(view.state; is_dragging_modal=false)
+        view.on_state_change(new_state)
     end
 
+    child_action = detect_click(view.child, input_state, modal_x, modal_y, modal_width, modal_height, z)
+    if !isnothing(child_action) || !isnothing(modal_action)
+        unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
+
+        if !isnothing(child_action)
+            return child_action
+        else
+            return modal_action
+        end
+    end
+
+
     # Click inside component but outside of modal. Typically used to close the modal when clicking outside of it.
-    if input_state.mouse_down[LeftButton] && inside_component(view, x, y, width, height, mouse_x, mouse_y) && !mouse_over_modal
-        view.on_click_outside()
+    if inside_component(view, x, y, width, height, mouse_x, mouse_y) && !mouse_over_modal
+        if input_state.mouse_down[LeftButton]
+            view.on_click_outside()
+        end
 
         if view.capture_clicks_outside
             unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
+            return nothing
         end
 
         return detect_click(view.background, input_state, x, y, width, height, Int32(parent_z + 1))
