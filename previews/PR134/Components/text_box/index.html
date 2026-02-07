@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>TextBox · Fugl.jl</title><meta name="title" content="TextBox · Fugl.jl"/><meta property="og:title" content="TextBox · Fugl.jl"/><meta property="twitter:title" content="TextBox · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li class="is-active"><a class="tocitem" href>TextBox</a><ul class="internal"><li><a class="tocitem" href="#Focus-and-Blur-Events"><span>Focus and Blur Events</span></a></li><li><a class="tocitem" href="#Dark-Theme-Example"><span>Dark Theme Example</span></a></li></ul></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-22" type="checkbox"/><label class="tocitem" for="menuitem-3-22"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li><a class="tocitem" href="../keylistener/">KeyListener</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>TextBox</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>TextBox</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/text_box.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="TextBox"><a class="docs-heading-anchor" href="#TextBox">TextBox</a><a id="TextBox-1"></a><a class="docs-heading-anchor-permalink" href="#TextBox" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+text_box_state = Ref(EditorState(&quot;Enter your text here...&quot;))
+
+function MyApp()
+    Card(
+        &quot;Plain Text Box:&quot;,
+        TextBox(
+            text_box_state[];
+            on_state_change=(new_state) -&gt; text_box_state[] = new_state,
+            on_change=(new_text) -&gt; println(&quot;Optional hook. Text is now: &quot;, new_text[1:min(20, length(new_text))], &quot;...&quot;)
+        )
+    )
+end
+
+screenshot(MyApp, &quot;textBox.png&quot;, 812, 400);</code></pre><p><img src="../textBox.png" alt="Text Box"/></p><h2 id="Focus-and-Blur-Events"><a class="docs-heading-anchor" href="#Focus-and-Blur-Events">Focus and Blur Events</a><a id="Focus-and-Blur-Events-1"></a><a class="docs-heading-anchor-permalink" href="#Focus-and-Blur-Events" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+focus_state = Ref(&quot;No focus events yet&quot;)
+text_box_state = Ref(EditorState(&quot;Click me to see focus events&quot;))
+
+function MyApp()
+    Card(
+        focus_state[],
+        TextBox(
+            text_box_state[];
+            on_state_change=(new_state) -&gt; text_box_state[] = new_state,
+            on_focus=() -&gt; focus_state[] = &quot;TextBox gained focus! 🎯&quot;,
+            on_blur=() -&gt; focus_state[] = &quot;TextBox lost focus 😔&quot;
+        )
+    )
+end
+
+screenshot(MyApp, &quot;textBoxFocusBlur.png&quot;, 812, 300);</code></pre><p><img src="../textBoxFocusBlur.png" alt="TextBox Focus/Blur Events"/></p><h2 id="Dark-Theme-Example"><a class="docs-heading-anchor" href="#Dark-Theme-Example">Dark Theme Example</a><a id="Dark-Theme-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Dark-Theme-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+dark_text_box_state = Ref(EditorState(&quot;Dark theme text box...&quot;))
+
+function MyApp()
+    # Dark theme card style
+    dark_card_style = ContainerStyle(
+        background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark background
+        border_color=Vec4f(0.25, 0.25, 0.30, 1.0),      # Subtle border
+        border_width=1.5f0,
+        padding=12.0f0,
+        corner_radius=6.0f0,
+        anti_aliasing_width=1.0f0
+    )
+
+    # Dark theme title style
+    dark_title_style = TextStyle(
+        size_px=18,
+        color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
+    )
+
+    # Dark theme text box style
+    dark_text_box_style = TextBoxStyle(
+        background_color_unfocused = Vec4f(0.08, 0.10, 0.14, 1.0),
+        background_color_focused = Vec4f(0.06, 0.08, 0.12, 1.0),
+        border_color = Vec4f(0.15, 0.18, 0.25, 1.0),
+        border_width = 1.5f0,
+        corner_radius = 6.0f0,
+        padding = 12.0f0,
+        cursor_color = Vec4f(1.0, 1.0, 1.0, 0.8),
+        selection_color = Vec4f(0.4, 0.6, 0.9, 0.5),
+        text_style = TextStyle(
+            color = Vec4f(0.9, 0.9, 0.95, 1.0),  # Light text
+            size_px = 16
+        )
+    )
+
+    Card(
+        &quot;Dark Theme Text Box:&quot;,
+        TextBox(
+            dark_text_box_state[];
+            style = dark_text_box_style,
+            on_state_change=(new_state) -&gt; dark_text_box_state[] = new_state,
+            on_change=(new_text) -&gt; println(&quot;Dark text changed: &quot;, new_text[1:min(20, length(new_text))], &quot;...&quot;)
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;dark_text_box.png&quot;, 812, 400);</code></pre><p><img src="../dark_text_box.png" alt="Dark Text Box"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../text/">« Text</a><a class="docs-footer-nextpage" href="../code_editor/">CodeEditor »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Wednesday 7 January 2026 20:20">Wednesday 7 January 2026</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

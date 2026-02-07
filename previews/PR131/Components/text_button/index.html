@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>TextButton · Fugl.jl</title><meta name="title" content="TextButton · Fugl.jl"/><meta property="og:title" content="TextButton · Fugl.jl"/><meta property="twitter:title" content="TextButton · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li class="is-active"><a class="tocitem" href>TextButton</a><ul class="internal"><li><a class="tocitem" href="#Basic-TextButton-(No-Interaction-Styling)"><span>Basic TextButton (No Interaction Styling)</span></a></li><li><a class="tocitem" href="#TextButton-with-InteractionState"><span>TextButton with InteractionState</span></a></li><li><a class="tocitem" href="#Interaction-States"><span>Interaction States</span></a></li><li><a class="tocitem" href="#Disabled-Button"><span>Disabled Button</span></a></li></ul></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-22" type="checkbox"/><label class="tocitem" for="menuitem-3-22"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li><a class="tocitem" href="../keylistener/">KeyListener</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>TextButton</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>TextButton</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/text_button.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="TextButton"><a class="docs-heading-anchor" href="#TextButton">TextButton</a><a id="TextButton-1"></a><a class="docs-heading-anchor-permalink" href="#TextButton" title="Permalink"></a></h1><h2 id="Basic-TextButton-(No-Interaction-Styling)"><a class="docs-heading-anchor" href="#Basic-TextButton-(No-Interaction-Styling)">Basic TextButton (No Interaction Styling)</a><a id="Basic-TextButton-(No-Interaction-Styling)-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-TextButton-(No-Interaction-Styling)" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    Container(
+        TextButton(&quot;Basic Button&quot;,
+            on_click=() -&gt; println(&quot;Basic button clicked&quot;),
+            text_style = TextStyle(size_px=16),
+            container_style = ContainerStyle(
+                background_color = Vec4f(0.9, 0.9, 0.9, 1.0),
+                border_color = Vec4f(0.6, 0.6, 0.6, 1.0),
+                border_width = 1.0f0,
+                padding = 12.0f0,
+                corner_radius = 4.0f0
+            )
+        ),
+        style = ContainerStyle(
+            background_color = Vec4f(0.95, 0.95, 0.95, 1.0),
+            padding = 20.0f0
+        )
+    )
+end
+
+screenshot(MyApp, &quot;textButton.png&quot;, 812, 150);</code></pre><p><img src="../textButton.png" alt="Text Button"/></p><p><em>Note: This example doesn&#39;t use InteractionState, so hover and pressed styling won&#39;t work.</em></p><h2 id="TextButton-with-InteractionState"><a class="docs-heading-anchor" href="#TextButton-with-InteractionState">TextButton with InteractionState</a><a id="TextButton-with-InteractionState-1"></a><a class="docs-heading-anchor-permalink" href="#TextButton-with-InteractionState" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+# State for managing button interaction
+button_interaction = Ref(InteractionState())
+
+# Normal button style
+normal_style = ContainerStyle(
+    background_color = Vec4f(0.2, 0.4, 0.8, 1.0),
+    border_color = Vec4f(0.1, 0.3, 0.7, 1.0),
+    border_width = 2.0f0,
+    padding = 12.0f0,
+    corner_radius = 6.0f0
+)
+
+# Hover style
+hover_style = ContainerStyle(
+    background_color = Vec4f(0.3, 0.5, 0.9, 1.0),
+    border_color = Vec4f(0.2, 0.4, 0.8, 1.0),
+    border_width = 2.0f0,
+    padding = 12.0f0,
+    corner_radius = 6.0f0
+)
+
+# Pressed style
+pressed_style = ContainerStyle(
+    background_color = Vec4f(0.1, 0.2, 0.6, 1.0),
+    border_color = Vec4f(0.05, 0.15, 0.5, 1.0),
+    border_width = 2.0f0,
+    padding = 12.0f0,
+    corner_radius = 6.0f0
+)
+
+text_style = TextStyle(
+    color = Vec4f(1.0, 1.0, 1.0, 1.0),
+    size_px = 16
+)
+
+function MyApp()
+    Container(
+        AlignCenter(
+            FixedSize(
+                TextButton(&quot;Interactive Button&quot;,
+                    on_click=() -&gt; println(&quot;Interactive button clicked!&quot;),
+                    text_style = text_style,
+                    container_style = normal_style,
+                    hover_style = hover_style,
+                    pressed_style = pressed_style,
+                    interaction_state = button_interaction[],
+                    on_interaction_state_change = (new_state) -&gt; button_interaction[] = new_state
+                ),
+                200, 50
+            )
+        ),
+        style = ContainerStyle(
+            background_color = Vec4f(0.08, 0.08, 0.08, 1.0),
+            padding = 20.0f0
+        )
+    )
+end
+
+screenshot(MyApp, &quot;interactive_text_button.png&quot;, 812, 150);</code></pre><p><img src="../interactive_text_button.png" alt="Interactive Text Button"/></p><h2 id="Interaction-States"><a class="docs-heading-anchor" href="#Interaction-States">Interaction States</a><a id="Interaction-States-1"></a><a class="docs-heading-anchor-permalink" href="#Interaction-States" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+# State for managing button interactions
+button1_interaction = Ref(InteractionState())
+button2_interaction = Ref(InteractionState())
+button3_interaction = Ref(InteractionState())
+
+# Green button styles
+green_normal = ContainerStyle(
+    background_color = Vec4f(0.2, 0.6, 0.3, 1.0),
+    border_color = Vec4f(0.1, 0.5, 0.2, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+green_hover = ContainerStyle(
+    background_color = Vec4f(0.3, 0.7, 0.4, 1.0),
+    border_color = Vec4f(0.2, 0.6, 0.3, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+green_pressed = ContainerStyle(
+    background_color = Vec4f(0.1, 0.4, 0.2, 1.0),
+    border_color = Vec4f(0.05, 0.3, 0.15, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+# Orange button styles
+orange_normal = ContainerStyle(
+    background_color = Vec4f(0.8, 0.5, 0.2, 1.0),
+    border_color = Vec4f(0.7, 0.4, 0.1, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+orange_hover = ContainerStyle(
+    background_color = Vec4f(0.9, 0.6, 0.3, 1.0),
+    border_color = Vec4f(0.8, 0.5, 0.2, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+orange_pressed = ContainerStyle(
+    background_color = Vec4f(0.6, 0.3, 0.1, 1.0),
+    border_color = Vec4f(0.5, 0.2, 0.05, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+# Red button styles
+red_normal = ContainerStyle(
+    background_color = Vec4f(0.8, 0.2, 0.2, 1.0),
+    border_color = Vec4f(0.7, 0.1, 0.1, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+red_hover = ContainerStyle(
+    background_color = Vec4f(0.9, 0.3, 0.3, 1.0),
+    border_color = Vec4f(0.8, 0.2, 0.2, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+red_pressed = ContainerStyle(
+    background_color = Vec4f(0.6, 0.1, 0.1, 1.0),
+    border_color = Vec4f(0.5, 0.05, 0.05, 1.0),
+    border_width = 2.0f0,
+    padding = 10.0f0,
+    corner_radius = 8.0f0
+)
+
+button_text_style = TextStyle(
+    color = Vec4f(1.0, 1.0, 1.0, 1.0),
+    size_px = 14
+)
+
+function MyApp()
+
+    # Dark background container
+    Container(
+        IntrinsicColumn([
+            # Success button
+            AlignCenter(
+                FixedSize(
+                    TextButton(&quot;Success&quot;,
+                        on_click=() -&gt; println(&quot;Success button clicked&quot;),
+                        text_style = button_text_style,
+                        container_style = green_normal,
+                        hover_style = green_hover,
+                        pressed_style = green_pressed,
+                        interaction_state = button1_interaction[],
+                        on_interaction_state_change = (new_state) -&gt; button1_interaction[] = new_state
+                    ),
+                    120, 40
+                )
+            ),
+
+            # Warning button
+            AlignCenter(
+                FixedSize(
+                    TextButton(&quot;Warning&quot;,
+                        on_click=() -&gt; println(&quot;Warning button clicked&quot;),
+                        text_style = button_text_style,
+                        container_style = orange_normal,
+                        hover_style = orange_hover,
+                        pressed_style = orange_pressed,
+                        interaction_state = button2_interaction[],
+                        on_interaction_state_change = (new_state) -&gt; button2_interaction[] = new_state
+                    ),
+                    120, 40
+                )
+            ),
+
+            # Danger button
+            AlignCenter(
+                FixedSize(
+                    TextButton(&quot;Danger&quot;,
+                        on_click=() -&gt; println(&quot;Danger button clicked&quot;),
+                        text_style = button_text_style,
+                        container_style = red_normal,
+                        hover_style = red_hover,
+                        pressed_style = red_pressed,
+                        interaction_state = button3_interaction[],
+                        on_interaction_state_change = (new_state) -&gt; button3_interaction[] = new_state
+                    ),
+                    120, 40
+                )
+            )
+        ], spacing=15.0f0),
+        style = ContainerStyle(
+            background_color = Vec4f(0.08, 0.08, 0.08, 1.0),
+            padding = 20.0f0,
+            corner_radius = 8.0f0
+        )
+    )
+end
+
+screenshot(MyApp, &quot;dark_interactive_text_buttons.png&quot;, 812, 250);</code></pre><p><img src="../dark_interactive_text_buttons.png" alt="Dark Interactive Text Buttons"/></p><h2 id="Disabled-Button"><a class="docs-heading-anchor" href="#Disabled-Button">Disabled Button</a><a id="Disabled-Button-1"></a><a class="docs-heading-anchor-permalink" href="#Disabled-Button" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+# Dark mode button styles
+const BUTTON_STYLE = ContainerStyle(
+    background_color=Vec4f(0.08, 0.10, 0.14, 1.0f0),
+    border_color=Vec4f(0.15, 0.18, 0.25, 1.0f0),
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0
+)
+
+const BUTTON_HOVER_STYLE = ContainerStyle(
+    background_color=Vec4f(0.12, 0.14, 0.18, 1.0f0),
+    border_color=Vec4f(0.20, 0.23, 0.30, 1.0f0),
+    border_width=2.0f0,
+    padding=12.0f0,
+    corner_radius=6.0f0
+)
+
+const BUTTON_PRESSED_STYLE = ContainerStyle(
+    background_color=Vec4f(0.06, 0.08, 0.12, 1.0f0),
+    border_color=Vec4f(0.12, 0.15, 0.22, 1.0f0),
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0
+)
+
+const BUTTON_DISABLED_STYLE = ContainerStyle(
+    background_color=Vec4f(0.05, 0.05, 0.06, 1.0f0),
+    border_color=Vec4f(0.10, 0.10, 0.12, 1.0f0),
+    border_width=1.0f0,
+    padding=12.0f0,
+    corner_radius=6.0f0
+)
+
+# Dark mode card style
+const DARK_CARD_STYLE = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.18, 1.0),
+    border_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0,
+    anti_aliasing_width=1.0f0
+)
+
+# Dark mode title style
+const DARK_TITLE_STYLE = TextStyle(
+    size_px=18,
+    color=Vec4f(0.9, 0.9, 0.95, 1.0)
+)
+
+# Text styles
+const LIGHT_TEXT_STYLE = TextStyle(color=Vec4f(0.9, 0.9, 0.95, 1.0))
+const DISABLED_TEXT_STYLE = TextStyle(color=Vec4f(0.4, 0.4, 0.45, 1.0))
+
+# Button interaction states
+enabled_button_state = Ref(InteractionState())
+
+function MyApp()
+    Card(
+        &quot;Dark Mode Button States&quot;,
+        Column(
+            [
+                # Interactive button (enabled)
+                TextButton(&quot;Interactive Button&quot;,
+                    on_click=() -&gt; println(&quot;Interactive button clicked!&quot;),
+                    container_style=BUTTON_STYLE,
+                    hover_style=BUTTON_HOVER_STYLE,
+                    pressed_style=BUTTON_PRESSED_STYLE,
+                    text_style=LIGHT_TEXT_STYLE,
+                    interaction_state=enabled_button_state[],
+                    on_interaction_state_change=(new_state) -&gt; enabled_button_state[] = new_state
+                ),
+
+                # Disabled button
+                TextButton(&quot;Disabled Button&quot;,
+                    disabled=true,
+                    on_click=() -&gt; println(&quot;This shouldn&#39;t print - button is disabled&quot;),
+                    container_style=BUTTON_STYLE,
+                    hover_style=BUTTON_HOVER_STYLE,
+                    pressed_style=BUTTON_PRESSED_STYLE,
+                    disabled_style=BUTTON_DISABLED_STYLE,
+                    text_style=LIGHT_TEXT_STYLE,
+                    disabled_text_style=DISABLED_TEXT_STYLE
+                ),
+            ],
+            spacing=12.0f0),
+        style=DARK_CARD_STYLE,
+        title_style=DARK_TITLE_STYLE
+    )
+end
+
+screenshot(MyApp, &quot;disabled_button.png&quot;, 812, 250);</code></pre><p><img src="../disabled_button.png" alt="Dark Interactive Text Buttons"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../number_field/">« NumberField</a><a class="docs-footer-nextpage" href="../icon_button/">IconButton »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Sunday 4 January 2026 12:51">Sunday 4 January 2026</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

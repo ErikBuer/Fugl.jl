@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Focus · Fugl.jl</title><meta name="title" content="Focus · Fugl.jl"/><meta property="og:title" content="Focus · Fugl.jl"/><meta property="twitter:title" content="Focus · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-23" type="checkbox"/><label class="tocitem" for="menuitem-3-23"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li><a class="tocitem" href="../keylistener/">KeyListener</a></li><li class="is-active"><a class="tocitem" href>Focus</a><ul class="internal"><li><a class="tocitem" href="#Basic-Focus-Example"><span>Basic Focus Example</span></a></li><li><a class="tocitem" href="#Focus-with-Multiple-Keys-Example"><span>Focus with Multiple Keys Example</span></a></li><li><a class="tocitem" href="#Focus-with-Separate-on*focus-and-on*blur-Callbacks"><span>Focus with Separate on<em>focus and on</em>blur Callbacks</span></a></li><li><a class="tocitem" href="#Focus-Behavior"><span>Focus Behavior</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Focus</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Focus</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/focus.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Focus"><a class="docs-heading-anchor" href="#Focus">Focus</a><a id="Focus-1"></a><a class="docs-heading-anchor-permalink" href="#Focus" title="Permalink"></a></h1><p>Focus wraps another component to manage keyboard focus state. When a component has focus, it can receive keyboard input. Focus is gained by clicking inside the component and lost by clicking outside.</p><h2 id="Basic-Focus-Example"><a class="docs-heading-anchor" href="#Basic-Focus-Example">Basic Focus Example</a><a id="Basic-Focus-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-Focus-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+message = Ref(&quot;Click the blue area to focus, then press &#39;A&#39;&quot;)
+is_focused = Ref(false)
+
+function MyApp()
+    # Create content with visual focus feedback
+    content = Container(
+        Fugl.Text(message[], style=TextStyle(size_px=16, color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+        style=ContainerStyle(
+            background_color=is_focused[] ? Vec4f(0.2, 0.4, 0.8, 1.0) : Vec4f(0.5, 0.5, 0.5, 1.0),
+            border_color=is_focused[] ? Vec4f(0.4, 0.6, 1.0, 1.0) : Vec4f(0.7, 0.7, 0.7, 1.0),
+            border_width=is_focused[] ? 3.0f0 : 1.0f0,
+            padding=20.0f0,
+            corner_radius=8.0f0
+        )
+    )
+
+    # Add keyboard listener
+    key_listener = KeyListener(
+        content,
+        Fugl.GLFW.KEY_A,
+        () -&gt; message[] = &quot;You pressed &#39;A&#39;!&quot;
+    )
+
+    # Wrap with Focus to enable focus management
+    Focus(
+        key_listener;
+        is_focused=is_focused[],
+        on_focus_change=(focused) -&gt; begin
+            is_focused[] = focused
+            if focused
+                message[] = &quot;Focused! Press &#39;A&#39; to test&quot;
+            else
+                message[] = &quot;Click the blue area to focus&quot;
+            end
+        end
+    )
+end
+
+screenshot(MyApp, &quot;focus_basic.png&quot;, 400, 200);</code></pre><p><img src="../focus_basic.png" alt="Focus Basic"/></p><h2 id="Focus-with-Multiple-Keys-Example"><a class="docs-heading-anchor" href="#Focus-with-Multiple-Keys-Example">Focus with Multiple Keys Example</a><a id="Focus-with-Multiple-Keys-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Focus-with-Multiple-Keys-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+status = Ref(&quot;Click to focus, then try key combinations&quot;)
+is_focused = Ref(false)
+
+function MyApp()
+    # Define multiple key bindings
+    key_bindings = Tuple{Fugl.GLFW.Key,Union{Nothing,Int32},Function}[
+        (Fugl.GLFW.KEY_A, nothing, () -&gt; status[] = &quot;A key pressed&quot;),
+        (Fugl.GLFW.KEY_S, Fugl.GLFW.MOD_CONTROL, () -&gt; status[] = &quot;Ctrl+S: Save&quot;),
+        (Fugl.GLFW.KEY_ESCAPE, nothing, () -&gt; status[] = &quot;Escape pressed&quot;)
+    ]
+
+    # Create content area
+    content = Container(
+        IntrinsicColumn([
+            Fugl.Text(&quot;Focused Area&quot;, style=TextStyle(size_px=16, color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+            Fugl.Text(&quot;Try: A, Ctrl+S, Escape&quot;, style=TextStyle(size_px=12, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+            Fugl.Text(status[], style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.9, 1.0)))
+        ], spacing=8.0f0),
+        style=ContainerStyle(
+            background_color=is_focused[] ? Vec4f(0.1, 0.5, 0.2, 1.0) : Vec4f(0.4, 0.4, 0.4, 1.0),
+            border_color=is_focused[] ? Vec4f(0.2, 0.7, 0.3, 1.0) : Vec4f(0.6, 0.6, 0.6, 1.0),
+            border_width=is_focused[] ? 2.0f0 : 1.0f0,
+            padding=15.0f0,
+            corner_radius=6.0f0
+        )
+    )
+
+    # Add multi-key listener
+    key_listener = KeyListener(content, key_bindings)
+
+    # Wrap with Focus component
+    Focus(
+        key_listener;
+        is_focused=is_focused[],
+        on_focus_change=(focused) -&gt; begin
+            is_focused[] = focused
+            if focused
+                status[] = &quot;Focused! Keys are active&quot;
+            else
+                status[] = &quot;Click to focus, then try key combinations&quot;
+            end
+        end
+    )
+end
+
+screenshot(MyApp, &quot;focus_multiple.png&quot;, 500, 250);</code></pre><p><img src="../focus_multiple.png" alt="Focus Multiple"/></p><h2 id="Focus-with-Separate-on*focus-and-on*blur-Callbacks"><a class="docs-heading-anchor" href="#Focus-with-Separate-on*focus-and-on*blur-Callbacks">Focus with Separate on<em>focus and on</em>blur Callbacks</a><a id="Focus-with-Separate-on*focus-and-on*blur-Callbacks-1"></a><a class="docs-heading-anchor-permalink" href="#Focus-with-Separate-on*focus-and-on*blur-Callbacks" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+message = Ref(&quot;Click the area to see focus/blur callbacks&quot;)
+focus_count = Ref(0)
+blur_count = Ref(0)
+is_focused = Ref(false)
+
+function MyApp()
+    # Create content area
+    content = Container(
+        IntrinsicColumn([
+            Fugl.Text(message[], style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+            Fugl.Text(&quot;Focused: $(focus_count[]) times&quot;, style=TextStyle(size_px=12, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+            Fugl.Text(&quot;Blurred: $(blur_count[]) times&quot;, style=TextStyle(size_px=12, color=Vec4f(0.8, 0.8, 0.8, 1.0)))
+        ], spacing=8.0f0),
+        style=ContainerStyle(
+            background_color=is_focused[] ? Vec4f(0.8, 0.3, 0.2, 1.0) : Vec4f(0.4, 0.4, 0.4, 1.0),
+            border_color=is_focused[] ? Vec4f(1.0, 0.5, 0.4, 1.0) : Vec4f(0.6, 0.6, 0.6, 1.0),
+            border_width=is_focused[] ? 2.0f0 : 1.0f0,
+            padding=15.0f0,
+            corner_radius=6.0f0
+        )
+    )
+
+    # Add keyboard listener
+    key_listener = KeyListener(
+        content,
+        Fugl.GLFW.KEY_SPACE,
+        () -&gt; message[] = &quot;Spacebar pressed!&quot;
+    )
+
+    # Wrap with Focus using separate callbacks
+    Focus(
+        key_listener;
+        is_focused=is_focused[],
+        on_focus_change=(focused) -&gt; is_focused[] = focused,
+        on_focus=() -&gt; begin
+            focus_count[] += 1
+            message[] = &quot;Focused! Press Space to test&quot;
+        end,
+        on_blur=() -&gt; begin
+            blur_count[] += 1
+            message[] = &quot;Blurred! Click again to refocus&quot;
+        end
+    )
+end
+
+screenshot(MyApp, &quot;focus_callbacks.png&quot;, 500, 200);</code></pre><p><img src="../focus_callbacks.png" alt="Focus Callbacks"/></p><h2 id="Focus-Behavior"><a class="docs-heading-anchor" href="#Focus-Behavior">Focus Behavior</a><a id="Focus-Behavior-1"></a><a class="docs-heading-anchor-permalink" href="#Focus-Behavior" title="Permalink"></a></h2><ul><li><strong>Gaining Focus</strong>: Click inside the wrapped component</li><li><strong>Losing Focus</strong>: Click outside the wrapped component</li><li><strong>Visual Feedback</strong>: Use the <code>on_focus_change</code> callback to update visual styling</li><li><strong>Keyboard Input</strong>: Only works when the component has focus</li></ul><h3 id="Available-Callbacks"><a class="docs-heading-anchor" href="#Available-Callbacks">Available Callbacks</a><a id="Available-Callbacks-1"></a><a class="docs-heading-anchor-permalink" href="#Available-Callbacks" title="Permalink"></a></h3><ul><li><code>on_focus_change(focused::Bool)</code>: Called when focus state changes (focus gained or lost). Used to update state.</li><li><code>on_focus()</code>: Called specifically when focus is gained</li><li><code>on_blur()</code>: Called specifically when focus is lost</li></ul><p>You can use either <code>on_focus_change</code> for general focus management, or <code>on_focus</code>/<code>on_blur</code> for more specific event handling.</p><p>The Focus component follows the single-purpose design principle - it only manages focus state and delegates all other functionality to its child component.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../keylistener/">« KeyListener</a><a class="docs-footer-nextpage" href="../../adding_shaders/">Adding your own shaders »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Sunday 18 January 2026 10:39">Sunday 18 January 2026</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

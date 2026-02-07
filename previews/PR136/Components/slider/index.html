@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>HorizontalSlider · Fugl.jl</title><meta name="title" content="HorizontalSlider · Fugl.jl"/><meta property="og:title" content="HorizontalSlider · Fugl.jl"/><meta property="twitter:title" content="HorizontalSlider · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li class="is-active"><a class="tocitem" href>HorizontalSlider</a><ul class="internal"><li><a class="tocitem" href="#Slider-with-State-Management-and-Steps"><span>Slider with State Management and Steps</span></a></li><li><a class="tocitem" href="#RGB-Color-Picker-with-Hidden-Step-Markers"><span>RGB Color Picker with Hidden Step Markers</span></a></li><li><a class="tocitem" href="#Slider-Sizing-and-Styling"><span>Slider Sizing and Styling</span></a></li></ul></li><li><a class="tocitem" href="../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-23" type="checkbox"/><label class="tocitem" for="menuitem-3-23"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li><a class="tocitem" href="../keylistener/">KeyListener</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>HorizontalSlider</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>HorizontalSlider</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/slider.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="HorizontalSlider"><a class="docs-heading-anchor" href="#HorizontalSlider">HorizontalSlider</a><a id="HorizontalSlider-1"></a><a class="docs-heading-anchor-permalink" href="#HorizontalSlider" title="Permalink"></a></h1><p>The HorizontalSlider component provides interactive value selection with support for state management, visual feedback, and discrete step snapping.</p><h2 id="Slider-with-State-Management-and-Steps"><a class="docs-heading-anchor" href="#Slider-with-State-Management-and-Steps">Slider with State Management and Steps</a><a id="Slider-with-State-Management-and-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Slider-with-State-Management-and-Steps" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function slider_demo()
+    # Slider states with different configurations
+    continuous_state = Ref(SliderState(0.5, 0.0, 1.0))
+    discrete_state = Ref(SliderState(50, 0, 100))
+    stepped_state = Ref(SliderState(0.2, 0.0, 1.0))
+
+    # Dark theme styles
+    dark_container_style = ContainerStyle(
+        background_color=Vec4f(0.08, 0.08, 0.08, 1.0),
+        border_color=Vec4f(0.3, 0.3, 0.3, 1.0),
+        border_width=1.0f0,
+        corner_radius=8.0f0,
+        padding=20.0f0
+    )
+
+    dark_card_style = ContainerStyle(
+        background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
+        border_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+        border_width=1.0f0,
+        corner_radius=8.0f0
+    )
+
+    dark_text_style = TextStyle(
+        color=Vec4f(0.9, 0.9, 0.9, 1.0),
+        size_px=16
+    )
+
+    dark_card_title_style = TextStyle(
+        color=Vec4f(0.9, 0.9, 0.9, 1.0),
+        size_px=16
+    )
+
+    dark_slider_style = SliderStyle(
+        background_color=Vec4f(0.2, 0.2, 0.2, 1.0),
+        handle_color=Vec4f(0.6, 0.7, 0.8, 1.0),
+        border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
+        border_width=1.0f0,
+        radius=4.0f0,
+        fill_color=Vec4f(0.4, 0.6, 0.8, 0.6),
+        marker_color=Vec4f(0.6, 0.6, 0.6, 0.8)
+    )
+
+    # Focused style - lighter colors for hover state
+    focused_slider_style = SliderStyle(
+        background_color=Vec4f(0.25, 0.25, 0.3, 1.0),
+        handle_color=Vec4f(0.7, 0.8, 0.9, 1.0),
+        border_color=Vec4f(0.6, 0.6, 0.7, 1.0),
+        border_width=1.5f0,
+        radius=4.0f0,
+        fill_color=Vec4f(0.5, 0.7, 0.9, 0.8),
+        marker_color=Vec4f(0.8, 0.8, 0.8, 1.0)
+    )
+
+    # Dragging style - blue accent for active dragging
+    dragging_slider_style = SliderStyle(
+        background_color=Vec4f(0.2, 0.25, 0.35, 1.0),
+        handle_color=Vec4f(0.3, 0.6, 1.0, 1.0),
+        border_color=Vec4f(0.4, 0.6, 0.8, 1.0),
+        border_width=2.0f0,
+        radius=4.0f0,
+        fill_color=Vec4f(0.3, 0.6, 1.0, 0.8),
+        marker_color=Vec4f(0.9, 0.9, 1.0, 1.0)
+    )
+
+    Container(
+        IntrinsicColumn([
+            # Continuous slider with interaction styles
+            Card(
+                &quot;Interactive Slider with State Styles&quot;,
+                Column([
+                    HorizontalSlider(
+                        continuous_state[];
+                        style=dark_slider_style,
+                        focused_style=focused_slider_style,
+                        dragging_style=dragging_slider_style,
+                        on_state_change=(new_state) -&gt; continuous_state[] = new_state,
+                        on_change=(new_value) -&gt; println(&quot;Continuous: &quot;, new_value)
+                    ),
+                    Text(&quot;Value: $(round(continuous_state[].value, digits=3))&quot;, style=dark_text_style),
+                    Text(&quot;Hover and drag to see different styles!&quot;, style=TextStyle(color=Vec4f(0.7, 0.7, 0.7, 1.0), size_px=12))
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            ),
+
+            # Continuous slider
+            Card(
+                &quot;Continuous Slider&quot;,
+                Column([
+                    HorizontalSlider(
+                        continuous_state[];
+                        style=dark_slider_style,
+                        on_state_change=(new_state) -&gt; continuous_state[] = new_state,
+                        on_change=(new_value) -&gt; println(&quot;Continuous: &quot;, new_value)
+                    ),
+                    Text(&quot;Value: $(round(continuous_state[].value, digits=3))&quot;, style=dark_text_style)
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            ),
+
+            # Discrete steps slider
+            Card(
+                &quot;Discrete Steps (10 steps)&quot;,
+                Column([
+                    HorizontalSlider(
+                        discrete_state[];
+                        steps=11,  # 11 positions = 10 intervals
+                        style=dark_slider_style,
+                        on_state_change=(new_state) -&gt; discrete_state[] = new_state,
+                        on_change=(new_value) -&gt; println(&quot;Discrete: &quot;, new_value)
+                    ),
+                    Text(&quot;Value: $(Int(discrete_state[].value))&quot;, style=dark_text_style)
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            ),
+
+            # Fixed step size slider
+            Card(
+                &quot;Fixed Step Size (0.1)&quot;,
+                Column([
+                    HorizontalSlider(
+                        stepped_state[];
+                        steps=0.1,  # Step by 0.1
+                        style=dark_slider_style,
+                        on_state_change=(new_state) -&gt; stepped_state[] = new_state,
+                        on_change=(new_value) -&gt; println(&quot;Stepped: &quot;, new_value)
+                    ),
+                    Text(&quot;Value: $(stepped_state[].value)&quot;, style=dark_text_style)
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            )
+        ], spacing=20),
+        style=dark_container_style
+    )
+end
+
+screenshot(slider_demo, &quot;slider.png&quot;, 812, 500);</code></pre><p><img src="../slider.png" alt="Slider Example"/></p><h2 id="RGB-Color-Picker-with-Hidden-Step-Markers"><a class="docs-heading-anchor" href="#RGB-Color-Picker-with-Hidden-Step-Markers">RGB Color Picker with Hidden Step Markers</a><a id="RGB-Color-Picker-with-Hidden-Step-Markers-1"></a><a class="docs-heading-anchor-permalink" href="#RGB-Color-Picker-with-Hidden-Step-Markers" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+# RGB color states
+rgb_r_state = Ref(SliderState(Int, 200, 0, 255))
+rgb_g_state = Ref(SliderState(Int, 50, 0, 255))
+rgb_b_state = Ref(SliderState(Int, 150, 0, 255))
+
+# Dark theme styles
+dark_container_style = ContainerStyle(
+    background_color=Vec4f(0.08, 0.08, 0.08, 1.0),
+    border_color=Vec4f(0.3, 0.3, 0.3, 1.0),
+    border_width=1.0f0,
+    corner_radius=8.0f0,
+    padding=20.0f0
+)
+
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
+    border_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+    border_width=1.0f0,
+    corner_radius=8.0f0
+)
+
+# Color-themed slider styles with NO step markers (marker_color=nothing)
+red_slider_style = SliderStyle(
+    background_color=Vec4f(0.25, 0.15, 0.15, 1.0),
+    handle_color=Vec4f(1.0, 0.4, 0.4, 1.0),
+    border_color=Vec4f(0.6, 0.3, 0.3, 1.0),
+    border_width=1.0f0,
+    radius=4.0f0,
+    fill_color=Vec4f(0.8, 0.2, 0.2, 0.7),
+    marker_color=nothing,  # Hidden step markers
+    track_height=18.0f0,
+    handle_width=14.0f0
+)
+
+green_slider_style = SliderStyle(
+    background_color=Vec4f(0.15, 0.25, 0.15, 1.0),
+    handle_color=Vec4f(0.4, 1.0, 0.4, 1.0),
+    border_color=Vec4f(0.3, 0.6, 0.3, 1.0),
+    border_width=1.0f0,
+    radius=4.0f0,
+    fill_color=Vec4f(0.2, 0.8, 0.2, 0.7),
+    marker_color=nothing,  # Hidden step markers
+    track_height=18.0f0,
+    handle_width=14.0f0
+)
+
+blue_slider_style = SliderStyle(
+    background_color=Vec4f(0.15, 0.15, 0.25, 1.0),
+    handle_color=Vec4f(0.4, 0.4, 1.0, 1.0),
+    border_color=Vec4f(0.3, 0.3, 0.6, 1.0),
+    border_width=1.0f0,
+    radius=4.0f0,
+    fill_color=Vec4f(0.2, 0.2, 0.8, 0.7),
+    marker_color=nothing,  # Hidden step markers
+    track_height=18.0f0,
+    handle_width=14.0f0
+)
+
+function rgb_color_picker_demo()
+    Card(
+        &quot;RGB Color Picker&quot;,
+        IntrinsicColumn([
+            # Red slider
+            Row([
+                Container(
+                    Text(&quot;R:&quot;, style=TextStyle(color=Vec4f(1.0, 0.5, 0.5, 1.0), size_px=16)),
+                    style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
+                ),
+                HorizontalSlider(
+                    rgb_r_state[];
+                    steps=256,  # 0-255 steps, but markers are hidden
+                    style=red_slider_style,
+                    on_state_change=(new_state) -&gt; rgb_r_state[] = new_state
+                ),
+                Container(
+                    Text(&quot;$(rgb_r_state[].value)&quot;, style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                    style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
+                )
+            ]),
+
+            # Green slider
+            Row([
+                Container(
+                    Text(&quot;G:&quot;, style=TextStyle(color=Vec4f(0.5, 1.0, 0.5, 1.0), size_px=16)),
+                    style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
+                ),
+                HorizontalSlider(
+                    rgb_g_state[];
+                    steps=256,  # 0-255 steps, but markers are hidden
+                    style=green_slider_style,
+                    on_state_change=(new_state) -&gt; rgb_g_state[] = new_state
+                ),
+                Container(
+                    Text(&quot;$(rgb_g_state[].value)&quot;, style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                    style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
+                )
+            ]),
+
+            # Blue slider
+            Row([
+                Container(
+                    Text(&quot;B:&quot;, style=TextStyle(color=Vec4f(0.5, 0.5, 1.0, 1.0), size_px=16)),
+                    style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
+                ),
+                HorizontalSlider(
+                    rgb_b_state[];
+                    steps=256,  # 0-255 steps, but markers are hidden
+                    style=blue_slider_style,
+                    on_state_change=(new_state) -&gt; rgb_b_state[] = new_state
+                ),
+                Container(
+                    Text(&quot;$(rgb_b_state[].value)&quot;, style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                    style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
+                )
+            ]),
+
+            # Color preview
+            FixedHeight(
+                Container(
+                    Text(
+                        &quot;RGB($(rgb_r_state[].value), $(rgb_g_state[].value), $(rgb_b_state[].value))&quot;,
+                        style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_px=16)
+                    ),
+                    style=ContainerStyle(
+                        background_color=Vec4f(
+                            rgb_r_state[].value / 255.0f0,
+                            rgb_g_state[].value / 255.0f0,
+                            rgb_b_state[].value / 255.0f0,
+                            1.0
+                        ),
+                        border_color=Vec4f(0.6, 0.6, 0.6, 1.0),
+                        border_width=2.0f0,
+                        corner_radius=5.0f0,
+                        padding=15.0f0
+                    )
+                ),
+                50.0f0
+            ),
+
+            Text(
+                &quot;Note: Step markers are hidden (marker_color=nothing) for clean appearance&quot;,
+                style=TextStyle(color=Vec4f(0.6, 0.6, 0.6, 1.0), size_px=12)
+            )
+        ], spacing=15),
+        style=dark_card_style,
+        title_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_px=16)
+    )
+end
+
+screenshot(rgb_color_picker_demo, &quot;slider_rgb.png&quot;, 812, 400);</code></pre><p><img src="../slider_rgb.png" alt="RGB Color Picker"/></p><h2 id="Slider-Sizing-and-Styling"><a class="docs-heading-anchor" href="#Slider-Sizing-and-Styling">Slider Sizing and Styling</a><a id="Slider-Sizing-and-Styling-1"></a><a class="docs-heading-anchor-permalink" href="#Slider-Sizing-and-Styling" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+# States for different sized sliders
+small_state = Ref(SliderState(0.3, 0.0, 1.0))
+default_state = Ref(SliderState(0.5, 0.0, 1.0))
+large_state = Ref(SliderState(0.7, 0.0, 1.0))
+custom_state = Ref(SliderState(0.4, 0.0, 1.0))
+
+# Dark theme styles
+dark_container_style = ContainerStyle(
+    background_color=Vec4f(0.08, 0.08, 0.08, 1.0),
+    border_color=Vec4f(0.3, 0.3, 0.3, 1.0),
+    border_width=1.0f0,
+    corner_radius=8.0f0,
+    padding=20.0f0
+)
+
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
+    border_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+    border_width=1.0f0,
+    corner_radius=8.0f0
+)
+
+dark_text_style = TextStyle(
+    color=Vec4f(0.9, 0.9, 0.9, 1.0),
+    size_px=14
+)
+
+dark_card_title_style = TextStyle(
+    color=Vec4f(0.9, 0.9, 0.9, 1.0),
+    size_px=16
+)
+
+# Small slider style
+small_slider_style = SliderStyle(
+    background_color=Vec4f(0.2, 0.2, 0.2, 1.0),
+    handle_color=Vec4f(0.6, 0.7, 0.8, 1.0),
+    border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
+    border_width=1.0f0,
+    radius=2.0f0,
+    fill_color=Vec4f(0.4, 0.6, 0.8, 0.6),
+    marker_color=Vec4f(0.6, 0.6, 0.6, 0.8),
+    track_height=12.0f0,     # Smaller track
+    handle_width=8.0f0,      # Smaller handle
+    handle_height_offset=2.0f0,
+    min_width=40.0f0
+)
+
+# Default slider style
+default_slider_style = SliderStyle(
+    background_color=Vec4f(0.2, 0.2, 0.2, 1.0),
+    handle_color=Vec4f(0.6, 0.7, 0.8, 1.0),
+    border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
+    border_width=1.0f0,
+    radius=4.0f0,
+    fill_color=Vec4f(0.4, 0.6, 0.8, 0.6),
+    marker_color=Vec4f(0.6, 0.6, 0.6, 0.8)
+    # Uses default sizing: track_height=20.0f0, handle_width=12.0f0, etc.
+)
+
+# Large slider style
+large_slider_style = SliderStyle(
+    background_color=Vec4f(0.2, 0.2, 0.2, 1.0),
+    handle_color=Vec4f(0.6, 0.7, 0.8, 1.0),
+    border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
+    border_width=2.0f0,
+    radius=6.0f0,
+    fill_color=Vec4f(0.4, 0.6, 0.8, 0.6),
+    marker_color=Vec4f(0.6, 0.6, 0.6, 0.8),
+    track_height=32.0f0,     # Larger track
+    handle_width=18.0f0,     # Larger handle
+    handle_height_offset=6.0f0,
+    min_width=80.0f0
+)
+
+# Custom styled slider
+custom_slider_style = SliderStyle(
+    background_color=Vec4f(0.15, 0.25, 0.15, 1.0),
+    handle_color=Vec4f(0.4, 1.0, 0.4, 1.0),
+    border_color=Vec4f(0.3, 0.6, 0.3, 1.0),
+    border_width=1.5f0,
+    radius=8.0f0,
+    fill_color=Vec4f(0.2, 0.8, 0.2, 0.7),
+    marker_color=Vec4f(0.5, 0.9, 0.5, 0.9),
+    track_height=24.0f0,
+    handle_width=14.0f0,
+    handle_height_offset=8.0f0,
+    min_width=60.0f0
+)
+
+
+function slider_sizing_demo()
+    Container(
+        IntrinsicColumn([
+            Card(
+                &quot;Small Slider (12px height)&quot;,
+                Column([
+                    HorizontalSlider(
+                        small_state[];
+                        steps=5,
+                        style=small_slider_style,
+                        on_state_change=(new_state) -&gt; small_state[] = new_state
+                    ),
+                    Text(&quot;Value: $(round(small_state[].value, digits=2))&quot;, style=dark_text_style)
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            ),
+
+            Card(
+                &quot;Default Slider (20px height)&quot;,
+                Column([
+                    HorizontalSlider(
+                        default_state[];
+                        steps=10,
+                        style=default_slider_style,
+                        on_state_change=(new_state) -&gt; default_state[] = new_state
+                    ),
+                    Text(&quot;Value: $(round(default_state[].value, digits=2))&quot;, style=dark_text_style)
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            ),
+
+            Card(
+                &quot;Large Slider (32px height)&quot;,
+                Column([
+                    HorizontalSlider(
+                        large_state[];
+                        steps=8,
+                        style=large_slider_style,
+                        on_state_change=(new_state) -&gt; large_state[] = new_state
+                    ),
+                    Text(&quot;Value: $(round(large_state[].value, digits=2))&quot;, style=dark_text_style)
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            ),
+
+            Card(
+                &quot;Custom Green Slider (24px height)&quot;,
+                Column([
+                    HorizontalSlider(
+                        custom_state[];
+                        steps=6,
+                        style=custom_slider_style,
+                        on_state_change=(new_state) -&gt; custom_state[] = new_state
+                    ),
+                    Text(&quot;Value: $(round(custom_state[].value, digits=2))&quot;, style=dark_text_style)
+                ]),
+                style=dark_card_style,
+                title_style=dark_card_title_style
+            )
+        ], spacing=20),
+        style=dark_container_style
+    )
+end
+
+screenshot(slider_sizing_demo, &quot;slider_sizes.png&quot;, 812, 480);</code></pre><p><img src="../slider_sizes.png" alt="Slider Sizing Examples"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../image/">« Image</a><a class="docs-footer-nextpage" href="../scroll_area/">ScrollArea »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Wednesday 14 January 2026 20:08">Wednesday 14 January 2026</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

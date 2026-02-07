@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Table · Fugl.jl</title><meta name="title" content="Table · Fugl.jl"/><meta property="og:title" content="Table · Fugl.jl"/><meta property="twitter:title" content="Table · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">Sliders</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-2-20" type="checkbox"/><label class="tocitem" for="menuitem-2-20"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li class="is-active"><a class="tocitem" href>Table</a><ul class="internal"><li><a class="tocitem" href="#Basic-Table"><span>Basic Table</span></a></li><li><a class="tocitem" href="#Styled-Table-with-Alternating-Row-Colors"><span>Styled Table with Alternating Row Colors</span></a></li><li><a class="tocitem" href="#Text-Clipping-and-Wrapping"><span>Text Clipping and Wrapping</span></a></li><li><a class="tocitem" href="#Interactive-Table"><span>Interactive Table</span></a></li><li><a class="tocitem" href="#Table-with-Custom-Column-Widths"><span>Table with Custom Column Widths</span></a></li></ul></li><li><a class="tocitem" href="../tree/">Tree</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Table</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Table</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/table.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Table"><a class="docs-heading-anchor" href="#Table">Table</a><a id="Table-1"></a><a class="docs-heading-anchor-permalink" href="#Table" title="Permalink"></a></h1><p>The <code>Table</code> component provides a flexible way to display tabular data with customizable styling, text wrapping, and clipping options.</p><h2 id="Basic-Table"><a class="docs-heading-anchor" href="#Basic-Table">Basic Table</a><a id="Basic-Table-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-Table" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Table, TableStyle, Card
+
+function MyApp()
+    # Simple table data
+    headers = [&quot;Product&quot;, &quot;Price&quot;, &quot;Stock&quot;]
+    data = [
+        [&quot;Laptop&quot;, &quot;999&quot;, &quot;15&quot;],
+        [&quot;Mouse&quot;, &quot;25&quot;, &quot;50&quot;],
+        [&quot;Keyboard&quot;, &quot;75&quot;, &quot;30&quot;],
+        [&quot;Monitor&quot;, &quot;299&quot;, &quot;8&quot;]
+    ]
+
+    # Create basic table
+    table = Table(headers, data)
+
+    # Wrap in a card
+    Card(&quot;Basic Table Example&quot;, table)
+end
+
+screenshot(MyApp, &quot;table_basic.png&quot;, 812, 400)</code></pre><p><img src="../table_basic.png" alt="Basic Table"/></p><h2 id="Styled-Table-with-Alternating-Row-Colors"><a class="docs-heading-anchor" href="#Styled-Table-with-Alternating-Row-Colors">Styled Table with Alternating Row Colors</a><a id="Styled-Table-with-Alternating-Row-Colors-1"></a><a class="docs-heading-anchor-permalink" href="#Styled-Table-with-Alternating-Row-Colors" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Table, TableStyle, TextStyle, Card
+
+function MyApp()
+    # Employee data
+    headers = [&quot;Name&quot;, &quot;Department&quot;, &quot;Status&quot;]
+    data = [
+        [&quot;Alice Johnson&quot;, &quot;Engineering&quot;, &quot;Active&quot;],
+        [&quot;Bob Smith&quot;, &quot;Design&quot;, &quot;Active&quot;],
+        [&quot;Carol Davis&quot;, &quot;Management&quot;, &quot;On Leave&quot;],
+        [&quot;David Wilson&quot;, &quot;Engineering&quot;, &quot;Active&quot;],
+        [&quot;Eve Brown&quot;, &quot;Engineering&quot;, &quot;Active&quot;],
+        [&quot;Frank Miller&quot;, &quot;Design&quot;, &quot;Active&quot;]
+    ]
+
+    # Create styled table with alternating row colors
+    styled_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            header_background_color=Vec4f(0.8, 0.4, 0.2, 1.0),
+            header_text_style=TextStyle(size_px=16, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            header_height=35.0f0,
+
+            cell_background_color=Vec4f(1.0, 1.0, 1.0, 1.0),  # White for odd rows
+            cell_alternate_background_color=Vec4f(0.95, 0.95, 0.95, 1.0),  # Light gray for even rows
+            cell_text_style=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+            cell_height=30.0f0,
+
+            show_grid=true,
+            grid_color=Vec4f(0.6, 0.6, 0.6, 1.0),
+            cell_padding=10.0f0,
+
+            border_color=Vec4f(0.3, 0.3, 0.3, 1.0),
+            border_width=2.0f0
+        )
+    )
+
+    Card(&quot;Styled Table with Colors&quot;, styled_table)
+end
+
+screenshot(MyApp, &quot;table_styled.png&quot;, 812, 400)</code></pre><p><img src="../table_styled.png" alt="Styled Table"/></p><h2 id="Text-Clipping-and-Wrapping"><a class="docs-heading-anchor" href="#Text-Clipping-and-Wrapping">Text Clipping and Wrapping</a><a id="Text-Clipping-and-Wrapping-1"></a><a class="docs-heading-anchor-permalink" href="#Text-Clipping-and-Wrapping" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Table, TableStyle, TextStyle, Card, IntrinsicColumn
+
+function MyApp()
+    # Data with long text content
+    headers = [&quot;Name&quot;, &quot;Description&quot;, &quot;Notes&quot;]
+    data = [
+        [&quot;Product A&quot;, &quot;This is a very long description that will demonstrate text clipping with ellipsis&quot;, &quot;Short note&quot;],
+        [&quot;Product B&quot;, &quot;Another long description that exceeds the available cell width&quot;, &quot;Another short note&quot;],
+        [&quot;Product C&quot;, &quot;Yet another lengthy description for testing purposes&quot;, &quot;Final note&quot;]
+    ]
+
+    # Table with text clipping (no wrapping)
+    clipping_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            max_wrapped_rows=0,  # No wrapping - clip with ellipsis
+            header_background_color=Vec4f(0.8, 0.4, 0.2, 1.0),
+            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            cell_height=30.0f0,
+            cell_padding=8.0f0,
+            show_grid=true
+        )
+    )
+
+    # Table with text wrapping (max 2 rows)
+    wrapping_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            max_wrapped_rows=2,  # Allow up to 2 rows of wrapped text
+            header_background_color=Vec4f(0.2, 0.6, 0.4, 1.0),
+            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            cell_height=50.0f0,  # Taller cells for wrapped text
+            cell_padding=8.0f0,
+            show_grid=true
+        )
+    )
+
+    IntrinsicColumn([
+        Card(&quot;Text Clipping (max_wrapped_rows=0)&quot;, clipping_table),
+        Card(&quot;Text Wrapping (max_wrapped_rows=2)&quot;, wrapping_table)
+    ], spacing=10.0f0, padding=0.0f0)
+end
+
+screenshot(MyApp, &quot;table_clipping.png&quot;, 812, 600)</code></pre><p><img src="../table_clipping.png" alt="Text Clipping and Wrapping"/></p><h2 id="Interactive-Table"><a class="docs-heading-anchor" href="#Interactive-Table">Interactive Table</a><a id="Interactive-Table-1"></a><a class="docs-heading-anchor-permalink" href="#Interactive-Table" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Table, TableStyle, TextStyle, Card
+
+function MyApp()
+    # Interactive table data
+    headers = [&quot;ID&quot;, &quot;Name&quot;, &quot;Action&quot;]
+    data = [
+        [&quot;001&quot;, &quot;Alice&quot;, &quot;Edit&quot;],
+        [&quot;002&quot;, &quot;Bob&quot;, &quot;View&quot;],
+        [&quot;003&quot;, &quot;Carol&quot;, &quot;Delete&quot;],
+        [&quot;004&quot;, &quot;David&quot;, &quot;Edit&quot;]
+    ]
+
+    # Create interactive table with click handling
+    interactive_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            header_background_color=Vec4f(0.4, 0.2, 0.6, 1.0),
+            header_text_style=TextStyle(size_px=15, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            cell_background_color=Vec4f(0.99, 0.99, 0.99, 1.0),
+            cell_padding=12.0f0,
+            show_grid=true,
+            grid_color=Vec4f(0.7, 0.7, 0.7, 1.0)
+        ),
+        on_cell_click=(row, col) -&gt; begin
+            println(&quot;Clicked row $row, column $col: $(data[row][col])&quot;)
+        end
+    )
+
+    Card(&quot;Interactive Table (Click cells to see console output)&quot;, interactive_table)
+end
+
+screenshot(MyApp, &quot;table_interactive.png&quot;, 812, 400)</code></pre><p><img src="../table_interactive.png" alt="Interactive Table"/></p><h2 id="Table-with-Custom-Column-Widths"><a class="docs-heading-anchor" href="#Table-with-Custom-Column-Widths">Table with Custom Column Widths</a><a id="Table-with-Custom-Column-Widths-1"></a><a class="docs-heading-anchor-permalink" href="#Table-with-Custom-Column-Widths" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+function MyApp()
+    # Product data with varying content lengths
+    headers = [&quot;ID&quot;, &quot;Product Name&quot;, &quot;Description&quot;, &quot;Price&quot;]
+    data = [
+        [&quot;1&quot;, &quot;Laptop&quot;, &quot;High-performance gaming laptop with RGB keyboard&quot;, &quot;\$1299&quot;],
+        [&quot;2&quot;, &quot;Mouse&quot;, &quot;Wireless optical mouse&quot;, &quot;\$29&quot;],
+        [&quot;3&quot;, &quot;Monitor&quot;, &quot;4K Ultra HD display&quot;, &quot;\$449&quot;],
+        [&quot;4&quot;, &quot;Keyboard&quot;, &quot;Mechanical gaming keyboard&quot;, &quot;\$129&quot;],
+        [&quot;5&quot;, &quot;Headphones&quot;, &quot;Noise-cancelling wireless headphones&quot;, &quot;\$199&quot;]
+    ]
+
+    # Auto-sizing table (default behavior - no column widths specified)
+    auto_state = Ref(TableState())  # column_widths=nothing, so auto-calculate
+
+    auto_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            header_background_color=Vec4f(0.2, 0.4, 0.8, 1.0),
+            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            cell_padding=8.0f0,
+            show_grid=true
+        ),
+        state=auto_state[],
+        on_state_change=(new_state) -&gt; auto_state[] = new_state
+    )
+
+    # Custom column widths table
+    custom_state = Ref(TableState([50.0f0, 120.0f0, 300.0f0, 80.0f0]))  # Explicit widths
+
+    custom_table = Table(
+        headers,
+        data,
+        style=TableStyle(
+            header_background_color=Vec4f(0.8, 0.2, 0.4, 1.0),
+            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            cell_padding=8.0f0,
+            show_grid=true,
+            max_wrapped_rows=2  # Allow text wrapping in description column
+        ),
+        state=custom_state[],
+        on_state_change=(new_state) -&gt; custom_state[] = new_state
+    )
+
+
+    IntrinsicColumn([
+        Card(&quot;Auto-sized Columns (TableState())&quot;, auto_table),
+        Card(&quot;Custom Column Widths [50, 120, 300, 80]&quot;, custom_table),
+    ], spacing=15.0f0, padding=0.0f0)
+end
+
+screenshot(MyApp, &quot;table_state.png&quot;, 812, 800)</code></pre><p><img src="../table_state.png" alt="Table with Custom Column Widths"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../plot/07_plot_state/">« PlotState</a><a class="docs-footer-nextpage" href="../tree/">Tree »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.15.0 on <span class="colophon-date" title="Monday 27 October 2025 18:07">Monday 27 October 2025</span>. Using Julia version 1.11.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
