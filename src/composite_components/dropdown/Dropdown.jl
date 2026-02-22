@@ -42,9 +42,7 @@ function measure_width(view::DropdownView, available_height::Float32)::Float32
     end
 
     # Measure the width of the selected text using the same method as Text component
-    font = view.style.text_style.font
-    size_px = view.style.text_style.size_px
-    text_width = measure_word_width_cached(font, selected_text, size_px)
+    text_width = measure_word_width_cached(view.style.text_style, selected_text)
 
     return text_width + padding
 end

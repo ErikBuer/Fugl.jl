@@ -158,7 +158,7 @@ function measure(view::TableView)::Tuple{Float32,Float32}
     # Estimate minimum column widths based on header text
     min_col_widths = Float32[]
     for header in view.headers
-        header_width = measure_word_width_cached(view.style.header_text_style.font, header, view.style.header_text_style.size_px)
+        header_width = measure_word_width_cached(view.style.header_text_style, header)
         push!(min_col_widths, header_width + 2 * view.style.cell_padding)
     end
 
@@ -166,7 +166,7 @@ function measure(view::TableView)::Tuple{Float32,Float32}
     for row in view.data
         for (col_idx, cell) in enumerate(row)
             if col_idx <= length(min_col_widths)
-                cell_width = measure_word_width_cached(view.style.cell_text_style.font, cell, view.style.cell_text_style.size_px)
+                cell_width = measure_word_width_cached(view.style.cell_text_style, cell)
                 min_col_widths[col_idx] = max(min_col_widths[col_idx], cell_width + 2 * view.style.cell_padding)
             end
         end
@@ -361,9 +361,10 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
                 available_text_width = col_width - 2 * view.style.cell_padding
 
                 # Wrap the cell text based on table settings
+                cell_font = get_font(view.style.cell_text_style)
                 wrapped_lines = wrap_cell_text(
                     cell_text,
-                    view.style.cell_text_style.font,
+                    cell_font,
                     view.style.cell_text_style.size_px,
                     available_text_width,
                     view.style.max_wrapped_rows
@@ -530,7 +531,7 @@ function calculate_column_widths(view::TableView, available_width::Float32)::Vec
 
     # Start with header widths
     for header in view.headers
-        header_width = measure_word_width_cached(view.style.header_text_style.font, header, view.style.header_text_style.size_px)
+        header_width = measure_word_width_cached(view.style.header_text_style, header)
         push!(min_col_widths, header_width + 2 * view.style.cell_padding)
     end
 
@@ -538,7 +539,7 @@ function calculate_column_widths(view::TableView, available_width::Float32)::Vec
     for row in view.data
         for (col_idx, cell) in enumerate(row)
             if col_idx <= length(min_col_widths)
-                cell_width = measure_word_width_cached(view.style.cell_text_style.font, cell, view.style.cell_text_style.size_px)
+                cell_width = measure_word_width_cached(view.style.cell_text_style, cell)
                 min_col_widths[col_idx] = max(min_col_widths[col_idx], cell_width + 2 * view.style.cell_padding)
             end
         end

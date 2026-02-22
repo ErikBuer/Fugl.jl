@@ -80,7 +80,7 @@ function measure(view::CheckBoxView)::Tuple{Float32,Float32}
         return (checkbox_size, checkbox_size)
     else
         # Measure label text
-        label_width = measure_word_width_cached(view.style.label_style.font, view.label, view.style.label_style.size_px)
+        label_width = measure_word_width_cached(view.style.label_style, view.label)
         label_height = Float32(view.style.label_style.size_px)
 
         # Total width: checkbox + spacing + label
@@ -99,7 +99,7 @@ function measure_width(view::CheckBoxView, available_height::Float32)::Float32
         return checkbox_size
     else
         # Measure label text
-        label_width = measure_word_width_cached(view.style.label_style.font, view.label, view.style.label_style.size_px)
+        label_width = measure_word_width_cached(view.style.label_style, view.label)
 
         # Total width: checkbox + spacing + label
         spacing = 8.0f0
@@ -170,8 +170,9 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
         label_x = checkbox_x + checkbox_size + spacing
         label_y = y + (height + view.style.label_style.size_px) / 2  # Vertically center the text
 
+        label_font = get_font(view.style.label_style)
         draw_text(
-            view.style.label_style.font,
+            label_font,
             view.label,
             label_x,
             label_y,

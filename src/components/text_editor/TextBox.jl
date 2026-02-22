@@ -34,7 +34,7 @@ end
 
 function measure_width(view::TextBoxView, available_height::Float32)::Float32
     # TextBox width is determined by the longest line (no wrapping)
-    font = view.style.text_style.font
+    font = get_font(view.style.text_style)
     size_px = view.style.text_style.size_px
     padding = view.style.padding
 
@@ -52,7 +52,7 @@ end
 
 function measure_height(view::TextBoxView, available_width::Float32)::Float32
     # TextBox height is determined by the number of lines (no wrapping)
-    font = view.style.text_style.font
+    font = get_font(view.style.text_style)
     size_px = view.style.text_style.size_px
     padding = view.style.padding
     line_height = Float32(size_px * 1.2)  # Same line spacing as in render_textbox_content
@@ -148,7 +148,7 @@ end
 
 function render_textbox_content(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Extract style properties
-    font = view.style.text_style.font
+    font = get_font(view.style.text_style)
     size_px = view.style.text_style.size_px
     color = view.style.text_style.color
     padding = view.style.padding
@@ -253,9 +253,10 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
         z = Int32(parent_z + 1)
 
         # Calculate cursor position from mouse coordinates (allow outside bounds)
+        text_font = get_font(view.style.text_style)
         new_cursor_pos = mouse_to_cursor_position(
             view.state,
-            view.style.text_style.font,
+            text_font,
             view.style.text_style.size_px,
             view.style.padding,
             mouse_state.x,
@@ -288,9 +289,10 @@ function detect_click(view::TextBoxView, mouse_state::InputState, x::Float32, y:
     z = Int32(parent_z + 1)
 
     # Calculate cursor position from mouse coordinates
+    text_font = get_font(view.style.text_style)
     new_cursor_pos = mouse_to_cursor_position(
         view.state,
-        view.style.text_style.font,
+        text_font,
         view.style.text_style.size_px,
         view.style.padding,
         mouse_state.x,
