@@ -102,6 +102,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     initialize_plot_shaders()
     initialize_gl_state!()
 
+    # Load default font if not already loaded
+    get_default_font()
+
     # Initialize local states
     mouse_state = InputState()
 

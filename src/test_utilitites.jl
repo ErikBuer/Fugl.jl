@@ -40,6 +40,9 @@ function screenshot(ui_function::Function, output_file::String, width::Int, heig
     initialize_plot_shaders()
     initialize_gl_state!()  # Initialize GL state management for offscreen context
 
+    # Load default font if not already loaded
+    get_default_font()
+
     root_view::AbstractView = ui_function()
 
     framebuffer, texture = create_offscreen_framebuffer(width, height)
@@ -136,7 +139,8 @@ function render_fps_overlay(frame_count::Int, fps::Float64, screen_width::Float3
     )
 
     # Measure text to position it correctly
-    text_width = measure_word_width(debug_style.font, debug_text, debug_style.size_px)
+    debug_font = get_font(debug_style)
+    text_width = measure_word_width(debug_font, debug_text, debug_style.size_px)
     text_height = Float32(debug_style.size_px)
 
     # Position in upper right corner with some  padding
@@ -164,7 +168,7 @@ function render_fps_overlay(frame_count::Int, fps::Float64, screen_width::Float3
         draw_rectangle(bg_vertices, Vec4f(0.0, 0.0, 0.0, 0.7), projection_matrix)
 
         # Draw the debug text on top
-        draw_text(debug_style.font, debug_text, x, y, debug_style.size_px, projection_matrix, debug_style.color)
+        draw_text(debug_font, debug_text, x, y, debug_style.size_px, projection_matrix, debug_style.color)
     catch e
         # If drawing fails, silently ignore to avoid breaking the main UI
         # This can happen during startup when shaders aren't ready

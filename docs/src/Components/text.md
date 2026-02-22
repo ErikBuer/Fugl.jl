@@ -150,11 +150,13 @@ using Fugl
 using Fugl: Text
 
 my_style = TextStyle(
-    # font_path="SomeFont.ttf",
     size_px=32,
     color=Vec4f(0.1, 0.7, 0.7, 1.0), # RGBA
 )
 
+# To use a custom font:
+# Fugl.get_font_by_path(:my_custom_font, "/path/to/font.ttf")
+# my_style = TextStyle(font_cache_key=:my_custom_font, size_px=32, color=Vec4f(0.1, 0.7, 0.7, 1.0))
 
 function MyApp()
     Container(

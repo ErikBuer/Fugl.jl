@@ -488,16 +488,22 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
     end
 
     # Check for middle mouse button drag (pan functionality)
-    if mouse_state.button_state[MiddleButton] == IsPressed && mouse_state.is_dragging[MiddleButton]
-        # Get mouse position relative to plot area
-        mouse_x = Float32(mouse_state.x) - x
-        mouse_y = Float32(mouse_state.y) - y
+    if mouse_state.is_dragging[MiddleButton]
+        if mouse_state.drag_start_position[MiddleButton] !== nothing
+            # Check if drag started inside plot bounds
+            drag_start = mouse_state.drag_start_position[MiddleButton]
+            drag_start_x = Float32(drag_start[1]) - x
+            drag_start_y = Float32(drag_start[2]) - y
 
-        # Check if mouse is within plot bounds
-        if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height && mouse_state.drag_start_position[MiddleButton] !== nothing
-            pan_action() = handle_middle_button_drag(view, mouse_state, x, y, width, height)
-            return ClickResult(z, () -> pan_action())
+            if drag_start_x >= 0 && drag_start_x <= width && drag_start_y >= 0 && drag_start_y <= height
+                pan_action() = handle_middle_button_drag(view, mouse_state, x, y, width, height)
+                return ClickResult(z, () -> pan_action())
+            end
         end
+    elseif view.state.drag_cursor_position !== nothing
+        # Reset drag cursor position when middle button is released
+        new_state = PlotState(view.state; drag_cursor_position=nothing, is_dragging=false)
+        view.on_state_change(new_state)
     end
 
     return nothing
@@ -559,64 +565,58 @@ function handle_middle_button_drag(view::PlotView, mouse_state::InputState, plot
         return  # No valid drag positions
     end
 
-    # Get drag positions relative to plot area
-    drag_start = mouse_state.last_drag_position[MiddleButton]
-    current_mouse = (Float32(mouse_state.x), Float32(mouse_state.y))
-
-    start_x_screen = Float32(drag_start[1]) - plot_x
-    start_y_screen = Float32(drag_start[2]) - plot_y
-    current_x_screen = current_mouse[1] - plot_x
-    current_y_screen = current_mouse[2] - plot_y
-
-    # Calculate total drag vector from drag start
-    delta_x_screen = current_x_screen - start_x_screen
-    delta_y_screen = current_y_screen - start_y_screen
-
-    # Only proceed if there's actually some movement.
-    # This prevents drift
-    if abs(delta_x_screen) < 0.5 && abs(delta_y_screen) < 0.5
-        return  # No significant movement, don't update
-    end
-
-    # Get the effective bounds at the time drag started
-    # We'll calculate this based on what the bounds were when drag began
-    drag_start_bounds = if !isnothing(current_state.current_bounds)
-        # Use current bounds as the drag reference (existing zoom state)
+    # Get current effective bounds
+    effective_bounds = if !isnothing(current_state.current_bounds)
         current_state.current_bounds
     else
-        # Use the effective bounds (which considers initial bounds and auto-calculated bounds)
         get_effective_bounds(current_state, view.elements)
-    end    # Extract base bounds from drag reference
-    base_min_x = drag_start_bounds.x
-    base_max_x = drag_start_bounds.x + drag_start_bounds.width
-    base_min_y = drag_start_bounds.y
-    base_max_y = drag_start_bounds.y + drag_start_bounds.height
+    end
 
-    # Convert screen space drag to data space using the base bounds range
-    x_range = base_max_x - base_min_x
-    y_range = base_max_y - base_min_y
+    # Get current mouse position relative to plot
+    current_x_screen = Float32(mouse_state.x) - plot_x
+    current_y_screen = Float32(mouse_state.y) - plot_y
 
-    # Calculate data space offset (invert drag direction for natural feel)
-    delta_x_data = -(delta_x_screen / plot_width) * x_range
-    delta_y_data = (delta_y_screen / plot_height) * y_range  # Note: Y is flipped in screen coords
+    # Convert current mouse position to plot coordinates
+    x_range = effective_bounds.width
+    y_range = effective_bounds.height
 
-    # Apply drag vector to the base bounds for 1:1 movement
-    new_min_x = base_min_x + delta_x_data
-    new_max_x = base_max_x + delta_x_data
-    new_min_y = base_min_y + delta_y_data
-    new_max_y = base_max_y + delta_y_data
-
-    # Create new current bounds
-    new_current_bounds = Rectangle(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
-
-    # Create new state with updated pan bounds
-    new_state = PlotState(current_state;
-        current_bounds=new_current_bounds,
-        auto_scale=false  # Disable auto_scale during drag
+    current_mouse_plot = (
+        effective_bounds.x + (current_x_screen / plot_width) * x_range,
+        effective_bounds.y + effective_bounds.height - (current_y_screen / plot_height) * y_range
     )
 
-    # Update the plot state
-    view.on_state_change(new_state)
+    if mouse_state.is_dragging[MiddleButton] && !current_state.is_dragging
+        # Drag just started - store the plot coordinate
+        new_state = PlotState(current_state;
+            is_dragging=true,
+            drag_cursor_position=current_mouse_plot
+        )
+        view.on_state_change(new_state)
+        return
+    end
+
+    # Handle ongoing drag - adjust bounds so mouse stays at same plot coordinate
+    if mouse_state.is_dragging[MiddleButton] && current_state.is_dragging && !isnothing(current_state.drag_cursor_position)
+        # Calculate how much to shift the view so the drag start position stays under the cursor
+        offset_x = current_state.drag_cursor_position[1] - current_mouse_plot[1]
+        offset_y = current_state.drag_cursor_position[2] - current_mouse_plot[2]
+
+        # Apply offset to bounds
+        new_min_x = effective_bounds.x + offset_x
+        new_min_y = effective_bounds.y + offset_y
+
+        # Create new current bounds
+        new_current_bounds = Rectangle(new_min_x, new_min_y, x_range, y_range)
+
+        # Create new state with updated pan bounds
+        new_state = PlotState(current_state;
+            current_bounds=new_current_bounds,
+            auto_scale=false  # Disable auto_scale during drag
+        )
+
+        # Update the plot state
+        view.on_state_change(new_state)
+    end
 end
 
 """

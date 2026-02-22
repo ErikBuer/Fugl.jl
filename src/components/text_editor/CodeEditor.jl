@@ -111,7 +111,7 @@ end
 
 function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Extract style properties
-    font = view.style.text_style.font
+    font = get_font(view.style.text_style)
     size_px = view.style.text_style.size_px
     padding = view.style.padding
 
@@ -217,9 +217,10 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
         z = Int32(parent_z + 1)
 
         # Calculate cursor position from mouse coordinates (allow outside bounds)
+        text_font = get_font(view.style.text_style)
         new_cursor_pos = mouse_to_cursor_position(
             view.state,
-            view.style.text_style.font,
+            text_font,
             view.style.text_style.size_px,
             view.style.padding,
             mouse_state.x,
@@ -249,9 +250,10 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
     z = Int32(parent_z + 1)
 
     # Calculate cursor position from mouse coordinates
+    text_font = get_font(view.style.text_style)
     new_cursor_pos = mouse_to_cursor_position(
         view.state,
-        view.style.text_style.font,
+        text_font,
         view.style.text_style.size_px,
         view.style.padding,
         mouse_state.x,

@@ -59,13 +59,13 @@ function MyApp()
             color=Vec4{Float32}(0.4, 0.6, 0.9, 1.0),
             width=3.0f0,
             line_style=SOLID,
-            label="Sine Wave"
+            label="Sine"
         ),
         LinePlotElement(y2_data; x_data=x_data,
             color=Vec4{Float32}(0.9, 0.4, 0.4, 1.0),
             width=2.5f0,
             line_style=DASH,
-            label="Cosine Wave"
+            label="Cosine"
         ),
         ScatterPlotElement(y3_data; x_data=x_data,
             fill_color=Vec4{Float32}(0.4, 0.9, 0.4, 1.0),

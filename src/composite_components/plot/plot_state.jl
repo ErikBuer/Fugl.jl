@@ -18,6 +18,8 @@ Fields:
 - `current_bounds`: Current view bounds (after zoom/pan). If nothing, falls back to initial_bounds or auto-scale.
 - `auto_scale`: Bool, whether to automatically scale axes to fit data when no bounds are specified.
 - `cache_id`: Unique identifier for plot cache. Not user managed.
+- `drag_cursor_position`: Plot coordinate where drag started. Not user managed.
+- `is_dragging`: Whether plot is being dragged. Not user managed.
 """
 struct PlotState
     # User-defined initial view bounds (preserved during drag operations)
@@ -27,6 +29,9 @@ struct PlotState
     auto_scale::Bool
     # Cache ID for render caching
     cache_id::UInt64
+    # Drag state tracking
+    drag_cursor_position::Union{Nothing,Tuple{Float32,Float32}}
+    is_dragging::Bool
 end
 
 """
@@ -36,13 +41,17 @@ function PlotState(state::PlotState;
     initial_bounds=state.initial_bounds,
     current_bounds=state.current_bounds,
     auto_scale=state.auto_scale,
-    cache_id=state.cache_id # Not user managed
+    cache_id=state.cache_id, # Not user managed
+    drag_cursor_position=state.drag_cursor_position, # Not user managed
+    is_dragging=state.is_dragging # Not user managed
 )
     return PlotState(
         initial_bounds,
         current_bounds,
         auto_scale,
-        cache_id
+        cache_id,
+        drag_cursor_position,
+        is_dragging
     )
 end
 
@@ -50,7 +59,7 @@ end
 Create PlotState with explicit bounds
 """
 function PlotState(bounds::Rectangle; auto_scale::Bool=false)
-    return PlotState(bounds, nothing, auto_scale, generate_cache_id())
+    return PlotState(bounds, nothing, auto_scale, generate_cache_id(), nothing, false)
 end
 
 """
@@ -81,7 +90,7 @@ function PlotState(;
         end
     end
 
-    return PlotState(initial_bounds, nothing, auto_scale, generate_cache_id())
+    return PlotState(initial_bounds, nothing, auto_scale, generate_cache_id(), nothing, false)
 end
 
 """

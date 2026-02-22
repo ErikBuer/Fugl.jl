@@ -31,7 +31,7 @@ end
 Assumes text is rendered in a single line.
 """
 function measure(view::TextView)::Tuple{Float32,Float32}
-    font = view.style.font
+    font = get_font(view.style)
     size_px = view.style.size_px
 
     # Original behavior - measure as single line (will wrap based on container width)
@@ -49,7 +49,7 @@ Measure the width of the text when constrained by available height.
 function measure_width(view::TextView, available_height::Float32)::Float32
     # Text width is not constrained by height, so return the full measured width
 
-    font = view.style.font
+    font = get_font(view.style)
     size_px = view.style.size_px
 
     # Original behavior - measure as single line (will wrap based on container width)
@@ -61,7 +61,7 @@ end
 
 function measure_height(view::TextView, available_width::Float32)::Float32
     # Here we must account for line wrapping based on available width
-    font = view.style.font
+    font = get_font(view.style)
     size_px = view.style.size_px
     line_height = Float32(size_px)
     words = split(view.text, " ")
@@ -108,7 +108,7 @@ end
 
 function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Extract style properties
-    font = view.style.font
+    font = get_font(view.style)
     size_px = view.style.size_px
     color = view.style.color
 

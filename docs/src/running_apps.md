@@ -84,3 +84,52 @@ screenshot(ui_function, filename, width, height)
 # width: Image width in pixels
 # height: Image height in pixels
 ```
+
+## Font Configuration for Compiled Applications
+
+When compiling applications with `juliac`, you may need to configure the font path to match your deployment environment.
+
+### Setting a Custom Default Font
+
+Override the default font path before any text components are created:
+
+```julia
+using Fugl
+
+# Set custom font path for your application
+Fugl.DEFAULT_FONT_PATH[] = joinpath(@__DIR__, "assets", "MyFont.ttf")
+
+# Explicitly load the font (optional - will be loaded automatically on first use)
+Fugl.load_default_font!()
+
+function MyApp()
+    Container(
+        Text("Hello World")  # Uses the custom default font
+    )
+end
+
+Fugl.run(MyApp)
+```
+
+### Using Multiple Fonts
+
+Load additional fonts and use them in specific text components:
+
+```julia
+using Fugl
+
+# Load custom fonts with explicit cache keys
+Fugl.get_font_by_path(:title_font, "/path/to/TitleFont.ttf")
+Fugl.get_font_by_path(:body_font, "/path/to/BodyFont.ttf")
+
+# Create styles with different font cache keys
+title_style = TextStyle(font_cache_key=:title_font, size_px=32)
+body_style = TextStyle(font_cache_key=:body_font, size_px=16)
+
+function MyApp()
+    Column(
+        Fugl.Text("Title"; style=title_style),
+        Fugl.Text("Body text"; style=body_style),
+    )
+end
+```
