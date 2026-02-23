@@ -1,7 +1,13 @@
 module Fugl
 
-using ModernGL, GLAbstraction, GLFW # OpenGL dependencies
+# OpenGL dependencies
+#using GLFW
+include("GLFW.jl/src/GLFW.jl")
+using .GLFW
+
+using ModernGL, GLAbstraction
 const GLA = GLAbstraction
+
 using FreeTypeAbstraction # Font rendering dependencies
 using GeometryBasics
 using IndirectArrays
@@ -89,6 +95,9 @@ run(MyApp, periodic_callbacks=[file_check_callback, data_update_callback])
 ```
 """
 function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[])
+    # Initialize GLFW
+    GLFW.Init()
+
     # Initialize the GLFW window
     gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
     GLA.set_context!(gl_window)
@@ -255,6 +264,9 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
         clear_glyph_atlas!()
         clear_text_batch!()
         clear_render_caches!()
+
+        # Terminate GLFW
+        GLFW.Terminate()
 
         # Clear UI reference
         last_ui = nothing

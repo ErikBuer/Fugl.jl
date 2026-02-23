@@ -28,6 +28,9 @@ end
 
 function screenshot(ui_function::Function, output_file::String, width::Int, height::Int)
 
+    # Initialize GLFW
+    GLFW.Init()
+
     # Initialize GLFW window (offscreen context)
     gl_window = GLFW.Window(name="Offscreen", resolution=(width, height))
     GLA.set_context!(gl_window)
@@ -80,6 +83,9 @@ function screenshot(ui_function::Function, output_file::String, width::Int, heig
     clear_glyph_atlas!()
     clear_text_batch!()
     clear_render_caches!()
+
+    # Terminate GLFW
+    GLFW.Terminate()
 end
 
 """
