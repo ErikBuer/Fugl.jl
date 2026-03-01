@@ -1,0 +1,3 @@
+using Makie
+
+scene = Scene();
