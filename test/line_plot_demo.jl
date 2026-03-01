@@ -74,7 +74,7 @@ function main()
             ], padding=0.0, spacing=0.0)
     end
 
-    Fugl.run(MyApp, title="Line Plot Demo", window_width_px=812, window_height_px=600, fps_overlay=true)
+    Fugl.run(MyApp, title="Line Plot Demo", window_width_px=812, window_height_px=600, fps_overlay=false)
 end
 
 main()

@@ -1,0 +1,8 @@
+name = "GlfwTrim"
+version = "0.1.0"
+
+[deps]
+GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
+
+[compat]
+julia = "1.9"

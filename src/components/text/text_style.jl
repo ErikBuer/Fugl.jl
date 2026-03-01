@@ -5,12 +5,13 @@ struct TextStyle
 end
 
 """
-    get_font(style::TextStyle)::FreeTypeAbstraction.FTFont
+    get_font(style::TextStyle)::Union{FreeTypeAbstraction.FTFont, Nothing}
 
 Retrieve the font associated with a TextStyle from the font cache.
+Returns nothing if font is not available (e.g., during static compilation).
 """
-function get_font(style::TextStyle)::FreeTypeAbstraction.FTFont
-    return get_font(style.font_cache_key)
+function get_font(style::TextStyle)::Union{FreeTypeAbstraction.FTFont,Nothing}
+    return get_font(style.font_cache_key, safe_mode=true)
 end
 
 """
@@ -54,9 +55,14 @@ end
     measure_word_width_cached(style::TextStyle, word::AbstractString)::Float32
 
 Measure the width of a word using a TextStyle. Convenience function that extracts the font and size from the style.
+Returns fallback width if font is not available (e.g., during static compilation).
 """
 function measure_word_width_cached(style::TextStyle, word::AbstractString)::Float32
     font = get_font(style)
+    if font === nothing
+        # Fallback measurement during compilation
+        return Float32(length(word) * style.size_px * 0.6)  # Approximate monospace width
+    end
     return measure_word_width_cached(font, word, style.size_px)
 end
 
@@ -64,8 +70,13 @@ end
     measure_word_width(style::TextStyle, word::AbstractString)::Float32
 
 Measure the width of a word using a TextStyle. Convenience function that extracts the font and size from the style.
+Returns fallback width if font is not available (e.g., during static compilation).
 """
 function measure_word_width(style::TextStyle, word::AbstractString)::Float32
     font = get_font(style)
+    if font === nothing
+        # Fallback measurement during compilation
+        return Float32(length(word) * style.size_px * 0.6)  # Approximate monospace width
+    end
     return measure_word_width(font, word, style.size_px)
 end

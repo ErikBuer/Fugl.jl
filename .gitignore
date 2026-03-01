@@ -28,3 +28,5 @@ test/test_output/
 *.DS_Store
 
 .github/instructions/
+
+build/*
