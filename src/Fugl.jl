@@ -5,8 +5,11 @@ module Fugl
 include("GLFW.jl/src/GLFW.jl")
 using .GLFW
 
-using ModernGL, GLAbstraction
+include("GLAbstraction.jl/src/GLAbstraction.jl")
+using .GLAbstraction
 const GLA = GLAbstraction
+
+using ModernGL
 
 using FreeTypeAbstraction # Font rendering dependencies
 using GeometryBasics

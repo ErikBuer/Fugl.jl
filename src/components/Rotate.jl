@@ -1,4 +1,4 @@
-using GLAbstraction: VertexArray, generate_buffers, bind, unbind, draw, gluniform
+using .GLAbstraction: VertexArray, generate_buffers, bind, unbind, draw, gluniform
 using ModernGL
 using GeometryBasics: Point2f, Vec2, Vec4, NgonFace, Mat4
 
