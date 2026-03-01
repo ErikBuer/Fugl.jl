@@ -27,11 +27,18 @@ macro gputime(codeblock)
 end
 
 function print_with_lines(out::IO, text::AbstractString)
-    io = IOBuffer()
-    for (i,line) in enumerate(split(text, "\n"))
-        println(io, Printf.@sprintf("%-4d: %s", i, line))
+    # JuliaC compatibility: Skip implementation - uses dynamic IO dispatch
+    # that's incompatible with static compilation
+    try
+        io = IOBuffer()
+        for (i,line) in enumerate(split(text, "\n"))
+            println(io, Printf.@sprintf("%-4d: %s", i, line))
+        end
+        write(out, take!(io))
+    catch
+        # Fallback for JuliaC - just print without line numbers
+        println(out, text)
     end
-    write(out, take!(io))
 end
 
 print_with_lines(text::AbstractString) = print_with_lines(stdout, text)
