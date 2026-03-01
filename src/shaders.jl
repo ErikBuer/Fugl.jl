@@ -299,12 +299,8 @@ function initialize_shaders()
     rounded_rect_prog[] = GLA.Program(rounded_rect_vertex_shader, rounded_rect_fragment_shader)
     line_prog[] = GLA.Program(line_vertex_shader, line_fragment_shader)
 
-    # Initialize external shaders
-    for init_function in EXTERNAL_SHADER_INITIALIZERS
-        try
-            init_function()
-        catch e
-            @warn "Failed to initialize external shader" exception = (e, catch_backtrace())
-        end
-    end
+    # TODO add this suport in a way that works with JuliaC
+    # Note: External shader initializers from EXTERNAL_SHADER_INITIALIZERS are disabled
+    # for JuliaC compatibility since dynamic function calls are not supported.
+    # If you need external shaders, call them directly after initialize_shaders().
 end

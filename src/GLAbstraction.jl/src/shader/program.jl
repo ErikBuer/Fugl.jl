@@ -1,17 +1,17 @@
 islinked(program::GLuint) = glGetProgramiv(program, GL_LINK_STATUS) == GL_TRUE
 
-const AttributeTuple = NamedTuple{(:name, :location, :T, :size), Tuple{Symbol, GLint, GLenum,  GLint}}
+const AttributeTuple = NamedTuple{(:name, :location, :T, :size),Tuple{Symbol,GLint,GLenum,GLint}}
 const UniformTuple = AttributeTuple
 const INVALID_ATTRIBUTE = GLint(-1)
-const INVALID_UNIFORM   = GLint(-1)
+const INVALID_UNIFORM = GLint(-1)
 
 function setup_uniforms(program::GLuint)
     info = UniformTuple[]
     nuniforms = glGetProgramiv(program, GL_ACTIVE_UNIFORMS)
-    for i=1:nuniforms
-        name, typ, size = glGetActiveUniform(program, i-1)
+    for i = 1:nuniforms
+        name, typ, size = glGetActiveUniform(program, i - 1)
         loc = glGetUniformLocation(program, name)
-        push!(info, (name = name, location = loc, T = typ, size = size))
+        push!(info, (name=name, location=loc, T=typ, size=size))
     end
     return info
 end
@@ -19,22 +19,22 @@ end
 function setup_attributes(program::GLuint)
     info = AttributeTuple[]
     nattribs = glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES)
-    for i=1:nattribs
-        name, typ, size = glGetActiveAttrib(program, i-1)
+    for i = 1:nattribs
+        name, typ, size = glGetActiveAttrib(program, i - 1)
         loc = glGetAttribLocation(program, name)
-        push!(info, (name = name, location = loc, T = typ, size = size))
+        push!(info, (name=name, location=loc, T=typ, size=size))
     end
     return info
 end
 
 abstract type AbstractProgram end
 mutable struct Program <: AbstractProgram
-    id        ::GLuint
-    shaders   ::Vector{Shader}
-    uniforms  ::Vector{UniformTuple}
+    id::GLuint
+    shaders::Vector{Shader}
+    uniforms::Vector{UniformTuple}
     attributes::Vector{AttributeTuple}
     context
-    function Program(shaders::Vector{Shader}, fragdatalocation::Vector{Tuple{Int, String}})
+    function Program(shaders::Vector{Shader}, fragdatalocation::Vector{Tuple{Int,String}})
         # Remove old shaders
         exists_context()
         program = glCreateProgram()::GLuint
@@ -61,24 +61,26 @@ mutable struct Program <: AbstractProgram
 
         # generate the link locations
         uniforms = setup_uniforms(program)
-        attribs  = setup_attributes(program)
+        attribs = setup_attributes(program)
         prog = new(program, shaders, uniforms, attribs, current_context())
         finalizer(free!, prog)
         prog
     end
 end
 
-Program(shaders::Vector{Shader}) = Program(shaders, Tuple{Int, String}[])
+Program(shaders::Vector{Shader}) = Program(shaders, Tuple{Int,String}[])
 Program(shaders::Shader...) = Program([shaders...])
 
-#REVIEW: This is a bit redundant seen as there is `load(source)` from FilIO for shaders but ok
-Program(sh_string_typ...) = 
-    Program([map(x -> Shader(x), sh_string_typ)...])
+# Explicit constructors for JuliaC compatibility - avoid varargs with dynamic types
+Program(s1::Tuple{UInt32,String}) = Program([Shader(s1)])
+Program(s1::Tuple{UInt32,String}, s2::Tuple{UInt32,String}) = Program([Shader(s1), Shader(s2)])
+Program(s1::Tuple{UInt32,String}, s2::Tuple{UInt32,String}, s3::Tuple{UInt32,String}) = Program([Shader(s1), Shader(s2), Shader(s3)])
+Program(s1::Tuple{UInt32,String}, s2::Tuple{UInt32,String}, s3::Tuple{UInt32,String}, s4::Tuple{UInt32,String}) = Program([Shader(s1), Shader(s2), Shader(s3), Shader(s4)])
 
 free!(x::Program) = context_command(() -> glDeleteProgram(x.id), x.context)
 
 attributes(program::Program) = program.attributes
-uniforms(program::Program)   = program.uniforms
+uniforms(program::Program) = program.uniforms
 uniform_names(program::Program) = [x.name for x in program.uniforms]
 
 attribute(program::Program, name::Symbol) =
@@ -148,7 +150,7 @@ infolog(program::Program) = getinfolog(program.id)
 
 # display program's information
 function program_info(p::Program)
-    result = Dict{Symbol, Any}()
+    result = Dict{Symbol,Any}()
     program = p.id
     # check if name is really a program
     result[:program] = program
@@ -177,12 +179,12 @@ end
 mutable struct LazyProgram <: AbstractProgram
     sources::Vector
     data::Dict
-    compiled_program::Union{Program, Nothing}
+    compiled_program::Union{Program,Nothing}
 end
 LazyProgram(sources...; data...) = LazyProgram(Vector(sources), Dict(data), nothing)
 
 function Program(lazy_program::LazyProgram)
-    fragdatalocation = get(lazy_program.data, :fragdatalocation, Tuple{Int, String}[])
+    fragdatalocation = get(lazy_program.data, :fragdatalocation, Tuple{Int,String}[])
     shaders = haskey(lazy_program.data, :arguments) ? Shader.(lazy_program.sources, Ref(lazy_program.data[:arguments])) : Shader.()
     return Program([shaders...], fragdatalocation)
 end
@@ -206,7 +208,7 @@ end
 
 # display the values for a uniform in a named block
 function uniform_in_block_info(p::Program, blockName, uniName)
-    result = Dict{Symbol, Any}()
+    result = Dict{Symbol,Any}()
     program = p.id
 
     result[:index] = glGetUniformBlockIndex(program, blockName)

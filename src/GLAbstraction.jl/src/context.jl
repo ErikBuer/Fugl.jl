@@ -1,32 +1,26 @@
 struct Context
-    threadid::Int # So that the thread that the context is associated with calls the opengl operations in the queue
-    queue::Vector{Function} # Closures to be executed when the context becomes current again
+    threadid::Int
+    # Note: queue disabled for JuliaC compatibility - closures can't be stored/called in static compilation
 end
 
-Context() = Context(threadid(), Function[])
-
-Base.push!(c::Context, f::Function) = push!(c.queue, f)
+Context() = Context(1)  # Use thread 1 for JuliaC compatibility
 
 const GLOBAL_CONTEXT = Base.RefValue{Union{Nothing,Context}}(nothing)
-const GLOBAL_CONTEXTS = Dict{Any, Context}()
+# Use IdDict for better type stability with dynamic keys
+const GLOBAL_CONTEXTS = IdDict{Any,Context}()
 
 current_context() = GLOBAL_CONTEXT[]
 is_current_context(x::Context) = x == GLOBAL_CONTEXT[]
 is_current_context(x) =
     haskey(GLOBAL_CONTEXTS, x) && GLOBAL_CONTEXTS[x] === GLOBAL_CONTEXT[]
-    
+
 clear_context!() = GLOBAL_CONTEXT[] = Context()
 
 function set_context!(x)
     if haskey(GLOBAL_CONTEXTS, x)
         c = GLOBAL_CONTEXTS[x]
         GLOBAL_CONTEXT[] = c
-        @tspawnat c.threadid begin
-            for f in c.queue
-                f()
-            end
-            empty!(c.queue)
-        end
+        # Queue system disabled for JuliaC - closures cause verifier errors
     else
         c = Context()
         GLOBAL_CONTEXTS[x] = c
@@ -41,9 +35,14 @@ function exists_context()
 end
 
 function context_command(f::Function, c::Context)
+    # Queue system disabled for JuliaC compatibility
+    # Always execute immediately on current thread
     if !is_current_context(c)
-        push!(c, f)
-    else
-        @tspawnat c.threadid f()
+        @warn "Context command called on non-current context - executing anyway for JuliaC compatibility"
+    end
+    try
+        f()
+    catch e
+        @warn "Error executing context command" exception = (e, catch_backtrace())
     end
 end
