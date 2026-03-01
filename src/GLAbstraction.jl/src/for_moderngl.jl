@@ -20,9 +20,9 @@ function glShaderSource(shaderID::GLuint, shadercode::Vector{UInt8})
 end
 glShaderSource(shaderID::GLuint, shadercode::String) = glShaderSource(shaderID, Vector{UInt8}(shadercode))
 function glGetAttachedShaders(program::GLuint)
-    shader_count   = glGetProgramiv(program, GL_ATTACHED_SHADERS)
+    shader_count = glGetProgramiv(program, GL_ATTACHED_SHADERS)
     length_written = GLsizei[0]
-    shaders        = zeros(GLuint, shader_count)
+    shaders = zeros(GLuint, shader_count)
 
     glGetAttachedShaders(program, shader_count, length_written, shaders)
     shaders[1:first(length_written)]
@@ -35,15 +35,15 @@ function ModernGL.glGetActiveUniformsiv(program::GLuint, index, var::GLenum)
 end
 
 function glGetActiveUniform(programID::GLuint, index::Integer)
-    actualLength   = GLsizei[1]
-    uniformSize    = GLint[1]
-    typ            = GLenum[1]
-    maxcharsize    = glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH)
-    name           = zeros(GLchar, maxcharsize)
+    actualLength = GLsizei[1]
+    uniformSize = GLint[1]
+    typ = GLenum[1]
+    maxcharsize = glGetProgramiv(programID, GL_ACTIVE_UNIFORM_MAX_LENGTH)
+    name = zeros(GLchar, maxcharsize)
 
     glGetActiveUniform(programID, index, maxcharsize, actualLength, uniformSize, typ, name)
 
-    actualLength[1] <= 0 &&  @error "No active uniform at given index. Index: $index"
+    actualLength[1] <= 0 && @error "No active uniform at given index. Index: $index"
 
     uname = unsafe_string(pointer(name), actualLength[1])
     uname = Symbol(replace(uname, r"\[\d*\]" => "")) # replace array brackets. This is not really a good solution.
@@ -52,11 +52,11 @@ end
 glGetActiveUniformName(program::GLuint, index::Integer) = glGetActiveUniform(program, index)[1]
 
 function glGetActiveAttrib(programID::GLuint, index::Integer)
-    actualLength   = GLsizei[1]
-    attributeSize  = GLint[1]
-    typ            = GLenum[1]
-    maxcharsize    = glGetProgramiv(programID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH)
-    name           = zeros(GLchar, maxcharsize)
+    actualLength = GLsizei[1]
+    attributeSize = GLint[1]
+    typ = GLenum[1]
+    maxcharsize = glGetProgramiv(programID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH)
+    name = zeros(GLchar, maxcharsize)
 
     glGetActiveAttrib(programID, index, maxcharsize, actualLength, attributeSize, typ, name)
 
@@ -115,22 +115,22 @@ function glGenFramebuffers()
 end
 
 function glDeleteTextures(id::GLuint)
-  arr = [id]
-  glDeleteTextures(1, arr)
+    arr = [id]
+    glDeleteTextures(1, arr)
 end
 function glDeleteVertexArrays(id::GLuint)
-  arr = [id]
-  glDeleteVertexArrays(1, arr)
+    arr = [id]
+    glDeleteVertexArrays(1, arr)
 end
 function glDeleteBuffers(id::GLuint)
-  arr = [id]
-  glDeleteBuffers(1, arr)
+    arr = [id]
+    glDeleteBuffers(1, arr)
 end
 
 function glGetTexLevelParameteriv(target::GLenum, level, name::GLenum)
-  result = GLint[0]
-  glGetTexLevelParameteriv(target, level, name, result)
-  result[1]
+    result = GLint[0]
+    glGetTexLevelParameteriv(target, level, name, result)
+    result[1]
 end
 
 function glGenRenderbuffers(format::GLenum, attachment::GLenum, dimensions)
@@ -144,12 +144,12 @@ end
 
 function glTexImage(ttype::GLenum, level::Integer, internalFormat::GLenum, w::Integer, h::Integer, d::Integer, border::Integer, format::GLenum, datatype::GLenum, data)
     glTexImage3D(GL_PROXY_TEXTURE_3D, level, internalFormat, w, h, d, border, format, datatype, C_NULL)
-    for l in  0:level
+    for l in 0:level
         result = glGetTexLevelParameteriv(GL_PROXY_TEXTURE_3D, l, GL_TEXTURE_WIDTH)
         if result == 0
             @error "glTexImage 3D: width too large. Width: $w"
         end
-        result = glGetTexLevelParameteriv(GL_PROXY_TEXTURE_3D, l,GL_TEXTURE_HEIGHT)
+        result = glGetTexLevelParameteriv(GL_PROXY_TEXTURE_3D, l, GL_TEXTURE_HEIGHT)
         if result == 0
             @error "glTexImage 3D: height too large. height: $h"
         end
@@ -208,10 +208,6 @@ function compile_program(shaders::GLuint...)
     #link program
     glLinkProgram(program)
     if !islinked(program)
-        for shader in shaders
-            write(stdout, shader.source)
-            println("---------------------------")
-        end
         @error "program $program not linked. Error in: \n $(join(map(x-> string(x.name), shaders))), or, \n $(getinfolog(program))"
     end
     program

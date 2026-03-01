@@ -52,10 +52,6 @@ mutable struct Program <: AbstractProgram
         #link program
         glLinkProgram(program)
         if !islinked(program)
-            for shader in shaders
-                write(stdout, shader.source)
-                println("---------------------------")
-            end
             @error "program $program not linked. Error in: \n $(join(map(x->x.id, shaders), " or ")), \n $(getinfolog(program))"
         end
 
