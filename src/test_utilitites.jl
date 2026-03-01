@@ -103,6 +103,12 @@ end
 
 No-op function for when FPS overlay is disabled. Returns unchanged debug_fps value.
 """
+@inline function update_no_fps_stats(state, frame_start_time::Float64, debug_fps_update_interval::Float64)
+    # Intentionally empty - this function does nothing and should be optimized away
+    return 0.0  # Return dummy FPS value
+end
+
+# Legacy version for compatibility
 @inline function update_no_fps_stats(debug_frame_count::Ref{Int}, debug_last_time::Ref{Float64}, frame_start_time::Float64, debug_fps_update_interval::Float64, current_fps::Ref{Float64})
     # Intentionally empty - this function does nothing and should be optimized away
     return 0.0  # Return dummy FPS value
@@ -113,6 +119,23 @@ end
 
 Update FPS statistics when overlay is enabled. Returns current FPS value.
 """
+function update_fps_stats!(state, frame_start_time::Float64, debug_fps_update_interval::Float64)
+    state.debug_frame_count += 1
+    current_time = frame_start_time
+
+    # Update FPS every interval
+    if current_time - state.debug_last_time >= debug_fps_update_interval
+        elapsed = current_time - state.debug_last_time
+        fps = state.debug_frame_count / elapsed
+        state.debug_frame_count = 0
+        state.debug_last_time = current_time
+        state.debug_fps = fps  # Store the new FPS value
+    end
+
+    return state.debug_fps  # Always return the current FPS value
+end
+
+# Legacy version for compatibility
 function update_fps_stats!(debug_frame_count::Ref{Int}, debug_last_time::Ref{Float64}, frame_start_time::Float64, debug_fps_update_interval::Float64, current_fps::Ref{Float64})
     debug_frame_count[] += 1
     current_time = frame_start_time
