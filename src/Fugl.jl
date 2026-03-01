@@ -98,9 +98,23 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     # Initialize GLFW
     GLFW.Init()
 
-    # Initialize the GLFW window
-    gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
-    GLA.set_context!(gl_window)
+    # Initialize the GLFW window with explicit empty hints to avoid JuliaC dynamic dispatch issues
+    gl_window = GLFW.Window(
+        name=title,
+        resolution=(window_width_px, window_height_px),
+        #windowhints=[],  # Empty hints to avoid dynamic dispatch
+        #contexthints=[]  # Empty context hints too
+    )
+
+    # Try GLAbstraction context management, but handle JuliaC compatibility
+    try
+        GLA.set_context!(gl_window)
+    catch e
+        # JuliaC compilation may not support GLAbstraction's context management
+        # Skip it - GLFW.MakeContextCurrent should be sufficient for single-window apps
+        @warn "GLAbstraction context management failed: $(e)"
+    end
+
     GLFW.MakeContextCurrent(gl_window)
 
     # Enable alpha blending
@@ -112,23 +126,31 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     initialize_gl_state!()
 
     # Load default font if not already loaded
-    get_default_font()
+    # Try safe mode first to handle static compilation gracefully
+    font_result = get_default_font(safe_mode=true)
+    if font_result === nothing
+        @warn "Font loading failed in safe mode - this may be due to static compilation environment"
+    end
 
     # Initialize local states
     mouse_state = InputState()
 
-    # Store callbacks in local variables to prevent GC
-    mouse_callback = (gl_window, button, action, mods) -> mouse_button_callback(gl_window, button, action, mods, mouse_state)
-    mouse_pos_callback = (gl_window, xpos, ypos) -> mouse_position_callback(gl_window, xpos, ypos, mouse_state)
-    key_callback_func = (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state)
-    char_callback_func = (gl_window, codepoint) -> char_callback(gl_window, codepoint, mouse_state)
-    scroll_callback_func = (gl_window, xoffset, yoffset) -> scroll_callback(gl_window, xoffset, yoffset, mouse_state)
+    # Initialize C function pointers for JuliaC compatibility
+    GLFW.__init_callbacks__()
 
-    GLFW.SetMouseButtonCallback(gl_window, mouse_callback)
-    GLFW.SetCursorPosCallback(gl_window, mouse_pos_callback)
-    GLFW.SetKeyCallback(gl_window, key_callback_func)
-    GLFW.SetCharCallback(gl_window, char_callback_func)
-    GLFW.SetScrollCallback(gl_window, scroll_callback_func)
+    # Store callbacks in the USER_*_CALLBACK Refs so the wrappers can call them
+    GLFW.USER_MOUSE_BUTTON_CALLBACK[] = (gl_window, button, action, mods) -> mouse_button_callback(gl_window, button, action, mods, mouse_state)
+    GLFW.USER_CURSOR_POS_CALLBACK[] = (gl_window, xpos, ypos) -> mouse_position_callback(gl_window, xpos, ypos, mouse_state)
+    GLFW.USER_KEY_CALLBACK[] = (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state)
+    GLFW.USER_CHAR_CALLBACK[] = (gl_window, codepoint) -> char_callback(gl_window, codepoint, mouse_state)
+    GLFW.USER_SCROLL_CALLBACK[] = (gl_window, xoffset, yoffset) -> scroll_callback(gl_window, xoffset, yoffset, mouse_state)
+
+    # Use the low-level C pointer API
+    GLFW.SetMouseButtonCallbackPtr(gl_window, GLFW.C_MOUSE_BUTTON_CALLBACK_PTR[])
+    GLFW.SetCursorPosCallbackPtr(gl_window, GLFW.C_CURSOR_POS_CALLBACK_PTR[])
+    GLFW.SetKeyCallbackPtr(gl_window, GLFW.C_KEY_CALLBACK_PTR[])
+    GLFW.SetCharCallbackPtr(gl_window, GLFW.C_CHAR_CALLBACK_PTR[])
+    GLFW.SetScrollCallbackPtr(gl_window, GLFW.C_SCROLL_CALLBACK_PTR[])
 
     projection_matrix = get_orthographic_matrix(0.0f0, Float32(window_width_px), Float32(window_height_px), 0.0f0, -1.0f0, 1.0f0)
 

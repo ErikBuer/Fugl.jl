@@ -833,21 +833,6 @@ DestroyCursor(cursor::Cursor) = @require_main_thread ccall((:glfwDestroyCursor, 
 SetCursor(window::Window, cursor::Cursor) = @require_main_thread ccall((:glfwSetCursor, libglfw), Cvoid, (Window, Cursor), window, cursor)
 SetCursor(window::Window, ::Nothing) = SetCursor(window, Cursor(C_NULL))
 
-# Input callbacks - managed in callback.jl
-# Additional callback functions for compatibility
-function SetKeyCallback(window::Window, ::Nothing)
-    require_main_thread()
-    ClearKeyCallback(window)
-    return nothing
-end
-
-function SetKeyCallback(window::Window, callback)
-    require_main_thread()
-    # Redirect to static callback system
-    SetKeyCallback(window)
-    return nothing
-end
-
 
 JoystickPresent(joy::Joystick) = @require_main_thread Bool(ccall((:glfwJoystickPresent, libglfw), Cint, (Cint,), joy))
 

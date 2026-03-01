@@ -1,6 +1,8 @@
+#module SliderDemo
+
 using Fugl
 
-function main()
+function @main(ARGS)
     # Test states for different slider configurations
     basic_slider_state = Ref(SliderState(0.5, 0.0, 1.0))
     continuous_state = Ref(SliderState(0.3, 0.0, 1.0))
@@ -261,4 +263,4 @@ function main()
     Fugl.run(MyApp, title="Slider Test", window_width_px=800, window_height_px=900, fps_overlay=true)
 end
 
-main()
+#end # module
