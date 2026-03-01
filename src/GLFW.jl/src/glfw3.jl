@@ -375,11 +375,21 @@ function Window(
 )
     WindowHint(VISIBLE, visible)
     WindowHint(FOCUSED, focus)
-    for ch in contexthints
-        WindowHint(ch[1], ch[2])
+
+    # Process context hints
+    if !isempty(contexthints)
+        for i in 1:length(contexthints)
+            hint = contexthints[i]
+            WindowHint(hint[1], Int64(hint[2]))
+        end
     end
-    for wh in windowhints
-        WindowHint(wh[1], wh[2])
+
+    # Process window hints  
+    if !isempty(windowhints)
+        for i in 1:length(windowhints)
+            hint = windowhints[i]
+            WindowHint(hint[1], Int64(hint[2]))
+        end
     end
 
     @static if Sys.isapple()
