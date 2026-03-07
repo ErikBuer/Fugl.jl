@@ -61,7 +61,7 @@ function blur(view::FocusView)
 end
 
 # Focus detection and management
-function detect_click(view::FocusView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
+function detect_click(view::FocusView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     is_mouse_inside = inside_component(view, x, y, width, height, input_state.x, input_state.y)
 
     is_focused = view.is_focused

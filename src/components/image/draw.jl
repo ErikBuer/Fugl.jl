@@ -1,4 +1,4 @@
-function draw_image(texture::GLAbstraction.Texture, x_px::AbstractFloat, y_px::AbstractFloat, projection_matrix::Mat4{Float32}; scale::AbstractFloat=1.0)
+function draw_image(texture::GLAbstraction.Texture, x_px::Float32, y_px::Float32, projection_matrix::Mat4{Float32}; scale::Float32=1.0f0)
 
     # Get the image size from the texture
     width_px, height_px = Float32.(GLA.size(texture))

@@ -60,7 +60,7 @@ end
 Detect clicks on the IntrinsicRow and its children.
 The method returns the click result with the highest z-height.
 """
-function detect_click(view::IntrinsicRowView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
+function detect_click(view::IntrinsicRowView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     # Get the layout for the immediate children
     child_layouts = apply_layout(view, x, y, width, height)
 

@@ -64,7 +64,7 @@ end
 Detect clicks on the IntrinsicColumn and its children.
 The method returns the click result with the highest z-height.
 """
-function detect_click(view::IntrinsicColumnView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
+function detect_click(view::IntrinsicColumnView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     # Get the layout for the immediate children
     child_layouts = apply_layout(view, x, y, width, height)
 
@@ -93,7 +93,7 @@ function detect_click(view::IntrinsicColumnView, mouse_state::InputState, x::Abs
         return click_result
     end
 
-    if !inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+    if !inside_component(view, x, y, width, height, Float32(mouse_state.x), Float32(mouse_state.y))
         return nothing
     end
 

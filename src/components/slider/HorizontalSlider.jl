@@ -241,7 +241,7 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
 
         # Move slider according to current mouse position
         relative_x = clamp(mouse_state.x - slider_x, 0.0f0, slider_width)
-        raw_value = view.state.min_value + Float64(relative_x) / Float64(slider_width) * (view.state.max_value - view.state.min_value)
+        raw_value = view.state.min_value + Float32(relative_x) / Float32(slider_width) * (view.state.max_value - view.state.min_value)
 
         # Apply step snapping (convert raw_value to match state value type)
         snapped_value = if typeof(view.state.min_value) <: Integer
@@ -280,7 +280,7 @@ function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Fl
        mouse_state.was_clicked[LeftButton]
 
         relative_x = clamp(mouse_state.x - slider_x, 0.0f0, slider_width)
-        raw_value = view.state.min_value + Float64(relative_x) / Float64(slider_width) * (view.state.max_value - view.state.min_value)
+        raw_value = view.state.min_value + Float32(relative_x) / Float32(slider_width) * (view.state.max_value - view.state.min_value)
 
         # Apply step snapping (convert raw_value to match state value type)
         snapped_value = if typeof(view.state.min_value) <: Integer
