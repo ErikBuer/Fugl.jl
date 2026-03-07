@@ -50,6 +50,8 @@ function PolarPlot(
                 max_r = max(max_r, maximum(element.r_data))
             elseif isa(element, PolarScatterElement)
                 max_r = max(max_r, maximum(element.r_data))
+            elseif isa(element, PolarStemElement)
+                max_r = max(max_r, maximum(element.r_data))
             end
         end
 
@@ -391,6 +393,64 @@ function draw_polar_element(
     end
 end
 
+function draw_polar_element(
+    element::PolarStemElement,
+    polar_to_screen::Function,
+    projection_matrix::Mat4{Float32},
+    style::PolarStyle
+)
+    # Convert polar data to Cartesian screen coordinates
+    x_screen = Float32[]
+    y_screen = Float32[]
+
+    for i in 1:length(element.r_data)
+        x, y = polar_to_screen(element.r_data[i], element.theta_data[i])
+        push!(x_screen, x)
+        push!(y_screen, y)
+    end
+
+    # Use identity transform since we're already in screen coordinates
+    identity_transform(x, y) = (x, y)
+
+    # Draw stem lines from r=0 (or r_min if r=0 is not visible) to each point
+    for i in 1:length(x_screen)
+        # Calculate stem origin for this angle
+        # Stems should start at r=0 in data space, but if that's outside visible range,
+        # start at the edge of the visible range (r_min)
+        stem_origin_x, stem_origin_y = polar_to_screen(0.0f0, element.theta_data[i])
+
+        stem_x = Float32[stem_origin_x, x_screen[i]]
+        stem_y = Float32[stem_origin_y, y_screen[i]]
+
+        draw_line_plot(
+            stem_x,
+            stem_y,
+            identity_transform,
+            element.stem_color,
+            element.stem_width,
+            SOLID,
+            projection_matrix;
+            anti_aliasing_width=style.anti_aliasing_width
+        )
+    end
+
+    # Draw markers at each data point
+    if length(x_screen) >= 1
+        draw_scatter_plot(
+            x_screen,
+            y_screen,
+            identity_transform,
+            element.marker_fill_color,
+            element.marker_border_color,
+            element.marker_size,
+            element.marker_border_width,
+            element.marker_type,
+            projection_matrix;
+            anti_aliasing_width=style.anti_aliasing_width
+        )
+    end
+end
+
 function detect_click(
     view::PolarPlotView,
     mouse_state::InputState,
@@ -400,6 +460,53 @@ function detect_click(
     height::Float32,
     parent_z::Int32
 )::Union{ClickResult,Nothing}
-    # No interaction for now
+    z = Int32(parent_z + 1)
+
+    # Check for scroll wheel zoom with Ctrl/Cmd modifier
+    if (mouse_state.scroll_y != 0.0) && is_command_key(mouse_state.modifier_keys)
+        # Get mouse position relative to plot area
+        mouse_x = Float32(mouse_state.x) - x
+        mouse_y = Float32(mouse_state.y) - y
+
+        # Check if mouse is within plot bounds
+        if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height
+            zoom_action() = handle_scroll_zoom(view, mouse_x, mouse_y, width, height, Float32(mouse_state.scroll_y))
+            return ClickResult(z, () -> zoom_action())
+        end
+    end
+
     return nothing
+end
+
+function handle_scroll_zoom(
+    view::PolarPlotView,
+    mouse_x::Float32,
+    mouse_y::Float32,
+    plot_width::Float32,
+    plot_height::Float32,
+    scroll_y::Float32
+)
+    # Determine zoom factor based on scroll direction
+    zoom_factor = scroll_y > 0 ? 0.9f0 : 1.1f0  # Scroll up = zoom in, scroll down = zoom out
+
+    current_state = view.state
+
+    # Calculate new radial range by zooming
+    r_range = current_state.r_max - current_state.r_min
+    new_r_range = r_range * zoom_factor
+
+    # Keep the center of the zoom at the current midpoint
+    r_center = (current_state.r_max + current_state.r_min) / 2.0f0
+    new_r_min = max(0.0f0, r_center - new_r_range / 2.0f0)
+    new_r_max = r_center + new_r_range / 2.0f0
+
+    # Create new state with updated radial bounds
+    new_state = PolarState(current_state;
+        r_min=new_r_min,
+        r_max=new_r_max,
+        auto_scale_r=false  # Disable auto_scale when user zooms
+    )
+
+    # Notify callback for state management
+    view.on_state_change(new_state)
 end

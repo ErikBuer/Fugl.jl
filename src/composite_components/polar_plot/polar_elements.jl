@@ -77,3 +77,51 @@ function PolarScatter(
         marker_type
     )
 end
+
+"""
+Stem plot in polar coordinates.
+
+Data is specified as (r, θ) pairs where:
+- r: radius values
+- θ: angle values in radians
+
+Draws lines from the origin to each data point with markers at the endpoints.
+"""
+struct PolarStemElement <: AbstractPolarElement
+    r_data::Vector{Float32}
+    theta_data::Vector{Float32}
+    stem_color::Vec4f
+    stem_width::Float32
+    marker_fill_color::Vec4f
+    marker_border_color::Vec4f
+    marker_size::Float32
+    marker_border_width::Float32
+    marker_type::MarkerType
+end
+
+"""
+Create a polar stem plot element.
+"""
+function PolarStem(
+    r_data::Vector{<:Real},
+    theta_data::Vector{<:Real};
+    stem_color::Vec4f=Vec4f(0.0, 0.5, 1.0, 1.0),
+    stem_width::Float32=1.5f0,
+    marker_fill_color::Vec4f=Vec4f(0.0, 0.5, 1.0, 1.0),
+    marker_border_color::Vec4f=Vec4f(0.0, 0.0, 0.0, 1.0),
+    marker_size::Float32=8.0f0,
+    marker_border_width::Float32=1.0f0,
+    marker_type::MarkerType=CIRCLE
+)::PolarStemElement
+    return PolarStemElement(
+        Float32.(r_data),
+        Float32.(theta_data),
+        stem_color,
+        stem_width,
+        marker_fill_color,
+        marker_border_color,
+        marker_size,
+        marker_border_width,
+        marker_type
+    )
+end

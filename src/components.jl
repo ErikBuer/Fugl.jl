@@ -135,7 +135,7 @@ export Legend
 
 include("composite_components/polar_plot/PolarPlot.jl")
 export PolarPlot, PolarPlotView, PolarStyle, PolarState
-export PolarLine, PolarScatter
+export PolarLine, PolarScatter, PolarStem
 export AbstractPolarElement
 
 include("composite_components/tree/Tree.jl")

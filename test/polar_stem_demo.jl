@@ -1,13 +1,12 @@
 using Fugl
 using Fugl: Text
 
-# Create a simple polar plot with a rose curve
-# r = 1 + 0.5 * cos(5θ)
-theta = range(0, 2π, length=200)
-r = 1.0f0 .+ 0.5f0 .* cos.(5.0f0 .* theta)
+# Create data points at regular angular intervals
+theta = range(0, 2π, length=12)
+r = 0.5f0 .+ 0.3f0 .* sin.(3.0f0 .* theta)
 
-# Rose curve style - dark theme
-rose_style = PolarStyle(
+# Dark theme polar style
+polar_style = PolarStyle(
     background_color=Vec4f(0.08, 0.10, 0.14, 1.0),  # Very dark background
     show_radial_grid=true,
     show_angular_grid=true,
@@ -19,28 +18,31 @@ rose_style = PolarStyle(
     label_color=Vec4f(0.9, 0.9, 0.95, 1.0)           # Light labels
 )
 
-# Configure state: 0° points to the right (default)
-polar_state = Ref(PolarState(
-    theta_start=0.0f0,               # 0 radians = right/east
+# Configure state
+polar_state = PolarState(
+    theta_start=0.0f0,
     theta_direction=:counterclockwise,
-    num_angular_lines=12,            # Every 30 degrees
+    num_angular_lines=12,
     angular_label_format=:degrees
-))
+)
 
 function MyApp()
     Column(
         Card(
-            "Polar Plot - Rose Curve:",
+            "Polar Stem Plot Demo",
             PolarPlot(
-                [PolarLine(
+                [PolarStem(
                     Float32.(r),
                     Float32.(theta),
-                    color=Vec4f(0.9, 0.4, 0.4, 1.0),  # Bright red for dark background
-                    width=2.5f0
+                    stem_color=Vec4f(0.4, 0.6, 0.9, 1.0),  # Bright blue
+                    stem_width=2.0f0,
+                    marker_fill_color=Vec4f(0.4, 0.6, 0.9, 1.0),  # Bright blue (matching)
+                    marker_border_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+                    marker_size=10.0f0,
+                    marker_border_width=1.5f0
                 )],
-                rose_style,
-                polar_state[],
-                (new_state) -> polar_state[] = new_state
+                polar_style,
+                polar_state
             ),
             style=ContainerStyle(
                 background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark card background
@@ -51,12 +53,12 @@ function MyApp()
             ),
             title_style=TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))  # Light title text
         ),
-        Fugl.Text("Rose curve: r = 1 + 0.5*cos(5θ)", style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0)))
+        Fugl.Text("Stem lines from origin to each data point", style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0)))
     )
 end
 
 Fugl.run(MyApp,
-    title="Polar Plot Demo",
+    title="Polar Stem Plot Demo",
     window_width_px=800,
     window_height_px=800,
     fps_overlay=true
