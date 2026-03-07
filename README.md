@@ -33,7 +33,11 @@ end
 screenshot(MyApp, "row.png", 812, 300);
 ```
 
-![Line Plot](docs/src/assets/row.png)
+![Table](docs/src/assets/row.png)
+
+## Demo Application
+
+![Buer simulation](docs/src/assets/Buer_simulation.png)
 
 ## Real-Time Performance
 
@@ -41,6 +45,3 @@ Fugl is written with real-time applications in mind.
 
 ![realtime plot](https://github.com/user-attachments/assets/5c0e1d61-dce3-4156-83ea-5eb35f298638)
 
-## Demo Application
-
-![Line Plot](docs/src/assets/ArrayApp_demo.gif)
