@@ -49,6 +49,13 @@ function InteractionState(state::InteractionState;
     return InteractionState(is_hovered, is_pressed, is_focused, hover_duration, hover_start_time, just_hovered, just_unhovered, just_pressed, just_released)
 end
 
+function blur(state::InteractionState)::InteractionState
+    return InteractionState(state; is_focused=false)
+end
+function focus(state::InteractionState)::InteractionState
+    return InteractionState(state; is_focused=true)
+end
+
 """
 Update interaction state based on current mouse/input state.
 Returns a new InteractionState with updated values.
@@ -101,7 +108,7 @@ function update_interaction_state(
     return InteractionState(
         is_hovered=is_mouse_inside,
         is_pressed=is_mouse_pressed,
-        is_focused=is_mouse_inside,  # For now, focus follows hover
+        #is_focused=is_mouse_inside,  # Focus shall be managed separately, not automatically tied to hover
         hover_duration=new_hover_duration,
         hover_start_time=new_hover_start_time,
         just_hovered=just_hovered,

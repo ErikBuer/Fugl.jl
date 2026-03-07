@@ -32,6 +32,13 @@ function handle_key_input(component::AbstractView, input_state::InputState)
     error("handle_key_input is not implemented for $(typeof(component))")
 end
 
+"""
+    blur(::AbstractView)
+
+Blurs (de-focuses) the component.
+"""
+function blur(::AbstractView) end
+
 function detect_click(view::AbstractView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
     nothing
 end

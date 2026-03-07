@@ -137,6 +137,13 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
 end
 
+function blur(view::ContainerView)
+    if view.interaction_state !== nothing && view.interaction_state.is_focused
+        new_interaction_state = blur(view.interaction_state)
+        view.on_interaction_state_change(new_interaction_state)
+    end
+end
+
 """
 Detect clicks on the container and its child.
 """

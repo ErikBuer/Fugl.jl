@@ -179,6 +179,13 @@ function draw_step_markers_as_lines(view::HorizontalSliderView, slider_x::Float3
     draw_lines(marker_lines, projection_matrix)
 end
 
+function blur(view::HorizontalSliderView)
+    if view.state.interaction_state.is_focused
+        new_interaction_state = blur(view.state.interaction_state)
+        view.on_interaction_state_change(new_interaction_state)
+    end
+end
+
 function detect_click(view::HorizontalSliderView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     z = Int32(parent_z + 1)
 

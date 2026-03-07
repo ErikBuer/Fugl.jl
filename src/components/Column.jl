@@ -87,7 +87,7 @@ function detect_click(view::ColumnView, mouse_state::InputState, x::AbstractFloa
         return nothing
     end
 
-    if mouse_state.was_clicked[LeftButton]
+    if mouse_state.mouse_down[LeftButton]
         return ClickResult(Int32(parent_z + 1), () -> view.on_click())  # Call the on_click function of the column
     end
 
