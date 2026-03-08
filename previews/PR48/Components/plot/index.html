@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Plot · Fugl.jl</title><meta name="title" content="Plot · Fugl.jl"/><meta property="og:title" content="Plot · Fugl.jl"/><meta property="twitter:title" content="Plot · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../layout/">Layout</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">Sliders</a></li><li><a class="tocitem" href="../number_field/">Number Field</a></li><li><a class="tocitem" href="../text_button/">Text Buttons</a></li><li class="is-active"><a class="tocitem" href>Plot</a><ul class="internal"><li><a class="tocitem" href="#Scatter-Plot-Example"><span>Scatter Plot Example</span></a></li><li><a class="tocitem" href="#Stem-Plot-Example"><span>Stem Plot Example</span></a></li><li><a class="tocitem" href="#Fixed-Axis-Bounds-Example"><span>Fixed Axis Bounds Example</span></a></li><li><a class="tocitem" href="#State-Management-Example"><span>State Management Example</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Plot</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Plot</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/plot.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Plot"><a class="docs-heading-anchor" href="#Plot">Plot</a><a id="Plot-1"></a><a class="docs-heading-anchor-permalink" href="#Plot" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, LinePlotElement, SOLID, DASH, DOT
+
+function MyApp()
+    # Generate sample data for demonstration
+    x_data = collect(0.0:0.1:10.0)
+    y1_data = sin.(x_data)
+    y2_data = cos.(x_data)
+    y3_data = sin.(x_data .* 2) .* 0.5
+
+    # Create multiple plot elements with different colors and styles
+    elements = [
+        LinePlotElement(y1_data; x_data=x_data,
+            color=Vec4{Float32}(0.2, 0.6, 0.8, 1.0),
+            width=3.0f0,
+            line_style=SOLID,
+            )
+        LinePlotElement(y2_data; x_data=x_data,
+            color=Vec4{Float32}(0.8, 0.2, 0.2, 1.0),
+            width=2.5f0,
+            line_style=DASH,
+        )
+        LinePlotElement(y3_data; x_data=x_data,
+            color=Vec4{Float32}(0.2, 0.8, 0.2, 1.0),
+            width=2.0f0,
+            line_style=DOT,
+        )
+    ]
+
+    IntrinsicColumn([
+            IntrinsicHeight(Container(Text(&quot;Plot Example&quot;))),
+            Container(
+                Plot(
+                    elements,
+                    PlotStyle(
+                        background_color=Vec4{Float32}(0.3, 0.3, 0.3, 1.0),  # Gray background
+                        grid_color=Vec4{Float32}(0.9, 0.9, 0.9, 1.0),        # Light gray grid
+                        axis_color=Vec4{Float32}(1.0, 1.0, 1.0, 1.0),        # White axes
+                        show_grid=true,
+                        show_axes=true,
+                        padding_px=50.0f0
+                    )
+                )
+            ),
+        ], padding=0.0, spacing=0.0)
+end
+
+screenshot(MyApp, &quot;linePlot.png&quot;, 600, 400);</code></pre><p><img src="../linePlot.png" alt="Line Plot"/></p><h2 id="Scatter-Plot-Example"><a class="docs-heading-anchor" href="#Scatter-Plot-Example">Scatter Plot Example</a><a id="Scatter-Plot-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Scatter-Plot-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, ScatterPlotElement, CIRCLE, TRIANGLE, RECTANGLE
+
+function MyApp()
+    # Generate sample data for scatter plot
+    x_data = collect(1:10)
+    y1_data = rand(10) .* 5 .+ 2  # Random data between 2-7
+    y2_data = rand(10) .* 3 .+ 4  # Random data between 4-7
+    y3_data = rand(10) .* 4 .+ 1  # Random data between 1-5
+
+    # Create scatter plot elements with different marker types
+    elements = [
+        ScatterPlotElement(y1_data; x_data=x_data,
+                          fill_color=Vec4{Float32}(0.8, 0.2, 0.2, 0.8),
+                          border_color=Vec4{Float32}(0.5, 0.1, 0.1, 1.0),
+                          marker_size=8.0f0,
+                          border_width=2.0f0,
+                          marker_type=CIRCLE,
+        )
+        ScatterPlotElement(y2_data; x_data=x_data,
+                          fill_color=Vec4{Float32}(0.2, 0.8, 0.2, 0.8),
+                          border_color=Vec4{Float32}(0.1, 0.5, 0.1, 1.0),
+                          marker_size=8.0f0,
+                          border_width=2.0f0,
+                          marker_type=TRIANGLE,
+        )
+        ScatterPlotElement(y3_data; x_data=x_data,
+                          fill_color=Vec4{Float32}(0.2, 0.2, 0.8, 0.8),
+                          border_color=Vec4{Float32}(0.1, 0.1, 0.5, 1.0),
+                          marker_size=8.0f0,
+                          border_width=2.0f0,
+                          marker_type=RECTANGLE,
+        )
+    ]
+
+    IntrinsicColumn([
+        IntrinsicHeight(Container(Text(&quot;Scatter Plot Example&quot;))),
+        Container(
+            Plot(
+                elements,
+                PlotStyle(
+                    background_color=Vec4{Float32}(0.98, 0.98, 0.98, 1.0),  # Light background
+                    grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),        # Gray grid
+                    axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
+                    show_grid=true,
+                    show_axes=true,
+                    padding_px=50.0f0,
+                    anti_aliasing_width=1.5f0
+                )
+            )
+        ),
+    ], padding=0.0, spacing=0.0)
+end
+
+screenshot(MyApp, &quot;scatterPlot.png&quot;, 600, 400);</code></pre><p><img src="../scatterPlot.png" alt="Scatter Plot"/></p><h2 id="Stem-Plot-Example"><a class="docs-heading-anchor" href="#Stem-Plot-Example">Stem Plot Example</a><a id="Stem-Plot-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Stem-Plot-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, StemPlotElement, CIRCLE, TRIANGLE
+
+function MyApp()
+    # Generate sample data for stem plot
+    x_data = collect(1:8)
+    y1_data = [3.2, 5.1, 2.8, 6.3, 4.7, 3.9, 5.5, 4.2]
+    y2_data = [2.1, 3.8, 4.2, 2.9, 5.4, 4.1, 3.6, 4.8]
+
+    # Create stem plot elements
+    elements = [
+        StemPlotElement(y1_data; x_data=x_data,
+                       line_width=3.0f0,
+                       marker_size=6.0f0,
+                       border_width=1.5f0,
+                       marker_type=CIRCLE,
+                       baseline=0.0f0,
+        )
+        StemPlotElement(y2_data; x_data=x_data .+ 0.3,  # Offset x slightly for visibility
+                       line_color=Vec4{Float32}(0.3, 0.7, 0.3, 1.0),     # Green stems
+                       fill_color=Vec4{Float32}(0.3, 0.8, 0.3, 1.0),     # Green markers
+                       border_color=Vec4{Float32}(0.0, 0.3, 0.0, 1.0),   # Dark green border
+                       line_width=3.0f0,
+                       marker_size=6.0f0,
+                       border_width=1.5f0,
+                       marker_type=TRIANGLE,
+                       baseline=0.0f0,
+        )
+    ]
+
+    IntrinsicColumn([
+        IntrinsicHeight(Container(Text(&quot;Stem Plot Example&quot;))),
+        Container(
+            Plot(
+                elements,
+                PlotStyle(
+                    background_color=Vec4{Float32}(0.95, 0.98, 0.95, 1.0),  # Light green background
+                    grid_color=Vec4{Float32}(0.8, 0.9, 0.8, 1.0),           # Light green grid
+                    axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
+                    show_grid=true,
+                    show_axes=true,
+                    padding_px=50.0f0,
+                    anti_aliasing_width=1.5f0
+                )
+            )
+        ),
+    ], padding=0.0, spacing=0.0)
+end
+
+screenshot(MyApp, &quot;stemPlot.png&quot;, 600, 400);</code></pre><p><img src="../stemPlot.png" alt="Stem Plot"/></p><h2 id="Fixed-Axis-Bounds-Example"><a class="docs-heading-anchor" href="#Fixed-Axis-Bounds-Example">Fixed Axis Bounds Example</a><a id="Fixed-Axis-Bounds-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Fixed-Axis-Bounds-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, LinePlotElement, SOLID
+
+function MyApp()
+    # Generate sample data that extends beyond our desired view
+    x_data = collect(-2.0:0.1:12.0)
+    y_data = sin.(x_data) .* exp.(-x_data ./ 10)
+
+    # Create plot element
+    elements = [
+        LinePlotElement(y_data; x_data=x_data,
+            color=Vec4{Float32}(0.0, 0.6, 0.9, 1.0),
+            width=2.5f0,
+            line_style=SOLID,
+        )
+    ]
+
+    IntrinsicColumn(
+        [
+            IntrinsicHeight(Container(Text(&quot;Fixed Axis Bounds Example&quot;))),
+            Container(
+                Plot(
+                    elements,
+                    PlotStyle(
+                        background_color=Vec4{Float32}(0.98, 0.98, 0.98, 1.0),
+                        grid_color=Vec4{Float32}(0.85, 0.85, 0.85, 1.0),
+                        axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
+                        show_grid=true,
+                        show_axes=true,
+                        padding_px=50.0f0
+                    ),
+                    PlotState(
+                        # Fixed axis bounds - only show x from 0 to 8, y from -0.8 to 1.0
+                        initial_x_min=0.0f0,
+                        initial_x_max=8.0f0,
+                        initial_y_min=-0.8f0,
+                        initial_y_max=1.0f0
+                    ),
+                )
+            ),
+            IntrinsicHeight(Container(Text(&quot;View: X=[0,8], Y=[-0.8,1.0] (data extends beyond view)&quot;))),
+        ], padding=0.0, spacing=0.0
+    )
+end
+
+screenshot(MyApp, &quot;fixedBoundsPlot.png&quot;, 600, 400);</code></pre><p><img src="../fixedBoundsPlot.png" alt="Fixed Bounds Plot"/></p><h2 id="State-Management-Example"><a class="docs-heading-anchor" href="#State-Management-Example">State Management Example</a><a id="State-Management-Example-1"></a><a class="docs-heading-anchor-permalink" href="#State-Management-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, TextButton, LinePlotElement, SOLID
+
+function MyApp()
+    # Generate sample data
+    x_data = collect(0.0:0.2:10.0)
+    y_data = sin.(x_data)
+
+    elements = AbstractPlotElement[
+        LinePlotElement(y_data; x_data=x_data,
+        color=Vec4{Float32}(0.8, 0.2, 0.6, 1.0),
+        width=3.0f0,
+        line_style=SOLID,
+        )
+    ]
+
+    # Create simple plot state for zoom control with initial view bounds
+    plot_state = Ref(PlotState())
+
+    # Define plot style with initial view
+    plot_style = PlotStyle(
+        background_color=Vec4{Float32}(0.95, 0.95, 0.95, 1.0),
+        grid_color=Vec4{Float32}(0.8, 0.8, 0.8, 1.0),
+        axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
+        show_grid=true,
+        show_axes=true,
+        padding_px=40.0f0
+    )
+
+    IntrinsicColumn([
+            IntrinsicHeight(Container(Text(&quot;State Management Example&quot;))),
+
+            # Plot with user-managed state - elements and bounds from state
+            Container(
+                Plot(
+                    elements,              # Elements define what to plot
+                    plot_style,            # Style defines visual appearance
+                    plot_state[],         # State contains bounds and zoom info
+                    (new_state) -&gt; plot_state[] = new_state
+                )
+            ),
+
+            # Control buttons that modify the plot state
+            IntrinsicHeight(
+                IntrinsicRow([
+                        TextButton(&quot;Zoom In Y&quot;;
+                            on_click=() -&gt; begin
+                                current_state = plot_state[]
+                                # Get current Y bounds (or use initial if not set)
+                                y_min = something(current_state.current_y_min, current_state.initial_y_min, -1.0f0)
+                                y_max = something(current_state.current_y_max, current_state.initial_y_max, 1.0f0)
+
+                                # Zoom in by 20%
+                                y_center = (y_min + y_max) / 2
+                                y_range = (y_max - y_min) * 0.8f0
+                                new_y_min = y_center - y_range / 2
+                                new_y_max = y_center + y_range / 2
+
+                                # Create new state with updated bounds (clean API - no elements!)
+                                plot_state[] = PlotState(
+                                    current_state.bounds,
+                                    current_state.auto_scale,
+                                    current_state.initial_x_min,
+                                    current_state.initial_x_max,
+                                    current_state.initial_y_min,
+                                    current_state.initial_y_max,
+                                    current_state.current_x_min,
+                                    current_state.current_x_max,
+                                    new_y_min,
+                                    new_y_max
+                                )
+                            end
+                        ),
+                        TextButton(&quot;Reset View&quot;;
+                            on_click=() -&gt; begin
+                                current_state = plot_state[]
+                                # Reset to initial view bounds
+                                plot_state[] = PlotState(
+                                    current_state.bounds,
+                                    current_state.auto_scale,
+                                    current_state.initial_x_min,
+                                    current_state.initial_x_max,
+                                    current_state.initial_y_min,
+                                    current_state.initial_y_max,
+                                    current_state.initial_x_min,
+                                    current_state.initial_x_max,
+                                    current_state.initial_y_min,
+                                    current_state.initial_y_max
+                                )
+                            end
+                        )
+                    ], padding=0.0, spacing=0.0)
+            ),
+        ], padding=0.0, spacing=0.0)
+end
+
+screenshot(MyApp, &quot;stateManagementPlot.png&quot;, 600, 500);</code></pre><p><img src="../stateManagementPlot.png" alt="State Management Plot"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../text_button/">« Text Buttons</a><a class="docs-footer-nextpage" href="../../interaction/">User interaction »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 11 August 2025 08:51">Monday 11 August 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

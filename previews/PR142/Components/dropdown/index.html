@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Dropdown · Fugl.jl</title><meta name="title" content="Dropdown · Fugl.jl"/><meta property="og:title" content="Dropdown · Fugl.jl"/><meta property="twitter:title" content="Dropdown · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li class="is-active"><a class="tocitem" href>Dropdown</a><ul class="internal"><li><a class="tocitem" href="#Dark-Theme-Example"><span>Dark Theme Example</span></a></li><li><a class="tocitem" href="#IntrinsicColumn-with-Multiple-Dropdowns"><span>IntrinsicColumn with Multiple Dropdowns</span></a></li></ul></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-23" type="checkbox"/><label class="tocitem" for="menuitem-3-23"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li><a class="tocitem" href="../keylistener/">KeyListener</a></li><li><a class="tocitem" href="../focus/">Focus</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Dropdown</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Dropdown</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/dropdown.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Dropdown"><a class="docs-heading-anchor" href="#Dropdown">Dropdown</a><a id="Dropdown-1"></a><a class="docs-heading-anchor-permalink" href="#Dropdown" title="Permalink"></a></h1><p>The <code>Dropdown</code> component provides a dropdown selection interface that allows users to choose from a list of options. It follows the same immutable state management pattern as other Fugl components.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+# Initialize dropdown state
+options = [&quot;Small&quot;, &quot;Medium&quot;, &quot;Large&quot;, &quot;Extra Large&quot;]
+# Create initial state using Ref for reactivity
+dropdown_state = Ref(DropdownState(options; selected_index=1, is_open=true)) # force it open for demonstration purposes.
+
+# Custom styling
+dropdown_style = DropdownStyle(
+    text_style=TextStyle(size_px=14.0f0),
+    corner_radius=6.0f0,
+    padding=12.0f0,
+    item_height_px=32.0f0,
+    max_visible_items=3
+)
+
+function MyApp()
+    return Card(
+        &quot;Dropdown example:&quot;,
+        Dropdown(
+            dropdown_state[];
+            style=dropdown_style,
+            on_state_change=(new_state) -&gt; dropdown_state[] = new_state,
+            on_select=(value, index) -&gt; println(&quot;Selected: $value (index: $index)&quot;)
+        )
+    )
+end
+
+screenshot(MyApp, &quot;dropdown.png&quot;, 812, 400);</code></pre><p><img src="../dropdown.png" alt="Dropdown"/></p><h2 id="Dark-Theme-Example"><a class="docs-heading-anchor" href="#Dark-Theme-Example">Dark Theme Example</a><a id="Dark-Theme-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Dark-Theme-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+# Initialize dark dropdown state
+dark_options = [&quot;Dark Small&quot;, &quot;Dark Medium&quot;, &quot;Dark Large&quot;, &quot;Dark Extra Large&quot;]
+dark_dropdown_state = Ref(DropdownState(dark_options; selected_index=2, is_open=true)) # force it open for demonstration
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark background
+    border_color=Vec4f(0.25, 0.25, 0.30, 1.0),      # Subtle border
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0,
+    anti_aliasing_width=1.0f0
+)
+
+# Dark theme title style
+dark_title_style = TextStyle(
+    size_px=18,
+    color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
+)
+
+# Dark theme dropdown style
+dark_dropdown_style = DropdownStyle(
+    text_style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0)),  # Light text
+    background_color=Vec4f(0.08, 0.10, 0.14, 1.0),                       # Very dark background
+    background_color_hover=Vec4f(0.12, 0.14, 0.18, 1.0),                 # Slightly lighter on hover
+    background_color_open=Vec4f(0.06, 0.08, 0.12, 1.0),                  # Even darker when open
+    border_color=Vec4f(0.15, 0.18, 0.25, 1.0),                           # Dark border with blue tone
+    border_width=1.5f0,
+    corner_radius=6.0f0,
+    padding=12.0f0,
+    arrow_color=Vec4f(0.9, 0.9, 0.95, 1.0),                              # Light arrow
+    item_height_px=32.0f0,
+    max_visible_items=3
+)
+
+function MyDarkApp()
+    return Card(
+        &quot;Dark Theme Dropdown:&quot;,
+        Dropdown(
+            dark_dropdown_state[];
+            style=dark_dropdown_style,
+            on_state_change=(new_state) -&gt; dark_dropdown_state[] = new_state,
+            on_select=(value, index) -&gt; println(&quot;Dark selected: $value (index: $index)&quot;)
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyDarkApp, &quot;dark_dropdown.png&quot;, 812, 400);</code></pre><p><img src="../dark_dropdown.png" alt="Dark Dropdown"/></p><h2 id="IntrinsicColumn-with-Multiple-Dropdowns"><a class="docs-heading-anchor" href="#IntrinsicColumn-with-Multiple-Dropdowns">IntrinsicColumn with Multiple Dropdowns</a><a id="IntrinsicColumn-with-Multiple-Dropdowns-1"></a><a class="docs-heading-anchor-permalink" href="#IntrinsicColumn-with-Multiple-Dropdowns" title="Permalink"></a></h2><pre><code class="language-julia hljs"># Initialize states for multiple dropdowns
+size_options = [&quot;Small&quot;, &quot;Medium&quot;, &quot;Large&quot;, &quot;Extra Large&quot;]
+color_options = [&quot;Red&quot;, &quot;Green&quot;, &quot;Blue&quot;, &quot;Yellow&quot;, &quot;Purple&quot;]
+
+size_dropdown_state = Ref(DropdownState(size_options; selected_index=2))
+color_dropdown_state = Ref(DropdownState(color_options; selected_index=1))
+
+
+
+function MyColumnApp()
+    return Card(
+        &quot;Multiple Dropdowns in IntrinsicColumn:&quot;,
+        IntrinsicColumn([
+            Dropdown(
+                size_dropdown_state[];
+                style=dark_dropdown_style,
+                placeholder_text=&quot;Select size...&quot;,
+                on_state_change=(new_state) -&gt; size_dropdown_state[] = new_state,
+                on_select=(value, index) -&gt; println(&quot;Size selected: $value&quot;)
+            ),
+            Dropdown(
+                color_dropdown_state[];
+                style=dark_dropdown_style,
+                placeholder_text=&quot;Select color...&quot;,
+                on_state_change=(new_state) -&gt; color_dropdown_state[] = new_state,
+                on_select=(value, index) -&gt; println(&quot;Color selected: $value&quot;)
+            )
+        ], spacing=8.0f0),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyColumnApp, &quot;dark_dropdown_column.png&quot;, 812, 400);</code></pre><p><img src="../dark_dropdown_column.png" alt="Dark Dropdown Column"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../code_editor/">« CodeEditor</a><a class="docs-footer-nextpage" href="../image/">Image »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Sunday 18 January 2026 12:34">Sunday 18 January 2026</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
