@@ -44,6 +44,8 @@ struct EditorState
     cached_lines::Dict{Int,LineTokenData}
     text_hash::UInt64
     cache_id::UInt64  # Unique cache ID for render caching
+    scroll_offset_y::Int  # Vertical scroll offset in lines (0 = top)
+    scroll_offset_x::Float32  # Horizontal scroll offset in pixels (0.0 = left)
 end
 
 """
@@ -56,14 +58,14 @@ function EditorState(
     cached_lines::Dict{Int,LineTokenData},
     text_hash::UInt64
 )
-    return EditorState(text, cursor, is_focused, nothing, nothing, cached_lines, text_hash, generate_cache_id())
+    return EditorState(text, cursor, is_focused, nothing, nothing, cached_lines, text_hash, generate_cache_id(), 0, 0.0f0)
 end
 
 """
 Create a new EditorState with the given text and cursor at the beginning.
 """
 function EditorState(text::String)
-    return EditorState(text, CursorPosition(1, 1), false, nothing, nothing, Dict{Int,LineTokenData}(), hash(text), generate_cache_id())
+    return EditorState(text, CursorPosition(1, 1), false, nothing, nothing, Dict{Int,LineTokenData}(), hash(text), generate_cache_id(), 0, 0.0f0)
 end
 
 """
@@ -76,8 +78,10 @@ function EditorState(state::EditorState;
     selection_start=state.selection_start,
     selection_end=state.selection_end,
     cached_lines=state.cached_lines,
-    text_hash=state.text_hash)
-    return EditorState(text, cursor, is_focused, selection_start, selection_end, cached_lines, text_hash, state.cache_id)
+    text_hash=state.text_hash,
+    scroll_offset_y=state.scroll_offset_y,
+    scroll_offset_x=state.scroll_offset_x)
+    return EditorState(text, cursor, is_focused, selection_start, selection_end, cached_lines, text_hash, state.cache_id, scroll_offset_y, scroll_offset_x)
 end
 
 """

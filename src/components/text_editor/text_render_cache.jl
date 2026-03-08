@@ -3,7 +3,7 @@ using GeometryBasics: Mat4
 """
 Generate a content hash for text components (TextBox/CodeEditor) that captures all rendering-relevant state
 """
-function hash_text_content(text::String, style::Any, is_focused::Bool, cursor_pos::Any, selection::Any)::UInt64
+function hash_text_content(text::String, style::Any, is_focused::Bool, cursor_pos::Any, selection::Any, scroll_offset_y::Int, scroll_offset_x::Float32)::UInt64
     h = hash(text)
     h = hash(is_focused, h)
 
@@ -16,6 +16,9 @@ function hash_text_content(text::String, style::Any, is_focused::Bool, cursor_po
     if selection !== nothing && selection !== (nothing, nothing)
         h = hash(selection, h)
     end
+
+    # Hash scroll offsets
+    h = hash((scroll_offset_y, scroll_offset_x), h)
 
     # Hash relevant style properties that affect rendering
     h = hash((
@@ -39,7 +42,7 @@ Check if text component cache should be invalidated
 """
 function should_invalidate_text_cache(text::String, style::Any, is_focused::Bool, cursor_pos::Any, selection::Any, bounds::Tuple{Float32,Float32,Float32,Float32}, state)::Bool
     # Generate content hash for the text component
-    content_hash = hash_text_content(text, style, is_focused, cursor_pos, selection)
+    content_hash = hash_text_content(text, style, is_focused, cursor_pos, selection, state.scroll_offset_y, state.scroll_offset_x)
 
     # Get the cache using state's cache ID
     cache = get_render_cache(state.cache_id)

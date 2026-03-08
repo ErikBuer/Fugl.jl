@@ -32,7 +32,7 @@ function main()
     number_state = Ref(EditorState("42.5"))
 
     # Plain text field for comparison
-    text_state = Ref(EditorState("Hello World"))
+    text_state = Ref(EditorState("Hello World. LOOOOOONG text to test overflow handling in the text field component."))
 
     function MyApp()
         IntrinsicColumn([
@@ -59,12 +59,15 @@ function main()
                     )
                 ), Card(
                     "Plain Text Field:",
-                    TextField(
-                        text_state[];
-                        on_state_change=(new_state) -> text_state[] = new_state,
-                        on_change=(text) -> println("📝 Text changed: ", text),
-                        on_focus=() -> println("✍️ Text field gained focus"),
-                        on_blur=() -> println("✍️ Text field lost focus")
+                    Column(
+                        TextField(
+                            text_state[];
+                            on_state_change=(new_state) -> text_state[] = new_state,
+                            on_change=(text) -> println("📝 Text changed: ", text),
+                            on_focus=() -> println("✍️ Text field gained focus"),
+                            on_blur=() -> println("✍️ Text field lost focus")
+                        ),
+                        Empty()
                     )
                 ),
             ],
