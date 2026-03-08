@@ -300,7 +300,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarStem.png", 800, 800);
+screenshot(MyApp, "polarStem.png", 812, 812);
 nothing #hide
 ```
 

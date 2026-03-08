@@ -65,7 +65,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarScatter.png", 800, 800);
+screenshot(MyApp, "polarScatter.png", 812, 812);
 nothing #hide
 ```
 
@@ -148,7 +148,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarScatterMulti.png", 800, 800);
+screenshot(MyApp, "polarScatterMulti.png", 812, 812);
 nothing #hide
 ```
 
@@ -230,7 +230,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarScatterCombined.png", 800, 800);
+screenshot(MyApp, "polarScatterCombined.png", 812, 812);
 nothing #hide
 ```
 

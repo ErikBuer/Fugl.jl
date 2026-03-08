@@ -128,6 +128,7 @@ export Plot, PlotView, PlotStyle
 export PlotState, reset_plot_view_bounds, calculate_bounds_from_elements
 export LinePlotElement, ScatterPlotElement, StemPlotElement, HeatmapElement
 export AbstractPlotElement
+export toggle_mute
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE
 export SimpleLine, draw_line, draw_lines, draw_simple_line
 export VerticalColorbar, HorizontalColorbar

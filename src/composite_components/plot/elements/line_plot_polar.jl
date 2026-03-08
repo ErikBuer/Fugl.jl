@@ -29,7 +29,8 @@ function PolarLine(
     color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.5f0, 1.0f0, 1.0f0),
     width::Float32=2.0f0,
     line_style::LinePattern=SOLID,
-    label::String=""
+    label::String="",
+    muted::Bool=false
 )::LinePlotElement
     return LinePlotElement(
         Float32.(theta_data),  # x = theta (angle)
@@ -37,6 +38,7 @@ function PolarLine(
         color,
         width,
         line_style,
-        label
+        label,
+        muted
     )
 end

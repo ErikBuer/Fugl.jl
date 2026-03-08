@@ -41,7 +41,8 @@ function PolarStem(
     border_width::Float32=1.0f0,
     marker_type::MarkerType=CIRCLE,
     baseline::Float32=0.0f0,  # Radial baseline (typically 0 = center)
-    label::String=""
+    label::String="",
+    muted::Bool=false
 )::StemPlotElement
     return StemPlotElement(
         Float32.(theta_data),  # x = theta (angle)
@@ -54,6 +55,7 @@ function PolarStem(
         border_width,
         marker_type,
         baseline,
-        label
+        label,
+        muted
     )
 end

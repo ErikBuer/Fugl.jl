@@ -69,7 +69,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarStemBasic.png", 800, 800);
+screenshot(MyApp, "polarStemBasic.png", 812, 812);
 nothing #hide
 ```
 
@@ -153,7 +153,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarStemMultiple.png", 800, 800);
+screenshot(MyApp, "polarStemMultiple.png", 812, 812);
 nothing #hide
 ```
 
@@ -240,17 +240,9 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarStemCombined.png", 800, 800);
+screenshot(MyApp, "polarStemCombined.png", 812, 812);
 nothing #hide
 ```
 
 ![Combined Plot](polarStemCombined.png)
 
-## Stem Behavior with Zoom
-
-Stem lines always originate from r=0 in the data coordinate system. When zooming:
-- If r=0 is visible in the plot, stems extend from the center
-- If the plot is zoomed to r_min > 0, stems start from r=0 (which will appear partway out from the center)
-- If the plot shows negative values (r_min < 0), stems still start at r=0 (not at the plot boundary)
-
-This ensures stems always represent the true magnitude from zero, regardless of zoom level.

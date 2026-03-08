@@ -54,19 +54,20 @@ makedocs(
             "Plot"=>Any[
                 "Cartesian"=>Any[
                     "Components/plot/cartesian/line_plot.md",
-                    "Components/plot/cartesian/legend.md",
                     "Components/plot/cartesian/stem_plot.md",
                     "Components/plot/cartesian/scatter_plot.md",
                     "Components/plot/cartesian/heatmap.md",
                     "Components/plot/cartesian/colorbar.md",
                     "Components/plot/cartesian/plot_style.md",
                     "Components/plot/cartesian/plot_state.md",
-                ],
+                    "Components/plot/cartesian/legend.md",
+                    "Components/plot/cartesian/legend_interactive.md",],
                 "Polar"=>Any[
                     "Components/plot/polar/polar_plot.md",
                     "Components/plot/polar/polar_scatter.md",
                     "Components/plot/polar/polar_stem.md",
                     "Components/plot/polar/polar_legend.md",
+                    "Components/plot/polar/polar_legend_interactive.md",
                 ],
             ],
             "Components/table.md",

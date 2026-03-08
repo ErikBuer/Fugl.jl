@@ -288,7 +288,10 @@ function render_polar_content(
 
     # Draw plot elements
     for element in elements
-        draw_polar_element(element, polar_data_to_screen, projection_matrix, style, state)
+        # Skip muted elements
+        if !element.muted
+            draw_polar_element(element, polar_data_to_screen, projection_matrix, style, state)
+        end
     end
 
     # Draw labels

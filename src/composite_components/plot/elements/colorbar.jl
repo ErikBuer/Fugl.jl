@@ -7,6 +7,7 @@ struct VerticalColorbar <: AbstractPlotElement
     value_range::Tuple{Float32,Float32}  # Min and max values for the colorbar
     label::String     # Optional label for the colorbar
     gradient_pixels::Int32 # Number of pixels in the gradient direction for smooth rendering
+    muted::Bool
 end
 
 """
@@ -18,6 +19,7 @@ struct HorizontalColorbar <: AbstractPlotElement
     value_range::Tuple{Float32,Float32}  # Min and max values for the colorbar
     label::String     # Optional label for the colorbar
     gradient_pixels::Int32 # Number of pixels in the gradient direction for smooth rendering
+    muted::Bool
 end
 
 # Constructors for VerticalColorbar
@@ -25,7 +27,8 @@ function VerticalColorbar(
     colormap::Symbol,
     value_range::Tuple{Real,Real};
     label::String="",
-    gradient_pixels::Int=240
+    gradient_pixels::Int=240,
+    muted::Bool=false
 )
     value_range_f32 = (Float32(value_range[1]), Float32(value_range[2]))
 
@@ -33,7 +36,8 @@ function VerticalColorbar(
         colormap,
         value_range_f32,
         label,
-        Int32(gradient_pixels)
+        Int32(gradient_pixels),
+        muted
     )
 end
 
@@ -41,22 +45,43 @@ end
 function VerticalColorbar(
     heatmap::HeatmapElement;
     label::String="",
-    gradient_pixels::Int=240
+    gradient_pixels::Int=240,
+    muted::Bool=false
 )
     return VerticalColorbar(
         heatmap.colormap,
         heatmap.value_range,
         label=label,
-        gradient_pixels=gradient_pixels
+        gradient_pixels=gradient_pixels,
+        muted=muted
     )
 end
+
+"""
+Create a new VerticalColorbar from an existing colorbar with keyword-based modifications.
+"""
+function VerticalColorbar(elem::VerticalColorbar;
+    colormap=elem.colormap,
+    value_range=elem.value_range,
+    label=elem.label,
+    gradient_pixels=elem.gradient_pixels,
+    muted=elem.muted
+)
+    return VerticalColorbar(colormap, value_range, label, gradient_pixels, muted)
+end
+
+"""
+Toggle the muted state of a VerticalColorbar.
+"""
+toggle_mute(elem::VerticalColorbar) = VerticalColorbar(elem; muted=!elem.muted)
 
 # Constructors for HorizontalColorbar
 function HorizontalColorbar(
     colormap::Symbol,
     value_range::Tuple{Real,Real};
     label::String="",
-    gradient_pixels::Int=240
+    gradient_pixels::Int=240,
+    muted::Bool=false
 )
     value_range_f32 = (Float32(value_range[1]), Float32(value_range[2]))
 
@@ -64,7 +89,8 @@ function HorizontalColorbar(
         colormap,
         value_range_f32,
         label,
-        Int32(gradient_pixels)
+        Int32(gradient_pixels),
+        muted
     )
 end
 
@@ -72,12 +98,32 @@ end
 function HorizontalColorbar(
     heatmap::HeatmapElement;
     label::String="",
-    gradient_pixels::Int=240
+    gradient_pixels::Int=240,
+    muted::Bool=false
 )
     return HorizontalColorbar(
         heatmap.colormap,
         heatmap.value_range,
         label=label,
-        gradient_pixels=gradient_pixels
+        gradient_pixels=gradient_pixels,
+        muted=muted
     )
 end
+
+"""
+Create a new HorizontalColorbar from an existing colorbar with keyword-based modifications.
+"""
+function HorizontalColorbar(elem::HorizontalColorbar;
+    colormap=elem.colormap,
+    value_range=elem.value_range,
+    label=elem.label,
+    gradient_pixels=elem.gradient_pixels,
+    muted=elem.muted
+)
+    return HorizontalColorbar(colormap, value_range, label, gradient_pixels, muted)
+end
+
+"""
+Toggle the muted state of a HorizontalColorbar.
+"""
+toggle_mute(elem::HorizontalColorbar) = HorizontalColorbar(elem; muted=!elem.muted)

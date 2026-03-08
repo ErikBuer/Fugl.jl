@@ -33,7 +33,8 @@ function PolarScatter(
     marker_size::Float32=8.0f0,
     border_width::Float32=1.0f0,
     marker_type::MarkerType=CIRCLE,
-    label::String=""
+    label::String="",
+    muted::Bool=false
 )::ScatterPlotElement
     return ScatterPlotElement(
         Float32.(theta_data),  # x = theta (angle)
@@ -43,6 +44,7 @@ function PolarScatter(
         marker_size,
         border_width,
         marker_type,
-        label
+        label,
+        muted
     )
 end

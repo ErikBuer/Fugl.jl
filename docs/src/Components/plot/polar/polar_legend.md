@@ -123,7 +123,7 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarLegend.png", 900, 900);
+screenshot(MyApp, "polarLegend.png", 812, 812);
 nothing #hide
 ```
 
@@ -258,17 +258,8 @@ function MyApp()
     )
 end
 
-screenshot(MyApp, "polarLegendInteractive.png", 900, 900);
+screenshot(MyApp, "polarLegendInteractive.png", 812, 812);
 nothing #hide
 ```
 
 ![Interactive Polar Legend](polarLegendInteractive.png)
-
-## Benefits of Unified Elements
-
-Before the unified element system, polar plots used separate types (`PolarLineElement`, etc.) that didn't have label fields, making legends impossible. Now:
-
-- ✅ Same element types for both cartesian and polar plots
-- ✅ Legends work automatically
-- ✅ Consistent API across plot types
-- ✅ Label support built-in to all elements
