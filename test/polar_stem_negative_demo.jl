@@ -38,12 +38,12 @@ function MyApp()
                     PolarStem(
                         Float32.(r),
                         Float32.(theta),
-                        stem_color=Vec4f(0.9, 0.4, 0.4, 1.0),
-                        stem_width=2.0f0,
-                        marker_fill_color=Vec4f(0.9, 0.4, 0.4, 1.0),
-                        marker_border_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+                        line_color=Vec4f(0.9, 0.4, 0.4, 1.0),
+                        line_width=2.0f0,
+                        fill_color=Vec4f(0.9, 0.4, 0.4, 1.0),
+                        border_color=Vec4f(0.9, 0.9, 0.95, 1.0),
                         marker_size=10.0f0,
-                        marker_border_width=1.5f0
+                        border_width=1.5f0
                     )
                 ],
                 polar_style,

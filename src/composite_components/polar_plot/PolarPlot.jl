@@ -5,11 +5,10 @@ Polar plot component for visualizing data in polar coordinates.
 include("polar_transform.jl")
 include("polar_style.jl")
 include("polar_state.jl")
-include("polar_elements.jl")
 include("polar_axes.jl")
 
 struct PolarPlotView <: AbstractView
-    elements::Vector{AbstractPolarElement}
+    elements::Vector{<:AbstractPlotElement}  # Using unified plot elements
     state::PolarState
     style::PolarStyle
     on_state_change::Function
@@ -37,7 +36,7 @@ polar_plot = PolarPlot(
 ```
 """
 function PolarPlot(
-    elements::Vector{<:AbstractPolarElement},
+    elements::Vector{<:AbstractPlotElement},
     style::PolarStyle=PolarStyle(),
     state::PolarState=PolarState(),
     on_state_change::Function=(new_state) -> nothing
@@ -46,12 +45,12 @@ function PolarPlot(
     if state.auto_scale_r && !isempty(elements)
         max_r = 0.0f0
         for element in elements
-            if isa(element, PolarLineElement)
-                max_r = max(max_r, maximum(element.r_data))
-            elseif isa(element, PolarScatterElement)
-                max_r = max(max_r, maximum(element.r_data))
-            elseif isa(element, PolarStemElement)
-                max_r = max(max_r, maximum(element.r_data))
+            if isa(element, LinePlotElement)
+                max_r = max(max_r, maximum(element.y_data))  # y_data = r
+            elseif isa(element, ScatterPlotElement)
+                max_r = max(max_r, maximum(element.y_data))  # y_data = r
+            elseif isa(element, StemPlotElement)
+                max_r = max(max_r, maximum(element.y_data))  # y_data = r
             end
         end
 
@@ -332,7 +331,7 @@ end
 Draw a polar element by converting polar coordinates to Cartesian screen coordinates.
 """
 function draw_polar_element(
-    element::PolarLineElement,
+    element::LinePlotElement,
     polar_to_screen::Function,
     projection_matrix::Mat4{Float32},
     style::PolarStyle,
@@ -342,8 +341,8 @@ function draw_polar_element(
     x_screen = Float32[]
     y_screen = Float32[]
 
-    for i in 1:length(element.r_data)
-        x, y = polar_to_screen(element.r_data[i], element.theta_data[i])
+    for i in 1:length(element.y_data)  # y_data = r
+        x, y = polar_to_screen(element.y_data[i], element.x_data[i])  # x_data = theta
         push!(x_screen, x)
         push!(y_screen, y)
     end
@@ -367,7 +366,7 @@ function draw_polar_element(
 end
 
 function draw_polar_element(
-    element::PolarScatterElement,
+    element::ScatterPlotElement,
     polar_to_screen::Function,
     projection_matrix::Mat4{Float32},
     style::PolarStyle,
@@ -377,8 +376,8 @@ function draw_polar_element(
     x_screen = Float32[]
     y_screen = Float32[]
 
-    for i in 1:length(element.r_data)
-        x, y = polar_to_screen(element.r_data[i], element.theta_data[i])
+    for i in 1:length(element.y_data)  # y_data = r
+        x, y = polar_to_screen(element.y_data[i], element.x_data[i])  # x_data = theta
         # Skip NaN values (culled or out-of-range points)
         if !isnan(x) && !isnan(y)
             push!(x_screen, x)
@@ -407,7 +406,7 @@ function draw_polar_element(
 end
 
 function draw_polar_element(
-    element::PolarStemElement,
+    element::StemPlotElement,
     polar_to_screen::Function,
     projection_matrix::Mat4{Float32},
     style::PolarStyle,
@@ -418,8 +417,8 @@ function draw_polar_element(
     y_screen = Float32[]
     valid_indices = Int[]
 
-    for i in 1:length(element.r_data)
-        x, y = polar_to_screen(element.r_data[i], element.theta_data[i])
+    for i in 1:length(element.y_data)  # y_data = r
+        x, y = polar_to_screen(element.y_data[i], element.x_data[i])  # x_data = theta
         # Skip NaN values (culled or out-of-range points)
         if !isnan(x) && !isnan(y)
             push!(x_screen, x)
@@ -437,7 +436,7 @@ function draw_polar_element(
 
     for (idx, i) in enumerate(valid_indices)
         # Calculate stem origin for this angle at the clamped origin radius
-        stem_origin_x, stem_origin_y = polar_to_screen(stem_origin_r, element.theta_data[i])
+        stem_origin_x, stem_origin_y = polar_to_screen(stem_origin_r, element.x_data[i])  # x_data = theta
 
         stem_x = Float32[stem_origin_x, x_screen[idx]]
         stem_y = Float32[stem_origin_y, y_screen[idx]]
@@ -446,8 +445,8 @@ function draw_polar_element(
             stem_x,
             stem_y,
             identity_transform,
-            element.stem_color,
-            element.stem_width,
+            element.line_color,
+            element.line_width,
             SOLID,
             projection_matrix;
             anti_aliasing_width=style.anti_aliasing_width
@@ -460,10 +459,10 @@ function draw_polar_element(
             x_screen,
             y_screen,
             identity_transform,
-            element.marker_fill_color,
-            element.marker_border_color,
+            element.fill_color,
+            element.border_color,
             element.marker_size,
-            element.marker_border_width,
+            element.border_width,
             element.marker_type,
             projection_matrix;
             anti_aliasing_width=style.anti_aliasing_width

@@ -28,6 +28,11 @@ include("elements/stem_plot.jl")
 include("elements/heatmap.jl")
 include("elements/colorbar.jl")
 
+# Polar coordinate constructors
+include("elements/line_plot_polar.jl")
+include("elements/scatter_plot_polar.jl")
+include("elements/stem_plot_polar.jl")
+
 include("Legend.jl")
 
 
