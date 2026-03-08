@@ -172,9 +172,12 @@ function render_polar_content(
 
     # Create transform from polar data coordinates to screen coordinates
     function polar_data_to_screen(r::Float32, theta::Float32)::Tuple{Float32,Float32}
+        # Normalize theta to [0, 2π) to handle negative angles seamlessly
+        theta_normalized = mod2pi(theta)
+
         # Check if theta is within visible range
         theta_min, theta_max = state.theta_range
-        if theta < theta_min || theta > theta_max
+        if theta_normalized < theta_min || theta_normalized > theta_max
             return (NaN32, NaN32)  # Outside visible range
         end
 
@@ -190,10 +193,10 @@ function render_polar_content(
         r_normalized = (r_clamped - state.r_min) / (state.r_max - state.r_min)
         screen_radius = r_normalized * max_plot_radius
 
-        # Convert to Cartesian screen coordinates
+        # Convert to Cartesian screen coordinates (use normalized theta)
         return polar_to_cartesian(
             screen_radius,
-            theta,
+            theta_normalized,
             state.theta_start,
             state.theta_direction,
             center_x,
