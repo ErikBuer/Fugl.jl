@@ -53,8 +53,15 @@ function interpret_view(view::FocusView, x::Float32, y::Float32, width::Float32,
     interpret_view(view.child, x, y, width, height, projection_matrix, mouse_x, mouse_y)
 end
 
+function blur(view::FocusView)
+    if view.is_focused
+        view.on_focus_change(false)
+        view.on_blur()  # Call blur callback. Runs no matter what z-height.
+    end
+end
+
 # Focus detection and management
-function detect_click(view::FocusView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
+function detect_click(view::FocusView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     is_mouse_inside = inside_component(view, x, y, width, height, input_state.x, input_state.y)
 
     is_focused = view.is_focused

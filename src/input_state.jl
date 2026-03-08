@@ -90,22 +90,22 @@ mutable struct InputState
     was_clicked::Dict{MouseButton,Bool}          # Tracks if the button was clicked (released)
     mouse_down::Dict{MouseButton,Bool}           # Tracks mouse down events
     mouse_up::Dict{MouseButton,Bool}             # Tracks mouse up events
-    x::Float64                                   # Current mouse X position
-    y::Float64                                   # Current mouse Y position
-    last_click_time::Float64                     # Time of the last click
-    last_click_position::Tuple{Float64,Float64}  # Position of the last click
+    x::Float32                                   # Current mouse X position
+    y::Float32                                   # Current mouse Y position
+    last_click_time::Float64                    # Time of the last click
+    last_click_position::Tuple{Float32,Float32}  # Position of the last click
     key_buffer::Vector{Char}                     # Buffer for character input
     key_events::Vector{KeyEvent}                 # Buffer for key events
     # Mouse drag tracking (per button)
-    drag_start_position::Dict{MouseButton,Union{Tuple{Float64,Float64},Nothing}}  # Where drag started for each button
+    drag_start_position::Dict{MouseButton,Union{Tuple{Float32,Float32},Nothing}}  # Where drag started for each button
     is_dragging::Dict{MouseButton,Bool}          # Whether currently dragging for each button
-    last_drag_position::Dict{MouseButton,Union{Tuple{Float64,Float64},Nothing}}   # Last position during drag for incremental movement
+    last_drag_position::Dict{MouseButton,Union{Tuple{Float32,Float32},Nothing}}   # Last position during drag for incremental movement
     # Double-click tracking
     double_click_threshold::Float64              # Max time between clicks for double-click (seconds)
     was_double_clicked::Dict{MouseButton,Bool}   # Tracks if the button was double-clicked
     # Scroll wheel tracking
-    scroll_x::Float64                            # Horizontal scroll delta
-    scroll_y::Float64                            # Vertical scroll delta
+    scroll_x::Float32                            # Horizontal scroll delta
+    scroll_y::Float32                            # Vertical scroll delta
     # Modifier keys tracking
     modifier_keys::ModifierKeys                  # Current modifier keys state
 end
@@ -116,10 +116,10 @@ function InputState()
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),
+        0.0f0,
+        0.0f0,
         0.0,
-        0.0,
-        0.0,
-        (0.0, 0.0),
+        (0.0f0, 0.0f0),
         Char[],     # Initialize an empty key buffer
         KeyEvent[], # Initialize empty key events buffer
         Dict(LeftButton => nothing, RightButton => nothing, MiddleButton => nothing),    # No drag start positions initially
@@ -127,8 +127,8 @@ function InputState()
         Dict(LeftButton => nothing, RightButton => nothing, MiddleButton => nothing),    # No last drag positions initially
         0.5,        # 500ms double-click threshold
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # No double-clicks initially
-        0.0,        # No horizontal scroll initially
-        0.0,        # No vertical scroll initially
+        0.0f0,        # No horizontal scroll initially
+        0.0f0,        # No vertical scroll initially
         ModifierKeys()  # No modifier keys initially
     )
 end
@@ -166,7 +166,7 @@ function mouse_button_callback(gl_window, button, action, mods, mouse_state::Inp
                                         (current_pos[2] - mouse_state.last_click_position[2])^2)
 
         if (time_since_last_click <= mouse_state.double_click_threshold &&
-            distance_from_last_click <= 5.0)  # 5 pixel tolerance
+            distance_from_last_click <= 5.0f0)  # 5 pixel tolerance
             mouse_state.was_double_clicked[mapped_button] = true
         else
             mouse_state.was_clicked[mapped_button] = true
@@ -323,8 +323,8 @@ function collect_state!(mouse_state::InputState)::InputState
     end
 
     # Reset scroll values
-    mouse_state.scroll_x = 0.0
-    mouse_state.scroll_y = 0.0
+    mouse_state.scroll_x = 0.0f0
+    mouse_state.scroll_y = 0.0f0
 
     return locked_state
 end

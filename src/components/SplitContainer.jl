@@ -132,9 +132,9 @@ function detect_click(container::HorizontalSplitContainerView, input_state::Inpu
         return ClickResult(z, () -> update_hover())
     end
 
-    # Handle dragging
-    if is_over_handle && !container.state.is_dragging && input_state.button_state[LeftButton] == IsPressed
-        # Start dragging - simplified condition: just check if mouse is pressed over handle and not already dragging
+    # Handle dragging - only start if mouse button was pressed while over handle (not just held down)
+    if is_over_handle && !container.state.is_dragging && input_state.mouse_down[LeftButton]
+        # Start dragging - use mouse_down to ensure press happened over handle
         new_state = SplitContainerState(
             split_position=container.state.split_position,
             is_dragging=true,
@@ -238,9 +238,9 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
         return ClickResult(z, () -> update_hover())
     end
 
-    # Handle dragging
-    if is_over_handle && !container.state.is_dragging && input_state.button_state[LeftButton] == IsPressed
-        # Start dragging - simplified condition: just check if mouse is pressed over handle and not already dragging
+    # Handle dragging - only start if mouse button was pressed while over handle (not just held down)
+    if is_over_handle && !container.state.is_dragging && input_state.mouse_down[LeftButton]
+        # Start dragging - use mouse_down to ensure press happened over handle
         new_state = SplitContainerState(
             split_position=container.state.split_position,
             is_dragging=true,

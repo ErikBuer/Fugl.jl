@@ -153,7 +153,8 @@ function detect_click(view::ModalView, input_state::InputState, x::Float32, y::F
 
     child_action = detect_click(view.child, input_state, modal_x, modal_y, modal_width, modal_height, z)
     if !isnothing(child_action) || !isnothing(modal_action)
-        unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
+        #unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
+        blur(view.background)
 
         if !isnothing(child_action)
             return child_action
@@ -170,7 +171,8 @@ function detect_click(view::ModalView, input_state::InputState, x::Float32, y::F
         end
 
         if view.capture_clicks_outside
-            unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
+            #unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
+            blur(view.background)
             return nothing
         end
 

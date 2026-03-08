@@ -1,13 +1,13 @@
 struct DropdownStyle
     text_style::TextStyle
-    background_color::Vec4{<:AbstractFloat}
-    background_color_hover::Vec4{<:AbstractFloat}
-    background_color_open::Vec4{<:AbstractFloat}
-    border_color::Vec4{<:AbstractFloat}
+    background_color::Vec4{<:Float32}
+    background_color_hover::Vec4{<:Float32}
+    background_color_open::Vec4{<:Float32}
+    border_color::Vec4{<:Float32}
     border_width::Float32
     corner_radius::Float32
     padding::Float32
-    arrow_color::Vec4{<:AbstractFloat}
+    arrow_color::Vec4{<:Float32}
     item_height_px::Float32
     max_visible_items::Int
 end

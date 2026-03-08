@@ -65,7 +65,7 @@ function interpret_view(view::KeyListenerView, x::Float32, y::Float32, width::Fl
 end
 
 # Key detection - processes keys only when focused
-function detect_click(view::KeyListenerView, input_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32; is_focused::Bool=true)::Union{ClickResult,Nothing}
+function detect_click(view::KeyListenerView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32; is_focused::Bool=true)::Union{ClickResult,Nothing}
     # Process keyboard events only when focused
     if !is_focused
         return detect_click(view.child, input_state, x, y, width, height, Int32(parent_z + 1))

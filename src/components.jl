@@ -128,10 +128,16 @@ export Plot, PlotView, PlotStyle
 export PlotState, reset_plot_view_bounds, calculate_bounds_from_elements
 export LinePlotElement, ScatterPlotElement, StemPlotElement, HeatmapElement
 export AbstractPlotElement
+export toggle_mute
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE
 export SimpleLine, draw_line, draw_lines, draw_simple_line
 export VerticalColorbar, HorizontalColorbar
 export Legend
+
+include("composite_components/polar_plot/PolarPlot.jl")
+export PolarPlot, PolarPlotView, PolarStyle, PolarState
+export PolarLine, PolarScatter, PolarStem
+export AbstractPolarElement
 
 include("composite_components/tree/Tree.jl")
 export Tree, TreeNode, TreeStyle, TreeState

@@ -195,6 +195,14 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
     end
 end
 
+function blur(view::CodeEditorView)
+    if view.state.is_focused
+        new_state = EditorState(view.state; is_focused=false)
+        view.on_state_change(new_state)
+        view.on_blur()  # Call blur callback. Runs no matter what z-height.
+    end
+end
+
 """
 Detect click events and handle focus, cursor positioning, drag selection, and double-clicks.
 """
@@ -239,10 +247,7 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
     if !mouse_inside
         # Mouse clicked outside component
         if view.state.is_focused && (mouse_state.mouse_down[LeftButton])
-            # Focus change - create new state with focus=false
-            new_state = EditorState(view.state; is_focused=false)
-            view.on_state_change(new_state)
-            view.on_blur()  # Call blur callback
+            blur(view)
         end
         return nothing # Independent of click capturing
     end
@@ -309,14 +314,14 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
         # No state change needed - selection and cursor position are already correct from the drag operation
         return nothing
 
-    elseif mouse_state.was_clicked[LeftButton]
+    elseif mouse_state.mouse_down[LeftButton]
         # Simple click: move cursor and clear selection
         if !view.state.is_focused
             # Focus change and cursor positioning
             new_state = EditorState(
                 view.state.text,
                 new_cursor_pos,
-                true,
+                true,     # Focus the component on click
                 nothing,  # Clear selection on click
                 nothing,
                 view.state.cached_lines,

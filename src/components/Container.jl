@@ -1,6 +1,6 @@
 struct ContainerStyle
-    background_color::Vec4{<:AbstractFloat} #RGBA color
-    border_color::Vec4{<:AbstractFloat} #RGBA color
+    background_color::Vec4{<:Float32} #RGBA color
+    border_color::Vec4{<:Float32} #RGBA color
     border_width::Float32
     padding::Float32
     corner_radius::Float32
@@ -137,10 +137,17 @@ function interpret_view(container::ContainerView, x::Float32, y::Float32, width:
     interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
 end
 
+function blur(view::ContainerView)
+    if view.interaction_state !== nothing && view.interaction_state.is_focused
+        new_interaction_state = blur(view.interaction_state)
+        view.on_interaction_state_change(new_interaction_state)
+    end
+end
+
 """
 Detect clicks on the container and its child.
 """
-function detect_click(view::ContainerView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
+function detect_click(view::ContainerView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     (child_x, child_y, child_width, child_height) = apply_layout(view, x, y, width, height)
 
     z::Int32 = parent_z + 1

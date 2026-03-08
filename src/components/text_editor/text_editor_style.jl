@@ -5,14 +5,14 @@ This replaces the separate CodeEditorStyle and TextBoxStyle structures.
 
 struct TextEditorStyle
     text_style::TextStyle
-    background_color_focused::Vec4{<:AbstractFloat}
-    background_color_unfocused::Vec4{<:AbstractFloat}
-    border_color::Vec4{<:AbstractFloat}
+    background_color_focused::Vec4{<:Float32}
+    background_color_unfocused::Vec4{<:Float32}
+    border_color::Vec4{<:Float32}
     border_width::Float32
     corner_radius::Float32
     padding::Float32
-    cursor_color::Vec4{<:AbstractFloat}
-    selection_color::Vec4{<:AbstractFloat}
+    cursor_color::Vec4{<:Float32}
+    selection_color::Vec4{<:Float32}
 end
 
 """

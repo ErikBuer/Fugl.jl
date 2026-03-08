@@ -28,6 +28,11 @@ include("elements/stem_plot.jl")
 include("elements/heatmap.jl")
 include("elements/colorbar.jl")
 
+# Polar coordinate constructors
+include("elements/line_plot_polar.jl")
+include("elements/scatter_plot_polar.jl")
+include("elements/stem_plot_polar.jl")
+
 include("Legend.jl")
 
 
@@ -37,8 +42,6 @@ struct PlotView <: AbstractView
     style::PlotStyle
     on_state_change::Function
 end
-
-include("plot_cache.jl")
 
 """
 Plot component.
@@ -79,8 +82,8 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     # Get plot render cache using state's cache ID
     cache = get_render_cache(view.state.cache_id)
 
-    # Generate content hash for this plot
-    content_hash = hash_plot_content(view.elements, view.state, view.style)
+    # Generate content hash for this plot (same approach as PolarPlot)
+    content_hash = hash((view.elements, view.state, view.style))
 
     # Check if we need to invalidate cache
     needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
@@ -220,7 +223,10 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
     effective_bounds = get_effective_bounds(state, elements)
 
     for element in elements
-        draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
+        # Skip muted elements
+        if !element.muted
+            draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
+        end
     end
 end
 

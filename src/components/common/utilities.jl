@@ -5,7 +5,7 @@ Function to generate a rectangle with specified position and size in pixel coord
 
 This function creates a rectangle defined by its top-left corner (x, y), width, and height.
 """
-function generate_rectangle_vertices(x, y, width, height)::Vector{Point{2,Float32}}
+function generate_rectangle_vertices(x::Float32, y::Float32, width::Float32, height::Float32)::Vector{Point{2,Float32}}
     vertices = Point{2,Float32}[
         Point{2,Float32}(x, y),                    # Top-left
         Point{2,Float32}(x, y + height),           # Bottom-left
@@ -15,6 +15,6 @@ function generate_rectangle_vertices(x, y, width, height)::Vector{Point{2,Float3
     return vertices
 end
 
-function inside_component(view::AbstractView, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, mouse_x::AbstractFloat, mouse_y::AbstractFloat)::Bool
+function inside_component(view::AbstractView, x::Float32, y::Float32, width::Float32, height::Float32, mouse_x::Float32, mouse_y::Float32)::Bool
     return mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height
 end

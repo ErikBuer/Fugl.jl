@@ -54,7 +54,7 @@ end
 Detect clicks on the Column and its children.
 The method returns the click result with the highest z-height.
 """
-function detect_click(view::ColumnView, mouse_state::InputState, x::AbstractFloat, y::AbstractFloat, width::AbstractFloat, height::AbstractFloat, parent_z::Int32)::Union{ClickResult,Nothing}
+function detect_click(view::ColumnView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     # Get the layout for the immediate children
     child_layouts = apply_layout(view, x, y, width, height)
 
@@ -83,11 +83,11 @@ function detect_click(view::ColumnView, mouse_state::InputState, x::AbstractFloa
         return click_result
     end
 
-    if !inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+    if !inside_component(view, x, y, width, height, Float32(mouse_state.x), Float32(mouse_state.y))
         return nothing
     end
 
-    if mouse_state.was_clicked[LeftButton]
+    if mouse_state.mouse_down[LeftButton]
         return ClickResult(Int32(parent_z + 1), () -> view.on_click())  # Call the on_click function of the column
     end
 

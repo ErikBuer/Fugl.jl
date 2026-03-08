@@ -1,9 +1,9 @@
 """
-    draw_closed_lines(vertices::Vector{Point2f}, color_rgba::Vec4{<:AbstractFloat})
+    draw_closed_lines(vertices::Vector{Point2f}, color_rgba::Vec4{<:Float32})
 
 Draw closed lines using the provided vertices and color.
 """
-function draw_closed_lines(vertices::Vector{Point2f}, color_rgba::Vec4{<:AbstractFloat})
+function draw_closed_lines(vertices::Vector{Point2f}, color_rgba::Vec4{<:Float32})
     # Generate a uniform color array for all vertices
     colors = Vec{4,Float32}[color_rgba for _ in 1:length(vertices)]
 
@@ -26,11 +26,11 @@ function draw_closed_lines(vertices::Vector{Point2f}, color_rgba::Vec4{<:Abstrac
 end
 
 """
-    draw_rectangle(vertices::Vector{Point2f}, color_rgba::Vec4{<:AbstractFloat}, projection_matrix::Mat4{Float32})
+    draw_rectangle(vertices::Vector{Point2f}, color_rgba::Vec4{<:Float32}, projection_matrix::Mat4{Float32})
 
 Draw a rectangle using the provided vertices and color.
 """
-function draw_rectangle(vertices::Vector{Point2f}, color_rgba::Vec4{<:AbstractFloat}, projection_matrix::Mat4{Float32})
+function draw_rectangle(vertices::Vector{Point2f}, color_rgba::Vec4{<:Float32}, projection_matrix::Mat4{Float32})
     # Generate a uniform color array for all vertices
     colors = Vec{4,Float32}[color_rgba for _ in 1:4]
 
@@ -66,7 +66,7 @@ end
     draw_rounded_rectangle(
         vertices::Vector{Point2f},
         width::Float32, height::Float32,
-        fill_color_rgba::Vec4{<:AbstractFloat}, border_color_rgba::Vec4{<:AbstractFloat},
+        fill_color_rgba::Vec4{<:Float32}, border_color_rgba::Vec4{<:Float32},
         border_width::Float32, radius::Float32,
         projection_matrix::Mat4{Float32},
         anti_aliasing_width::Float32
@@ -78,8 +78,8 @@ function draw_rounded_rectangle(
     vertices::Vector{Point2f},
     width::Float32,
     height::Float32,
-    fill_color_rgba::Vec4{<:AbstractFloat},
-    border_color_rgba::Vec4{<:AbstractFloat},
+    fill_color_rgba::Vec4{<:Float32},
+    border_color_rgba::Vec4{<:Float32},
     border_width::Float32,
     radius::Float32,
     projection_matrix::Mat4{Float32},
