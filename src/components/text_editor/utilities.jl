@@ -166,12 +166,19 @@ function render_line_from_cache(
     x::Float32,
     y::Float32,
     size_px::Int,
-    projection_matrix
+    projection_matrix;
+    visible_width::Union{Float32,Nothing}=nothing,
+    start_x::Union{Float32,Nothing}=nothing
 )
     current_x = x
     current_pos = 1
     line = line_data.line_text
     default_color = Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)
+
+    # Calculate culling boundaries if provided
+    cull_enabled = visible_width !== nothing && start_x !== nothing
+    min_x = cull_enabled ? start_x : -Inf32
+    max_x = cull_enabled ? start_x + visible_width : Inf32
 
     # Sort token data by position
     sorted_tokens = sort(line_data.token_data, by=x -> x[1])
@@ -181,15 +188,23 @@ function render_line_from_cache(
         if pos > current_pos
             gap = line[current_pos:pos-1]
             if !isempty(gap)
-                draw_text(font, gap, current_x, y, size_px, projection_matrix, default_color)
-                current_x += measure_word_width(font, gap, size_px)
+                gap_width = measure_word_width(font, gap, size_px)
+                # Only draw if within visible bounds
+                if !cull_enabled || (current_x < max_x && current_x + gap_width > min_x)
+                    draw_text(font, gap, current_x, y, size_px, projection_matrix, default_color)
+                end
+                current_x += gap_width
             end
         end
 
         # Draw the token
         if !isempty(text)
-            draw_text(font, text, current_x, y, size_px, projection_matrix, color)
-            current_x += measure_word_width(font, text, size_px)
+            text_width = measure_word_width(font, text, size_px)
+            # Only draw if within visible bounds
+            if !cull_enabled || (current_x < max_x && current_x + text_width > min_x)
+                draw_text(font, text, current_x, y, size_px, projection_matrix, color)
+            end
+            current_x += text_width
         end
 
         current_pos = pos + length(text)
@@ -199,7 +214,11 @@ function render_line_from_cache(
     if current_pos <= length(line)
         remaining = line[current_pos:end]
         if !isempty(remaining)
-            draw_text(font, remaining, current_x, y, size_px, projection_matrix, default_color)
+            remaining_width = measure_word_width(font, remaining, size_px)
+            # Only draw if within visible bounds
+            if !cull_enabled || (current_x < max_x && current_x + remaining_width > min_x)
+                draw_text(font, remaining, current_x, y, size_px, projection_matrix, default_color)
+            end
         end
     end
 end
@@ -638,11 +657,15 @@ function mouse_to_cursor_position(
 
     lines = get_lines(editor_state)
 
-    # Calculate line number (1-based)
+    # Calculate line number (1-based), accounting for vertical scroll
     # We need to account for the fact that text is rendered at the baseline
     # The first line starts at text_start_y, so we adjust accordingly
     relative_y = Float32(mouse_y) - (text_start_y - size_px / 2)  # Adjust to center of first line
-    line_number = max(1, min(length(lines), Int(round(relative_y / line_height)) + 1))
+    visible_line_index = max(1, Int(round(relative_y / line_height)) + 1)
+
+    # Account for vertical scroll offset
+    line_number = visible_line_index + editor_state.scroll_offset_y
+    line_number = max(1, min(length(lines), line_number))
 
     # If we have no lines, return cursor at (1,1)
     if isempty(lines)
@@ -660,9 +683,10 @@ function mouse_to_cursor_position(
 
     # Calculate which character position the mouse is on
     text_start_x = x + padding
-    relative_x = Float32(mouse_x) - text_start_x
+    # Account for horizontal scroll offset - when scrolled right, we need to add the offset
+    relative_x = Float32(mouse_x) - text_start_x + editor_state.scroll_offset_x
 
-    # If mouse is before the text starts, put cursor at beginning of line
+    # If mouse is before the text starts (accounting for scroll), put cursor at beginning of line
     if relative_x <= 0
         return CursorPosition(line_number, 1)
     end
@@ -754,7 +778,9 @@ function clear_selection(state::EditorState)::EditorState
         nothing,  # Clear selection
         state.cached_lines,
         state.text_hash,
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -770,7 +796,9 @@ function set_selection(state::EditorState, start_pos::CursorPosition, end_pos::C
         end_pos,
         state.cached_lines,
         state.text_hash,
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -897,6 +925,94 @@ function delete_selected_text(state::EditorState)::EditorState
         nothing,  # Clear selection
         Dict{Int,LineTokenData}(),  # Clear cache since text changed
         hash(new_text),
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
+end
+
+"""
+Ensure the cursor is visible by adjusting scroll offsets if needed.
+
+Arguments:
+- `state`: Current editor state
+- `font`: Font used for rendering text
+- `size_px`: Font size in pixels
+- `visible_width`: Width of the visible area in pixels (excluding padding)
+- `visible_height`: Height of the visible area in pixels (excluding padding)
+- `padding`: Padding around the text
+
+Returns a new EditorState with adjusted scroll offsets if the cursor was out of view.
+"""
+function ensure_cursor_visible(
+    state::EditorState,
+    font,
+    size_px::Int,
+    visible_width::Float32,
+    visible_height::Float32,
+    padding::Float32
+)::EditorState
+    lines = get_lines(state)
+    cursor = state.cursor
+
+    # Calculate line height
+    line_height = Float32(size_px * 1.2)
+
+    # Calculate visible lines
+    visible_lines = max(1, Int(floor(visible_height / line_height)))
+
+    # Vertical scrolling - ensure cursor line is visible
+    new_scroll_y = state.scroll_offset_y
+
+    # If cursor is above visible area, scroll up
+    if cursor.line - 1 < new_scroll_y
+        new_scroll_y = cursor.line - 1
+    end
+
+    # If cursor is below visible area, scroll down
+    if cursor.line - 1 >= new_scroll_y + visible_lines
+        new_scroll_y = cursor.line - visible_lines
+    end
+
+    # Ensure scroll_y doesn't go negative
+    new_scroll_y = max(0, new_scroll_y)
+
+    # Horizontal scrolling - ensure cursor column is visible
+    new_scroll_x = state.scroll_offset_x
+
+    if cursor.line <= length(lines)
+        line = lines[cursor.line]
+        chars = collect(line)
+
+        # Calculate cursor x position (distance from start of line)
+        cursor_x = 0.0f0
+        if cursor.column > 1
+            text_before_cursor = join(chars[1:min(cursor.column - 1, length(chars))])
+            cursor_x = measure_word_width(font, text_before_cursor, size_px)
+        end
+
+        # Add some margin (e.g., half a character width) for better UX
+        char_width = measure_word_width(font, "W", size_px)  # Use 'W' as average char width
+        margin = char_width * 0.5f0
+
+        # If cursor is to the left of visible area, scroll left
+        if cursor_x < new_scroll_x + margin
+            new_scroll_x = max(0.0f0, cursor_x - margin)
+        end
+
+        # If cursor is to the right of visible area, scroll right
+        if cursor_x > new_scroll_x + visible_width - margin
+            new_scroll_x = cursor_x - visible_width + margin
+        end
+
+        # Ensure scroll_x doesn't go negative
+        new_scroll_x = max(0.0f0, new_scroll_x)
+    end
+
+    # Only create new state if scroll offsets changed
+    if new_scroll_y != state.scroll_offset_y || new_scroll_x != state.scroll_offset_x
+        return EditorState(state; scroll_offset_y=new_scroll_y, scroll_offset_x=new_scroll_x)
+    end
+
+    return state
 end

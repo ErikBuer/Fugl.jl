@@ -100,7 +100,9 @@ function apply_insert_text(state::EditorState, action::InsertText)
             nothing,
             Dict{Int,LineTokenData}(),  # Clear cache
             hash(new_text),
-            state.cache_id
+            state.cache_id,
+            state.scroll_offset_y,
+            state.scroll_offset_x
         )
     end
 
@@ -114,7 +116,9 @@ function apply_insert_text(state::EditorState, action::InsertText)
         nothing,
         Dict{Int,LineTokenData}(),  # Clear cache
         hash(new_text),
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -214,7 +218,9 @@ function apply_move_cursor(state::EditorState, action::MoveCursor)
         new_selection_end,
         state.cached_lines,  # Keep cache since text didn't change
         state.text_hash,
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -354,7 +360,9 @@ function apply_delete_text(state::EditorState, action::DeleteText)
         nothing,
         Dict{Int,LineTokenData}(),  # Clear cache since text changed
         hash(new_text),
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -393,7 +401,9 @@ function apply_clipboard_action(state::EditorState, action::ClipboardAction)
                     nothing,
                     Dict{Int,LineTokenData}(),  # Clear cache since text changed
                     hash(new_text),
-                    state.cache_id
+                    state.cache_id,
+                    state.scroll_offset_y,
+                    state.scroll_offset_x
                 )
             elseif length(lines) == 1
                 # Only one line - clear it
@@ -405,7 +415,9 @@ function apply_clipboard_action(state::EditorState, action::ClipboardAction)
                     nothing,
                     Dict{Int,LineTokenData}(),
                     hash(""),
-                    state.cache_id
+                    state.cache_id,
+                    0,
+                    0.0f0
                 )
             end
         end
@@ -457,7 +469,9 @@ function apply_select_all(state::EditorState, action::SelectAll)
         selection_end,
         state.cached_lines,
         state.text_hash,
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -518,7 +532,9 @@ function apply_select_word(state::EditorState, action::SelectWord)
         selection_end,
         state.cached_lines,
         state.text_hash,
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -542,7 +558,9 @@ function apply_start_mouse_selection(state::EditorState, action::StartMouseSelec
         action.start_position,  # End selection (initially same as start)
         state.cached_lines,
         state.text_hash,
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
 
@@ -566,6 +584,8 @@ function apply_extend_mouse_selection(state::EditorState, action::ExtendMouseSel
         action.end_position,
         state.cached_lines,
         state.text_hash,
-        state.cache_id
+        state.cache_id,
+        state.scroll_offset_y,
+        state.scroll_offset_x
     )
 end
