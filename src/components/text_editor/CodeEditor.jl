@@ -282,15 +282,18 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
         end
         return ClickResult(z, () -> handle_double_click())
 
-    elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.is_dragging[LeftButton]
-        # Mouse drag: extend selection
+    elseif mouse_state.button_state[LeftButton] == IsPressed &&
+           mouse_state.is_dragging[LeftButton] &&
+           mouse_state.drag_start_position[LeftButton] !== nothing &&
+           inside_component(view, x, y, width, height, mouse_state.drag_start_position[LeftButton]...)
+        # Mouse drag: extend selection (only if drag started inside)
         action = ExtendMouseSelection(new_cursor_pos)
         new_state = apply_editor_action(view.state, action)
 
         handle_drag_inside() = view.on_state_change(new_state)
         return ClickResult(z, () -> handle_drag_inside())
 
-    elseif mouse_state.button_state[LeftButton] == IsPressed && mouse_state.drag_start_position[LeftButton] !== nothing && !mouse_state.is_dragging[LeftButton]
+    elseif mouse_state.mouse_down[LeftButton] && mouse_state.drag_start_position[LeftButton] !== nothing && !mouse_state.is_dragging[LeftButton]
         # Mouse press (start of potential drag): start selection
         action = StartMouseSelection(new_cursor_pos)
         new_state = apply_editor_action(view.state, action)
