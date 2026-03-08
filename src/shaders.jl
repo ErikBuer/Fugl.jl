@@ -94,6 +94,75 @@ void main() {
 }
 """
 
+const configurable_rect_vertex_shader = GLA.vert"""
+#version 330 core
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 uv; // [0,1] box coordinates
+
+out vec2 v_uv;
+
+uniform mat4 projection;
+
+void main() {
+    gl_Position = projection * vec4(position, 0.0, 1.0);
+    v_uv = uv;
+}
+"""
+
+const configurable_rect_fragment_shader = GLA.frag"""
+#version 330 core
+in vec2 v_uv;
+out vec4 FragColor;
+
+// Uniforms for rectangle appearance
+uniform vec4 fill_color;      // Fill color inside the rectangle
+uniform vec4 border_color;    // Border color
+uniform float border_width;   // Border thickness in pixels
+uniform vec4 corner_radii;    // Corner radii in pixels (top-left, top-right, bottom-right, bottom-left)
+uniform float aa;             // Anti-aliasing width in pixels
+uniform vec2 rect_size;       // Size of the rectangle in pixels
+
+// Signed distance function for a rounded rectangle with per-corner radii
+float sdRoundBox(vec2 p, vec2 size, vec4 radii, vec2 rect_size) {
+    // radii = vec4(top-left, top-right, bottom-right, bottom-left)
+    vec2 centered = (p - 0.5) * rect_size;
+    vec2 half_size = size * 0.5 * rect_size;
+    
+    // Select the appropriate radius based on which quadrant we're in
+    float r = radii.x; // default to top-left
+    if (centered.x > 0.0 && centered.y > 0.0) {
+        r = radii.y; // top-right
+    } else if (centered.x > 0.0 && centered.y < 0.0) {
+        r = radii.z; // bottom-right
+    } else if (centered.x < 0.0 && centered.y < 0.0) {
+        r = radii.w; // bottom-left
+    }
+    // else centered.x < 0.0 && centered.y > 0.0, which is top-left (radii.x)
+    
+    vec2 q = abs(centered) - half_size + r;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+}
+
+void main() {
+    vec4 cr = corner_radii;   // Corner radii
+    float bw = border_width;  // Border thickness
+    float antialias = aa;     // Anti-aliasing width
+
+    // SDF for the original rectangle, but increase radii by border width
+    float dist = sdRoundBox(v_uv, vec2(1.0, 1.0), cr + bw, rect_size);
+
+    // Border: band between dist = 0 (outer edge) and dist = -bw (inner edge)
+    float border_alpha =  smoothstep(-antialias, antialias, dist + bw) - smoothstep(-antialias, antialias, dist);
+
+    // Fill: everything inside the border
+    float fill_alpha = 1.0 - smoothstep(-antialias, antialias, dist + bw);
+
+    vec4 border = border_color * border_alpha;
+    vec4 fill = fill_color * fill_alpha;
+
+    FragColor = border + fill;
+}
+"""
 
 const glyph_vertex_shader = GLA.vert"""
 #version 330 core
@@ -260,6 +329,7 @@ void main() {
 const prog = Ref{GLA.Program}()
 const glyph_prog = Ref{GLA.Program}()
 const rounded_rect_prog = Ref{GLA.Program}()
+const configurable_rect_prog = Ref{GLA.Program}()
 const line_prog = Ref{GLA.Program}()
 
 # External shader registration system
@@ -297,6 +367,7 @@ function initialize_shaders()
     prog[] = GLA.Program(vertex_shader, fragment_shader)
     glyph_prog[] = GLA.Program(glyph_vertex_shader, glyph_fragment_shader)
     rounded_rect_prog[] = GLA.Program(rounded_rect_vertex_shader, rounded_rect_fragment_shader)
+    configurable_rect_prog[] = GLA.Program(configurable_rect_vertex_shader, configurable_rect_fragment_shader)
     line_prog[] = GLA.Program(line_vertex_shader, line_fragment_shader)
 
     # Initialize external shaders
