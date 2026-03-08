@@ -19,17 +19,17 @@ polar_style = PolarStyle(
 )
 
 # Configure state
-polar_state = PolarState(
+polar_state = Ref(PolarState(
     theta_start=0.0f0,
     theta_direction=:counterclockwise,
     num_angular_lines=12,
     angular_label_format=:degrees
-)
+))
 
 function MyApp()
     Column(
         Card(
-            "Polar Stem Plot Demo",
+            "Polar Stem Plot Demo (Ctrl+Scroll: r_max, Shift+Scroll: r_min, Mid-Drag: Pan)",
             PolarPlot(
                 [PolarStem(
                     Float32.(r),
@@ -42,7 +42,8 @@ function MyApp()
                     marker_border_width=1.5f0
                 )],
                 polar_style,
-                polar_state
+                polar_state[],
+                (new_state) -> polar_state[] = new_state
             ),
             style=ContainerStyle(
                 background_color=Vec4f(0.15, 0.15, 0.18, 1.0),  # Dark card background

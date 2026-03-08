@@ -39,7 +39,7 @@ polar_state = Ref(PolarState(
 function MyApp()
     Column(
         Card(
-            "Polar Plot - Multiple Elements (Ctrl+Scroll to Zoom)",
+            "Polar Plot - Multiple Elements (Ctrl+Scroll: r_max, Shift+Scroll: r_min, Mid-Drag: Pan)",
             PolarPlot(
                 [
                     PolarLine(

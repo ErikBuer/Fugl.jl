@@ -32,7 +32,7 @@ polar_state = Ref(PolarState(
 function MyApp()
     Column(
         Card(
-            "Stem Plot with Negative Values (Ctrl+Scroll to Zoom)",
+            "Stem Plot with Negative Values (Ctrl+Scroll: r_max, Shift+Scroll: r_min, Mid-Drag: Pan)",
             PolarPlot(
                 [
                     PolarStem(

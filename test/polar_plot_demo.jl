@@ -30,7 +30,7 @@ polar_state = Ref(PolarState(
 function MyApp()
     Column(
         Card(
-            "Polar Plot - Rose Curve:",
+            "Polar Plot - Rose Curve (Ctrl+Scroll: r_max, Shift+Scroll: r_min, Mid-Drag: Pan):",
             PolarPlot(
                 [PolarLine(
                     Float32.(r),

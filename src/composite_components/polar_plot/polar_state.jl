@@ -20,6 +20,10 @@ struct PolarState
     # Angular label format
     angular_label_format::Symbol            # :degrees or :radians
 
+    # Pan/drag state
+    is_dragging::Bool                       # Whether a drag operation is in progress
+    drag_start_radius::Union{Float32,Nothing}  # Radius at drag start position
+
     # Cache ID for render caching
     cache_id::UInt64
 end
@@ -37,6 +41,8 @@ function PolarState(;
     num_radial_circles::Int=5,
     num_angular_lines::Int=12,                         # Every 30 degrees
     angular_label_format::Symbol=:degrees,
+    is_dragging::Bool=false,
+    drag_start_radius::Union{Float32,Nothing}=nothing,
     cache_id::UInt64=rand(UInt64)
 )::PolarState
     return PolarState(
@@ -49,6 +55,8 @@ function PolarState(;
         num_radial_circles,
         num_angular_lines,
         angular_label_format,
+        is_dragging,
+        drag_start_radius,
         cache_id
     )
 end
@@ -66,6 +74,8 @@ function PolarState(base::PolarState;
     num_radial_circles=base.num_radial_circles,
     num_angular_lines=base.num_angular_lines,
     angular_label_format=base.angular_label_format,
+    is_dragging=base.is_dragging,
+    drag_start_radius=base.drag_start_radius,
     cache_id=base.cache_id
 )::PolarState
     return PolarState(
@@ -78,6 +88,8 @@ function PolarState(base::PolarState;
         num_radial_circles,
         num_angular_lines,
         angular_label_format,
+        is_dragging,
+        drag_start_radius,
         cache_id
     )
 end
