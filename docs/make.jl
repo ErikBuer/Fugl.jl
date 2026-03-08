@@ -31,6 +31,7 @@ makedocs(
             "Components/container.md",
             "Components/card.md",
             "Components/modal.md",
+            "Components/tabs.md",
             "Components/row_col.md",
             "Components/split_container.md",
             "Components/align.md",

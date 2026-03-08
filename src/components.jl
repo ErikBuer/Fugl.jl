@@ -80,6 +80,9 @@ export CodeEditor, CodeEditorStyle
 # Export the unified style structure
 export TextEditorStyle
 
+include("components/Tabs.jl")
+export Tabs, TabsView, TabsStyle
+
 include("components/image/Image.jl")
 export Image
 export clear_texture_cache!
