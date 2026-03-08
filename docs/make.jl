@@ -66,6 +66,7 @@ makedocs(
                     "Components/plot/polar/polar_plot.md",
                     "Components/plot/polar/polar_scatter.md",
                     "Components/plot/polar/polar_stem.md",
+                    "Components/plot/polar/polar_legend.md",
                 ],
             ],
             "Components/table.md",
