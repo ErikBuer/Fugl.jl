@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Polar Scatter Plot · Fugl.jl</title><meta name="title" content="Polar Scatter Plot · Fugl.jl"/><meta property="og:title" content="Polar Scatter Plot · Fugl.jl"/><meta property="twitter:title" content="Polar Scatter Plot · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../../assets/documenter.js"></script><script src="../../../../search_index.js"></script><script src="../../../../siteinfo.js"></script><script src="../../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../../">Fugl.jl</a></li><li><a class="tocitem" href="../../../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../../../container/">Container</a></li><li><a class="tocitem" href="../../../card/">Card</a></li><li><a class="tocitem" href="../../../modal/">Modal</a></li><li><a class="tocitem" href="../../../tabs/">Tabs</a></li><li><a class="tocitem" href="../../../row_col/">Row/Column</a></li><li><a class="tocitem" href="../../../align/">Align</a></li><li><a class="tocitem" href="../../../padding/">Padding</a></li><li><a class="tocitem" href="../../../sizing/">Sizing</a></li><li><a class="tocitem" href="../../../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../../../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../../../Rotate/">Rotate</a></li><li><a class="tocitem" href="../../../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../../../text/">Text</a></li><li><a class="tocitem" href="../../../text_box/">TextBox</a></li><li><a class="tocitem" href="../../../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../../../text_field/">TextField</a></li><li><a class="tocitem" href="../../../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../../../number_field/">NumberField</a></li><li><a class="tocitem" href="../../../text_button/">TextButton</a></li><li><a class="tocitem" href="../../../icon_button/">IconButton</a></li><li><a class="tocitem" href="../../../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../../../checkbox/">CheckBox</a></li><li><a class="tocitem" href="../../../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../../../keylistener/">KeyListener</a></li><li><a class="tocitem" href="../../../focus/">Focus</a></li><li><a class="tocitem" href="../../../image/">Image</a></li><li><a class="tocitem" href="../../../table/">Table</a></li><li><a class="tocitem" href="../../../tree/">Tree</a></li><li><input class="collapse-toggle" id="menuitem-3-29" type="checkbox" checked/><label class="tocitem" for="menuitem-3-29"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-3-29-1" type="checkbox"/><label class="tocitem" for="menuitem-3-29-1"><span class="docs-label">Cartesian</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../cartesian/line_plot/">Line Plot</a></li><li><a class="tocitem" href="../../cartesian/stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../../cartesian/scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../../cartesian/heatmap/">Heatmap</a></li><li><a class="tocitem" href="../../cartesian/colorbar/">Colorbar</a></li><li><a class="tocitem" href="../../cartesian/plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../../cartesian/plot_state/">PlotState</a></li><li><a class="tocitem" href="../../cartesian/legend/">Legend</a></li><li><a class="tocitem" href="../../cartesian/legend_interactive/">Interactive Legend</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-29-2" type="checkbox" checked/><label class="tocitem" for="menuitem-3-29-2"><span class="docs-label">Polar</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../polar_plot/">Polar Plot</a></li><li class="is-active"><a class="tocitem" href>Polar Scatter Plot</a><ul class="internal"><li><a class="tocitem" href="#Multiple-Scatter-Series-Example"><span>Multiple Scatter Series Example</span></a></li><li><a class="tocitem" href="#Combined-Line-and-Scatter-Example"><span>Combined Line and Scatter Example</span></a></li></ul></li><li><a class="tocitem" href="../polar_stem/">Polar Stem Plot</a></li><li><a class="tocitem" href="../polar_legend/">Polar Plot Legend</a></li><li><a class="tocitem" href="../polar_legend_interactive/">Interactive Polar Legend</a></li></ul></li></ul></li></ul></li><li><a class="tocitem" href="../../../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li><a class="is-disabled">Plot</a></li><li><a class="is-disabled">Polar</a></li><li class="is-active"><a href>Polar Scatter Plot</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Polar Scatter Plot</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/plot/polar/polar_scatter.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Polar-Scatter-Plot"><a class="docs-heading-anchor" href="#Polar-Scatter-Plot">Polar Scatter Plot</a><a id="Polar-Scatter-Plot-1"></a><a class="docs-heading-anchor-permalink" href="#Polar-Scatter-Plot" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+# Create scatter points at regular angular intervals
+theta = range(0, 2π, length=16)
+r = 0.6f0 .+ 0.3f0 .* rand(Float32, 16)
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.18, 1.0),
+    border_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0,
+    anti_aliasing_width=1.0f0
+)
+
+dark_title_style = TextStyle(
+    size_px=18,
+    color=Vec4f(0.9, 0.9, 0.95, 1.0)
+)
+
+# Dark theme polar style
+polar_style = PolarStyle(
+    background_color=Vec4f(0.08, 0.10, 0.14, 1.0),
+    show_radial_grid=true,
+    show_angular_grid=true,
+    radial_grid_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    angular_grid_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    show_outer_circle=true,
+    outer_circle_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+    outer_circle_width=2.0f0,
+    label_color=Vec4f(0.9, 0.9, 0.95, 1.0)
+)
+
+polar_state = PolarState(
+    theta_start=0.0f0,
+    theta_direction=:counterclockwise,
+    num_angular_lines=12,
+    angular_label_format=:degrees
+)
+
+function MyApp()
+    Card(
+        &quot;Polar Scatter Plot&quot;,
+        PolarPlot(
+            [
+                PolarScatter(
+                    Float32.(r),
+                    Float32.(theta),
+                    fill_color=Vec4f(0.9, 0.4, 0.4, 1.0),
+                    border_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+                    marker_size=12.0f0,
+                    border_width=1.5f0
+                )
+            ],
+            polar_style,
+            polar_state
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;polarScatter.png&quot;, 812, 812);</code></pre><p><img src="../polarScatter.png" alt="Polar Scatter"/></p><h2 id="Multiple-Scatter-Series-Example"><a class="docs-heading-anchor" href="#Multiple-Scatter-Series-Example">Multiple Scatter Series Example</a><a id="Multiple-Scatter-Series-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Multiple-Scatter-Series-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+# Create two sets of scatter points
+theta1 = range(0, 2π, length=8)
+r1 = fill(0.8f0, 8)
+
+theta2 = range(π/8, 2π + π/8, length=8)
+r2 = fill(0.5f0, 8)
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.18, 1.0),
+    border_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0
+)
+
+dark_title_style = TextStyle(
+    size_px=18,
+    color=Vec4f(0.9, 0.9, 0.95, 1.0)
+)
+
+# Dark theme polar style
+polar_style = PolarStyle(
+    background_color=Vec4f(0.08, 0.10, 0.14, 1.0),
+    show_radial_grid=true,
+    show_angular_grid=true,
+    radial_grid_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    angular_grid_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    show_outer_circle=true,
+    outer_circle_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+    outer_circle_width=2.0f0,
+    label_color=Vec4f(0.9, 0.9, 0.95, 1.0)
+)
+
+polar_state = PolarState(
+    theta_start=Float32(π / 2),
+    theta_direction=:counterclockwise,
+    num_angular_lines=8,
+    angular_label_format=:degrees
+)
+
+function MyApp()
+    Card(
+        &quot;Multiple Scatter Series&quot;,
+        PolarPlot(
+            [
+                PolarScatter(
+                    Float32.(r1),
+                    Float32.(theta1),
+                    fill_color=Vec4f(0.9, 0.4, 0.4, 1.0),
+                    border_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+                    marker_size=14.0f0,
+                    border_width=1.5f0
+                ),
+                PolarScatter(
+                    Float32.(r2),
+                    Float32.(theta2),
+                    fill_color=Vec4f(0.4, 0.6, 0.9, 1.0),
+                    border_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+                    marker_size=14.0f0,
+                    border_width=1.5f0
+                )
+            ],
+            polar_style,
+            polar_state
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;polarScatterMulti.png&quot;, 812, 812);</code></pre><p><img src="../polarScatterMulti.png" alt="Polar Scatter Multi"/></p><h2 id="Combined-Line-and-Scatter-Example"><a class="docs-heading-anchor" href="#Combined-Line-and-Scatter-Example">Combined Line and Scatter Example</a><a id="Combined-Line-and-Scatter-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Combined-Line-and-Scatter-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+# Create continuous spiral curve
+theta_line = range(0, 4π, length=300)
+r_line = theta_line ./ (4π)
+
+# Add scatter points at key locations
+scatter_theta = range(0, 2π, length=8)
+scatter_r = fill(0.8f0, 8)
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color=Vec4f(0.15, 0.15, 0.18, 1.0),
+    border_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    border_width=1.5f0,
+    padding=12.0f0,
+    corner_radius=6.0f0
+)
+
+dark_title_style = TextStyle(
+    size_px=18,
+    color=Vec4f(0.9, 0.9, 0.95, 1.0)
+)
+
+# Dark theme polar style
+polar_style = PolarStyle(
+    background_color=Vec4f(0.08, 0.10, 0.14, 1.0),
+    show_radial_grid=true,
+    show_angular_grid=true,
+    radial_grid_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    angular_grid_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    show_outer_circle=true,
+    outer_circle_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+    outer_circle_width=2.0f0,
+    label_color=Vec4f(0.9, 0.9, 0.95, 1.0)
+)
+
+polar_state = PolarState(
+    theta_start=0.0f0,
+    theta_direction=:counterclockwise,
+    num_angular_lines=12,
+    angular_label_format=:degrees
+)
+
+function MyApp()
+    Card(
+        &quot;Polar Line + Scatter&quot;,
+        PolarPlot(
+            [
+                PolarLine(
+                    Float32.(r_line),
+                    Float32.(theta_line),
+                    color=Vec4f(0.4, 0.6, 0.9, 1.0),
+                    width=2.0f0
+                ),
+                PolarScatter(
+                    scatter_r,
+                    Float32.(scatter_theta),
+                    fill_color=Vec4f(0.9, 0.4, 0.4, 1.0),
+                    border_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+                    marker_size=12.0f0,
+                    border_width=1.5f0
+                )
+            ],
+            polar_style,
+            polar_state
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;polarScatterCombined.png&quot;, 812, 812);</code></pre><p><img src="../polarScatterCombined.png" alt="Polar Scatter Combined"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../polar_plot/">« Polar Plot</a><a class="docs-footer-nextpage" href="../polar_stem/">Polar Stem Plot »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Sunday 8 March 2026 21:14">Sunday 8 March 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
