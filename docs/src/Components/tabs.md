@@ -35,13 +35,10 @@ A dark-themed tabs interface using border color to indicate selection.
 using Fugl
 
 selected_tab_dark = Ref(1)
-option1 = Ref(false)
-option2 = Ref(true)
 
 # Dark background colors
 main_bg = Vec4{Float32}(0.12f0, 0.12f0, 0.12f0, 1.0f0)
 tab_area_bg = Vec4{Float32}(0.16f0, 0.16f0, 0.16f0, 1.0f0)
-container_bg = Vec4{Float32}(0.20f0, 0.20f0, 0.22f0, 1.0f0)
 tab_bg_color = Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0)
 selected_border = Vec4{Float32}(0.3f0, 0.6f0, 0.95f0, 1.0f0)
 unselected_border = Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0)
@@ -53,43 +50,9 @@ function MyApp()
             Container(
                 Tabs(
                     [
-                        ("Overview", 
-                            Container(
-                                Column([
-                                    Fugl.Text("Welcome"; style=TextStyle(size_px=18, color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0))),
-                                    Fugl.Text("This is the first tab with some content."; style=TextStyle(size_px=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0)))
-                                ]);
-                                style=ContainerStyle(background_color=tab_bg_color, padding=10.0f0)
-                            )
-                        ),
-                        ("Settings", 
-                            Container(
-                                Column([
-                                    Fugl.Text("Options"; style=TextStyle(size_px=18, color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0))),
-                                    Container(
-                                        Column([
-                                            CheckBox(option1[]; label="Enable feature A", on_change=(v) -> option1[] = v),
-                                            CheckBox(option2[]; label="Enable feature B", on_change=(v) -> option2[] = v)
-                                        ]);
-                                        style=ContainerStyle(
-                                            background_color=container_bg,
-                                            border_color=Vec4{Float32}(0.35f0, 0.35f0, 0.37f0, 1.0f0),
-                                            corner_radius=6.0f0,
-                                            padding=10.0f0
-                                        )
-                                    )
-                                ]);
-                                style=ContainerStyle(background_color=tab_bg_color, padding=10.0f0)
-                            )
-                        ),
-                        ("About", 
-                            Container(
-                                Column([
-                                    Fugl.Text("Version 1.0"; style=TextStyle(size_px=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0)))
-                                ]);
-                                style=ContainerStyle(background_color=tab_bg_color, padding=10.0f0)
-                            )
-                        )
+                        ("Overview", Fugl.Text("Content of overview tab"; style=TextStyle(color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)))),
+                        ("Settings", Fugl.Text("Content of settings tab"; style=TextStyle(color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)))),
+                        ("About", Fugl.Text("Content of about tab"; style=TextStyle(color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0))))
                     ];
                     selected_index=selected_tab_dark[],
                     on_tab_change=(index) -> selected_tab_dark[] = index,
@@ -202,3 +165,65 @@ nothing #hide
 ```
 
 ![Tab Text Style](tabs_text.png)
+
+## Fixed Width Tabs
+
+Tabs can have fixed or flexible widths. Use `NaN32` for flexible tabs that share space equally, or specify a width in pixels for fixed-width tabs. This is useful for creating special tabs like "add new" buttons.
+
+```@example TabsFixed
+using Fugl
+
+
+
+selected_tab_fixed = Ref(1)
+tab_list = Ref([
+    ("Tab 1", Fugl.Text("First tab content"; style=TextStyle(color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0))), NaN32),
+    ("Tab 2", Fugl.Text("Second tab content"; style=TextStyle(color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0))), NaN32),
+    ("+", Empty(), 40.0f0)
+])
+
+function MyApp()
+    # Handle tab clicks
+    on_tab_click = (index) -> begin
+        if index == length(tab_list[])  # Clicked the "+" tab
+            # Add a new tab before the "+" tab
+            new_tab_num = length(tab_list[]) 
+            new_tab = ("Tab $new_tab_num", Fugl.Text("Content $new_tab_num"; style=TextStyle(color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0))), NaN32)
+            # Insert before the "+" tab
+            tab_list[] = vcat(tab_list[][1:end-1], [new_tab], [tab_list[][end]])
+            selected_tab_fixed[] = new_tab_num
+        else
+            selected_tab_fixed[] = index
+        end
+    end
+    
+    Container(
+        Column([
+            Fugl.Text("Click + to add new tabs"; style=TextStyle(size_px=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0))),
+            Tabs(
+                tab_list[];
+                selected_index=selected_tab_fixed[],
+                on_tab_change=on_tab_click,
+                style=TabsStyle(
+                    tab_height=38.0f0,
+                    selected_color=Vec4{Float32}(0.25f0, 0.45f0, 0.75f0, 1.0f0),
+                    unselected_color=Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+                    tab_corner_radius=6.0f0,
+                    tab_border_width=1.5f0,
+                    selected_border_color=Vec4{Float32}(0.4f0, 0.6f0, 0.9f0, 1.0f0),
+                    unselected_border_color=Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0)
+                )
+            )
+        ]);
+        style=ContainerStyle(
+            background_color=Vec4{Float32}(0.12f0, 0.12f0, 0.12f0, 1.0f0),
+            padding=10.0f0
+        )
+    )
+end
+
+screenshot(MyApp, "tabs_fixed_width.png", 600, 200);
+nothing #hide
+```
+
+![Fixed Width Tabs](tabs_fixed_width.png)

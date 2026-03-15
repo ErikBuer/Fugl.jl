@@ -34,14 +34,14 @@ function TabsStyle(;
 end
 
 struct TabsView <: AbstractView
-    tabs::Vector{Tuple{String,AbstractView}}  # Vector of (name, content) tuples
+    tabs::Vector{Tuple{String,AbstractView,Float32}}  # Vector of (name, content, width) tuples. width=NaN means flexible
     selected_index::Int
     style::TabsStyle
     on_tab_change::Function  # Callback when tab is changed: (new_index) -> nothing
 end
 
 function Tabs(
-    tabs::Vector{<:Tuple{String,<:AbstractView}};
+    tabs::Vector{<:Tuple{String,<:AbstractView,Float32}};
     selected_index::Int=1,
     style::TabsStyle=TabsStyle(),
     on_tab_change::Function=(index) -> nothing
@@ -52,9 +52,21 @@ function Tabs(
     end
 
     # Convert to the expected type
-    converted_tabs = Vector{Tuple{String,AbstractView}}([(name, view) for (name, view) in tabs])
+    converted_tabs = Vector{Tuple{String,AbstractView,Float32}}([(name, view, width) for (name, view, width) in tabs])
 
     return TabsView(converted_tabs, selected_index, style, on_tab_change)
+end
+
+# Convenience constructor for tabs without explicit widths (all flexible)
+function Tabs(
+    tabs::Vector{<:Tuple{String,<:AbstractView}};
+    selected_index::Int=1,
+    style::TabsStyle=TabsStyle(),
+    on_tab_change::Function=(index) -> nothing
+)
+    # Add NaN width to all tabs (flexible)
+    tabs_with_width = [(name, view, NaN32) for (name, view) in tabs]
+    return Tabs(tabs_with_width; selected_index=selected_index, style=style, on_tab_change=on_tab_change)
 end
 
 function measure(view::TabsView)::Tuple{Float32,Float32}
@@ -63,7 +75,7 @@ function measure(view::TabsView)::Tuple{Float32,Float32}
     end
 
     # Measure the selected tab's content
-    _, content = view.tabs[view.selected_index]
+    _, content, _ = view.tabs[view.selected_index]
     content_width, content_height = measure(content)
 
     # Add tab bar height
@@ -100,7 +112,7 @@ function interpret_view(
     content_height = height - tab_height
 
     if content_height > 0
-        _, selected_content = view.tabs[view.selected_index]
+        _, selected_content, _ = view.tabs[view.selected_index]
         interpret_view(selected_content, x, content_y, width, content_height, projection_matrix, mouse_x, mouse_y)
     end
 end
@@ -113,14 +125,30 @@ function render_tab_bar(
     height::Float32,
     projection_matrix::Mat4{Float32}
 )
-    # Calculate tab widths (equal width for all tabs)
+    # Calculate tab widths
     num_tabs = length(view.tabs)
-    tab_width = width / Float32(num_tabs)
+
+    # Calculate total fixed width and count flexible tabs
+    total_fixed_width = 0.0f0
+    num_flexible = 0
+    for (_, _, tab_width) in view.tabs
+        if isnan(tab_width)
+            num_flexible += 1
+        else
+            total_fixed_width += tab_width
+        end
+    end
+
+    # Calculate flexible tab width
+    flexible_width = num_flexible > 0 ? (width - total_fixed_width) / Float32(num_flexible) : 0.0f0
 
     font = get_default_font()
+    current_x = x
 
-    for (i, (name, _)) in enumerate(view.tabs)
-        tab_x = x + (i - 1) * tab_width
+    for (i, (name, _, tab_width)) in enumerate(view.tabs)
+        # Determine actual width for this tab
+        actual_tab_width = isnan(tab_width) ? flexible_width : tab_width
+
         is_selected = i == view.selected_index
 
         # Choose colors and styles based on selection state
@@ -129,7 +157,7 @@ function render_tab_bar(
         tab_border_color = is_selected ? view.style.selected_border_color : view.style.unselected_border_color
 
         # Draw tab background with border
-        vertices = generate_rectangle_vertices(tab_x, y, tab_width, height)
+        vertices = generate_rectangle_vertices(current_x, y, actual_tab_width, height)
         if view.style.tab_corner_radius > 0.0f0 || view.style.tab_border_width > 0.0f0
             # Only round the top corners for tabs
             corner_radii = Vec4{Float32}(
@@ -140,7 +168,7 @@ function render_tab_bar(
             )
             draw_configurable_rectangle(
                 vertices,
-                tab_width,
+                actual_tab_width,
                 height,
                 bg_color,
                 tab_border_color,
@@ -155,7 +183,7 @@ function render_tab_bar(
 
         # Draw separator border on the right edge (except last tab)
         if i < num_tabs && view.style.tab_border_width == 0.0f0
-            border_x = tab_x + tab_width
+            border_x = current_x + actual_tab_width
             border_vertices = [
                 Point2f(border_x, y + height),
                 Point2f(border_x, y),
@@ -167,10 +195,13 @@ function render_tab_bar(
 
         # Draw tab text (centered)
         text_width = measure_word_width(font, name, text_style.size_px)
-        text_x = tab_x + (tab_width - text_width) / 2.0f0
+        text_x = current_x + (actual_tab_width - text_width) / 2.0f0
         text_y = y + text_style.size_px + (height - text_style.size_px) / 2.0f0
 
         draw_text(font, name, text_x, text_y, text_style.size_px, projection_matrix, text_style.color)
+
+        # Move to next tab position
+        current_x += actual_tab_width
     end
 end
 
@@ -195,10 +226,30 @@ function detect_click(
        mouse_state.y >= y && mouse_state.y <= (y + tab_height) &&
        mouse_state.x >= x && mouse_state.x <= (x + width)
 
-        # Determine which tab was clicked
+        # Calculate tab widths (same logic as render_tab_bar)
         num_tabs = length(view.tabs)
-        tab_width = width / Float32(num_tabs)
-        clicked_tab = Int(floor((mouse_state.x - x) / tab_width)) + 1
+        total_fixed_width = 0.0f0
+        num_flexible = 0
+        for (_, _, tab_width) in view.tabs
+            if isnan(tab_width)
+                num_flexible += 1
+            else
+                total_fixed_width += tab_width
+            end
+        end
+        flexible_width = num_flexible > 0 ? (width - total_fixed_width) / Float32(num_flexible) : 0.0f0
+
+        # Determine which tab was clicked
+        current_x = x
+        clicked_tab = 0
+        for (i, (_, _, tab_width)) in enumerate(view.tabs)
+            actual_tab_width = isnan(tab_width) ? flexible_width : tab_width
+            if mouse_state.x >= current_x && mouse_state.x < current_x + actual_tab_width
+                clicked_tab = i
+                break
+            end
+            current_x += actual_tab_width
+        end
 
         if clicked_tab >= 1 && clicked_tab <= num_tabs && clicked_tab != view.selected_index
             handle_tab_click() = view.on_tab_change(clicked_tab)
@@ -211,7 +262,7 @@ function detect_click(
     content_height = height - tab_height
 
     if content_height > 0
-        _, selected_content = view.tabs[view.selected_index]
+        _, selected_content, _ = view.tabs[view.selected_index]
         return detect_click(selected_content, mouse_state, x, content_y, width, content_height, z)
     end
 
