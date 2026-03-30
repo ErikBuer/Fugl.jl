@@ -75,11 +75,11 @@ function MyApp()
 
     dark_text_style = TextStyle(
         color = Vec4f(0.9, 0.9, 0.9, 1.0),
-        size_px = 14
+        size_points = 14
     )
 
     dark_field_style = TextBoxStyle(
-        text_style = TextStyle(color = Vec4f(0.9, 0.9, 0.9, 1.0), size_px = 14),
+        text_style = TextStyle(color = Vec4f(0.9, 0.9, 0.9, 1.0), size_points = 14),
         background_color_focused = Vec4f(0.2, 0.2, 0.25, 1.0),
         background_color_unfocused = Vec4f(0.15, 0.15, 0.15, 1.0),
         border_color = Vec4f(0.4, 0.6, 0.8, 1.0),
@@ -91,7 +91,7 @@ function MyApp()
 
     Container(
         IntrinsicColumn([
-            Fugl.Text("Status: $(status[])", style=TextStyle(size_px=14, color=status_color)),
+            Fugl.Text("Status: $(status[])", style=TextStyle(size_points=14, color=status_color)),
             NumberField(
                 number_state[];
                 type=Float64,

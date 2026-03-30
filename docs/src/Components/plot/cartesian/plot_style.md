@@ -125,7 +125,7 @@ function axis_control_demo()
             idx = (i - 1) * 3 + j
             if idx <= length(plots)
                 push!(row_plots, IntrinsicColumn([
-                        IntrinsicHeight(Text(labels[idx], style=TextStyle(size_px=14))),
+                        IntrinsicHeight(Text(labels[idx], style=TextStyle(size_points=14))),
                         plots[idx]
                     ], spacing=0.0))
             end
@@ -135,7 +135,7 @@ function axis_control_demo()
 
     ui = Container(
         IntrinsicColumn([
-            IntrinsicHeight(Text("Granular Axis Control Examples", style=TextStyle(size_px=20))),
+            IntrinsicHeight(Text("Granular Axis Control Examples", style=TextStyle(size_points=20))),
             Column(rows, spacing=0.0)
         ], spacing=0.0, padding=0.0)
     )

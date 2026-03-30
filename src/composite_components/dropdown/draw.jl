@@ -125,7 +125,7 @@ function draw_dropdown_arrow(view::DropdownView, x::Float32, y::Float32, project
 
     arrow_component = Text(
         arrow_text;
-        style=TextStyle(size_px=12, color=view.style.arrow_color),
+        style=TextStyle(size_points=12, color=view.style.arrow_color),
         horizontal_align=:center,
         vertical_align=:middle
     )

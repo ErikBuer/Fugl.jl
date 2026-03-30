@@ -25,4 +25,4 @@ function colorbar_debug()
 end
 
 # Run the debug test
-Fugl.run(colorbar_debug, title="Colorbar Debug", window_width_px=200, window_height_px=400, fps_overlay=true)
+Fugl.run(colorbar_debug, title="Colorbar Debug", window_width_points=200, window_height_points=400, fps_overlay=true)

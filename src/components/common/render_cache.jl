@@ -196,8 +196,8 @@ function update_cache!(cache::RenderCache, framebuffer::UInt32, color_texture::U
     cache.framebuffer = framebuffer
     cache.color_texture = color_texture
     cache.depth_texture = depth_texture
-    cache.cache_width = Int32(round(bounds[3]))
-    cache.cache_height = Int32(round(bounds[4]))
+    cache.cache_width = Int32(round(bounds[3]))  # Pixel, not points
+    cache.cache_height = Int32(round(bounds[4])) # Pixel, not points
     cache.is_valid = true
     cache.last_bounds = bounds
     cache.last_content_hash = content_hash

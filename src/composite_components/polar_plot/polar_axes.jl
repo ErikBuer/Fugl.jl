@@ -227,10 +227,10 @@ function draw_radial_labels(
     r_max::Float32,
     theta_start::Float32,
     label_color::Vec4f,
-    label_size_px::Int,
+    label_size_points::Int,
     projection_matrix::Mat4{Float32}
 )
-    text_style = TextStyle(size_px=label_size_px, color=label_color)
+    text_style = TextStyle(size_points=label_size_points, color=label_color)
 
     # Place labels at theta_start + π/2 (perpendicular to starting direction)
     label_angle = theta_start + Float32(π) / 2.0f0
@@ -259,7 +259,7 @@ function draw_radial_labels(
 
         # Draw label
         font = get_font(text_style)
-        draw_text(font, label_text, label_x, label_y, label_size_px, projection_matrix, label_color)
+        draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix, label_color)
     end
 end
 
@@ -275,10 +275,10 @@ function draw_angular_labels(
     theta_direction::Symbol,
     label_format::Symbol,
     label_color::Vec4f,
-    label_size_px::Int,
+    label_size_points::Int,
     projection_matrix::Mat4{Float32}
 )
-    text_style = TextStyle(size_px=label_size_px, color=label_color)
+    text_style = TextStyle(size_points=label_size_points, color=label_color)
     label_offset = 15.0f0  # Pixels beyond max radius
 
     for angle in angles
@@ -307,10 +307,10 @@ function draw_angular_labels(
 
         # Center text at label position
         font = get_font(text_style)
-        text_width = measure_word_width(font, label_text, text_style.size_px)
+        text_width = measure_word_width(font, label_text, text_style.size_points)
         label_x -= text_width / 2.0f0
 
         # Draw label
-        draw_text(font, label_text, label_x, label_y, label_size_px, projection_matrix, label_color)
+        draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix, label_color)
     end
 end

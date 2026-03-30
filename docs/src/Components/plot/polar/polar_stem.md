@@ -22,7 +22,7 @@ dark_card_style = ContainerStyle(
 )
 
 dark_title_style = TextStyle(
-    size_px=18,
+    size_points=18,
     color=Vec4f(0.9, 0.9, 0.95, 1.0)
 )
 
@@ -96,7 +96,7 @@ dark_card_style = ContainerStyle(
 )
 
 dark_title_style = TextStyle(
-    size_px=18,
+    size_points=18,
     color=Vec4f(0.9, 0.9, 0.95, 1.0)
 )
 
@@ -185,7 +185,7 @@ dark_card_style = ContainerStyle(
 )
 
 dark_title_style = TextStyle(
-    size_px=18,
+    size_points=18,
     color=Vec4f(0.9, 0.9, 0.95, 1.0)
 )
 

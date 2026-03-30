@@ -31,11 +31,17 @@ function apply_layout(view::CodeEditorView, x::Float32, y::Float32, width::Float
     return (x, y, width, height)
 end
 
-function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
-    # Use render caching for CodeEditor to improve performance with syntax highlighting
-    bounds = (x, y, width, height)
-    cache_width = Int32(round(width))
-    cache_height = Int32(round(height))
+function interpret_view(view::CodeEditorView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+    # Get DPI scaling to convert logical points to pixel coordinates
+    dpi_scaling = get_current_dpi_scaling()
+    scale_factor = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
+
+    # The framebuffer is rendered in pixel coordinates to get the highest quality
+    cache_width_pixels = Int32(round(width_points * scale_factor))
+    cache_height_pixels = Int32(round(height_points * scale_factor))
+
+    bounds_points = (x_points, y_points, width_points, height_points)
+    bounds_pixels = (Float32(x_points) * scale_factor, Float32(y_points) * scale_factor, Float32(width_points) * scale_factor, Float32(height_points) * scale_factor)
 
     # Get text render cache using state's cache ID
     cache = get_render_cache(view.state.cache_id)
@@ -44,21 +50,21 @@ function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Flo
     content_hash = hash_text_content(view.state.text, view.style, view.state.is_focused, view.state.cursor, (view.state.selection_start, view.state.selection_end), view.state.scroll_offset_y, view.state.scroll_offset_x)
 
     # Check if we need to invalidate cache
-    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds_pixels)
 
     if needs_redraw
         # Create new framebuffer if needed
-        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-            if cache_width > 0 && cache_height > 0
+        if cache.framebuffer === nothing || cache.cache_width != cache_width_pixels || cache.cache_height != cache_height_pixels
+            if cache_width_pixels > 0 && cache_height_pixels > 0
                 try
-                    (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
+                    (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width_pixels, cache_height_pixels; with_depth=false)
 
                     # Update cache with new framebuffer and content hash
-                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
+                    update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds_pixels)
                 catch e
                     @warn "Failed to create code editor framebuffer: $e"
                     # Fall back to immediate rendering
-                    render_codeeditor_immediate(view, x, y, width, height, projection_matrix)
+                    render_codeeditor_immediate(view, x_points, y_points, width_points, height_points, projection_matrix)
                     return
                 end
             else
@@ -67,23 +73,23 @@ function interpret_view(view::CodeEditorView, x::Float32, y::Float32, width::Flo
             end
         else
             # Update cache with existing framebuffer and new content hash
-            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds_pixels)
         end
 
         # Render to framebuffer
-        render_codeeditor_to_framebuffer(view, cache, width, height, projection_matrix)
+        render_codeeditor_to_framebuffer(view, cache, width_points, height_points, projection_matrix)
     end
 
     # Draw cached texture to screen
     if cache.is_valid && cache.color_texture !== nothing
-        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
+        draw_cached_texture(cache.color_texture, x_points, y_points, width_points, height_points, projection_matrix)
     else
         # Fallback to immediate rendering if cache failed
         render_codeeditor_immediate(view, x, y, width, height, projection_matrix)
     end
 end
 
-function render_codeeditor_to_framebuffer(view::CodeEditorView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function render_codeeditor_to_framebuffer(view::CodeEditorView, cache::RenderCache, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32})
     # Push current framebuffer and viewport onto stacks
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
@@ -93,11 +99,11 @@ function render_codeeditor_to_framebuffer(view::CodeEditorView, cache::RenderCac
         ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
         ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
-        # Create framebuffer-specific projection matrix
-        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+        # Create framebuffer-specific projection matrix in points
+        fb_projection = get_orthographic_matrix(0.0f0, width_points, height_points, 0.0f0, -1.0f0, 1.0f0)
 
         # Render CodeEditor content with syntax highlighting to framebuffer
-        render_codeeditor_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+        render_codeeditor_content(view, 0.0f0, 0.0f0, width_points, height_points, fb_projection)
     finally
         # Always restore previous framebuffer and viewport, even if there's an exception
         pop_viewport!()
@@ -113,7 +119,7 @@ end
 function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
     # Extract style properties
     font = get_font(view.style.text_style)
-    size_px = view.style.text_style.size_px
+    size_points = view.style.text_style.size_points
     padding = view.style.padding
 
     # Render the background with rounded corners
@@ -142,8 +148,8 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
     scroll_x = view.state.scroll_offset_x
 
     # Render each line with syntax highlighting
-    current_y = y + size_px + padding
-    line_height = Float32(size_px * 1.2)  # Add some line spacing
+    current_y = y + size_points + padding
+    line_height = Float32(size_points * 1.2)  # Add some line spacing
 
     # Calculate visible line range for culling
     visible_height = height - 2 * padding
@@ -156,7 +162,7 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
 
         # Calculate Y position with scroll offset
         display_line_index = line_num - scroll_y
-        display_y = y + size_px + padding + (display_line_index - 1) * line_height
+        display_y = y + size_points + padding + (display_line_index - 1) * line_height
 
         # Cull lines outside visible area
         if display_y < y + padding || display_y > y + height - padding
@@ -181,7 +187,7 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
                     font,
                     x + padding - scroll_x,
                     display_y,
-                    size_px,
+                    size_points,
                     projection_matrix,
                     view.style.selection_color;  # Use configurable selection color from style
                     visible_start_x=x + padding,
@@ -196,7 +202,7 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
             font,
             x + padding - scroll_x,  # Left padding with horizontal scroll
             display_y,
-            size_px,
+            size_points,
             projection_matrix;
             visible_width=visible_width,
             start_x=x + padding
@@ -210,7 +216,7 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
                 font,
                 x + padding - scroll_x,
                 display_y,
-                size_px,
+                size_points,
                 projection_matrix,
                 view.style.cursor_color  # Use the cursor color from style
             )
@@ -241,8 +247,8 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
     if mouse_inside && (mouse_state.scroll_y != 0.0 || mouse_state.scroll_x != 0.0)
         lines = get_lines(view.state)
         padding = view.style.padding
-        size_px = view.style.text_style.size_px
-        line_height = Float32(size_px * 1.2)
+        size_points = view.style.text_style.size_points
+        line_height = Float32(size_points * 1.2)
         visible_height = height - 2 * padding
         visible_width = width - 2 * padding
         max_visible_lines = Int(ceil(visible_height / line_height))
@@ -309,7 +315,7 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
         new_cursor_pos = mouse_to_cursor_position(
             view.state,
             text_font,
-            view.style.text_style.size_px,
+            view.style.text_style.size_points,
             view.style.padding,
             mouse_state.x,
             mouse_state.y,
@@ -339,7 +345,7 @@ function detect_click(view::CodeEditorView, mouse_state::InputState, x::Float32,
     new_cursor_pos = mouse_to_cursor_position(
         view.state,
         text_font,
-        view.style.text_style.size_px,
+        view.style.text_style.size_points,
         view.style.padding,
         mouse_state.x,
         mouse_state.y,
@@ -495,7 +501,7 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState, width::
     if text_changed || cursor_changed || selection_changed
         # Ensure cursor is visible by adjusting scroll offsets if needed
         font = get_font(view.style.text_style)
-        size_px = view.style.text_style.size_px
+        size_points = view.style.text_style.size_points
         padding = view.style.padding
 
         # Calculate visible area (width and height minus padding)
@@ -505,7 +511,7 @@ function handle_key_input(view::CodeEditorView, mouse_state::InputState, width::
         current_state = ensure_cursor_visible(
             current_state,
             font,
-            size_px,
+            size_points,
             visible_width,
             visible_height,
             padding

@@ -64,7 +64,7 @@ modal_card_style = ContainerStyle(
     corner_radius=8.0f0
 )
 
-title_text_style = TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+title_text_style = TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
 
 # Button interaction state
 button_state = Ref(InteractionState())

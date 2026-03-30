@@ -23,7 +23,7 @@ include("draw.jl")
 
 function measure(view::DropdownView)::Tuple{Float32,Float32}
     # Always return just the button height - dropdown list overlays outside bounds
-    button_height = view.style.text_style.size_px + 2 * view.style.padding
+    button_height = view.style.text_style.size_points + 2 * view.style.padding
     return (Inf32, button_height)
 end
 
@@ -56,13 +56,13 @@ Measure the height of the component when constrained by available width.
 """
 function measure_height(view::DropdownView, available_width::Float32)::Float32
     # The dropdown height is just the button height - the dropdown list overlays outside bounds
-    button_height = view.style.text_style.size_px + 2 * view.style.padding
+    button_height = view.style.text_style.size_points + 2 * view.style.padding
     return button_height
 end
 
 function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Calculate button height
-    button_height = view.style.text_style.size_px + 2 * view.style.padding
+    button_height = view.style.text_style.size_points + 2 * view.style.padding
 
     # Draw the main dropdown button
     draw_dropdown_button(view, x, y, width, button_height, projection_matrix, mouse_x, mouse_y)
@@ -80,7 +80,7 @@ function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float
 end
 
 function detect_click(view::DropdownView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
-    button_height = view.style.text_style.size_px + 2 * view.style.padding
+    button_height = view.style.text_style.size_points + 2 * view.style.padding
     mouse_x, mouse_y = input_state.x, input_state.y
 
     # Handle key input when dropdown is open (search functionality)

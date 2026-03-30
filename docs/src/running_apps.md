@@ -28,7 +28,7 @@ function MyApp()
 end
 
 # Launch interactive window
-Fugl.run(MyApp, title="My App", window_width_px=400, window_height_px=300)
+Fugl.run(MyApp, title="My App", window_width_points=400, window_height_points=300)
 ```
 
 ### run() Options
@@ -36,8 +36,8 @@ Fugl.run(MyApp, title="My App", window_width_px=400, window_height_px=300)
 ```julia
 run(ui_function;
     title="Fugl",                    # Window title
-    window_width_px=1920,            # Initial window width
-    window_height_px=1080,           # Initial window height
+    window_width_points=1920,            # Initial window width
+    window_height_points=1080,           # Initial window height
     fps_overlay=false,               # Show FPS counter
     periodic_callbacks=PeriodicCallback[]  # Callbacks executed every N frames (Experimental)
 )
@@ -123,8 +123,8 @@ Fugl.get_font_by_path(:title_font, "/path/to/TitleFont.ttf")
 Fugl.get_font_by_path(:body_font, "/path/to/BodyFont.ttf")
 
 # Create styles with different font cache keys
-title_style = TextStyle(font_cache_key=:title_font, size_px=32)
-body_style = TextStyle(font_cache_key=:body_font, size_px=16)
+title_style = TextStyle(font_cache_key=:title_font, size_points=32)
+body_style = TextStyle(font_cache_key=:body_font, size_points=16)
 
 function MyApp()
     Column(

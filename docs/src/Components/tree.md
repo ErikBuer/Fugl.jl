@@ -41,11 +41,11 @@ function MyApp()
     dark_tree_style = TreeStyle(
         selected = TextStyle(
             color = Vec4f(0.3, 0.7, 1.0, 1.0),      # Bright blue for selected items
-            size_px = 14
+            size_points = 14
         ),
         normal = TextStyle(
             color = Vec4f(0.85, 0.85, 0.9, 1.0),    # Light gray for normal text
-            size_px = 14
+            size_points = 14
         )
     )
 
@@ -60,7 +60,7 @@ function MyApp()
 
     # Dark theme title style
     dark_title_style = TextStyle(
-        size_px = 16,
+        size_points = 16,
         color = Vec4f(0.9, 0.9, 0.95, 1.0)  # Light title text
     )
 

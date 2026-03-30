@@ -28,11 +28,11 @@ end
 
 function TableStyle(;
     header_background_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0),
-    header_text_style::TextStyle=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+    header_text_style::TextStyle=TextStyle(size_points=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
     header_height::Float32=30.0f0,
     cell_background_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),
     cell_alternate_background_color::Vec4f=Vec4f(0.95, 0.95, 0.95, 1.0),
-    cell_text_style::TextStyle=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+    cell_text_style::TextStyle=TextStyle(size_points=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
     cell_height::Float32=25.0f0,
     max_wrapped_rows::Int=0,
     show_grid::Bool=true,

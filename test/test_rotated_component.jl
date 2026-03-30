@@ -27,7 +27,7 @@ function test_rotated_component()
         )
     end
 
-    Fugl.run(MyApp, title="Rotated Component Test", window_width_px=600, window_height_px=500)
+    Fugl.run(MyApp, title="Rotated Component Test", window_width_points=600, window_height_points=500)
 end
 
 test_rotated_component()

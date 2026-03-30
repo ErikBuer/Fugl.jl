@@ -38,7 +38,7 @@ function simple_heatmap_test()
             ], padding=0.0, spacing=0.0)
     end
 
-    Fugl.run(MyApp, title="Checkerboard Heatmap Test", window_width_px=600, window_height_px=500, fps_overlay=true)
+    Fugl.run(MyApp, title="Checkerboard Heatmap Test", window_width_points=600, window_height_points=500, fps_overlay=true)
 end
 
 simple_heatmap_test()

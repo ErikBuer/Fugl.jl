@@ -21,7 +21,7 @@ struct PolarStyle
     show_radial_labels::Bool
     show_angular_labels::Bool
     label_color::Vec4f
-    label_size_px::Int
+    label_size_points::Int
 
     # Tick marks
     show_radial_ticks::Bool
@@ -57,7 +57,7 @@ function PolarStyle(;
     show_radial_labels::Bool=true,
     show_angular_labels::Bool=true,
     label_color::Vec4f=Vec4f(0.2, 0.2, 0.2, 1.0),
-    label_size_px::Int=12,
+    label_size_points::Int=12,
     show_radial_ticks::Bool=true,
     radial_tick_size::Float32=6.0f0,
     radial_tick_width::Float32=1.0f0,
@@ -83,7 +83,7 @@ function PolarStyle(;
         show_radial_labels,
         show_angular_labels,
         label_color,
-        label_size_px,
+        label_size_points,
         show_radial_ticks,
         radial_tick_size,
         radial_tick_width,
@@ -114,7 +114,7 @@ function PolarStyle(base::PolarStyle;
     show_radial_labels=base.show_radial_labels,
     show_angular_labels=base.show_angular_labels,
     label_color=base.label_color,
-    label_size_px=base.label_size_px,
+    label_size_points=base.label_size_points,
     show_radial_ticks=base.show_radial_ticks,
     radial_tick_size=base.radial_tick_size,
     radial_tick_width=base.radial_tick_width,
@@ -140,7 +140,7 @@ function PolarStyle(base::PolarStyle;
         show_radial_labels,
         show_angular_labels,
         label_color,
-        label_size_px,
+        label_size_points,
         show_radial_ticks,
         radial_tick_size,
         radial_tick_width,

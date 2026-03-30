@@ -28,10 +28,10 @@ function MyApp()
         data,
         style=TableStyle(
             header_background_color=Vec4f(0.25, 0.35, 0.55, 1.0),
-            header_text_style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.9, 1.0)),
+            header_text_style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.9, 1.0)),
             cell_background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
             cell_alternate_background_color=Vec4f(0.18, 0.18, 0.18, 1.0),
-            cell_text_style=TextStyle(size_px=12, color=Vec4f(0.85, 0.85, 0.85, 1.0)),
+            cell_text_style=TextStyle(size_points=12, color=Vec4f(0.85, 0.85, 0.85, 1.0)),
             show_grid=true,
             grid_color=Vec4f(0.4, 0.4, 0.4, 1.0),
             cell_padding=8.0f0
@@ -50,7 +50,7 @@ function MyApp()
     )
 
     dark_title_style = TextStyle(
-        size_px=18,
+        size_points=18,
         color=Vec4f(0.9, 0.9, 0.95, 1.0)
     )
 
@@ -97,11 +97,11 @@ function MyApp()
         data,
         style=TableStyle(
             header_background_color=Vec4f(0.25, 0.35, 0.55, 1.0),
-            header_text_style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.9, 1.0)),
+            header_text_style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.9, 1.0)),
             header_height=30.0f0,
             cell_background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
             cell_alternate_background_color=Vec4f(0.18, 0.18, 0.18, 1.0),
-            cell_text_style=TextStyle(size_px=12, color=Vec4f(0.85, 0.85, 0.85, 1.0)),
+            cell_text_style=TextStyle(size_points=12, color=Vec4f(0.85, 0.85, 0.85, 1.0)),
             cell_height=25.0f0,
             show_grid=true,
             grid_color=Vec4f(0.4, 0.4, 0.4, 1.0),
@@ -135,7 +135,7 @@ function MyApp()
     )
 
     dark_title_style = TextStyle(
-        size_px=18,
+        size_points=18,
         color=Vec4f(0.9, 0.9, 0.95, 1.0)
     )
 
@@ -171,7 +171,7 @@ function MyApp()
     wide_items = [
         Container(
             Fugl.Text("Item $i - This is a very long text that makes the content wide", 
-                style=TextStyle(size_px=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
+                style=TextStyle(size_points=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
             style=ContainerStyle(
                 background_color=Vec4f(0.18, 0.22, 0.25, 1.0),
                 border_color=Vec4f(0.35, 0.45, 0.55, 1.0),
@@ -206,7 +206,7 @@ function MyApp()
     )
 
     dark_title_style = TextStyle(
-        size_px=18,
+        size_points=18,
         color=Vec4f(0.9, 0.9, 0.95, 1.0)
     )
 

@@ -46,7 +46,7 @@ unselected_border = Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0)
 function MyApp()
     Container(
         Column([
-            Fugl.Text("Dark Theme Tabs"; style=TextStyle(size_px=22, color=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0))),
+            Fugl.Text("Dark Theme Tabs"; style=TextStyle(size_points=22, color=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0))),
             Container(
                 Tabs(
                     [
@@ -96,7 +96,7 @@ tab_state2 = Ref(1)
 function MyApp()
     Container(
         Column([
-            Fugl.Text("No rounded corners"; style=TextStyle(size_px=14)),
+            Fugl.Text("No rounded corners"; style=TextStyle(size_points=14)),
             Tabs(
                 [
                     ("Tab 1", Fugl.Text("Content 1")),
@@ -107,7 +107,7 @@ function MyApp()
                 on_tab_change=(i) -> tab_state1[] = i,
                 style=TabsStyle(tab_corner_radius=0.0f0)
             ),
-            Fugl.Text("Rounded corners (12px)"; style=TextStyle(size_px=14)),
+            Fugl.Text("Rounded corners (12px)"; style=TextStyle(size_points=14)),
             Tabs(
                 [
                     ("Tab 1", Fugl.Text("Content 1")),
@@ -137,8 +137,8 @@ using Fugl
 
 tab_custom = Ref(2)
 
-custom_text = TextStyle(size_px=16, color=Vec4{Float32}(0.6f0, 0.6f0, 0.6f0, 1.0f0))
-custom_selected = TextStyle(size_px=16, color=Vec4{Float32}(1.0f0, 0.9f0, 0.5f0, 1.0f0))
+custom_text = TextStyle(size_points=16, color=Vec4{Float32}(0.6f0, 0.6f0, 0.6f0, 1.0f0))
+custom_selected = TextStyle(size_points=16, color=Vec4{Float32}(1.0f0, 0.9f0, 0.5f0, 1.0f0))
 
 function MyApp()
     Tabs(
@@ -199,7 +199,7 @@ function MyApp()
     
     Container(
         Column([
-            Fugl.Text("Click + to add new tabs"; style=TextStyle(size_px=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0))),
+            Fugl.Text("Click + to add new tabs"; style=TextStyle(size_points=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0))),
             Tabs(
                 tab_list[];
                 selected_index=selected_tab_fixed[],

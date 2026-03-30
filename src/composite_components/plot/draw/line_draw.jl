@@ -291,11 +291,11 @@ function draw_axes_with_labels(
     x_ticks::Vector{Float32},
     y_ticks::Vector{Float32},
     transform_func::Function,
-    screen_bounds::Rectangle,
+    screen_bounds_points::Rectangle,
     color::Vec4{Float32},
     width::Float32,
-    projection_matrix::Mat4{Float32};
-    label_size_px::Int=12,
+    projection_matrix_points::Mat4{Float32};    # Projection matrix for points, not screen pixels (used for axis lines and tick marks)
+    label_size_points::Int=12,
     label_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
     label_offset_px::Float32=5.0f0,
     axis_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
@@ -388,10 +388,10 @@ function draw_axes_with_labels(
     end
 
     # Draw the axis lines and tick marks
-    draw_lines(axis_batch, projection_matrix; anti_aliasing_width=anti_aliasing_width)
+    draw_lines(axis_batch, projection_matrix_points; anti_aliasing_width=anti_aliasing_width)
 
     # Create text style for labels
-    text_style = TextStyle(size_px=label_size_px, color=label_color)
+    text_style = TextStyle(size_points=label_size_points, color=label_color)
 
     # Draw x-axis labels along the bottom edge (outside plot area) if x-tick labels are enabled
     if show_x_tick_labels
@@ -416,7 +416,7 @@ function draw_axes_with_labels(
                 label_y = tick_screen_y + tick_length_px + label_offset_px  # Below tick mark
 
                 # Render the text component
-                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix, 0.0f0, 0.0f0)
+                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, 0.0f0, 0.0f0)
             end
         end
     end
@@ -444,7 +444,7 @@ function draw_axes_with_labels(
                 label_y = tick_screen_y - text_height / 2.0f0  # Centered vertically on tick
 
                 # Render the text component
-                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix, 0.0f0, 0.0f0)
+                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, 0.0f0, 0.0f0)
             end
         end
     end
@@ -452,22 +452,22 @@ function draw_axes_with_labels(
     # Draw axis labels if enabled
     if show_x_label && !isempty(x_label)
         # Create Text component for x-axis label
-        x_label_style = TextStyle(size_px=label_size_px + 4, color=label_color)  # Slightly larger for axis labels
+        x_label_style = TextStyle(size_points=label_size_points + 4, color=label_color)  # Slightly larger for axis labels
         x_label_text = Text(x_label, style=x_label_style, horizontal_align=:center, vertical_align=:top)
         x_label_width, x_label_height = measure(x_label_text)
 
         # Position x-axis label centered below the plot, below tick labels
         bottom_edge_screen_x, bottom_edge_screen_y = transform_func(plot_bounds.x + plot_bounds.width / 2, plot_bounds.y)
         x_label_x = bottom_edge_screen_x - x_label_width / 2.0f0
-        x_label_y = bottom_edge_screen_y + tick_length_px + label_offset_px + Float32(label_size_px) + label_offset_px  # Below tick labels
+        x_label_y = bottom_edge_screen_y + tick_length_px + label_offset_px + Float32(label_size_points) + label_offset_px  # Below tick labels
 
         # Render the x-axis label
-        interpret_view(x_label_text, x_label_x, x_label_y, x_label_width, x_label_height, projection_matrix, 0.0f0, 0.0f0)
+        interpret_view(x_label_text, x_label_x, x_label_y, x_label_width, x_label_height, projection_matrix_points, 0.0f0, 0.0f0)
     end
 
     if show_y_label && !isempty(y_label)
         # Create Text component for y-axis label (rotated -90 degrees using Rotate component)
-        y_label_style = TextStyle(size_px=label_size_px + 4, color=label_color)  # Style without rotation
+        y_label_style = TextStyle(size_points=label_size_points + 4, color=label_color)  # Style without rotation
         y_label_text = Rotate(Text(y_label, style=y_label_style, horizontal_align=:center, vertical_align=:middle), rotation_degrees=-90.0f0)  # Use Rotate component
         y_label_width, y_label_height = measure(y_label_text)
 
@@ -475,10 +475,10 @@ function draw_axes_with_labels(
         left_edge_screen_x, left_edge_screen_y = transform_func(plot_bounds.x, plot_bounds.y + plot_bounds.height / 2)
 
         # For rotated text, adjust positioning
-        y_label_x = left_edge_screen_x - tick_length_px - label_offset_px - Float32(label_size_px) * 3.0f0 - label_offset_px  # Left of tick labels
+        y_label_x = left_edge_screen_x - tick_length_px - label_offset_px - Float32(label_size_points) * 3.0f0 - label_offset_px  # Left of tick labels
         y_label_y = left_edge_screen_y - y_label_height / 2.0f0  # Center vertically
 
         # Render the y-axis label
-        interpret_view(y_label_text, y_label_x, y_label_y, y_label_width, y_label_height, projection_matrix, 0.0f0, 0.0f0)
+        interpret_view(y_label_text, y_label_x, y_label_y, y_label_width, y_label_height, projection_matrix_points, 0.0f0, 0.0f0)
     end
 end

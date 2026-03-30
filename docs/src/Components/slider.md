@@ -32,12 +32,12 @@ function slider_demo()
     
     dark_text_style = TextStyle(
         color=Vec4f(0.9, 0.9, 0.9, 1.0),
-        size_px=16
+        size_points=16
     )
     
     dark_card_title_style = TextStyle(
         color=Vec4f(0.9, 0.9, 0.9, 1.0),
-        size_px=16
+        size_points=16
     )
     
     dark_slider_style = SliderStyle(
@@ -87,7 +87,7 @@ function slider_demo()
                         on_change=(new_value) -> println("Continuous: ", new_value)
                     ),
                     Text("Value: $(round(continuous_state[].value, digits=3))", style=dark_text_style),
-                    Text("Hover and drag to see different styles!", style=TextStyle(color=Vec4f(0.7, 0.7, 0.7, 1.0), size_px=12))
+                    Text("Hover and drag to see different styles!", style=TextStyle(color=Vec4f(0.7, 0.7, 0.7, 1.0), size_points=12))
                 ]),
                 style=dark_card_style,
                 title_style=dark_card_title_style
@@ -224,7 +224,7 @@ function rgb_color_picker_demo()
             # Red slider
             Row([
                 Container(
-                    Text("R:", style=TextStyle(color=Vec4f(1.0, 0.5, 0.5, 1.0), size_px=16)),
+                    Text("R:", style=TextStyle(color=Vec4f(1.0, 0.5, 0.5, 1.0), size_points=16)),
                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                 ),
                 HorizontalSlider(
@@ -234,7 +234,7 @@ function rgb_color_picker_demo()
                     on_state_change=(new_state) -> rgb_r_state[] = new_state
                 ),
                 Container(
-                    Text("$(rgb_r_state[].value)", style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                    Text("$(rgb_r_state[].value)", style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                 )
             ]),
@@ -242,7 +242,7 @@ function rgb_color_picker_demo()
             # Green slider
             Row([
                 Container(
-                    Text("G:", style=TextStyle(color=Vec4f(0.5, 1.0, 0.5, 1.0), size_px=16)),
+                    Text("G:", style=TextStyle(color=Vec4f(0.5, 1.0, 0.5, 1.0), size_points=16)),
                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                 ),
                 HorizontalSlider(
@@ -252,7 +252,7 @@ function rgb_color_picker_demo()
                     on_state_change=(new_state) -> rgb_g_state[] = new_state
                 ),
                 Container(
-                    Text("$(rgb_g_state[].value)", style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                    Text("$(rgb_g_state[].value)", style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                 )
             ]),
@@ -260,7 +260,7 @@ function rgb_color_picker_demo()
             # Blue slider
             Row([
                 Container(
-                    Text("B:", style=TextStyle(color=Vec4f(0.5, 0.5, 1.0, 1.0), size_px=16)),
+                    Text("B:", style=TextStyle(color=Vec4f(0.5, 0.5, 1.0, 1.0), size_points=16)),
                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                 ),
                 HorizontalSlider(
@@ -270,7 +270,7 @@ function rgb_color_picker_demo()
                     on_state_change=(new_state) -> rgb_b_state[] = new_state
                 ),
                 Container(
-                    Text("$(rgb_b_state[].value)", style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                    Text("$(rgb_b_state[].value)", style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                 )
             ]),
@@ -280,7 +280,7 @@ function rgb_color_picker_demo()
                 Container(
                     Text(
                         "RGB($(rgb_r_state[].value), $(rgb_g_state[].value), $(rgb_b_state[].value))",
-                        style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_px=16)
+                        style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_points=16)
                     ),
                     style=ContainerStyle(
                         background_color=Vec4f(
@@ -300,11 +300,11 @@ function rgb_color_picker_demo()
             
             Text(
                 "Note: Step markers are hidden (marker_color=nothing) for clean appearance", 
-                style=TextStyle(color=Vec4f(0.6, 0.6, 0.6, 1.0), size_px=12)
+                style=TextStyle(color=Vec4f(0.6, 0.6, 0.6, 1.0), size_points=12)
             )
         ], spacing=15),
         style=dark_card_style,
-        title_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_px=16)
+        title_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_points=16)
     )
 end
 
@@ -346,12 +346,12 @@ dark_card_style = ContainerStyle(
 
 dark_text_style = TextStyle(
     color=Vec4f(0.9, 0.9, 0.9, 1.0),
-    size_px=14
+    size_points=14
 )
 
 dark_card_title_style = TextStyle(
     color=Vec4f(0.9, 0.9, 0.9, 1.0),
-    size_px=16
+    size_points=16
 )
 
 # Small slider style

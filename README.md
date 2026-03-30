@@ -28,7 +28,7 @@ function MyApp()
 end
 
 # Run the GUI:
-# Fugl.run(MyApp, title="Fugl Demo", window_width_px=812, window_height_px=300, fps_overlay=true)
+# Fugl.run(MyApp, title="Fugl Demo", window_width_points=812, window_height_points=300, fps_overlay=true)
 
 screenshot(MyApp, "row.png", 812, 300);
 ```

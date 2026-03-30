@@ -1,18 +1,38 @@
+using GeometryBasics: MMatrix
+
 function draw_text(
     font_face::FreeTypeAbstraction.FTFont,
     text::AbstractString,
-    x_px::Float32,
-    y_px::Float32,
-    pixelsize::Int,
+    x::Float32,
+    y::Float32,
+    size_points::Int,
     projection_matrix::Mat4{Float32},
     color::Vec4{Float32}
 )
-    # Snap position to pixel boundary for crisp text
-    snapped_x = Float32(round(x_px))
-    snapped_y = Float32(round(y_px))
+    # Convert effective coordinates to pixel coordinates for crisp text rendering
+    dpi_scaling = get_current_dpi_scaling()
+    system_dpi_ratio = get_system_dpi_ratio(dpi_scaling)
+    manual_scale = dpi_scaling[].manual_scale
+
+    # Scale coordinates by the same total factor used for glyph sizing
+    # This ensures alignment calculations match the glyph coordinate system
+    total_scale = manual_scale * system_dpi_ratio
+    pixel_x = x * total_scale
+    pixel_y = y * total_scale
+
+    # Round to whole pixels for crisp rendering
+    snapped_pixel_x = Float32(round(pixel_x))
+    snapped_pixel_y = Float32(round(pixel_y))
+
+    # Convert the passed projection matrix from points to pixels
+    # Scale the projection matrix to work with pixel coordinates
+    pixel_projection_matrix = MMatrix{4,4,Float32}(projection_matrix)
+    pixel_projection_matrix[1, 1] /= total_scale  # Scale x component for pixel coordinates
+    pixel_projection_matrix[2, 2] /= total_scale  # Scale y component for pixel coordinates
+    pixel_projection_matrix = Mat4{Float32}(pixel_projection_matrix)  # Convert back to SMatrix
 
     batch = get_global_text_batch()
-    return draw_text_batched(font_face, text, snapped_x, snapped_y, pixelsize, projection_matrix, color, batch)
+    return draw_text_batched(font_face, text, snapped_pixel_x, snapped_pixel_y, size_points, pixel_projection_matrix, color, batch)
 end
 
 
@@ -23,7 +43,7 @@ Draw a single glyph from the atlas texture with specified UV coordinates.
 """
 function draw_glyph_from_atlas(
     atlas_texture::GLAbstraction.Texture,
-    x_px::Float32, y_px::Float32,
+    x::Float32, y::Float32,
     width::Float32, height::Float32,
     u_min::Float32, v_min::Float32, u_max::Float32, v_max::Float32,
     projection_matrix::Mat4{Float32},
@@ -31,10 +51,10 @@ function draw_glyph_from_atlas(
 )
     # Define rectangle vertices
     positions = [
-        Point2f(x_px, y_px + height),           # Top-left
-        Point2f(x_px + width, y_px + height),   # Top-right
-        Point2f(x_px + width, y_px),            # Bottom-right
-        Point2f(x_px, y_px),                    # Bottom-left
+        Point2f(x, y + height),           # Top-left
+        Point2f(x + width, y + height),   # Top-right
+        Point2f(x + width, y),            # Bottom-right
+        Point2f(x, y),                    # Bottom-left
     ]
 
     # Define texture coordinates from atlas UV
@@ -87,7 +107,7 @@ This helps visualize what glyphs are actually stored in the atlas.
 """
 function draw_glyph_atlas_debug(
     atlas::GlyphAtlas,
-    x_px::Float32, y_px::Float32,
+    x::Float32, y::Float32,
     scale::Float32,
     projection_matrix::Mat4{Float32}
 )
@@ -96,10 +116,10 @@ function draw_glyph_atlas_debug(
 
     # Define rectangle vertices for the full atlas
     positions = [
-        Point2f(x_px, y_px + atlas_height),           # Top-left
-        Point2f(x_px + atlas_width, y_px + atlas_height),   # Top-right
-        Point2f(x_px + atlas_width, y_px),            # Bottom-right
-        Point2f(x_px, y_px),                          # Bottom-left
+        Point2f(x, y + atlas_height),           # Top-left
+        Point2f(x + atlas_width, y + atlas_height),   # Top-right
+        Point2f(x + atlas_width, y),            # Bottom-right
+        Point2f(x, y),                          # Bottom-left
     ]
 
     # Define texture coordinates to show the entire atlas
@@ -205,15 +225,23 @@ function draw_text_batched(
     text::AbstractString,
     x_px::Float32,
     y_px::Float32,
-    pixelsize::Int,
+    size_points::Int,
     projection_matrix::Mat4{Float32},
     color::Vec4{Float32},
     batch::GlyphBatch=GlyphBatch()
 )
+    # Convert from points to pixel coordinates for crisp rendering
+    # Use both manual_scale and system_dpi_ratio for proper pixel sizing
+    dpi_scaling = get_current_dpi_scaling()
+    system_dpi_ratio = get_system_dpi_ratio(dpi_scaling)
+    manual_scale = dpi_scaling[].manual_scale
+
+    # Scale size by both manual scale and system DPI ratio for pixel-perfect rendering
+    pixel_size = Int(round(Float32(size_points) * manual_scale * system_dpi_ratio))
+
     atlas = get_glyph_atlas()
     current_x = 0.0f0  # Start at 0, will be transformed relative to origin
     prev_char::Union{Char,Nothing} = nothing
-
     # Clear the batch for reuse
     clear_batch!(batch)
 
@@ -225,8 +253,8 @@ function draw_text_batched(
             current_x += kx
         end
 
-        # Get glyph from atlas
-        glyph_uv = get_or_insert_glyph!(atlas, font_face, char, pixelsize)
+        # Get glyph from atlas using pixel size for pixel coordinate rendering
+        glyph_uv = get_or_insert_glyph!(atlas, font_face, char, pixel_size)
 
         # Add to batch if it has content
         if glyph_uv.width > 0 && glyph_uv.height > 0
@@ -266,11 +294,32 @@ function draw_multiline_text_batched(
     lines::Vector{String},
     x_positions::Vector{Float32},
     y_positions::Vector{Float32},
-    pixelsize::Int,
-    projection_matrix::Mat4{Float32},
+    size_points::Int,
+    projection_matrix_points::Mat4{Float32},
     color::Vec4{Float32},
     batch::GlyphBatch=GlyphBatch()
 )
+    # Use pixel-based scaling for crisp rendering (matches draw_text_batched)
+    dpi_scaling = get_current_dpi_scaling()
+    system_dpi_ratio = get_system_dpi_ratio(dpi_scaling)
+    manual_scale = dpi_scaling[].manual_scale
+    # Scale size by both manual scale and system DPI ratio for pixel-perfect rendering
+    pixel_size = Int(round(Float32(size_points) * manual_scale * system_dpi_ratio))
+
+    # Convert position arrays from effective coordinates to pixel coordinates 
+    # (matches draw_text coordinate conversion)
+    total_scale = manual_scale * system_dpi_ratio
+    pixel_x_positions = [Float32(round(x * total_scale)) for x in x_positions]
+    pixel_y_positions = [Float32(round(y * total_scale)) for y in y_positions]
+
+    # Convert the passed projection matrix from points to pixels
+    # The projection matrix is already set up for the correct rendering target (window or framebuffer)
+    # We just need to scale it to work with pixel coordinates instead of point coordinates
+    pixel_projection_matrix = MMatrix{4,4,Float32}(projection_matrix_points)
+    pixel_projection_matrix[1, 1] /= total_scale  # Scale x component for pixel coordinates
+    pixel_projection_matrix[2, 2] /= total_scale  # Scale y component for pixel coordinates
+    pixel_projection_matrix = Mat4{Float32}(pixel_projection_matrix)  # Convert back to SMatrix
+
     atlas = get_glyph_atlas()
 
     # Clear the batch for reuse
@@ -278,12 +327,12 @@ function draw_multiline_text_batched(
 
     # Process all lines and collect all glyphs into the batch
     for (line_idx, line) in enumerate(lines)
-        if line_idx > length(x_positions) || line_idx > length(y_positions)
+        if line_idx > length(pixel_x_positions) || line_idx > length(pixel_y_positions)
             break
         end
 
-        line_origin_x = x_positions[line_idx]
-        line_origin_y = y_positions[line_idx]
+        line_origin_x = pixel_x_positions[line_idx]
+        line_origin_y = pixel_y_positions[line_idx]
         current_x = 0.0f0  # Start at 0, will be transformed relative to line origin
         prev_char::Union{Char,Nothing} = nothing
 
@@ -295,8 +344,8 @@ function draw_multiline_text_batched(
                 current_x += kx
             end
 
-            # Get glyph from atlas
-            glyph_uv = get_or_insert_glyph!(atlas, font_face, char, pixelsize)
+            # Get glyph from atlas using pixel size (matches other text functions)
+            glyph_uv = get_or_insert_glyph!(atlas, font_face, char, pixel_size)
 
             # Add to batch if it has content
             if glyph_uv.width > 0 && glyph_uv.height > 0
@@ -322,8 +371,8 @@ function draw_multiline_text_batched(
         end
     end
 
-    # Render the entire batch with all lines
-    render_glyph_batch!(batch, atlas.texture, projection_matrix, color)
+    # Render the entire batch with all lines using pixel coordinate system
+    render_glyph_batch!(batch, atlas.texture, pixel_projection_matrix, color)
 
     return batch
 end

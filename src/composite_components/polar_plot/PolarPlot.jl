@@ -73,53 +73,59 @@ end
 
 function interpret_view(
     view::PolarPlotView,
-    x::Float32,
-    y::Float32,
-    width::Float32,
-    height::Float32,
+    x_points::Float32,
+    y_points::Float32,
+    width_points::Float32,
+    height_points::Float32,
     projection_matrix::Mat4{Float32},
     mouse_x::Float32,
     mouse_y::Float32
 )
-    # Get plot render cache
-    cache = get_render_cache(view.state.cache_id)
+    # Get DPI scaling to convert logical points to pixel coordinates
+    dpi_scaling = get_current_dpi_scaling()
+    scale_factor = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
 
-    cache_width = Int32(round(width))
-    cache_height = Int32(round(height))
+    # The framebuffer is rendered in pixel coordinates to get the highest quality
+    cache_width_pixels = Int32(round(width_points * scale_factor))
+    cache_height_pixels = Int32(round(height_points * scale_factor))
 
-    if cache_width <= 0 || cache_height <= 0
+    if cache_width_pixels <= 0 || cache_height_pixels <= 0
         return
     end
 
+    # Get plot render cache
+    cache = get_render_cache(view.state.cache_id)
+
     # Generate content hash
     content_hash = hash((view.elements, view.state, view.style))
-    bounds = (x, y, width, height)
+    bounds_points = (x_points, y_points, width_points, height_points)
+    bounds_pixels = (Float32(x_points) * scale_factor, Float32(y_points) * scale_factor, Float32(width_points) * scale_factor, Float32(height_points) * scale_factor)
 
     # Check if we need to redraw
-    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds_pixels)
 
     if needs_redraw || !cache.is_valid
-        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
-            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
+        if cache.framebuffer === nothing || cache.cache_width != cache_width_pixels || cache.cache_height != cache_height_pixels
+            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width_pixels, cache_height_pixels; with_depth=false)
+            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds_pixels)
         else
-            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds_pixels)
         end
 
         # Render to framebuffer
-        render_polar_plot_to_framebuffer(view, cache, width, height, projection_matrix)
+        render_polar_plot_to_framebuffer(view, cache, width_points, height_points, projection_matrix)
     end
 
-    if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0
-        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
+    if cache.is_valid && cache.color_texture !== nothing && cache_width_pixels > 0 && cache_height_pixels > 0
+        draw_cached_texture(cache.color_texture, x_points, y_points, width_points, height_points, projection_matrix)
     end
 end
 
 function render_polar_plot_to_framebuffer(
     view::PolarPlotView,
     cache::RenderCache,
-    width::Float32,
-    height::Float32,
+    width_points::Float32,
+    height_points::Float32,
     projection_matrix::Mat4{Float32}
 )
     push_framebuffer!(cache.framebuffer)
@@ -131,11 +137,11 @@ function render_polar_plot_to_framebuffer(
         ModernGL.glClearColor(bg[1], bg[2], bg[3], bg[4])
         ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
 
-        # Create framebuffer-specific projection matrix
-        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+        # Create framebuffer-specific projection matrix in points
+        fb_projection = get_orthographic_matrix(0.0f0, width_points, height_points, 0.0f0, -1.0f0, 1.0f0)
 
         # Render content
-        render_polar_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+        render_polar_content(view, 0.0f0, 0.0f0, width_points, height_points, fb_projection)
     finally
         pop_viewport!()
         pop_framebuffer!()
@@ -308,7 +314,7 @@ function render_polar_content(
             state.r_max,
             state.theta_start,
             style.label_color,
-            style.label_size_px,
+            style.label_size_points,
             projection_matrix
         )
     end
@@ -327,7 +333,7 @@ function render_polar_content(
             state.theta_direction,
             state.angular_label_format,
             style.label_color,
-            style.label_size_px,
+            style.label_size_points,
             projection_matrix
         )
     end

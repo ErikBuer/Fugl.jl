@@ -69,13 +69,20 @@ function apply_layout(view::PlotView, x::Float32, y::Float32, width::Float32, he
     return (x, y, width, height)
 end
 
-function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
-    bounds = (x, y, width, height)
-    cache_width = Int32(round(width))
-    cache_height = Int32(round(height))
+function interpret_view(view::PlotView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+    # Get DPI scaling to convert logical points to pixel coordinates
+    dpi_scaling = get_current_dpi_scaling()
+    scale_factor = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
+
+    # The framebuffer is rendered in pixel coordinates to get the highest quality.
+    cache_width_pixels = Int32(round(width_points * scale_factor))
+    cache_height_pixels = Int32(round(height_points * scale_factor))
+
+    bounds_points = (x_points, y_points, width_points, height_points)
+    bounds_pixels = (Float32(x_points) * scale_factor, Float32(y_points) * scale_factor, Float32(width_points) * scale_factor, Float32(height_points) * scale_factor)
 
     # Ensure minimum cache size to avoid zero-sized framebuffers
-    if cache_width <= 0 || cache_height <= 0
+    if cache_width_pixels <= 0 || cache_height_pixels <= 0
         return  # Skip rendering if size is invalid
     end
 
@@ -86,29 +93,29 @@ function interpret_view(view::PlotView, x::Float32, y::Float32, width::Float32, 
     content_hash = hash((view.elements, view.state, view.style))
 
     # Check if we need to invalidate cache
-    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds_pixels)
 
     if needs_redraw || !cache.is_valid
-        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
+        if cache.framebuffer === nothing || cache.cache_width != cache_width_pixels || cache.cache_height != cache_height_pixels
+            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width_pixels, cache_height_pixels; with_depth=false)
 
             # Update cache with new framebuffer and content hash
-            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
+            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds_pixels)
         else
             # Update cache with existing framebuffer and new content hash
-            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds_pixels)
         end
 
         # Render to framebuffer
-        render_plot_to_framebuffer(view, cache, width, height, projection_matrix)
+        render_plot_to_framebuffer(view, cache, width_points, height_points, projection_matrix)
     end
 
-    if cache.is_valid && cache.color_texture !== nothing && cache_width > 0 && cache_height > 0 # TODO this seems to be the same check as above
-        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
+    if cache.is_valid && cache.color_texture !== nothing && cache_width_pixels > 0 && cache_height_pixels > 0 # TODO this seems to be the same check as above
+        draw_cached_texture(cache.color_texture, x_points, y_points, width_points, height_points, projection_matrix)
     end
 end
 
-function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32})
     state = view.state
     style = view.style
     elements = view.elements
@@ -123,10 +130,10 @@ function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::F
         ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
 
         # Create framebuffer-specific projection matrix
-        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+        fb_projection = get_orthographic_matrix(0.0f0, width_points, height_points, 0.0f0, -1.0f0, 1.0f0)
 
         # Render plot content to framebuffer
-        render_plot_content(view, 0.0f0, 0.0f0, width, height, fb_projection)
+        render_plot_content(view, 0.0f0, 0.0f0, width_points, height_points, fb_projection)
     finally
         # Always restore previous framebuffer and viewport, even if there's an exception
         pop_viewport!()
@@ -134,21 +141,25 @@ function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width::F
     end
 end
 
-function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
+function render_plot_content(view::PlotView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix_points::Mat4{Float32})
     state = view.state
     style = view.style
     elements = view.elements
 
     # Calculate plot area (subtract padding)
-    plot_x = x + style.padding
-    plot_y = y + style.padding
-    plot_width = width - 2 * style.padding
-    plot_height = height - 2 * style.padding
+    plot_x = x_points + style.padding
+    plot_y = y_points + style.padding
+    plot_width = width_points - 2 * style.padding
+    plot_height = height_points - 2 * style.padding
+
+    screen_bounds_points = Rectangle(x_points, y_points, width_points, height_points)
+
 
     if plot_width <= 0 || plot_height <= 0 || isempty(elements)
         return  # Not enough space or no data to draw
     end
 
+    # TODO change this to use a transformation matrix.
     # Transform data coordinates to screen coordinates
     function data_to_screen(data_x::Float32, data_y::Float32)::Tuple{Float32,Float32}
         # Map from effective bounds (considering zoom state) to plot area
@@ -167,7 +178,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
         effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
-        screen_bounds = Rectangle(x, y, width, height)
+
 
         draw_grid(
             effective_bounds,
@@ -177,7 +188,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
             style.grid_color,
             style.grid_width,
             DOT,  # DOT line style for grid
-            projection_matrix;
+            projection_matrix_points;
             anti_aliasing_width=style.anti_aliasing_width
         )
     end
@@ -187,17 +198,16 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
         effective_bounds = get_effective_bounds(state, elements)
         x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
         y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
-        screen_bounds = Rectangle(x, y, width, height)
 
         draw_axes_with_labels(
             effective_bounds,
             x_ticks,
             y_ticks,
             data_to_screen,
-            screen_bounds,
+            screen_bounds_points,
             style.axis_color,
             4.0f0,  # Axis line width
-            projection_matrix;
+            projection_matrix_points;
             label_color=style.axis_color,
             axis_color=style.axis_color,
             label_offset_px=5.0f0,
@@ -225,7 +235,7 @@ function render_plot_content(view::PlotView, x::Float32, y::Float32, width::Floa
     for element in elements
         # Skip muted elements
         if !element.muted
-            draw_plot_element_culled(element, data_to_screen, projection_matrix, style, effective_bounds)
+            draw_plot_element_culled(element, data_to_screen, projection_matrix_points, style, effective_bounds)
         end
     end
 end

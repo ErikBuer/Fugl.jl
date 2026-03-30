@@ -22,7 +22,7 @@ function hash_text_content(text::String, style::Any, is_focused::Bool, cursor_po
 
     # Hash relevant style properties that affect rendering
     h = hash((
-            style.text_style.size_px,
+            style.text_style.size_points,
             style.text_style.color,
             style.background_color_focused,
             style.background_color_unfocused,

@@ -37,7 +37,7 @@ const DEFAULT_PRESSED_STYLE = ContainerStyle(
 
 const BUTTON_TEXT_STYLE = TextStyle(
     color=DARK_TEXT,
-    size_px=14
+    size_points=14
 )
 
 const CUSTOM_STYLE = ContainerStyle(
@@ -66,22 +66,22 @@ const CUSTOM_PRESSED_STYLE = ContainerStyle(
 
 const CUSTOM_TEXT_STYLE = TextStyle(
     color=Vec4f(1.0, 1.0, 1.0, 1.0),
-    size_px=14
+    size_points=14
 )
 
 const TITLE_TEXT_STYLE = TextStyle(
     color=DARK_TEXT,
-    size_px=16
+    size_points=16
 )
 
 const INFO_TEXT_STYLE = TextStyle(
     color=Vec4f(0.7, 0.7, 0.7, 1.0),
-    size_px=12
+    size_points=12
 )
 
 const HELP_TEXT_STYLE = TextStyle(
     color=Vec4f(0.6, 0.6, 0.6, 1.0),
-    size_px=10
+    size_points=10
 )
 
 const INFO_CONTAINER_STYLE = ContainerStyle(
@@ -187,4 +187,4 @@ function HoverDemo()
 end
 
 # Run the hover demo
-Fugl.run(HoverDemo, title="Dark Mode Hover Demo", window_width_px=650, window_height_px=500, fps_overlay=true)
+Fugl.run(HoverDemo, title="Dark Mode Hover Demo", window_width_points=650, window_height_points=500, fps_overlay=true)

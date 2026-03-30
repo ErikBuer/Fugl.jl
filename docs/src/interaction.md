@@ -49,7 +49,7 @@ function MyApp()
     Container(
         KeyListener(
             Container(
-                Fugl.Text(message[], style=TextStyle(size_px=16)),
+                Fugl.Text(message[], style=TextStyle(size_points=16)),
                 style=ContainerStyle(
                     padding=20.0f0,
                     background_color=Vec4f(0.9, 0.9, 0.95, 1.0),

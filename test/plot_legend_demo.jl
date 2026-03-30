@@ -43,8 +43,8 @@ plot_card_style = ContainerStyle(
     corner_radius=6.0f0
 )
 
-title_text_style = TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
-legend_text_style = TextStyle(size_px=12, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+title_text_style = TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+legend_text_style = TextStyle(size_points=12, color=Vec4f(0.9, 0.9, 0.95, 1.0))
 
 function MyApp()
     # Generate sample data
@@ -105,4 +105,4 @@ function MyApp()
     )
 end
 
-Fugl.run(MyApp, title="Plot Legend Demo", window_width_px=1000, window_height_px=700, fps_overlay=true)
+Fugl.run(MyApp, title="Plot Legend Demo", window_width_points=1000, window_height_points=700, fps_overlay=true)

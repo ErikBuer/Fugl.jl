@@ -165,7 +165,7 @@ function render_line_from_cache(
     font,
     x::Float32,
     y::Float32,
-    size_px::Int,
+    size_points::Int,
     projection_matrix;
     visible_width::Union{Float32,Nothing}=nothing,
     start_x::Union{Float32,Nothing}=nothing
@@ -188,10 +188,10 @@ function render_line_from_cache(
         if pos > current_pos
             gap = line[current_pos:pos-1]
             if !isempty(gap)
-                gap_width = measure_word_width(font, gap, size_px)
+                gap_width = measure_word_width(font, gap, size_points)
                 # Only draw if within visible bounds
                 if !cull_enabled || (current_x < max_x && current_x + gap_width > min_x)
-                    draw_text(font, gap, current_x, y, size_px, projection_matrix, default_color)
+                    draw_text(font, gap, current_x, y, size_points, projection_matrix, default_color)
                 end
                 current_x += gap_width
             end
@@ -199,10 +199,10 @@ function render_line_from_cache(
 
         # Draw the token
         if !isempty(text)
-            text_width = measure_word_width(font, text, size_px)
+            text_width = measure_word_width(font, text, size_points)
             # Only draw if within visible bounds
             if !cull_enabled || (current_x < max_x && current_x + text_width > min_x)
-                draw_text(font, text, current_x, y, size_px, projection_matrix, color)
+                draw_text(font, text, current_x, y, size_points, projection_matrix, color)
             end
             current_x += text_width
         end
@@ -214,10 +214,10 @@ function render_line_from_cache(
     if current_pos <= length(line)
         remaining = line[current_pos:end]
         if !isempty(remaining)
-            remaining_width = measure_word_width(font, remaining, size_px)
+            remaining_width = measure_word_width(font, remaining, size_points)
             # Only draw if within visible bounds
             if !cull_enabled || (current_x < max_x && current_x + remaining_width > min_x)
-                draw_text(font, remaining, current_x, y, size_px, projection_matrix, default_color)
+                draw_text(font, remaining, current_x, y, size_points, projection_matrix, default_color)
             end
         end
     end
@@ -642,7 +642,7 @@ This is a generic function that works for both CodeEditor and TextBox.
 function mouse_to_cursor_position(
     editor_state::EditorState,
     font,
-    size_px::Int,
+    size_points::Int,
     padding::Float32,
     mouse_x::Float32,
     mouse_y::Float32,
@@ -652,15 +652,15 @@ function mouse_to_cursor_position(
     height::Float32
 )::CursorPosition
     # Calculate which line the mouse is on
-    text_start_y = y + size_px + padding
-    line_height = Float32(size_px * 1.2)
+    text_start_y = y + size_points + padding
+    line_height = Float32(size_points * 1.2)
 
     lines = get_lines(editor_state)
 
     # Calculate line number (1-based), accounting for vertical scroll
     # We need to account for the fact that text is rendered at the baseline
     # The first line starts at text_start_y, so we adjust accordingly
-    relative_y = Float32(mouse_y) - (text_start_y - size_px / 2)  # Adjust to center of first line
+    relative_y = Float32(mouse_y) - (text_start_y - size_points / 2)  # Adjust to center of first line
     visible_line_index = max(1, Int(round(relative_y / line_height)) + 1)
 
     # Account for vertical scroll offset
@@ -700,7 +700,7 @@ function mouse_to_cursor_position(
 
     for (i, char) in enumerate(chars)
         # Measure width of this character
-        char_width = measure_word_width(font, string(char), size_px)
+        char_width = measure_word_width(font, string(char), size_points)
 
         # If we're past the halfway point of this character, cursor goes after it
         if relative_x <= current_x + char_width / 2
@@ -937,7 +937,7 @@ Ensure the cursor is visible by adjusting scroll offsets if needed.
 Arguments:
 - `state`: Current editor state
 - `font`: Font used for rendering text
-- `size_px`: Font size in pixels
+- `size_points`: Font size in pixels
 - `visible_width`: Width of the visible area in pixels (excluding padding)
 - `visible_height`: Height of the visible area in pixels (excluding padding)
 - `padding`: Padding around the text
@@ -947,7 +947,7 @@ Returns a new EditorState with adjusted scroll offsets if the cursor was out of 
 function ensure_cursor_visible(
     state::EditorState,
     font,
-    size_px::Int,
+    size_points::Int,
     visible_width::Float32,
     visible_height::Float32,
     padding::Float32
@@ -956,7 +956,7 @@ function ensure_cursor_visible(
     cursor = state.cursor
 
     # Calculate line height
-    line_height = Float32(size_px * 1.2)
+    line_height = Float32(size_points * 1.2)
 
     # Calculate visible lines
     visible_lines = max(1, Int(floor(visible_height / line_height)))
@@ -988,11 +988,11 @@ function ensure_cursor_visible(
         cursor_x = 0.0f0
         if cursor.column > 1
             text_before_cursor = join(chars[1:min(cursor.column - 1, length(chars))])
-            cursor_x = measure_word_width(font, text_before_cursor, size_px)
+            cursor_x = measure_word_width(font, text_before_cursor, size_points)
         end
 
         # Add some margin (e.g., half a character width) for better UX
-        char_width = measure_word_width(font, "W", size_px)  # Use 'W' as average char width
+        char_width = measure_word_width(font, "W", size_points)  # Use 'W' as average char width
         margin = char_width * 0.5f0
 
         # If cursor is to the left of visible area, scroll left

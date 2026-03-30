@@ -1,6 +1,6 @@
 struct TextStyle
     font_cache_key::Symbol
-    size_px::Int
+    size_points::Int
     color::Vec4{Float32}  # RGBA color
 end
 
@@ -14,7 +14,7 @@ function get_font(style::TextStyle)::FreeTypeAbstraction.FTFont
 end
 
 """
-    TextStyle(; font_cache_key=DEFAULT_FONT_CACHE_KEY, size_px=16, color=Vec{4,Float32}(0.0, 0.0, 0.0, 1.0))
+    TextStyle(; font_cache_key=DEFAULT_FONT_CACHE_KEY, size_points=16, color=Vec{4,Float32}(0.0, 0.0, 0.0, 1.0))
 
 Create a TextStyle with the specified font cache key, size, and color.
 
@@ -24,19 +24,19 @@ By default, uses the default font cache key (a Symbol for optimal performance).
 # Example
 ```julia
 # Use default font
-style = TextStyle(size_px=20)
+style = TextStyle(size_points=20)
 
 # Use a custom font
 Fugl.get_font_by_path(:my_font, "/path/to/font.ttf")
-style = TextStyle(font_cache_key=:my_font, size_px=20)
+style = TextStyle(font_cache_key=:my_font, size_points=20)
 ```
 """
 function TextStyle(;
     font_cache_key::Symbol=DEFAULT_FONT_CACHE_KEY,
-    size_px=16,
+    size_points=16,
     color=Vec{4,Float32}(0.0, 0.0, 0.0, 1.0),
 )
-    return TextStyle(font_cache_key, size_px, color)
+    return TextStyle(font_cache_key, size_points, color)
 end
 
 """
@@ -44,10 +44,10 @@ Copy constructor for TextStyle that allows overriding specific fields.
 """
 function TextStyle(base::TextStyle;
     font_cache_key=base.font_cache_key,
-    size_px=base.size_px,
+    size_points=base.size_points,
     color=base.color
 )
-    return TextStyle(font_cache_key, size_px, color)
+    return TextStyle(font_cache_key, size_points, color)
 end
 
 """
@@ -57,7 +57,7 @@ Measure the width of a word using a TextStyle. Convenience function that extract
 """
 function measure_word_width_cached(style::TextStyle, word::AbstractString)::Float32
     font = get_font(style)
-    return measure_word_width_cached(font, word, style.size_px)
+    return measure_word_width_cached(font, word, style.size_points)
 end
 
 """
@@ -67,5 +67,5 @@ Measure the width of a word using a TextStyle. Convenience function that extract
 """
 function measure_word_width(style::TextStyle, word::AbstractString)::Float32
     font = get_font(style)
-    return measure_word_width(font, word, style.size_px)
+    return measure_word_width(font, word, style.size_points)
 end

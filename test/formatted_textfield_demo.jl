@@ -76,7 +76,7 @@ function main()
     end
 
     # Run the GUI
-    Fugl.run(MyApp, title="FormattedTextField Demo", window_width_px=812, window_height_px=600, fps_overlay=true)
+    Fugl.run(MyApp, title="FormattedTextField Demo", window_width_points=812, window_height_points=600, fps_overlay=true)
 end
 
 main()

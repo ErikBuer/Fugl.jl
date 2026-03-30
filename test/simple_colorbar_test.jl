@@ -22,4 +22,4 @@ end
 
 # Run the simple test
 println("Starting simple colorbar test...")
-Fugl.run(simple_colorbar_test, title="Simple Colorbar Test", window_width_px=300, window_height_px=500)
+Fugl.run(simple_colorbar_test, title="Simple Colorbar Test", window_width_points=300, window_height_points=500)

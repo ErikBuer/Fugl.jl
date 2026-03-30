@@ -86,7 +86,7 @@ If already cached with this key, returns the cached font.
 ```julia
 # Load a custom font with an explicit cache key
 get_font_by_path(:my_title_font, "/path/to/font.ttf")
-style = TextStyle(font_cache_key=:my_title_font, size_px=32)
+style = TextStyle(font_cache_key=:my_title_font, size_points=32)
 ```
 """
 function get_font_by_path(cache_key::Symbol, font_path::String)::FreeTypeAbstraction.FTFont
@@ -116,7 +116,7 @@ If already cached with this key, returns the cached font.
 ```julia
 # Load a system font
 get_font_by_name(:my_system_font, "Arial")
-style = TextStyle(font_cache_key=:my_system_font, size_px=16)
+style = TextStyle(font_cache_key=:my_system_font, size_points=16)
 ```
 """
 function get_font_by_name(cache_key::Symbol, font_name::String)::FreeTypeAbstraction.FTFont

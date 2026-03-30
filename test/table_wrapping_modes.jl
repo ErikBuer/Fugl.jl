@@ -19,7 +19,7 @@ function test_wrapping_modes()
             cell_padding=8.0f0,
             show_grid=true,
             header_background_color=Vec4f(0.7, 0.7, 0.9, 1.0),
-            header_text_style=TextStyle(size_px=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+            header_text_style=TextStyle(size_points=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
             cell_background_color=Vec4f(1.0, 1.0, 1.0, 1.0)
         )
 
@@ -29,7 +29,7 @@ function test_wrapping_modes()
             cell_padding=8.0f0,
             show_grid=true,
             header_background_color=Vec4f(0.7, 0.7, 0.9, 1.0),
-            header_text_style=TextStyle(size_px=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+            header_text_style=TextStyle(size_points=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
             cell_background_color=Vec4f(1.0, 1.0, 1.0, 1.0)
         )
 
@@ -39,7 +39,7 @@ function test_wrapping_modes()
             cell_padding=8.0f0,
             show_grid=true,
             header_background_color=Vec4f(0.7, 0.7, 0.9, 1.0),
-            header_text_style=TextStyle(size_px=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+            header_text_style=TextStyle(size_points=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
             cell_background_color=Vec4f(1.0, 1.0, 1.0, 1.0)
         )        # Create three tables to show different modes
         IntrinsicColumn([
@@ -50,7 +50,7 @@ function test_wrapping_modes()
             ], spacing=20.0f0, padding=20.0f0)
     end
 
-    Fugl.run(MyApp, title="Table Wrapping Modes Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
+    Fugl.run(MyApp, title="Table Wrapping Modes Demo", window_width_points=800, window_height_points=600, fps_overlay=true)
 end
 
 test_wrapping_modes()

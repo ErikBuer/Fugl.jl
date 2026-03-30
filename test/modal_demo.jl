@@ -58,7 +58,7 @@ modal_card_style = ContainerStyle(
     corner_radius=8.0f0
 )
 
-title_text_style = TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+title_text_style = TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
 
 # Button interaction state
 button_state = Ref(InteractionState())
@@ -107,4 +107,4 @@ function MyApp()
     )
 end
 
-Fugl.run(MyApp, title="Modal Demo", window_width_px=800, window_height_px=600, fps_overlay=true)
+Fugl.run(MyApp, title="Modal Demo", window_width_points=800, window_height_points=600, fps_overlay=true)

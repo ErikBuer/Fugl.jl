@@ -35,7 +35,7 @@ function main()
                         interaction_state=left_button_state[],
                         on_interaction_state_change=(new_state) -> left_button_state[] = new_state
                     ),
-                    Fugl.Text("Clicks: $(left_clicks[])", style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
+                    Fugl.Text("Clicks: $(left_clicks[])", style=TextStyle(size_points=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
                 ], spacing=10.0f0),
             style=ContainerStyle(
                 background_color=Vec4f(0.9, 0.9, 1.0, 1.0),  # Light blue
@@ -55,7 +55,7 @@ function main()
                         interaction_state=right_button_state[],
                         on_interaction_state_change=(new_state) -> right_button_state[] = new_state
                     ),
-                    Fugl.Text("Clicks: $(right_clicks[])", style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
+                    Fugl.Text("Clicks: $(right_clicks[])", style=TextStyle(size_points=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
                 ], spacing=10.0f0),
             style=ContainerStyle(
                 background_color=Vec4f(1.0, 0.9, 0.9, 1.0),  # Light red
@@ -105,9 +105,9 @@ function main()
                         on_select=(value, index) -> println("Dropdown selected: $value (index: $index)")
                     ),
                     Fugl.Text("Selected: $(dropdown_state[].options[dropdown_state[].selected_index])",
-                        style=TextStyle(size_px=12, color=Vec4f(0.4, 0.4, 0.4, 1.0))),
+                        style=TextStyle(size_points=12, color=Vec4f(0.4, 0.4, 0.4, 1.0))),
                     Fugl.Text("Top clicks: $(top_clicks[]) | Total: $(left_clicks[] + right_clicks[] + top_clicks[])",
-                        style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
+                        style=TextStyle(size_points=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
                 ], spacing=10.0f0),
             style=ContainerStyle(
                 background_color=Vec4f(0.9, 1.0, 0.9, 1.0),  # Light green
@@ -128,7 +128,7 @@ function main()
     end
 
     # Run the GUI - SplitDemo function will be called each frame
-    Fugl.run(SplitDemo, title="Split Container Demo - Immutable", window_width_px=1200, window_height_px=812, fps_overlay=true)
+    Fugl.run(SplitDemo, title="Split Container Demo - Immutable", window_width_points=1200, window_height_points=812, fps_overlay=true)
 end
 
 main()

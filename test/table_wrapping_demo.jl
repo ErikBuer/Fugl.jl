@@ -17,9 +17,9 @@ function test_table_text_wrapping()
         # Create table with text wrapping enabled
         table_style = TableStyle(
             header_background_color=Vec4f(0.7, 0.7, 0.9, 1.0),
-            header_text_style=TextStyle(size_px=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+            header_text_style=TextStyle(size_points=16, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
             header_height=35.0f0, cell_background_color=Vec4f(0.98, 0.98, 0.98, 1.0),
-            cell_text_style=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+            cell_text_style=TextStyle(size_points=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
             cell_height=60.0f0,  # Taller cells to accommodate wrapped text
 
             # Text wrapping settings
@@ -55,7 +55,7 @@ function test_table_text_wrapping()
         )
     end
 
-    Fugl.run(MyApp, title="Table Text Wrapping Demo", window_width_px=1200, window_height_px=700, fps_overlay=true)
+    Fugl.run(MyApp, title="Table Text Wrapping Demo", window_width_points=1200, window_height_points=700, fps_overlay=true)
 end
 
 test_table_text_wrapping()

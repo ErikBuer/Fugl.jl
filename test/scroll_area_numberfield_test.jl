@@ -57,7 +57,7 @@ card_style = ContainerStyle(
 
 # Dark theme card title style
 card_title_style = TextStyle(
-    size_px=18,
+    size_points=18,
     color=DARK_TEXT
 )
 
@@ -81,7 +81,7 @@ number_field_style = TextBoxStyle(
     selection_color=Vec4f(0.4, 0.6, 0.9, 0.5),
     text_style=TextStyle(
         color=DARK_TEXT,
-        size_px=14
+        size_points=14
     )
 )
 
@@ -97,13 +97,13 @@ text_field_style = TextBoxStyle(
     selection_color=Vec4f(0.4, 0.6, 0.9, 0.5),
     text_style=TextStyle(
         color=DARK_TEXT,
-        size_px=14
+        size_points=14
     )
 )
 
 # Dark theme text style for labels
 label_text_style = TextStyle(
-    size_px=14,
+    size_points=14,
     color=DARK_TEXT
 )
 
@@ -117,7 +117,7 @@ inactive_button_style = ContainerStyle(
 
 button_text_style = TextStyle(
     color=DARK_TEXT,                                  # Light text
-    size_px=14
+    size_points=14
 )
 
 function create_parameter_form()
@@ -240,7 +240,7 @@ initialize_test_data!()
 # Run the test
 Fugl.run(test_scroll_area_numberfields,
     title="Scroll Area NumberField Test - Troubleshooting",
-    window_width_px=700,
-    window_height_px=600,
+    window_width_points=700,
+    window_height_points=600,
     fps_overlay=true
 )

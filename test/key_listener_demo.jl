@@ -9,8 +9,8 @@ function MyApp()
     # Create a simple container with text
     content = Container(
         Column([
-            Fugl.Text(message[], style=TextStyle(size_px=16)),
-            Fugl.Text("Counter: $(counter[])", style=TextStyle(size_px=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))
+            Fugl.Text(message[], style=TextStyle(size_points=16)),
+            Fugl.Text("Counter: $(counter[])", style=TextStyle(size_points=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))
         ]),
         style=ContainerStyle(padding=20.0f0)
     )
@@ -53,4 +53,4 @@ println("  - A: Increment counter")
 println("  - Ctrl+S: Add 5 to counter")
 println("  - Enter: Reset counter")
 
-Fugl.run(MyApp, title="KeyListener Demo - Keyboard Shortcuts", window_width_px=500, window_height_px=200)
+Fugl.run(MyApp, title="KeyListener Demo - Keyboard Shortcuts", window_width_points=500, window_height_points=200)

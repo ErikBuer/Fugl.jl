@@ -14,7 +14,7 @@ dropdown_state = Ref(DropdownState(options; selected_index=1, is_open=true)) # f
 
 # Custom styling
 dropdown_style = DropdownStyle(
-    text_style=TextStyle(size_px=14.0f0),
+    text_style=TextStyle(size_points=14.0f0),
     corner_radius=6.0f0,
     padding=12.0f0,
     item_height_px=32.0f0,
@@ -61,13 +61,13 @@ dark_card_style = ContainerStyle(
 
 # Dark theme title style
 dark_title_style = TextStyle(
-    size_px=18,
+    size_points=18,
     color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
 )
 
 # Dark theme dropdown style
 dark_dropdown_style = DropdownStyle(
-    text_style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0)),  # Light text
+    text_style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0)),  # Light text
     background_color=Vec4f(0.08, 0.10, 0.14, 1.0),                       # Very dark background
     background_color_hover=Vec4f(0.12, 0.14, 0.18, 1.0),                 # Slightly lighter on hover
     background_color_open=Vec4f(0.06, 0.08, 0.12, 1.0),                  # Even darker when open

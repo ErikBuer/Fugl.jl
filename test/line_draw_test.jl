@@ -65,4 +65,4 @@ function MyApp()
         ], padding=10.0, spacing=10.0)
 end
 
-Fugl.run(MyApp, title="Line Drawing Test", window_width_px=450, window_height_px=400, fps_overlay=true)
+Fugl.run(MyApp, title="Line Drawing Test", window_width_points=450, window_height_points=400, fps_overlay=true)

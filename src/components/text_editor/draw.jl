@@ -4,7 +4,7 @@ Returns (visible_text, start_x_offset) where:
 - visible_text is the substring that should be drawn
 - start_x_offset is how much to shift the drawing position
 """
-function calculate_visible_text(line::AbstractString, font, size_px::Int, scroll_x::Float32, visible_width::Float32)
+function calculate_visible_text(line::AbstractString, font, size_points::Int, scroll_x::Float32, visible_width::Float32)
     if isempty(line)
         return ("", 0.0f0)
     end
@@ -19,7 +19,7 @@ function calculate_visible_text(line::AbstractString, font, size_px::Int, scroll
     start_char = 1
 
     for i in 1:length(chars)
-        char_width = measure_word_width(font, string(chars[i]), size_px)
+        char_width = measure_word_width(font, string(chars[i]), size_points)
         if current_x + char_width > scroll_x
             start_char = i
             break
@@ -32,7 +32,7 @@ function calculate_visible_text(line::AbstractString, font, size_px::Int, scroll
     width_so_far = current_x
 
     for i in start_char:length(chars)
-        char_width = measure_word_width(font, string(chars[i]), size_px)
+        char_width = measure_word_width(font, string(chars[i]), size_points)
         if width_so_far - scroll_x > visible_width
             break
         end
@@ -62,7 +62,7 @@ function draw_cursor(
     font,
     x::Float32,
     y::Float32,
-    size_px::Int,
+    size_points::Int,
     projection_matrix,
     cursor_color::Vec4{Float32}=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 0.8f0)  # Default to white
 )
@@ -89,7 +89,7 @@ function draw_cursor(
                 end
             end
 
-            cursor_x = x + measure_word_width(font, text_before_cursor, size_px)
+            cursor_x = x + measure_word_width(font, text_before_cursor, size_points)
         catch e
             # Fallback: if character indexing fails, position cursor at start
             @warn "Error calculating cursor position, using fallback" exception = (e, catch_backtrace())
@@ -99,7 +99,7 @@ function draw_cursor(
 
     # Draw cursor as a vertical line
     cursor_width = 2.0f0
-    cursor_height = Float32(size_px)
+    cursor_height = Float32(size_points)
 
     # Create cursor rectangle
     cursor_vertices = generate_rectangle_vertices(cursor_x, y - cursor_height + 4, cursor_width, cursor_height)
@@ -117,7 +117,7 @@ function draw_selection_background(
     font,
     x::Float32,
     y::Float32,
-    size_px::Int,
+    size_points::Int,
     projection_matrix,
     selection_color::Vec4{Float32}=Vec4{Float32}(0.3f0, 0.5f0, 0.8f0, 0.4f0);  # Default blue selection
     visible_start_x::Float32=-Inf32,
@@ -136,7 +136,7 @@ function draw_selection_background(
 
     line_str = string(line_text)
     chars = collect(line_str)
-    line_height = Float32(size_px)
+    line_height = Float32(size_points)
 
     # Determine start and end columns for this line
     start_col = (line_number == start_pos.line) ? start_pos.column : 1
@@ -146,7 +146,7 @@ function draw_selection_background(
     start_x = x
     if start_col > 1
         text_before_start = join(chars[1:min(start_col - 1, length(chars))])
-        start_x += measure_word_width(font, text_before_start, size_px)
+        start_x += measure_word_width(font, text_before_start, size_points)
     end
 
     # Calculate selection width
@@ -155,7 +155,7 @@ function draw_selection_background(
         selected_chars_end = min(end_col - 1, length(chars))
         if selected_chars_end >= start_col
             selected_text = join(chars[start_col:selected_chars_end])
-            selection_width = measure_word_width(font, selected_text, size_px)
+            selection_width = measure_word_width(font, selected_text, size_points)
         end
     end
 

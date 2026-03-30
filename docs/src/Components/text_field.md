@@ -21,7 +21,7 @@ function MyApp()
 
     dark_text_style = TextStyle(
         color = Vec4f(0.9, 0.9, 0.9, 1.0),
-        size_px = 16
+        size_points = 16
     )
 
     dark_card_style = ContainerStyle(
@@ -33,11 +33,11 @@ function MyApp()
 
     dark_card_title_style = TextStyle(
         color = Vec4f(0.9, 0.9, 0.9, 1.0),
-        size_px = 16
+        size_points = 16
     )
 
     dark_field_style = TextBoxStyle(
-        text_style = TextStyle(color = Vec4f(0.9, 0.9, 0.9, 1.0), size_px = 14),
+        text_style = TextStyle(color = Vec4f(0.9, 0.9, 0.9, 1.0), size_points = 14),
         background_color_focused = Vec4f(0.2, 0.2, 0.25, 1.0),
         background_color_unfocused = Vec4f(0.15, 0.15, 0.15, 1.0),
         border_color = Vec4f(0.4, 0.6, 0.8, 1.0),
@@ -84,10 +84,10 @@ function MyApp()
             ),
             Container(
                 IntrinsicColumn([
-                    IntrinsicHeight(Fugl.Text("Current Values:", style=TextStyle(size_px=16, color=Vec4f(0.8, 0.8, 0.8, 1.0)))),
-                    IntrinsicHeight(Fugl.Text("Name: \"$(name_state[].text)\"", style=TextStyle(size_px=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
-                    IntrinsicHeight(Fugl.Text("Email: \"$(email_state[].text)\" ($(length(email_state[].text)) chars)", style=TextStyle(size_px=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
-                    IntrinsicHeight(Fugl.Text("Phone: \"$(phone_state[].text)\" ($(length(phone_state[].text)) chars)", style=TextStyle(size_px=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
+                    IntrinsicHeight(Fugl.Text("Current Values:", style=TextStyle(size_points=16, color=Vec4f(0.8, 0.8, 0.8, 1.0)))),
+                    IntrinsicHeight(Fugl.Text("Name: \"$(name_state[].text)\"", style=TextStyle(size_points=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
+                    IntrinsicHeight(Fugl.Text("Email: \"$(email_state[].text)\" ($(length(email_state[].text)) chars)", style=TextStyle(size_points=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
+                    IntrinsicHeight(Fugl.Text("Phone: \"$(phone_state[].text)\" ($(length(phone_state[].text)) chars)", style=TextStyle(size_points=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
                 ], padding=10.0, spacing=5.0),
                 style=dark_container_style
             )
@@ -119,7 +119,7 @@ text_state = Ref(EditorState("Click to focus"))
 function MyApp()
     Container(
         IntrinsicColumn([
-            Fugl.Text("Status: $(status[])", style=TextStyle(size_px=14, color=Vec4f(0.2, 0.6, 0.2, 1.0))),
+            Fugl.Text("Status: $(status[])", style=TextStyle(size_points=14, color=Vec4f(0.2, 0.6, 0.2, 1.0))),
             TextField(
                 text_state[];
                 on_state_change=(new_state) -> text_state[] = new_state,
