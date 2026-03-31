@@ -90,9 +90,9 @@ mutable struct InputState
     was_clicked::Dict{MouseButton,Bool}          # Tracks if the button was clicked (released)
     mouse_down::Dict{MouseButton,Bool}           # Tracks mouse down events
     mouse_up::Dict{MouseButton,Bool}             # Tracks mouse up events
-    x::Float32                                   # Current mouse X position
-    y::Float32                                   # Current mouse Y position
-    last_click_time::Float64                    # Time of the last click
+    x::Float32                                   # Current mouse X position (points)
+    y::Float32                                   # Current mouse Y position (points)
+    last_click_time::Float64                     # Time of the last click
     last_click_position::Tuple{Float32,Float32}  # Position of the last click
     key_buffer::Vector{Char}                     # Buffer for character input
     key_events::Vector{KeyEvent}                 # Buffer for key events

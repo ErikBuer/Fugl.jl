@@ -14,7 +14,7 @@ function main()
     end
 
 
-    Fugl.run(MyApp, title="Border Width Test", window_width_px=400, window_height_px=500)
+    Fugl.run(MyApp, title="Border Width Test", window_width_points=400, window_height_points=500)
 end
 
 main()

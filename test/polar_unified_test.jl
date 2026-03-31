@@ -114,7 +114,7 @@ end
 
 Fugl.run(MyApp,
     title="Unified Polar Plot Test",
-    window_width_px=900,
-    window_height_px=900,
+    window_width_points=900,
+    window_height_points=900,
     fps_overlay=true
 )

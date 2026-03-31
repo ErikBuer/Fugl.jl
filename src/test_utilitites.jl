@@ -43,6 +43,12 @@ function screenshot(ui_function::Function, output_file::String, width::Int, heig
     # Load default font if not already loaded
     get_default_font()
 
+    # Initialize DPI scaling for screenshot rendering
+    # For screenshots, window size = framebuffer size (no OS scaling)
+    dpi_scaling = create_dpi_scaling_ref()
+    update_dpi_scaling!(dpi_scaling, width, height, width, height)
+    set_current_dpi_scaling!(dpi_scaling)
+
     root_view::AbstractView = ui_function()
 
     framebuffer, texture = create_offscreen_framebuffer(width, height)
@@ -134,14 +140,14 @@ function render_fps_overlay(frame_count::Int, fps::Float64, screen_width::Float3
 
     # Create text style for debug overlay
     debug_style = TextStyle(
-        size_px=14,
+        size_points=14,
         color=Vec4f(1.0, 1.0, 1.0, 0.8)  # Light gray text
     )
 
     # Measure text to position it correctly
     debug_font = get_font(debug_style)
-    text_width = measure_word_width(debug_font, debug_text, debug_style.size_px)
-    text_height = Float32(debug_style.size_px)
+    text_width = measure_word_width(debug_font, debug_text, debug_style.size_points)
+    text_height = Float32(debug_style.size_points)
 
     # Position in upper right corner with some  padding
     padding = 0.0f0
@@ -168,7 +174,7 @@ function render_fps_overlay(frame_count::Int, fps::Float64, screen_width::Float3
         draw_rectangle(bg_vertices, Vec4f(0.0, 0.0, 0.0, 0.7), projection_matrix)
 
         # Draw the debug text on top
-        draw_text(debug_font, debug_text, x, y, debug_style.size_px, projection_matrix, debug_style.color)
+        draw_text(debug_font, debug_text, x, y, debug_style.size_points, projection_matrix, debug_style.color)
     catch e
         # If drawing fails, silently ignore to avoid breaking the main UI
         # This can happen during startup when shaders aren't ready

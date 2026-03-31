@@ -4,6 +4,7 @@ using ModernGL, GLAbstraction, GLFW # OpenGL dependencies
 const GLA = GLAbstraction
 using FreeTypeAbstraction # Font rendering dependencies
 using GeometryBasics
+using GeometryBasics: MMatrix
 using IndirectArrays
 export Vec4f, Vec4
 using ColorTypes
@@ -12,6 +13,13 @@ const OPENGL_LOCK = ReentrantLock()
 
 include("matrices.jl")
 include("gl_context_state.jl")
+include("dpi_scaling.jl")
+export fugl_to_pixels, fugl_to_pixels_x, fugl_to_pixels_y
+export pixels_to_fugl, pixels_to_fugl_x, pixels_to_fugl_y
+export get_dpi_scale, get_logical_size, get_pixel_size
+export set_manual_scaling!, get_effective_scale, adjust_manual_scaling!, get_manual_scaling
+export get_system_dpi_ratio, get_pixel_perfect_scale
+export create_dpi_scaling_ref
 include("interaction_state.jl")
 export InteractionState
 include("overlay_system.jl")
@@ -63,8 +71,7 @@ end
 
 PeriodicCallback(func::Function, interval::Int) = PeriodicCallback(func, interval, Ref(0))
 
-"""
-    run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[])
+"""    run(ui_function::Function; title::String="Fugl", window_width_points::Integer=1920, window_height_points::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[])
 
 Run the main loop for the GUI application.
 This function handles the rendering and event processing for the GUI.
@@ -72,8 +79,8 @@ This function handles the rendering and event processing for the GUI.
 # Arguments
 - `ui_function::Function`: Function that returns an AbstractView for the UI
 - `title::String="Fugl"`: Window title
-- `window_width_px::Integer=1920`: Initial window width
-- `window_height_px::Integer=1080`: Initial window height
+- `window_width_points::Integer=1920`: Initial window width in logical points
+- `window_height_points::Integer=1080`: Initial window height in logical points
 - `fps_overlay::Bool=false`: Show frame count and FPS in upper right corner
 - `periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[]`: **[Experimental]** Periodic callbacks to execute at specified frame intervals
 
@@ -88,9 +95,9 @@ data_update_callback = PeriodicCallback(() -> update_data(), 300)
 run(MyApp, periodic_callbacks=[file_check_callback, data_update_callback])
 ```
 """
-function run(ui_function::Function; title::String="Fugl", window_width_px::Integer=1920, window_height_px::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[])
+function run(ui_function::Function; title::String="Fugl", window_width_points::Integer=1920, window_height_points::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[], dpi_scaling::Union{Ref{DPIScaling},Nothing}=nothing)
     # Initialize the GLFW window
-    gl_window = GLFW.Window(name=title, resolution=(window_width_px, window_height_px))
+    gl_window = GLFW.Window(name=title, resolution=(window_width_points, window_height_points))
     GLA.set_context!(gl_window)
     GLFW.MakeContextCurrent(gl_window)
 
@@ -121,7 +128,17 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
     GLFW.SetCharCallback(gl_window, char_callback_func)
     GLFW.SetScrollCallback(gl_window, scroll_callback_func)
 
-    projection_matrix = get_orthographic_matrix(0.0f0, Float32(window_width_px), Float32(window_height_px), 0.0f0, -1.0f0, 1.0f0)
+    # Initialize DPI scaling state
+    # Create default DPI scaling if none provided 
+    if dpi_scaling === nothing
+        dpi_scaling = create_dpi_scaling_ref()
+    end
+    window_width_points, window_height_points = GLFW.GetWindowSize(gl_window)
+    fb_width, fb_height = GLFW.GetFramebufferSize(gl_window)
+    update_dpi_scaling!(dpi_scaling, window_width_points, window_height_points, fb_width, fb_height)
+
+    # Use initial logical coordinate based projection matrix
+    logical_projection_matrix = get_orthographic_matrix(0.0f0, Float32(dpi_scaling[].logical_width), Float32(dpi_scaling[].logical_height), 0.0f0, -1.0f0, 1.0f0)
 
     # Track frame count for GC management and debug overlay
     frame_count = 0
@@ -161,22 +178,32 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
             end
             last_frame_time = frame_start_time
 
-            # Update window size
-            window_width, window_height = GLFW.GetWindowSize(gl_window)
-            fb_width, fb_height = GLFW.GetFramebufferSize(gl_window)
-            scale_x = fb_width / window_width
-            scale_y = fb_height / window_height
+            # Update window size and DPI scaling
+            window_width_points, window_height_points = GLFW.GetWindowSize(gl_window)
+            fb_width_px, fb_height_px = GLFW.GetFramebufferSize(gl_window)
 
-            # Poll mouse position  
-            mouse_state.x, mouse_state.y = Tuple(GLFW.GetCursorPos(gl_window))
-            mouse_state.x *= scale_x
-            mouse_state.y *= scale_y
+            # Update DPI scaling state
+            update_dpi_scaling!(dpi_scaling, window_width_points, window_height_points, fb_width_px, fb_height_px)
 
-            # Update viewport and projection matrix
-            glViewport(0, 0, fb_width, fb_height)
-            # Update our GL state tracker to match the current viewport
-            GL_STATE.current_viewport = (0, 0, Int32(fb_width), Int32(fb_height))
-            projection_matrix = get_orthographic_matrix(0.0f0, Float32(fb_width), Float32(fb_height), 0.0f0, -1.0f0, 1.0f0)
+            # Calculate our effective UI coordinate system (GLFW logical coordinates scaled by manual_scale)
+            effective_width_points = Float32(window_width_points) / dpi_scaling[].manual_scale
+            effective_height_points = Float32(window_height_points) / dpi_scaling[].manual_scale
+
+            # Poll mouse position and convert from GLFW logical coordinates to our effective coordinate system
+            mouse_x_logical, mouse_y_logical = Tuple(GLFW.GetCursorPos(gl_window))
+            mouse_state.x = mouse_x_logical / dpi_scaling[].manual_scale  # Convert to effective coordinates
+            mouse_state.y = mouse_y_logical / dpi_scaling[].manual_scale
+
+            # Use full viewport - UI should always fill the entire window
+            glViewport(0, 0, fb_width_px, fb_height_px)
+            GL_STATE.current_viewport = (0, 0, Int32(fb_width_px), Int32(fb_height_px))
+
+            # Projection matrix maps our effective coordinate space to fill entire window
+            effective_projection_matrix = get_orthographic_matrix(0.0f0, effective_width_points, effective_height_points, 0.0f0, -1.0f0, 1.0f0)
+
+
+            # Also keep pixel-based projection matrix for overlays and other actual pixel-based rendering
+            pixel_projection_matrix = get_orthographic_matrix(0.0f0, Float32(fb_width_px), Float32(fb_height_px), 0.0f0, -1.0f0, 1.0f0)
 
             lock(OPENGL_LOCK) do
                 # Clear the screen
@@ -185,38 +212,34 @@ function run(ui_function::Function; title::String="Fugl", window_width_px::Integ
                 # IMPORTANT: Copy the input state immediately under lock protection
                 # This prevents GLFW callbacks from modifying buffers while we're reading them
                 locked_state = collect_state!(mouse_state)
+
                 empty!(mouse_state.key_buffer)
                 empty!(mouse_state.key_events)
 
                 # Generate the UI dynamically with error handling
                 try
+                    # Set current DPI scaling context for this rendering frame
+                    set_current_dpi_scaling!(dpi_scaling)
                     ui::AbstractView = ui_function()
                     last_ui = ui  # Keep reference to prevent GC during this frame
 
-                    click_result = detect_click(ui, locked_state, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), Int32(0))
+                    # Use effective coordinates for UI layout - both click detection and rendering must use same coordinate system
+                    click_result = detect_click(ui, locked_state, 0.0f0, 0.0f0, effective_width_points, effective_height_points, Int32(0))
                     if click_result !== nothing # Run captured action
                         click_result.action()
                     end
 
-                    interpret_view(ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, Float32(locked_state.x), Float32(locked_state.y))
+                    interpret_view(ui, 0.0f0, 0.0f0, effective_width_points, effective_height_points, effective_projection_matrix, Float32(mouse_state.x), Float32(mouse_state.y))
 
                     # Render overlays after main content
                     render_overlays()
 
-                    # Framerate debug overlay
+                    # Framerate debug overlay (uses effective coordinates for consistent positioning)
                     # Render overlay using compile-time-selected function
-                    debug_overlay(frame_count, current_fps_value, Float32(fb_width), Float32(fb_height), projection_matrix)
+                    debug_overlay(frame_count, current_fps_value, effective_width_points, effective_height_points, effective_projection_matrix)
 
                 catch e
                     @error "Error generating UI" exception = (e, catch_backtrace())
-                    # Keep the last working UI alive
-                    if last_ui !== nothing
-                        try
-                            interpret_view(last_ui, 0.0f0, 0.0f0, Float32(fb_width), Float32(fb_height), projection_matrix, 0.0f0, 0.0f0)
-                        catch
-                            # If even the last UI fails, just continue
-                        end
-                    end
                 end
 
                 # Periodic GC management

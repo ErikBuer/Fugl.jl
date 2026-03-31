@@ -14,7 +14,7 @@ function MyApp()
     Container(
         KeyListener(
             Container(
-                Fugl.Text(message[], style=TextStyle(size_px=16)),
+                Fugl.Text(message[], style=TextStyle(size_points=16)),
                 style=ContainerStyle(
                     padding=20.0f0,
                     background_color=Vec4f(0.9, 0.9, 0.95, 1.0),
@@ -44,7 +44,7 @@ function MyApp()
     Container(
         KeyListener(
             Container(
-                Fugl.Text(message[], style=TextStyle(size_px=16)),
+                Fugl.Text(message[], style=TextStyle(size_points=16)),
                 style=ContainerStyle(
                     padding=20.0f0,
                     background_color=Vec4f(0.85, 0.95, 0.85, 1.0),
@@ -75,7 +75,7 @@ function MyApp()
     Container(
         KeyListener(
             Container(
-                Fugl.Text(message[], style=TextStyle(size_px=16)),
+                Fugl.Text(message[], style=TextStyle(size_points=16)),
                 style=ContainerStyle(
                     padding=20.0f0,
                     background_color=Vec4f(0.95, 0.85, 0.85, 1.0),
@@ -118,9 +118,9 @@ function MyApp()
         KeyListener(
             Container(
                 IntrinsicColumn([
-                    Fugl.Text("Multi-Key Demo", style=TextStyle(size_px=16, color=Vec4f(0.2, 0.2, 0.2, 1.0))),
-                    Fugl.Text("Try: A, Ctrl+S, Ctrl+O, Ctrl+Shift+N, Escape", style=TextStyle(size_px=12, color=Vec4f(0.5, 0.5, 0.5, 1.0))),
-                    Fugl.Text(status[], style=TextStyle(size_px=14, color=Vec4f(0.1, 0.4, 0.1, 1.0)))
+                    Fugl.Text("Multi-Key Demo", style=TextStyle(size_points=16, color=Vec4f(0.2, 0.2, 0.2, 1.0))),
+                    Fugl.Text("Try: A, Ctrl+S, Ctrl+O, Ctrl+Shift+N, Escape", style=TextStyle(size_points=12, color=Vec4f(0.5, 0.5, 0.5, 1.0))),
+                    Fugl.Text(status[], style=TextStyle(size_points=14, color=Vec4f(0.1, 0.4, 0.1, 1.0)))
                 ], spacing=8.0f0),
                 style=ContainerStyle(
                     padding=20.0f0,

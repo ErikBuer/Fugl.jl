@@ -57,12 +57,12 @@ function MyApp()
                 padding=10.0f0,
                 corner_radius=6.0f0
             ),
-            title_style=TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+            title_style=TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
         ),
         IntrinsicHeight(
             Row([
                     Fugl.Text("Data ranges from -0.9 to 0.3 | Stems originate at r=0",
-                        style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
+                        style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
                     TextButton("Reset View",
                         on_click=() -> begin
                             polar_state[] = PolarState(polar_state[];
@@ -85,7 +85,7 @@ function MyApp()
                             padding=8.0f0,
                             corner_radius=4.0f0
                         ),
-                        text_style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+                        text_style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))
                     ),
                     TextButton("Zoom to Positive",
                         on_click=() -> begin
@@ -109,7 +109,7 @@ function MyApp()
                             padding=8.0f0,
                             corner_radius=4.0f0
                         ),
-                        text_style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+                        text_style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))
                     )
                 ], spacing=10.0f0)
         )
@@ -118,7 +118,7 @@ end
 
 Fugl.run(MyApp,
     title="Polar Stem with Negative Values",
-    window_width_px=800,
-    window_height_px=900,
+    window_width_points=800,
+    window_height_points=900,
     fps_overlay=true
 )

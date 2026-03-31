@@ -23,8 +23,8 @@ function TabsStyle(;
     selected_color::Vec4{Float32}=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
     unselected_color::Vec4{Float32}=Vec4{Float32}(0.15f0, 0.15f0, 0.15f0, 1.0f0),
     border_color::Vec4{Float32}=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
-    text_style::TextStyle=TextStyle(size_px=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0)),
-    selected_text_style::TextStyle=TextStyle(size_px=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+    text_style::TextStyle=TextStyle(size_points=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0)),
+    selected_text_style::TextStyle=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
     tab_corner_radius::Float32=0.0f0,
     tab_border_width::Float32=0.0f0,
     selected_border_color::Vec4{Float32}=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
@@ -194,11 +194,11 @@ function render_tab_bar(
         end
 
         # Draw tab text (centered)
-        text_width = measure_word_width(font, name, text_style.size_px)
+        text_width = measure_word_width(font, name, text_style.size_points)
         text_x = current_x + (actual_tab_width - text_width) / 2.0f0
-        text_y = y + text_style.size_px + (height - text_style.size_px) / 2.0f0
+        text_y = y + text_style.size_points + (height - text_style.size_points) / 2.0f0
 
-        draw_text(font, name, text_x, text_y, text_style.size_px, projection_matrix, text_style.color)
+        draw_text(font, name, text_x, text_y, text_style.size_points, projection_matrix, text_style.color)
 
         # Move to next tab position
         current_x += actual_tab_width

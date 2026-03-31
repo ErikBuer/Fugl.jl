@@ -21,14 +21,14 @@ function simple_measure_test()
             Card("Column with IntrinsicSize", IntrinsicSize(column)),
             Card("Row with IntrinsicSize", IntrinsicSize(row)),
             Text("See console for measurement details",
-                style=TextStyle(size_px=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
+                style=TextStyle(size_points=12, color=Vec4f(0.6, 0.6, 0.6, 1.0)))
         ], spacing=15.0f0, padding=20.0f0)
 end
 
 
 Fugl.run(simple_measure_test,
     title="Measure Width/Height Test",
-    window_width_px=800,
-    window_height_px=600
+    window_width_points=800,
+    window_height_points=600
 )
 

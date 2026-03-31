@@ -20,9 +20,9 @@ function main()
         # Create tab content with current state values
         tab1_content = Container(
             Column([
-                Fugl.Text("Welcome to Tab 1!"; style=TextStyle(size_px=20, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0))),
+                Fugl.Text("Welcome to Tab 1!"; style=TextStyle(size_points=20, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0))),
                 Padding(
-                    Fugl.Text("This is the first tab with some text content."; style=TextStyle(size_px=14)),
+                    Fugl.Text("This is the first tab with some text content."; style=TextStyle(size_points=14)),
                     10.0f0
                 ),
                 TextButton(
@@ -35,7 +35,7 @@ function main()
 
         tab2_content = Container(
             Column([
-                Fugl.Text("Tab 2: Interactive Elements"; style=TextStyle(size_px=20, color=Vec4(1.0f0, 1.0f0, 0.0f0, 1.0f0))),
+                Fugl.Text("Tab 2: Interactive Elements"; style=TextStyle(size_points=20, color=Vec4(1.0f0, 1.0f0, 0.0f0, 1.0f0))),
                 Container(
                     Column([
                         CheckBox(
@@ -75,7 +75,7 @@ function main()
 
         tab3_content = Container(
             Column([
-                Fugl.Text("Tab 3: Code Editor"; style=TextStyle(size_px=20, color=Vec4(0.0f0, 1.0f0, 1.0f0, 1.0f0))),
+                Fugl.Text("Tab 3: Code Editor"; style=TextStyle(size_points=20, color=Vec4(0.0f0, 1.0f0, 1.0f0, 1.0f0))),
                 FixedHeight(
                     CodeEditor(
                         editor_state[];
@@ -90,14 +90,14 @@ function main()
         # A simple table for tab 4
         tab4_content = Container(
             Column([
-                Fugl.Text("Tab 4: Data View"; style=TextStyle(size_px=20, color=Vec4(1.0f0, 0.5f0, 0.0f0, 1.0f0))),
+                Fugl.Text("Tab 4: Data View"; style=TextStyle(size_points=20, color=Vec4(1.0f0, 0.5f0, 0.0f0, 1.0f0))),
                 Padding(
                     Container(
                         Column([
-                            Row([Fugl.Text("Name:"; style=TextStyle(size_px=14)), Fugl.Text("John Doe"; style=TextStyle(size_px=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))]),
-                            Row([Fugl.Text("Age:"; style=TextStyle(size_px=14)), Fugl.Text("30"; style=TextStyle(size_px=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))]),
-                            Row([Fugl.Text("Location:"; style=TextStyle(size_px=14)), Fugl.Text("San Francisco"; style=TextStyle(size_px=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))]),
-                            Row([Fugl.Text("Profession:"; style=TextStyle(size_px=14)), Fugl.Text("Developer"; style=TextStyle(size_px=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))])
+                            Row([Fugl.Text("Name:"; style=TextStyle(size_points=14)), Fugl.Text("John Doe"; style=TextStyle(size_points=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))]),
+                            Row([Fugl.Text("Age:"; style=TextStyle(size_points=14)), Fugl.Text("30"; style=TextStyle(size_points=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))]),
+                            Row([Fugl.Text("Location:"; style=TextStyle(size_points=14)), Fugl.Text("San Francisco"; style=TextStyle(size_points=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))]),
+                            Row([Fugl.Text("Profession:"; style=TextStyle(size_points=14)), Fugl.Text("Developer"; style=TextStyle(size_points=14, color=Vec4(0.7f0, 0.7f0, 0.7f0, 1.0f0)))])
                         ]);
                         style=ContainerStyle(
                             background_color=Vec4(0.1f0, 0.1f0, 0.1f0, 1.0f0),
@@ -113,7 +113,7 @@ function main()
 
         Container(
             Column([
-                Fugl.Text("Tabs Component Demo"; style=TextStyle(size_px=24, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0))), Tabs(
+                Fugl.Text("Tabs Component Demo"; style=TextStyle(size_points=24, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0))), Tabs(
                     [
                         ("Home", tab1_content),
                         ("Options", tab2_content),
@@ -143,7 +143,7 @@ function main()
     end
 
     # Run the app
-    Fugl.run(MyApp; title="Tabs Demo", window_width_px=800, window_height_px=600)
+    Fugl.run(MyApp; title="Tabs Demo", window_width_points=800, window_height_points=600)
 end
 
 main()

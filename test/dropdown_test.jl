@@ -27,7 +27,7 @@ function test_dropdown()
             ], padding=0.0, spacing=0.0)
     end
 
-    Fugl.run(MyApp, title="Dropdown Test", window_width_px=400, window_height_px=300, fps_overlay=true)
+    Fugl.run(MyApp, title="Dropdown Test", window_width_points=400, window_height_points=300, fps_overlay=true)
 end
 
 test_dropdown()

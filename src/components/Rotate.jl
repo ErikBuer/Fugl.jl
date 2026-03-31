@@ -59,15 +59,19 @@ function apply_layout(view::RotateView, x::Float32, y::Float32, width::Float32, 
     return (x, y, width, height)
 end
 
-function interpret_view(view::RotateView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::RotateView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # If no rotation, render child directly
     if abs(view.rotation_degrees) < 0.1f0
         child_width, child_height = measure(view.child)
-        child_x = x + (width - child_width) / 2.0f0
-        child_y = y + (height - child_height) / 2.0f0
+        child_x = x_points + (width_points - child_width) / 2.0f0
+        child_y = y_points + (height_points - child_height) / 2.0f0
         interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
         return
     end
+
+    # Get DPI scaling to convert logical points to pixel coordinates
+    dpi_scaling = get_current_dpi_scaling()
+    scale_factor = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
 
     # Get render cache
     cache = get_render_cache(view.cache_id)
@@ -78,22 +82,22 @@ function interpret_view(view::RotateView, x::Float32, y::Float32, width::Float32
     # Calculate content hash for cache invalidation
     content_hash = hash((view.rotation_degrees, child_width, child_height, hash(view.child)))
 
-    # Cache dimensions - use exact pixel dimensions matching the child size
-    cache_width = Int32(round(child_width))
-    cache_height = Int32(round(child_height))
+    # Cache dimensions - use pixel dimensions for high quality rendering
+    cache_width_pixels = Int32(round(child_width * scale_factor))
+    cache_height_pixels = Int32(round(child_height * scale_factor))
 
     # Check if we need to redraw
-    bounds = (x, y, Float32(cache_width), Float32(cache_height))
-    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+    bounds_pixels = (x_points * scale_factor, y_points * scale_factor, Float32(cache_width_pixels), Float32(cache_height_pixels))
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds_pixels)
 
     if needs_redraw || !cache.is_valid
         # Create new framebuffer if needed
-        if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width, cache_height; with_depth=false)
-            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds)
+        if cache.framebuffer === nothing || cache.cache_width != cache_width_pixels || cache.cache_height != cache_height_pixels
+            (framebuffer, color_texture, depth_texture) = create_render_framebuffer(cache_width_pixels, cache_height_pixels; with_depth=false)
+            update_cache!(cache, framebuffer, color_texture, depth_texture, content_hash, bounds_pixels)
         else
             # Update cache with existing framebuffer
-            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds)
+            update_cache!(cache, cache.framebuffer, cache.color_texture, cache.depth_texture, content_hash, bounds_pixels)
         end
 
         # Render child to framebuffer
@@ -103,14 +107,14 @@ function interpret_view(view::RotateView, x::Float32, y::Float32, width::Float32
 
     # Draw rotated texture to screen
     if cache.is_valid && cache.color_texture !== nothing
-        draw_rotated_texture(cache.color_texture, view.rotation_degrees, x, y, width, height, child_width, child_height, projection_matrix)
+        draw_rotated_texture(cache.color_texture, view.rotation_degrees, x_points, y_points, width_points, height_points, child_width, child_height, projection_matrix)
     end
 end
 
 """
 Render the child component to the framebuffer
 """
-function render_child_to_framebuffer(view::RotateView, cache::RenderCache, child_width::Float32, child_height::Float32)
+function render_child_to_framebuffer(view::RotateView, cache::RenderCache, child_width_points::Float32, child_height_points::Float32)
     # Push framebuffer and viewport
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
@@ -120,11 +124,11 @@ function render_child_to_framebuffer(view::RotateView, cache::RenderCache, child
         ModernGL.glClearColor(0.0f0, 0.0f0, 0.0f0, 0.0f0)
         ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT)
 
-        # Create simple projection matrix for exact pixel mapping
-        fb_projection = get_orthographic_matrix(0.0f0, child_width, child_height, 0.0f0, -1.0f0, 1.0f0)
+        # Create projection matrix for framebuffer in points
+        fb_projection = get_orthographic_matrix(0.0f0, child_width_points, child_height_points, 0.0f0, -1.0f0, 1.0f0)
 
         # Render child at its natural size for crisp rendering
-        interpret_view(view.child, 0.0f0, 0.0f0, child_width, child_height, fb_projection, 0.0f0, 0.0f0)
+        interpret_view(view.child, 0.0f0, 0.0f0, child_width_points, child_height_points, fb_projection, 0.0f0, 0.0f0)
     finally
         pop_viewport!()
         pop_framebuffer!()

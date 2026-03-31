@@ -16,11 +16,11 @@ function create_simple_large_content()
     # Create table style
     style = TableStyle(
         header_background_color=Vec4f(0.3, 0.5, 0.9, 1.0),
-        header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+        header_text_style=TextStyle(size_points=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
         header_height=30.0f0,
         cell_background_color=Vec4f(1.0, 1.0, 1.0, 1.0),
         cell_alternate_background_color=Vec4f(0.95, 0.95, 0.95, 1.0),
-        cell_text_style=TextStyle(size_px=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+        cell_text_style=TextStyle(size_points=12, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
         cell_height=25.0f0,
         show_grid=true,
         grid_color=Vec4f(0.8, 0.8, 0.8, 1.0),
@@ -76,7 +76,7 @@ end
 # Run the scroll area demo
 Fugl.run(test_scroll_area,
     title="VerticalScrollArea Demo - Use mouse wheel to scroll",
-    window_width_px=700,
-    window_height_px=500,
+    window_width_points=700,
+    window_height_points=500,
     fps_overlay=true
 )

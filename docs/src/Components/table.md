@@ -55,12 +55,12 @@ function MyApp()
         data,
         style=TableStyle(
             header_background_color=Vec4f(0.8, 0.4, 0.2, 1.0),
-            header_text_style=TextStyle(size_px=16, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            header_text_style=TextStyle(size_points=16, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
             header_height=35.0f0,
             
             cell_background_color=Vec4f(1.0, 1.0, 1.0, 1.0),  # White for odd rows
             cell_alternate_background_color=Vec4f(0.95, 0.95, 0.95, 1.0),  # Light gray for even rows
-            cell_text_style=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
+            cell_text_style=TextStyle(size_points=14, color=Vec4f(0.0, 0.0, 0.0, 1.0)),
             cell_height=30.0f0,
             
             show_grid=true,
@@ -103,7 +103,7 @@ function MyApp()
         style=TableStyle(
             max_wrapped_rows=0,  # No wrapping - clip with ellipsis
             header_background_color=Vec4f(0.8, 0.4, 0.2, 1.0),
-            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            header_text_style=TextStyle(size_points=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
             cell_height=30.0f0,
             cell_padding=8.0f0,
             show_grid=true
@@ -117,7 +117,7 @@ function MyApp()
         style=TableStyle(
             max_wrapped_rows=2,  # Allow up to 2 rows of wrapped text
             header_background_color=Vec4f(0.2, 0.6, 0.4, 1.0),
-            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            header_text_style=TextStyle(size_points=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
             cell_height=50.0f0,  # Taller cells for wrapped text
             cell_padding=8.0f0,
             show_grid=true
@@ -158,7 +158,7 @@ function MyApp()
         data,
         style=TableStyle(
             header_background_color=Vec4f(0.4, 0.2, 0.6, 1.0),
-            header_text_style=TextStyle(size_px=15, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            header_text_style=TextStyle(size_points=15, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
             cell_background_color=Vec4f(0.99, 0.99, 0.99, 1.0),
             cell_padding=12.0f0,
             show_grid=true,
@@ -202,7 +202,7 @@ function MyApp()
         data,
         style=TableStyle(
             header_background_color=Vec4f(0.2, 0.4, 0.8, 1.0),
-            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            header_text_style=TextStyle(size_points=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
             cell_padding=8.0f0,
             show_grid=true
         ),
@@ -218,7 +218,7 @@ function MyApp()
         data,
         style=TableStyle(
             header_background_color=Vec4f(0.8, 0.2, 0.4, 1.0),
-            header_text_style=TextStyle(size_px=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+            header_text_style=TextStyle(size_points=14, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
             cell_padding=8.0f0,
             show_grid=true,
             max_wrapped_rows=2  # Allow text wrapping in description column

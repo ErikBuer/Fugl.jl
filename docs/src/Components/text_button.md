@@ -9,7 +9,7 @@ function MyApp()
     Container(
         TextButton("Basic Button",
             on_click=() -> println("Basic button clicked"),
-            text_style = TextStyle(size_px=16),
+            text_style = TextStyle(size_points=16),
             container_style = ContainerStyle(
                 background_color = Vec4f(0.9, 0.9, 0.9, 1.0),
                 border_color = Vec4f(0.6, 0.6, 0.6, 1.0),
@@ -70,7 +70,7 @@ pressed_style = ContainerStyle(
 
 text_style = TextStyle(
     color = Vec4f(1.0, 1.0, 1.0, 1.0),
-    size_px = 16
+    size_points = 16
 )
 
 function MyApp()   
@@ -189,7 +189,7 @@ red_pressed = ContainerStyle(
 
 button_text_style = TextStyle(
     color = Vec4f(1.0, 1.0, 1.0, 1.0),
-    size_px = 14
+    size_points = 14
 )
 
 function MyApp()
@@ -309,7 +309,7 @@ const DARK_CARD_STYLE = ContainerStyle(
 
 # Dark mode title style
 const DARK_TITLE_STYLE = TextStyle(
-    size_px=18,
+    size_points=18,
     color=Vec4f(0.9, 0.9, 0.95, 1.0)
 )
 

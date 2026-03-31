@@ -40,7 +40,7 @@ function test_table_clipping()
             ], spacing=20.0f0, padding=20.0f0)
     end
 
-    Fugl.run(MyApp, title="Table Text Clipping Demo", window_width_px=900, window_height_px=600)
+    Fugl.run(MyApp, title="Table Text Clipping Demo", window_width_points=900, window_height_points=600)
 end
 
 test_table_clipping()

@@ -52,15 +52,15 @@ function MyApp()
                 padding=10.0f0,
                 corner_radius=6.0f0
             ),
-            title_style=TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))  # Light title text
+            title_style=TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))  # Light title text
         ),
-        Fugl.Text("Stem lines from origin to each data point", style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0)))
+        Fugl.Text("Stem lines from origin to each data point", style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0)))
     )
 end
 
 Fugl.run(MyApp,
     title="Polar Stem Plot Demo",
-    window_width_px=800,
-    window_height_px=800,
+    window_width_points=800,
+    window_height_points=800,
     fps_overlay=true
 )

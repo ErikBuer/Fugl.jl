@@ -34,4 +34,4 @@ function test_delete_key()
         ]; spacing=10.0f0)
 end
 
-Fugl.run(test_delete_key, title="Delete Key Test", window_width_px=600, window_height_px=400)
+Fugl.run(test_delete_key, title="Delete Key Test", window_width_points=600, window_height_points=400)

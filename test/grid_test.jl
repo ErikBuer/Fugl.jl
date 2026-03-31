@@ -21,7 +21,7 @@ function grid_test()
     ))
 
     ui = IntrinsicColumn([
-            IntrinsicHeight(Text("Grid Test: Only Grid Lines (No Axis Lines, No Tick Marks)", style=TextStyle(size_px=16))),
+            IntrinsicHeight(Text("Grid Test: Only Grid Lines (No Axis Lines, No Tick Marks)", style=TextStyle(size_points=16))),
             plot
         ], spacing=10.0, padding=20.0)
 
@@ -29,4 +29,4 @@ function grid_test()
 end
 
 # Run the grid test
-Fugl.run(grid_test, title="Grid Test", window_width_px=600, window_height_px=400)
+Fugl.run(grid_test, title="Grid Test", window_width_points=600, window_height_points=400)

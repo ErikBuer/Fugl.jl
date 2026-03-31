@@ -29,12 +29,12 @@ function main()
 
         dark_text_style = TextStyle(
             color=Vec4f(0.9, 0.9, 0.9, 1.0),
-            size_px=16
+            size_points=16
         )
 
         dark_card_title_style = TextStyle(
             color=Vec4f(0.9, 0.9, 0.9, 1.0),
-            size_px=16
+            size_points=16
         )
 
         # Dark theme slider styles
@@ -163,7 +163,7 @@ function main()
                             # Red slider
                             Row([
                                 Container(
-                                    Fugl.Text("R:", style=TextStyle(color=Vec4f(1.0, 0.5, 0.5, 1.0), size_px=16)),
+                                    Fugl.Text("R:", style=TextStyle(color=Vec4f(1.0, 0.5, 0.5, 1.0), size_points=16)),
                                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                                 ),
                                 HorizontalSlider(
@@ -176,7 +176,7 @@ function main()
                                     end
                                 ),
                                 Container(
-                                    Fugl.Text("$(rgb_r_state[].value)", style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                                    Fugl.Text("$(rgb_r_state[].value)", style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
                                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                                 )
                             ]),
@@ -184,7 +184,7 @@ function main()
                             # Green slider
                             Row([
                                 Container(
-                                    Fugl.Text("G:", style=TextStyle(color=Vec4f(0.5, 1.0, 0.5, 1.0), size_px=16)),
+                                    Fugl.Text("G:", style=TextStyle(color=Vec4f(0.5, 1.0, 0.5, 1.0), size_points=16)),
                                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                                 ),
                                 HorizontalSlider(
@@ -197,7 +197,7 @@ function main()
                                     end
                                 ),
                                 Container(
-                                    Fugl.Text("$(rgb_g_state[].value)", style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                                    Fugl.Text("$(rgb_g_state[].value)", style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
                                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                                 )
                             ]),
@@ -205,7 +205,7 @@ function main()
                             # Blue slider
                             Row([
                                 Container(
-                                    Fugl.Text("B:", style=TextStyle(color=Vec4f(0.5, 0.5, 1.0, 1.0), size_px=16)),
+                                    Fugl.Text("B:", style=TextStyle(color=Vec4f(0.5, 0.5, 1.0, 1.0), size_points=16)),
                                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                                 ),
                                 HorizontalSlider(
@@ -218,7 +218,7 @@ function main()
                                     end
                                 ),
                                 Container(
-                                    Fugl.Text("$(rgb_b_state[].value)", style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                                    Fugl.Text("$(rgb_b_state[].value)", style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
                                     style=ContainerStyle(padding=5.0f0, background_color=Vec4f(0.0, 0.0, 0.0, 0.0))
                                 )
                             ]),
@@ -230,7 +230,7 @@ function main()
                                         "Hex: #$(uppercase(string(rgb_r_state[].value, base=16, pad=2)))" *
                                         "$(uppercase(string(rgb_g_state[].value, base=16, pad=2)))" *
                                         "$(uppercase(string(rgb_b_state[].value, base=16, pad=2)))",
-                                        style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_px=16)
+                                        style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_points=16)
                                     ),
                                     style=ContainerStyle(
                                         background_color=Vec4f(
@@ -258,7 +258,7 @@ function main()
     end
 
     # Run the GUI
-    Fugl.run(MyApp, title="Slider Test", window_width_px=800, window_height_px=900, fps_overlay=true)
+    Fugl.run(MyApp, title="Slider Test", window_width_points=800, window_height_points=900, fps_overlay=true)
 end
 
 main()

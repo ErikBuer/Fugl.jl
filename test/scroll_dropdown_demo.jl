@@ -52,13 +52,13 @@ function main()
             Container(
                 Column([
                         Fugl.Text("Scroll Area with Dropdowns and Buttons",
-                            style=TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.9, 1.0))),
+                            style=TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.9, 1.0))),
                         Fugl.Text("Test that dropdowns overlay properly and don't interfere with scrolling",
-                            style=TextStyle(size_px=12, color=Vec4f(0.7, 0.7, 0.7, 1.0))),
+                            style=TextStyle(size_points=12, color=Vec4f(0.7, 0.7, 0.7, 1.0))),
 
                         # First dropdown
                         Row([
-                                Fugl.Text("Category:", style=TextStyle(size_px=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
+                                Fugl.Text("Category:", style=TextStyle(size_points=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
                                 Dropdown(
                                     dropdown1_state[],
                                     on_state_change=(new_state) -> dropdown1_state[] = new_state,
@@ -98,9 +98,9 @@ function main()
             Container(
                 Column([
                         Fugl.Text("Multiple Interactive Elements",
-                            style=TextStyle(size_px=16, color=Vec4f(0.9, 0.9, 0.9, 1.0))), Row([
+                            style=TextStyle(size_points=16, color=Vec4f(0.9, 0.9, 0.9, 1.0))), Row([
                                 Column([
-                                        Fugl.Text("Color:", style=TextStyle(size_px=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
+                                        Fugl.Text("Color:", style=TextStyle(size_points=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
                                         Dropdown(
                                             dropdown2_state[],
                                             on_state_change=(new_state) -> dropdown2_state[] = new_state,
@@ -160,8 +160,8 @@ function main()
             Container(
                 Column([
                         Fugl.Text("Final Section",
-                            style=TextStyle(size_px=16, color=Vec4f(0.9, 0.9, 0.9, 1.0))), Row([
-                                Fugl.Text("Size:", style=TextStyle(size_px=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
+                            style=TextStyle(size_points=16, color=Vec4f(0.9, 0.9, 0.9, 1.0))), Row([
+                                Fugl.Text("Size:", style=TextStyle(size_points=14, color=Vec4f(0.85, 0.85, 0.85, 1.0))),
                                 Dropdown(
                                     dropdown3_state[],
                                     on_state_change=(new_state) -> dropdown3_state[] = new_state,
@@ -285,7 +285,7 @@ function main()
         )
 
         dark_title_style = TextStyle(
-            size_px=18,
+            size_points=18,
             color=Vec4f(0.9, 0.9, 0.95, 1.0)
         )
 
@@ -308,8 +308,8 @@ function main()
     # Run the demo
     Fugl.run(ScrollDropdownDemo,
         title="ScrollArea + Dropdown Demo - Z-Ordering Test",
-        window_width_px=800,
-        window_height_px=600,
+        window_width_points=800,
+        window_height_points=600,
         fps_overlay=true
     )
 end

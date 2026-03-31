@@ -18,4 +18,4 @@ function my_gui()
 end
 
 # Run the simple test
-Fugl.run(my_gui, title="Tree", window_width_px=300, window_height_px=800, fps_overlay=true)
+Fugl.run(my_gui, title="Tree", window_width_points=300, window_height_points=800, fps_overlay=true)

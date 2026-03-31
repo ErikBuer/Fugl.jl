@@ -15,7 +15,7 @@ is_focused = Ref(false)
 function MyApp()
     # Create content with visual focus feedback
     content = Container(
-        Fugl.Text(message[], style=TextStyle(size_px=16, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
+        Fugl.Text(message[], style=TextStyle(size_points=16, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
         style=ContainerStyle(
             background_color=is_focused[] ? Vec4f(0.08, 0.12, 0.16, 1.0) : Vec4f(0.15, 0.15, 0.18, 1.0),
             border_color=is_focused[] ? Vec4f(0.2, 0.4, 0.7, 1.0) : Vec4f(0.25, 0.25, 0.30, 1.0),
@@ -72,9 +72,9 @@ function MyApp()
     # Create content area
     content = Container(
         IntrinsicColumn([
-            Fugl.Text("Focused Area", style=TextStyle(size_px=16, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
-            Fugl.Text("Try: A, Ctrl+S, Escape", style=TextStyle(size_px=12, color=Vec4f(0.7, 0.7, 0.75, 1.0))),
-            Fugl.Text(status[], style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.85, 1.0)))
+            Fugl.Text("Focused Area", style=TextStyle(size_points=16, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
+            Fugl.Text("Try: A, Ctrl+S, Escape", style=TextStyle(size_points=12, color=Vec4f(0.7, 0.7, 0.75, 1.0))),
+            Fugl.Text(status[], style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.85, 1.0)))
         ], spacing=8.0f0),
         style=ContainerStyle(
             background_color=is_focused[] ? Vec4f(0.06, 0.10, 0.08, 1.0) : Vec4f(0.15, 0.15, 0.18, 1.0),
@@ -123,9 +123,9 @@ function MyApp()
     # Create content area
     content = Container(
         IntrinsicColumn([
-            Fugl.Text(message[], style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
-            Fugl.Text("Focused: $(focus_count[]) times", style=TextStyle(size_px=12, color=Vec4f(0.7, 0.7, 0.75, 1.0))),
-            Fugl.Text("Blurred: $(blur_count[]) times", style=TextStyle(size_px=12, color=Vec4f(0.7, 0.7, 0.75, 1.0)))
+            Fugl.Text(message[], style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
+            Fugl.Text("Focused: $(focus_count[]) times", style=TextStyle(size_points=12, color=Vec4f(0.7, 0.7, 0.75, 1.0))),
+            Fugl.Text("Blurred: $(blur_count[]) times", style=TextStyle(size_points=12, color=Vec4f(0.7, 0.7, 0.75, 1.0)))
         ], spacing=8.0f0),
         style=ContainerStyle(
             background_color=is_focused[] ? Vec4f(0.12, 0.08, 0.06, 1.0) : Vec4f(0.15, 0.15, 0.18, 1.0),

@@ -18,4 +18,4 @@ function minimal_colorbar_test()
 end
 
 # Run the minimal test
-Fugl.run(minimal_colorbar_test, title="Minimal Colorbar Test", window_width_px=400, window_height_px=600, fps_overlay=true)
+Fugl.run(minimal_colorbar_test, title="Minimal Colorbar Test", window_width_points=400, window_height_points=600, fps_overlay=true)

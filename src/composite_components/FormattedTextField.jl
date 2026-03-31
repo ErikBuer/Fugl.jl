@@ -61,7 +61,7 @@ function FormattedTextField(
     on_focus::Function=() -> nothing,
     on_blur::Function=() -> nothing
 )
-    height = style.text_style.size_px + 2 * style.padding + 1
+    height = style.text_style.size_points + 2 * style.padding + 1
 
     return (
         FixedHeight(

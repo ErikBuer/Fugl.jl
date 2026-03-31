@@ -32,12 +32,12 @@ Assumes text is rendered in a single line.
 """
 function measure(view::TextView)::Tuple{Float32,Float32}
     font = get_font(view.style)
-    size_px = view.style.size_px
+    size_points = view.style.size_points
 
     # Original behavior - measure as single line (will wrap based on container width)
-    # text_width = measure_word_width(font, view.text, size_px)
-    text_width = measure_word_width_cached(font, view.text, size_px)
-    text_height = Float32(size_px) + 2.0
+    # text_width = measure_word_width(font, view.text, size_points)
+    text_width = measure_word_width_cached(font, view.text, size_points)
+    text_height = Float32(size_points) + 2.0
     text_width = text_width + 2.0
 
     return (text_width, text_height)
@@ -50,10 +50,10 @@ function measure_width(view::TextView, available_height::Float32)::Float32
     # Text width is not constrained by height, so return the full measured width
 
     font = get_font(view.style)
-    size_px = view.style.size_px
+    size_points = view.style.size_points
 
     # Original behavior - measure as single line (will wrap based on container width)
-    text_width = measure_word_width_cached(font, view.text, size_px)
+    text_width = measure_word_width_cached(font, view.text, size_points)
     text_width = text_width + 2.0
 
     return text_width
@@ -62,17 +62,17 @@ end
 function measure_height(view::TextView, available_width::Float32)::Float32
     # Here we must account for line wrapping based on available width
     font = get_font(view.style)
-    size_px = view.style.size_px
-    line_height = Float32(size_px)
+    size_points = view.style.size_points
+    line_height = Float32(size_points)
     words = split(view.text, " ")
     lines = String[]
     current_line = ""
     current_width = 0.0f0
-    space_width = measure_word_width_cached(font, " ", size_px)
+    space_width = measure_word_width_cached(font, " ", size_points)
 
     for word in words
         # Measure the width of the word
-        word_width = measure_word_width_cached(font, word, size_px)
+        word_width = measure_word_width_cached(font, word, size_points)
 
         if current_line == ""
             # First word on a line - always place it, even if it doesn't fit (will be clipped)
@@ -106,10 +106,10 @@ function apply_layout(view::TextView, x::Float32, y::Float32, width::Float32, he
     return (x, y, width, height)
 end
 
-function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix_points::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Extract style properties
     font = get_font(view.style)
-    size_px = view.style.size_px
+    size_points = view.style.size_points
     color = view.style.color
 
     # Split text into words
@@ -126,11 +126,11 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         current_line = ""
         current_width = 0.0f0
 
-        space_width = measure_word_width_cached(font, " ", size_px)
+        space_width = measure_word_width_cached(font, " ", size_points)
 
         for word in words
             # Measure the width of the word
-            word_width = measure_word_width_cached(font, word, size_px)
+            word_width = measure_word_width_cached(font, word, size_points)
 
             if current_line == ""
                 # First word on a line - always place it, even if it doesn't fit (will be clipped)
@@ -155,7 +155,7 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     end
 
     # Calculate total text height
-    line_height = Float32(size_px)
+    line_height = Float32(size_points)
     total_height = length(lines) * line_height
 
     # Calculate vertical alignment offset with proper multi-line support
@@ -169,7 +169,7 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
     current_y = y + vertical_offset
     for line in lines
         # Calculate horizontal alignment offset
-        line_width = measure_word_width_cached(font, line, size_px)
+        line_width = measure_word_width_cached(font, line, size_points)
         horizontal_offset = calculate_horizontal_offset(width, line_width, view.horizontal_align)
 
         # Snap positions to pixel boundaries for crisp text rendering
@@ -190,8 +190,8 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         lines,               # All lines of text
         x_positions,         # X positions for each line
         y_positions,         # Y positions for each line
-        size_px,             # Text size
-        projection_matrix,   # Projection matrix
+        size_points,         # Text size
+        projection_matrix_points,   # Projection matrix
         color                # Text color
     )
 end

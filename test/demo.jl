@@ -167,10 +167,10 @@ end
 # Dark theme table style
 dark_table_style = TableStyle(
     header_background_color=Vec4f(0.1, 0.4, 0.15, 0.6),  # Dark green to match plot trace
-    header_text_style=TextStyle(size_px=15, color=Vec4f(1.0, 1.0, 1.0, 1.0)),  # White text
+    header_text_style=TextStyle(size_points=15, color=Vec4f(1.0, 1.0, 1.0, 1.0)),  # White text
     cell_background_color=Vec4f(0.12, 0.12, 0.16, 1.0),  # Dark background
     cell_alternate_background_color=Vec4f(0.16, 0.16, 0.20, 1.0),  # Slightly lighter for alternating rows
-    cell_text_style=TextStyle(size_px=14, color=Vec4f(0.85, 0.85, 0.85, 1.0)),  # Light text
+    cell_text_style=TextStyle(size_points=14, color=Vec4f(0.85, 0.85, 0.85, 1.0)),  # Light text
     show_grid=true,
     grid_color=Vec4f(0.3, 0.3, 0.35, 1.0),  # Subtle grid
     cell_padding=10.0f0,
@@ -188,7 +188,7 @@ dark_card_style = ContainerStyle(
 
 # Dark theme title style
 dark_title_style = TextStyle(
-    size_px=18,
+    size_points=18,
     color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
 )
 
@@ -204,7 +204,7 @@ dark_button_style = ContainerStyle(
 
 # Dark theme button text style
 dark_button_text_style = TextStyle(
-    size_px=14,
+    size_points=14,
     color=Vec4f(1.0, 1.0, 1.0, 1.0)  # White text
 )
 
@@ -249,5 +249,5 @@ function MyApp()
             ),], padding=0.0, spacing=0.0)
 end
 
-Fugl.run(MyApp, title="Spectrum Analyzer Demo - Fugl.jl", window_width_px=1200, window_height_px=800, fps_overlay=false)
+Fugl.run(MyApp, title="Spectrum Analyzer Demo - Fugl.jl", window_width_points=1200, window_height_points=800, fps_overlay=false)
 

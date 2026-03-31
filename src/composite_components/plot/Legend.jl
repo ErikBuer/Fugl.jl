@@ -12,7 +12,7 @@ end
 
 function Legend(
     elements::Vector{<:AbstractPlotElement};
-    text_style::TextStyle=TextStyle(size_px=12, color=Vec4f(0.9, 0.9, 0.95, 1.0)),
+    text_style::TextStyle=TextStyle(size_points=12, color=Vec4f(0.9, 0.9, 0.95, 1.0)),
     spacing::Float32=8.0f0,
     item_height::Float32=20.0f0,
     sample_width::Float32=30.0f0,
@@ -76,7 +76,7 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
         text_style = if element.muted
             # Reduce opacity for muted elements
             muted_color = Vec4f(view.text_style.color[1], view.text_style.color[2], view.text_style.color[3], 0.4f0)
-            TextStyle(size_px=view.text_style.size_px, color=muted_color)
+            TextStyle(size_points=view.text_style.size_points, color=muted_color)
         else
             view.text_style
         end

@@ -11,12 +11,12 @@ function MyApp()
     focused_content = Container(
         Column([
                 Fugl.Text("Focused Area - Keys Work Here",
-                    style=TextStyle(size_px=16, color=Vec4f(1.0, 1.0, 1.0, 1.0))),
-                Fugl.Text(message[], style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.9, 1.0))),
+                    style=TextStyle(size_points=16, color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+                Fugl.Text(message[], style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.9, 1.0))),
                 Fugl.Text("Counter: $(counter[])",
-                    style=TextStyle(size_px=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                    style=TextStyle(size_points=14, color=Vec4f(0.8, 0.8, 0.8, 1.0))),
                 Fugl.Text("Focused: $(is_focused[])",
-                    style=TextStyle(size_px=12, color=is_focused[] ? Vec4f(0.2, 0.8, 0.2, 1.0) : Vec4f(0.8, 0.2, 0.2, 1.0)))
+                    style=TextStyle(size_points=12, color=is_focused[] ? Vec4f(0.2, 0.8, 0.2, 1.0) : Vec4f(0.8, 0.2, 0.2, 1.0)))
             ], spacing=10.0f0),
         style=ContainerStyle(
             background_color=is_focused[] ? Vec4f(0.2, 0.4, 0.8, 1.0) : Vec4f(0.3, 0.3, 0.3, 1.0),
@@ -53,7 +53,7 @@ function MyApp()
     # Create unfocus area (empty container)
     unfocus_area = Container(
         Fugl.Text("Click anywhere here to unfocus",
-            style=TextStyle(size_px=14, color=Vec4f(0.6, 0.6, 0.6, 1.0))),
+            style=TextStyle(size_points=14, color=Vec4f(0.6, 0.6, 0.6, 1.0))),
         style=ContainerStyle(
             background_color=Vec4f(0.9, 0.9, 0.9, 1.0),
             padding=30.0f0,
@@ -77,4 +77,4 @@ println("     - Ctrl+S: Add 5 to counter")
 println("     - Enter: Reset counter")
 println("  3. Click gray areas to unfocus")
 
-Fugl.run(MyApp, title="Focus + KeyListener Demo", window_width_px=600, window_height_px=400)
+Fugl.run(MyApp, title="Focus + KeyListener Demo", window_width_points=600, window_height_points=400)

@@ -15,7 +15,7 @@ function main()
         )
     end
 
-    Fugl.run(MyApp; title="Simple Tabs", window_width_px=600, window_height_px=400)
+    Fugl.run(MyApp; title="Simple Tabs", window_width_points=600, window_height_points=400)
 end
 
 main()

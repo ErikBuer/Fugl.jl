@@ -70,7 +70,7 @@ function MyApp()
 
     # Dark theme title style
     dark_title_style = TextStyle(
-        size_px=18,
+        size_points=18,
         color=Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for titles
     )
     
@@ -86,7 +86,7 @@ function MyApp()
         selection_color = Vec4f(0.4, 0.6, 0.9, 0.5),
         text_style = TextStyle(
             color = Vec4f(0.9, 0.9, 0.95, 1.0),  # Light text
-            size_px = 16
+            size_points = 16
         )
     )
 

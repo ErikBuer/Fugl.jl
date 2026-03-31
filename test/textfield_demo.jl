@@ -9,7 +9,7 @@ function main()
 
     function MyApp()
         Column([
-                Fugl.Text("TextField Demo", style=TextStyle(size_px=24)),
+                Fugl.Text("TextField Demo", style=TextStyle(size_points=24)),
 
                 # Unlimited length text field
                 Card(
@@ -47,16 +47,16 @@ function main()
                 Card(
                     "Current Values",
                     Column([
-                        Fugl.Text("Unlimited: \"" * unlimited_text_state[].text * "\"", style=TextStyle(size_px=14)),
-                        Fugl.Text("Limited (20): \"" * limited_text_state[].text * "\" ($(length(limited_text_state[].text)) chars)", style=TextStyle(size_px=14)),
-                        Fugl.Text("Short (10): \"" * short_text_state[].text * "\" ($(length(short_text_state[].text)) chars)", style=TextStyle(size_px=14))
+                        Fugl.Text("Unlimited: \"" * unlimited_text_state[].text * "\"", style=TextStyle(size_points=14)),
+                        Fugl.Text("Limited (20): \"" * limited_text_state[].text * "\" ($(length(limited_text_state[].text)) chars)", style=TextStyle(size_points=14)),
+                        Fugl.Text("Short (10): \"" * short_text_state[].text * "\" ($(length(short_text_state[].text)) chars)", style=TextStyle(size_points=14))
                     ])
                 )
             ], spacing=20)
     end
 
     # Run the GUI
-    Fugl.run(MyApp, title="TextField Demo", window_width_px=600, window_height_px=500, fps_overlay=true)
+    Fugl.run(MyApp, title="TextField Demo", window_width_points=600, window_height_points=500, fps_overlay=true)
 end
 
 main()

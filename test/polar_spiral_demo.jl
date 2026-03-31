@@ -78,12 +78,12 @@ function MyApp()
                 padding=10.0f0,
                 corner_radius=6.0f0
             ),
-            title_style=TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))  # Light title text
+            title_style=TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))  # Light title text
         ),
         IntrinsicHeight(
             Row([
                     Fugl.Text("θ starts at up/north (90°) | Blue=spiral, Red=scatter, Green=stem",
-                        style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
+                        style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))),
                     TextButton("Reset Zoom",
                         on_click=() -> begin
                             polar_state[] = PolarState(polar_state[]; r_min=0.0f0, r_max=1.0f0, auto_scale_r=false)
@@ -102,7 +102,7 @@ function MyApp()
                             padding=8.0f0,
                             corner_radius=4.0f0
                         ),
-                        text_style=TextStyle(size_px=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+                        text_style=TextStyle(size_points=14, color=Vec4f(0.9, 0.9, 0.95, 1.0))
                     )
                 ], spacing=10.0f0)
         )
@@ -111,8 +111,8 @@ end
 
 Fugl.run(MyApp,
     title="Polar Plot with Custom Orientation and Zoom",
-    window_width_px=800,
-    window_height_px=900,
+    window_width_points=800,
+    window_height_points=900,
     fps_overlay=true
 )
 

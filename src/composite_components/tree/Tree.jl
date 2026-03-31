@@ -36,15 +36,22 @@ function apply_layout(view::TreeView, x::Float32, y::Float32, width::Float32, he
     return (x, y, width, height)
 end
 
-function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
-    bounds = (x, y, width, height)
-    cache_width = Int32(round(width))
-    cache_height = Int32(round(height))
+function interpret_view(view::TreeView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+    # Get DPI scaling to convert logical points to pixel coordinates
+    dpi_scaling = get_current_dpi_scaling()
+    scale_factor = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
+
+    # The framebuffer is rendered in pixel coordinates to get the highest quality
+    cache_width_pixels = Int32(round(width_points * scale_factor))
+    cache_height_pixels = Int32(round(height_points * scale_factor))
 
     # Ensure minimum cache size to avoid zero-sized framebuffers
-    if cache_width <= 0 || cache_height <= 0
+    if cache_width_pixels <= 0 || cache_height_pixels <= 0
         return  # Skip rendering if size is invalid
     end
+
+    bounds_points = (x_points, y_points, width_points, height_points)
+    bounds_pixels = (Float32(x_points) * scale_factor, Float32(y_points) * scale_factor, Float32(width_points) * scale_factor, Float32(height_points) * scale_factor)
 
     cache = get_render_cache(view.state.cache_id)
 
@@ -52,30 +59,30 @@ function interpret_view(view::TreeView, x::Float32, y::Float32, width::Float32, 
     content_hash = hash_tree_content(view.state.tree, view.state, view.style)
 
     # Check if we need to invalidate cache
-    needs_redraw = should_invalidate_cache(cache, content_hash, bounds)
+    needs_redraw = should_invalidate_cache(cache, content_hash, bounds_pixels)
 
     if needs_redraw || !cache.is_valid
         try
-            if cache.framebuffer === nothing || cache.cache_width != cache_width || cache.cache_height != cache_height
-                framebuffer, color_texture, depth_texture = create_render_framebuffer(cache_width, cache_height; with_depth=false)
-                update_cache!(cache, framebuffer, color_texture, depth_texture, cache.last_content_hash, bounds)
+            if cache.framebuffer === nothing || cache.cache_width != cache_width_pixels || cache.cache_height != cache_height_pixels
+                framebuffer, color_texture, depth_texture = create_render_framebuffer(cache_width_pixels, cache_height_pixels; with_depth=false)
+                update_cache!(cache, framebuffer, color_texture, depth_texture, cache.last_content_hash, bounds_pixels)
             end
         catch e
             @warn "Failed to create plot framebuffer: $e"
             return  # Skip rendering if framebuffer creation fails
         end
-        render_tree_to_framebuffer(view, cache, width, height, projection_matrix, mouse_x, mouse_y)
+        render_tree_to_framebuffer(view, cache, width_points, height_points, projection_matrix, mouse_x, mouse_y)
         cache.is_valid = true
     end
 
     # If cache is valid and has a color texture, draw it
     if cache.is_valid && cache.color_texture !== nothing
-        draw_cached_texture(cache.color_texture, x, y, width, height, projection_matrix)
+        draw_cached_texture(cache.color_texture, x_points, y_points, width_points, height_points, projection_matrix)
         return
     end
 end
 
-function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     # Push framebuffer and viewport
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
@@ -85,11 +92,11 @@ function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width::F
         ModernGL.glClearColor(1.0f0, 1.0f0, 1.0f0, 0.0f0) # White background, transparent
         ModernGL.glClear(ModernGL.GL_COLOR_BUFFER_BIT | ModernGL.GL_DEPTH_BUFFER_BIT)
 
-        # Create framebuffer-specific projection matrix
-        fb_projection = get_orthographic_matrix(0.0f0, width, height, 0.0f0, -1.0f0, 1.0f0)
+        # Create framebuffer-specific projection matrix in points
+        fb_projection = get_orthographic_matrix(0.0f0, width_points, height_points, 0.0f0, -1.0f0, 1.0f0)
 
         # Draw the tree into the framebuffer using shared function
-        render_tree_content(view, 0.0f0, 0.0f0, width, height, fb_projection, mouse_x, mouse_y)
+        render_tree_content(view, 0.0f0, 0.0f0, width_points, height_points, fb_projection, mouse_x, mouse_y)
     finally
         pop_viewport!()
         pop_framebuffer!()

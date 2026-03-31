@@ -83,7 +83,7 @@ function app()
                 Container(
                     Legend(
                         elements[],
-                        text_style=TextStyle(size_px=12, color=Vec4f(0.9, 0.9, 0.95, 1.0)),
+                        text_style=TextStyle(size_points=12, color=Vec4f(0.9, 0.9, 0.95, 1.0)),
                         on_click=(idx) -> begin
                             # Toggle muted state of clicked element
                             old_elem = elements[][idx]
@@ -113,7 +113,7 @@ function app()
             padding=12.0f0,
             corner_radius=6.0f0
         ),
-        title_style=TextStyle(size_px=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+        title_style=TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
     )
 end
 

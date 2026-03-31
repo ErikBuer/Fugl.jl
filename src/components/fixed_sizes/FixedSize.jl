@@ -27,16 +27,17 @@ function detect_click(view::FixedSizeView, mouse_state::InputState, x::Float32, 
 end
 
 function measure(view::FixedSizeView)::Tuple{Float32,Float32}
+    # Fixed size uses raw dimensions - scaling is handled by projection matrix
     return (view.width, view.height)
 end
 
 function measure_width(view::FixedSizeView, available_height::Float32)::Float32
-    # Fixed size views have a set width, no matter the available height
+    # Fixed size uses raw width - scaling is handled by projection matrix
     return view.width
 end
 
 function measure_height(view::FixedSizeView, available_width::Float32)::Float32
-    # Fixed size views have a set height, no matter the available width
+    # Fixed size uses raw height - scaling is handled by projection matrix
     return view.height
 end
 

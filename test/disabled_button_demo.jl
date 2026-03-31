@@ -45,7 +45,7 @@ const DARK_CARD_STYLE = ContainerStyle(
 
 # Dark mode title style
 const DARK_TITLE_STYLE = TextStyle(
-    size_px=18,
+    size_points=18,
     color=Vec4f(0.9, 0.9, 0.95, 1.0)
 )
 
@@ -98,7 +98,7 @@ function test_disabled_buttons()
         )
     end
 
-    Fugl.run(MyApp, title="Disabled Buttons Test", window_width_px=400, window_height_px=300)
+    Fugl.run(MyApp, title="Disabled Buttons Test", window_width_points=400, window_height_points=300)
 end
 
 test_disabled_buttons()

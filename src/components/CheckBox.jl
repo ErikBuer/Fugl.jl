@@ -19,7 +19,7 @@ function CheckBoxStyle(;
     check_color::Vec4f=Vec4f(1.0, 1.0, 1.0, 1.0),  # White checkmark
     corner_radius::Float32=3.0f0,
     padding::Float32=2.0f0,
-    label_style::TextStyle=TextStyle(size_px=14, color=Vec4f(0.0, 0.0, 0.0, 1.0))
+    label_style::TextStyle=TextStyle(size_points=14, color=Vec4f(0.0, 0.0, 0.0, 1.0))
 )
     return CheckBoxStyle(
         size, background_color, background_color_checked,
@@ -57,7 +57,7 @@ checkbox = CheckBox(
     label="Enable feature",
     style=CheckBoxStyle(
         size=18.0f0,
-        label_style=TextStyle(size_px=16, color=Vec4f(0.2, 0.2, 0.2, 1.0))
+        label_style=TextStyle(size_points=16, color=Vec4f(0.2, 0.2, 0.2, 1.0))
     ),
     on_change=(new_value) -> checkbox_state[] = new_value  # User updates state
 )
@@ -81,7 +81,7 @@ function measure(view::CheckBoxView)::Tuple{Float32,Float32}
     else
         # Measure label text
         label_width = measure_word_width_cached(view.style.label_style, view.label)
-        label_height = Float32(view.style.label_style.size_px)
+        label_height = Float32(view.style.label_style.size_points)
 
         # Total width: checkbox + spacing + label
         spacing = 8.0f0  # Gap between checkbox and label
@@ -113,7 +113,7 @@ function measure_height(view::CheckBoxView, available_width::Float32)::Float32
     if isempty(view.label)
         return checkbox_size
     else
-        label_height = Float32(view.style.label_style.size_px)
+        label_height = Float32(view.style.label_style.size_points)
         return max(checkbox_size, label_height)
     end
 end
@@ -168,7 +168,7 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
     if !isempty(view.label)
         spacing = 8.0f0
         label_x = checkbox_x + checkbox_size + spacing
-        label_y = y + (height + view.style.label_style.size_px) / 2  # Vertically center the text
+        label_y = y + (height + view.style.label_style.size_points) / 2  # Vertically center the text
 
         label_font = get_font(view.style.label_style)
         draw_text(
@@ -176,7 +176,7 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
             view.label,
             label_x,
             label_y,
-            view.style.label_style.size_px,
+            view.style.label_style.size_points,
             projection_matrix,
             view.style.label_style.color
         )

@@ -64,8 +64,8 @@ function main()
     # Run with multiple periodic callbacks
     Fugl.run(MyApp,
         title="Periodic Callback Demo",
-        window_width_px=700,
-        window_height_px=500,
+        window_width_points=700,
+        window_height_points=500,
         fps_overlay=true,
         periodic_callbacks=[
             fast_counter_callback,
