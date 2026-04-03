@@ -28,38 +28,38 @@ tooltip_state = Ref(TooltipState(is_visible=true))
 
 function MyApp()
     # Dark theme container
-    Container(
-        Card(
-            "Basic Tooltip Demo",
-            Container(
-                IntrinsicColumn([
-                    Fugl.Text("Hover over the button below to see a basic tooltip:", 
-                         style=TextStyle(color=Vec4f(0.8, 0.8, 0.8, 1.0))),
-                    
-                    # Basic tooltip wrapping a button
-                    Tooltip(
-                        "This is a helpful tooltip!",
-                        Container(
-                            Fugl.Text("Hover Me", style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
-                            style=ContainerStyle(
-                                background_color=Vec4f(0.2, 0.6, 0.9, 1.0),
-                                padding=15.0f0,
-                                corner_radius=8.0f0
-                            )
-                        ),
-                        position=:top,
-                        state=tooltip_state[],
-                        on_state_change=(new_state) -> tooltip_state[] = new_state
-                    )
-                ], spacing=15.0f0),
-                style=ContainerStyle(
-                    background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
-                    padding=20.0f0
+    Card(
+        "Basic Tooltip Demo",
+        Container(
+            IntrinsicColumn([
+                Fugl.Text("Hover over the button below to see a basic tooltip:", 
+                        style=TextStyle(color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+                
+                # Basic tooltip wrapping a button
+                Tooltip(
+                    "This is a helpful tooltip!",
+                    Container(
+                        Fugl.Text("Hover Me", style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+                        style=ContainerStyle(
+                            background_color=Vec4f(0.2, 0.6, 0.9, 1.0),
+                            padding=15.0f0,
+                            corner_radius=8.0f0
+                        )
+                    ),
+                    position=:top,
+                    show_delay=0.3,
+                    hide_delay=0.1,
+                    state=tooltip_state[],
+                    on_state_change=(new_state) -> tooltip_state[] = new_state
                 )
-            ),
-            style=dark_card_style,
-            title_style=dark_title_style
-        )
+            ], spacing=15.0f0),
+            style=ContainerStyle(
+                background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
+                padding=20.0f0
+            )
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
     )
 end
 
@@ -122,6 +122,8 @@ function MyApp()
                             style=button_style
                         ),
                         position=:top,
+                        show_delay=0.3,
+                        hide_delay=0.1,
                         style=TooltipStyle(
                             background_color=Vec4f(0.8, 0.3, 0.3, 0.95),
                             text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
@@ -138,6 +140,8 @@ function MyApp()
                             style=button_style
                         ),
                         position=:bottom,
+                        show_delay=0.3,
+                        hide_delay=0.1,
                         style=TooltipStyle(
                             background_color=Vec4f(0.3, 0.3, 0.8, 0.95),
                             text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
@@ -185,8 +189,8 @@ dark_title_style = TextStyle(
 )
 
 # States with different timing
-fast_tooltip_state = Ref(TooltipState(is_visible=true, show_delay=0.1, hide_delay=0.1))
-slow_tooltip_state = Ref(TooltipState(is_visible=true, show_delay=1.0, hide_delay=0.5))
+fast_tooltip_state = Ref(TooltipState(is_visible=true))
+slow_tooltip_state = Ref(TooltipState(is_visible=true))
 
 function MyApp()
     Card(
@@ -214,6 +218,8 @@ function MyApp()
                             text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
                         ),
                         position=:top,
+                        show_delay=0.1,
+                        hide_delay=0.1,
                         state=fast_tooltip_state[],
                         on_state_change=(new_state) -> fast_tooltip_state[] = new_state
                     ),
@@ -235,6 +241,8 @@ function MyApp()
                             text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
                         ),
                         position=:top,
+                        show_delay=1.0,
+                        hide_delay=0.5,
                         state=slow_tooltip_state[],
                         on_state_change=(new_state) -> slow_tooltip_state[] = new_state
                     )
