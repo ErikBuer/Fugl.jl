@@ -48,6 +48,7 @@ makedocs(
             "Components/number_field.md",
             "Components/text_button.md",
             "Components/icon_button.md",
+            "Components/tooltip.md",
             "Components/dropdown.md",
             "Components/checkbox.md",
             "Components/slider.md",

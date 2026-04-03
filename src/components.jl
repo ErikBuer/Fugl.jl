@@ -124,6 +124,9 @@ export Card
 include("composite_components/modal/Modal.jl")
 export Modal, ModalState, ModalStyle
 
+include("composite_components/tooltip/Tooltip.jl")
+export Tooltip, TooltipState, TooltipStyle
+
 include("components/AtlasDebug.jl")
 
 include("composite_components/plot/Plot.jl")
