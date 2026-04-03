@@ -2,15 +2,16 @@ struct IntrinsicRowView <: AbstractView
     children::Vector{AbstractView}
     padding::Float32 # Padding around the row
     spacing::Float32 # Space between children
+    reduce_spacing_on_overflow::Bool # If true, reduce spacing before clipping when space is tight
     on_click::Function
 end
 
-function IntrinsicRow(children::Vector{<:AbstractView}; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
-    return IntrinsicRowView(children, padding, spacing, on_click)
+function IntrinsicRow(children::Vector{<:AbstractView}; padding=10.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+    return IntrinsicRowView(children, padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-@inline function IntrinsicRow(children::AbstractView...; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
-    return IntrinsicRowView(collect(AbstractView, children), padding, spacing, on_click)
+@inline function IntrinsicRow(children::AbstractView...; padding=10.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+    return IntrinsicRowView(collect(AbstractView, children), padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
 function apply_layout(view::IntrinsicRowView, x, y, width, height)
@@ -18,7 +19,6 @@ function apply_layout(view::IntrinsicRowView, x, y, width, height)
     padded_y = y + view.padding
     padded_height = height - 2 * view.padding
     n = length(view.children)
-    total_spacing = (n - 1) * view.spacing
 
     # First pass: gather intrinsic widths
     intrinsic_widths = Float32[]
@@ -34,6 +34,22 @@ function apply_layout(view::IntrinsicRowView, x, y, width, height)
     end
     total_intrinsic_width = sum(intrinsic_widths)
     n_flexible = count(!, is_intrinsic)
+
+    # Calculate spacing - reduce if needed when reduce_spacing_on_overflow is true
+    effective_spacing = view.spacing
+    if view.reduce_spacing_on_overflow && n > 1
+        available_width = width - 2 * view.padding
+        total_spacing_needed = (n - 1) * view.spacing
+        total_content_width = total_intrinsic_width + total_spacing_needed
+
+        # If content doesn't fit with full spacing, reduce spacing
+        if total_content_width > available_width
+            max_possible_spacing = max(0f0, (available_width - total_intrinsic_width) / (n - 1))
+            effective_spacing = min(view.spacing, max_possible_spacing)
+        end
+    end
+
+    total_spacing = (n - 1) * effective_spacing
     remaining_width = max(0f0, width - 2 * view.padding - total_spacing - total_intrinsic_width)
     flexible_width = n_flexible > 0 ? remaining_width / n_flexible : 0f0
 
@@ -43,7 +59,7 @@ function apply_layout(view::IntrinsicRowView, x, y, width, height)
     for (i, child) in enumerate(view.children)
         child_width = is_intrinsic[i] ? intrinsic_widths[i] : flexible_width
         push!(child_layouts, (child_x, padded_y, child_width, padded_height))
-        child_x += child_width + view.spacing
+        child_x += child_width + effective_spacing
     end
 
     return child_layouts

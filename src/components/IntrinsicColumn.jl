@@ -2,15 +2,16 @@ struct IntrinsicColumnView <: AbstractView
     children::Vector{AbstractView}
     padding::Float32 # Padding around the column
     spacing::Float32 # Space between children
+    reduce_spacing_on_overflow::Bool # If true, reduce spacing before clipping when space is tight
     on_click::Function
 end
 
-function IntrinsicColumn(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, on_click::Function=() -> nothing)
-    return IntrinsicColumnView(children, padding, spacing, on_click)
+function IntrinsicColumn(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+    return IntrinsicColumnView(children, padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-@inline function IntrinsicColumn(children::AbstractView...; padding=0.0, spacing=10.0, on_click::Function=() -> nothing)
-    return IntrinsicColumnView(collect(AbstractView, children), padding, spacing, on_click)
+@inline function IntrinsicColumn(children::AbstractView...; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+    return IntrinsicColumnView(collect(AbstractView, children), padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
 function apply_layout(view::IntrinsicColumnView, x, y, width, height)
@@ -18,7 +19,6 @@ function apply_layout(view::IntrinsicColumnView, x, y, width, height)
     padded_y = y + view.padding
     padded_width = width - 2 * view.padding
     n = length(view.children)
-    total_spacing = (n - 1) * view.spacing
 
     # First pass: gather intrinsic heights
     intrinsic_heights = Float32[]
@@ -34,6 +34,22 @@ function apply_layout(view::IntrinsicColumnView, x, y, width, height)
     end
     total_intrinsic_height = sum(intrinsic_heights)
     n_flexible = count(!, is_intrinsic)
+
+    # Calculate spacing - reduce if needed when reduce_spacing_on_overflow is true
+    effective_spacing = view.spacing
+    if view.reduce_spacing_on_overflow && n > 1
+        available_height = height - 2 * view.padding
+        total_spacing_needed = (n - 1) * view.spacing
+        total_content_height = total_intrinsic_height + total_spacing_needed
+
+        # If content doesn't fit with full spacing, reduce spacing
+        if total_content_height > available_height
+            max_possible_spacing = max(0f0, (available_height - total_intrinsic_height) / (n - 1))
+            effective_spacing = min(view.spacing, max_possible_spacing)
+        end
+    end
+
+    total_spacing = (n - 1) * effective_spacing
     remaining_height = max(0f0, height - 2 * view.padding - total_spacing - total_intrinsic_height)
     flexible_height = n_flexible > 0 ? remaining_height / n_flexible : 0f0
 
@@ -43,7 +59,7 @@ function apply_layout(view::IntrinsicColumnView, x, y, width, height)
     for (i, child) in enumerate(view.children)
         child_height = is_intrinsic[i] ? intrinsic_heights[i] : flexible_height
         push!(child_layouts, (padded_x, child_y, padded_width, child_height))
-        child_y += child_height + view.spacing
+        child_y += child_height + effective_spacing
     end
 
     return child_layouts
