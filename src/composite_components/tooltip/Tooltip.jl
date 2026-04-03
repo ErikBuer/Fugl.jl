@@ -173,3 +173,17 @@ function calculate_tooltip_position(view::TooltipView, x::Float32, y::Float32, w
 
     return (tooltip_x, tooltip_y)
 end
+
+"""
+Preferred width - tooltip propagates the wrapped component's preferred width.
+"""
+function preferred_width(view::TooltipView)::Bool
+    return preferred_width(view.wrapped_component)
+end
+
+"""
+Preferred height - tooltip propagates the wrapped component's preferred height.
+"""
+function preferred_height(view::TooltipView)::Bool
+    return preferred_height(view.wrapped_component)
+end
