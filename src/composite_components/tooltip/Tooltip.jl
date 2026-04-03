@@ -7,7 +7,9 @@ struct TooltipView <: AbstractView
     tooltip_text::String             # Text to display in tooltip
     position::Symbol                 # Where to position tooltip: :right, :left, :top, :bottom
     style::TooltipStyle              # Tooltip appearance
-    state::TooltipState              # Current tooltip state (hover timing, visibility, position)
+    show_delay::Float64              # Delay before showing tooltip (seconds)
+    hide_delay::Float64              # Delay before hiding tooltip (seconds)
+    state::TooltipState              # Current tooltip state (hover timing, visibility)
     on_state_change::Function        # Callback for state changes
 end
 
@@ -16,10 +18,12 @@ function Tooltip(
     wrapped_component::AbstractView;
     position::Symbol=:right,
     style=TooltipStyle(),
+    show_delay::Float64=0.5,         # 500 ms delay before showing
+    hide_delay::Float64=0.1,         # 100 ms delay before hiding
     state::TooltipState=TooltipState(),
     on_state_change::Function=(new_state) -> nothing
 )::TooltipView
-    return TooltipView(wrapped_component, tooltip_text, position, style, state, on_state_change)
+    return TooltipView(wrapped_component, tooltip_text, position, style, show_delay, hide_delay, state, on_state_change)
 end
 
 """
@@ -58,7 +62,7 @@ function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float3
     # If we should show the tooltip (hover time exceeded)
     if !view.state.is_visible &&
        view.state.hover_start_time > 0.0 &&
-       current_time - view.state.hover_start_time >= view.state.show_delay
+       current_time - view.state.hover_start_time >= view.show_delay
         new_state = TooltipState(new_state; is_visible=true)
         state_changed = true
     end
@@ -66,7 +70,7 @@ function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float3
     # If we should hide the tooltip (hide time exceeded)  
     if view.state.is_visible &&
        view.state.last_hide_time > 0.0 &&
-       current_time - view.state.last_hide_time >= view.state.hide_delay
+       current_time - view.state.last_hide_time >= view.hide_delay
         new_state = TooltipState(new_state; is_visible=false, hover_start_time=0.0, last_hide_time=0.0)
         state_changed = true
     end
