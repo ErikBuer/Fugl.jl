@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tooltip · Fugl.jl</title><meta name="title" content="Tooltip · Fugl.jl"/><meta property="og:title" content="Tooltip · Fugl.jl"/><meta property="twitter:title" content="Tooltip · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../modal/">Modal</a></li><li><a class="tocitem" href="../tabs/">Tabs</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li class="is-active"><a class="tocitem" href>Tooltip</a><ul class="internal"><li><a class="tocitem" href="#Basic-Tooltip"><span>Basic Tooltip</span></a></li><li><a class="tocitem" href="#Positioned-Tooltips"><span>Positioned Tooltips</span></a></li><li><a class="tocitem" href="#Timing-and-Delay-Customization"><span>Timing and Delay Customization</span></a></li></ul></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><a class="tocitem" href="../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../keylistener/">KeyListener</a></li><li><a class="tocitem" href="../focus/">Focus</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li><input class="collapse-toggle" id="menuitem-3-30" type="checkbox"/><label class="tocitem" for="menuitem-3-30"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-3-30-1" type="checkbox"/><label class="tocitem" for="menuitem-3-30-1"><span class="docs-label">Cartesian</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/cartesian/line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/cartesian/stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/cartesian/scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/cartesian/heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/cartesian/colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/cartesian/plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/cartesian/plot_state/">PlotState</a></li><li><a class="tocitem" href="../plot/cartesian/legend/">Legend</a></li><li><a class="tocitem" href="../plot/cartesian/legend_interactive/">Interactive Legend</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-30-2" type="checkbox"/><label class="tocitem" for="menuitem-3-30-2"><span class="docs-label">Polar</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/polar/polar_plot/">Polar Plot</a></li><li><a class="tocitem" href="../plot/polar/polar_scatter/">Polar Scatter Plot</a></li><li><a class="tocitem" href="../plot/polar/polar_stem/">Polar Stem Plot</a></li><li><a class="tocitem" href="../plot/polar/polar_legend/">Polar Plot Legend</a></li><li><a class="tocitem" href="../plot/polar/polar_legend_interactive/">Interactive Polar Legend</a></li></ul></li></ul></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Tooltip</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tooltip</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/tooltip.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Tooltip"><a class="docs-heading-anchor" href="#Tooltip">Tooltip</a><a id="Tooltip-1"></a><a class="docs-heading-anchor-permalink" href="#Tooltip" title="Permalink"></a></h1><p>The <code>Tooltip</code> component provides overlay tooltips that appear when hovering over wrapped components. It uses a wrapper pattern similar to the Modal component, making it easy to add tooltips to any component.</p><h2 id="Basic-Tooltip"><a class="docs-heading-anchor" href="#Basic-Tooltip">Basic Tooltip</a><a id="Basic-Tooltip-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-Tooltip" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Tooltip, TooltipStyle, Card
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color = Vec4f(0.18, 0.18, 0.22, 1.0),  # Dark gray background
+    border_color = Vec4f(0.4, 0.4, 0.45, 1.0),       # Subtle border
+    border_width = 1.5f0,
+    corner_radius = 0.0f0,
+    padding = 15.0f0
+)
+
+# Dark theme title style
+dark_title_style = TextStyle(
+    size_points = 18,
+    color = Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for title
+)
+
+# Persistent state (essential for timing-based tooltips)
+tooltip_state = Ref(TooltipState(is_visible=true))
+
+function MyApp()
+    # Dark theme container
+    Card(
+        &quot;Basic Tooltip Demo&quot;,
+        Container(
+            IntrinsicColumn([
+                Fugl.Text(&quot;Hover over the button below to see a basic tooltip:&quot;,
+                        style=TextStyle(color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+
+                # Basic tooltip wrapping a button
+                Tooltip(
+                    &quot;This is a helpful tooltip!&quot;,
+                    Container(
+                        Fugl.Text(&quot;Hover Me&quot;, style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+                        style=ContainerStyle(
+                            background_color=Vec4f(0.2, 0.6, 0.9, 1.0),
+                            padding=15.0f0,
+                            corner_radius=8.0f0
+                        )
+                    ),
+                    position=:top,
+                    show_delay=0.3,
+                    hide_delay=0.1,
+                    state=tooltip_state[],
+                    on_state_change=(new_state) -&gt; tooltip_state[] = new_state
+                )
+            ], spacing=15.0f0),
+            style=ContainerStyle(
+                background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
+                padding=20.0f0
+            )
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;tooltip_basic.png&quot;, 400, 200)</code></pre><p><img src="../tooltip_basic.png" alt="Basic Tooltip"/></p><h2 id="Positioned-Tooltips"><a class="docs-heading-anchor" href="#Positioned-Tooltips">Positioned Tooltips</a><a id="Positioned-Tooltips-1"></a><a class="docs-heading-anchor-permalink" href="#Positioned-Tooltips" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Tooltip, TooltipStyle, Card
+
+# Persistent states for each tooltip
+tooltip1_state = Ref(TooltipState(is_visible=true))
+tooltip2_state = Ref(TooltipState(is_visible=true))
+tooltip3_state = Ref(TooltipState(is_visible=true))
+tooltip4_state = Ref(TooltipState(is_visible=true))
+
+# Button style for dark theme
+button_style = ContainerStyle(
+    background_color=Vec4f(0.3, 0.4, 0.6, 1.0),
+    border_color=Vec4f(0.5, 0.6, 0.8, 1.0),
+    border_width=1.0f0,
+    padding=15.0f0,
+    corner_radius=8.0f0
+)
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color = Vec4f(0.18, 0.18, 0.22, 1.0),  # Dark gray background
+    border_color = Vec4f(0.4, 0.4, 0.45, 1.0),       # Subtle border
+    border_width = 1.5f0,
+    corner_radius = 0.0f0,
+    padding = 15.0f0
+)
+
+# Dark theme title style
+dark_title_style = TextStyle(
+    size_points = 18,
+    color = Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for title
+)
+
+function MyApp()
+    Card(
+        &quot;Tooltip Positioning&quot;,
+        Container(
+            IntrinsicColumn([
+                Fugl.Text(&quot;Tooltips can be positioned on different sides:&quot;,
+                        style=TextStyle(color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+
+                # Grid layout for positioning examples
+                IntrinsicColumn([
+                    Tooltip(
+                        &quot;I appear above!&quot;,
+                        Container(
+                            Fugl.Text(&quot;Top&quot;, style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+                            style=button_style
+                        ),
+                        position=:top,
+                        show_delay=0.3,
+                        hide_delay=0.1,
+                        style=TooltipStyle(
+                            background_color=Vec4f(0.8, 0.3, 0.3, 0.95),
+                            text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
+                        ),
+                        state=tooltip1_state[],
+                        on_state_change=(new_state) -&gt; tooltip1_state[] = new_state
+                    ),
+
+                    # Bottom tooltip
+                    Tooltip(
+                        &quot;I appear below!&quot;,
+                        Container(
+                            Fugl.Text(&quot;Bottom&quot;, style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+                            style=button_style
+                        ),
+                        position=:bottom,
+                        show_delay=0.3,
+                        hide_delay=0.1,
+                        style=TooltipStyle(
+                            background_color=Vec4f(0.3, 0.3, 0.8, 0.95),
+                            text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
+                        ),
+                        state=tooltip4_state[],
+                        on_state_change=(new_state) -&gt; tooltip4_state[] = new_state
+                    )
+                ], spacing=5.0f0)
+            ], spacing=5.0f0),
+            style=ContainerStyle(
+                background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
+                padding=30.0f0
+            )
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;tooltip_positioning.png&quot;, 600, 400)</code></pre><p><img src="../tooltip_positioning.png" alt="Positioned Tooltips"/></p><h2 id="Timing-and-Delay-Customization"><a class="docs-heading-anchor" href="#Timing-and-Delay-Customization">Timing and Delay Customization</a><a id="Timing-and-Delay-Customization-1"></a><a class="docs-heading-anchor-permalink" href="#Timing-and-Delay-Customization" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Tooltip, TooltipStyle, Card
+
+# Dark theme card style
+dark_card_style = ContainerStyle(
+    background_color = Vec4f(0.18, 0.18, 0.22, 1.0),  # Dark gray background
+    border_color = Vec4f(0.4, 0.4, 0.45, 1.0),       # Subtle border
+    border_width = 1.5f0,
+    corner_radius = 0.0f0,
+    padding = 15.0f0
+)
+
+# Dark theme title style
+dark_title_style = TextStyle(
+    size_points = 18,
+    color = Vec4f(0.9, 0.9, 0.95, 1.0)  # Light text for title
+)
+
+# States with different timing
+fast_tooltip_state = Ref(TooltipState(is_visible=true))
+slow_tooltip_state = Ref(TooltipState(is_visible=true))
+
+function MyApp()
+    Card(
+        &quot;Tooltip Timing Control&quot;,
+        Container(
+            IntrinsicColumn([
+                Fugl.Text(&quot;Tooltip show and hide delays can be customized:&quot;,
+                        style=TextStyle(color=Vec4f(0.8, 0.8, 0.8, 1.0))),
+
+                IntrinsicRow([
+                    # Fast tooltip
+                    Tooltip(
+                        &quot;I appear quickly (0.1s) and hide quickly too!&quot;,
+                        Container(
+                            Fugl.Text(&quot;Fast Tooltip&quot;, style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+                            style=ContainerStyle(
+                                background_color=Vec4f(0.8, 0.4, 0.2, 1.0),
+                                padding=15.0f0,
+                                corner_radius=6.0f0
+                            )
+                        ),
+                        style=TooltipStyle(
+                            width=200.0f0,
+                            background_color=Vec4f(0.9, 0.5, 0.2, 0.95),
+                            text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
+                        ),
+                        position=:top,
+                        show_delay=0.1,
+                        hide_delay=0.1,
+                        state=fast_tooltip_state[],
+                        on_state_change=(new_state) -&gt; fast_tooltip_state[] = new_state
+                    ),
+
+                    # Slow tooltip
+                    Tooltip(
+                        &quot;I take a full second to appear (1.0s show delay) but hide after 0.5s.&quot;,
+                        Container(
+                            Fugl.Text(&quot;Slow Tooltip&quot;, style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))),
+                            style=ContainerStyle(
+                                background_color=Vec4f(0.2, 0.4, 0.8, 1.0),
+                                padding=15.0f0,
+                                corner_radius=6.0f0
+                            )
+                        ),
+                        style=TooltipStyle(
+                            width=220.0f0,
+                            background_color=Vec4f(0.2, 0.5, 0.9, 0.95),
+                            text_style=TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0))
+                        ),
+                        position=:top,
+                        show_delay=1.0,
+                        hide_delay=0.5,
+                        state=slow_tooltip_state[],
+                        on_state_change=(new_state) -&gt; slow_tooltip_state[] = new_state
+                    )
+                ], spacing=50.0f0)
+            ], spacing=20.0f0),
+            style=ContainerStyle(
+                background_color=Vec4f(0.15, 0.15, 0.15, 1.0),
+                padding=30.0f0
+            )
+        ),
+        style=dark_card_style,
+        title_style=dark_title_style
+    )
+end
+
+screenshot(MyApp, &quot;tooltip_timing.png&quot;, 600, 300)</code></pre><p><img src="../tooltip_timing.png" alt="Tooltip Timing"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../icon_button/">« IconButton</a><a class="docs-footer-nextpage" href="../dropdown/">Dropdown »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 3 April 2026 19:28">Friday 3 April 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>KeyListener · Fugl.jl</title><meta name="title" content="KeyListener · Fugl.jl"/><meta property="og:title" content="KeyListener · Fugl.jl"/><meta property="twitter:title" content="KeyListener · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-23" type="checkbox"/><label class="tocitem" for="menuitem-3-23"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li class="is-active"><a class="tocitem" href>KeyListener</a><ul class="internal"><li><a class="tocitem" href="#Basic-Key-Example"><span>Basic Key Example</span></a></li><li><a class="tocitem" href="#Single-Modifier-Example"><span>Single Modifier Example</span></a></li><li><a class="tocitem" href="#Multiple-Modifiers-Example"><span>Multiple Modifiers Example</span></a></li><li><a class="tocitem" href="#Multiple-Key-Bindings-Example"><span>Multiple Key Bindings Example</span></a></li><li><a class="tocitem" href="#Common-Key-Combinations"><span>Common Key Combinations</span></a></li></ul></li><li><a class="tocitem" href="../focus/">Focus</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>KeyListener</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>KeyListener</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/keylistener.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="KeyListener"><a class="docs-heading-anchor" href="#KeyListener">KeyListener</a><a id="KeyListener-1"></a><a class="docs-heading-anchor-permalink" href="#KeyListener" title="Permalink"></a></h1><p>KeyListener wraps another component and triggers a callback when a specific key combination is pressed. This allows adding keyboard shortcuts to any component.</p><h2 id="Basic-Key-Example"><a class="docs-heading-anchor" href="#Basic-Key-Example">Basic Key Example</a><a id="Basic-Key-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-Key-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+message = Ref(&quot;Press &#39;A&#39; to trigger the callback&quot;)
+
+function MyApp()
+    Container(
+        KeyListener(
+            Container(
+                Fugl.Text(message[], style=TextStyle(size_px=16)),
+                style=ContainerStyle(
+                    padding=20.0f0,
+                    background_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+                    corner_radius=8.0f0
+                )
+            ),
+            Fugl.GLFW.KEY_A,
+            () -&gt; message[] = &quot;You pressed &#39;A&#39;!&quot;
+        )
+    )
+end
+
+screenshot(MyApp, &quot;keylistener_basic.png&quot;, 400, 200);</code></pre><p><img src="../keylistener_basic.png" alt="KeyListener Basic"/></p><h2 id="Single-Modifier-Example"><a class="docs-heading-anchor" href="#Single-Modifier-Example">Single Modifier Example</a><a id="Single-Modifier-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Single-Modifier-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+message = Ref(&quot;Press &#39;Ctrl+S&#39; to save&quot;)
+
+function MyApp()
+    Container(
+        KeyListener(
+            Container(
+                Fugl.Text(message[], style=TextStyle(size_px=16)),
+                style=ContainerStyle(
+                    padding=20.0f0,
+                    background_color=Vec4f(0.85, 0.95, 0.85, 1.0),
+                    corner_radius=8.0f0
+                )
+            ),
+            Fugl.GLFW.KEY_S,
+            Fugl.GLFW.MOD_CONTROL,
+            () -&gt; message[] = &quot;File saved!&quot;
+        )
+    )
+end
+
+screenshot(MyApp, &quot;keylistener_modifier.png&quot;, 400, 200);</code></pre><p><img src="../keylistener_modifier.png" alt="KeyListener Modifier"/></p><h2 id="Multiple-Modifiers-Example"><a class="docs-heading-anchor" href="#Multiple-Modifiers-Example">Multiple Modifiers Example</a><a id="Multiple-Modifiers-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Multiple-Modifiers-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+
+message = Ref(&quot;Press &#39;Ctrl+Shift+N&#39; for new window&quot;)
+
+function MyApp()
+    Container(
+        KeyListener(
+            Container(
+                Fugl.Text(message[], style=TextStyle(size_px=16)),
+                style=ContainerStyle(
+                    padding=20.0f0,
+                    background_color=Vec4f(0.95, 0.85, 0.85, 1.0),
+                    corner_radius=8.0f0
+                )
+            ),
+            Fugl.GLFW.KEY_N,
+            Fugl.GLFW.MOD_CONTROL | Fugl.GLFW.MOD_SHIFT,  # Combine modifiers with bitwise OR
+            () -&gt; message[] = &quot;New window opened!&quot;
+        )
+    )
+end
+
+screenshot(MyApp, &quot;keylistener_multiple.png&quot;, 400, 200);</code></pre><p><img src="../keylistener_multiple.png" alt="KeyListener Multiple"/></p><h2 id="Multiple-Key-Bindings-Example"><a class="docs-heading-anchor" href="#Multiple-Key-Bindings-Example">Multiple Key Bindings Example</a><a id="Multiple-Key-Bindings-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Multiple-Key-Bindings-Example" title="Permalink"></a></h2><p>You can also define multiple key bindings in a single KeyListener using a vector of tuples:</p><pre><code class="language-julia hljs">using Fugl
+
+status = Ref(&quot;Ready - try various key combinations&quot;)
+
+function MyApp()
+    # Define key bindings with explicit type annotation
+    key_bindings = Tuple{Fugl.GLFW.Key, Union{Nothing, Int32}, Function}[
+        (Fugl.GLFW.KEY_A, nothing, () -&gt; status[] = &quot;A key pressed&quot;),
+        (Fugl.GLFW.KEY_S, Fugl.GLFW.MOD_CONTROL, () -&gt; status[] = &quot;Ctrl+S: Save action&quot;),
+        (Fugl.GLFW.KEY_O, Fugl.GLFW.MOD_CONTROL, () -&gt; status[] = &quot;Ctrl+O: Open action&quot;),
+        (Fugl.GLFW.KEY_N, Fugl.GLFW.MOD_CONTROL | Fugl.GLFW.MOD_SHIFT, () -&gt; status[] = &quot;Ctrl+Shift+N: New window&quot;),
+        (Fugl.GLFW.KEY_ESCAPE, nothing, () -&gt; status[] = &quot;Escape pressed&quot;),
+    ]
+
+    Container(
+        KeyListener(
+            Container(
+                IntrinsicColumn([
+                    Fugl.Text(&quot;Multi-Key Demo&quot;, style=TextStyle(size_px=16, color=Vec4f(0.2, 0.2, 0.2, 1.0))),
+                    Fugl.Text(&quot;Try: A, Ctrl+S, Ctrl+O, Ctrl+Shift+N, Escape&quot;, style=TextStyle(size_px=12, color=Vec4f(0.5, 0.5, 0.5, 1.0))),
+                    Fugl.Text(status[], style=TextStyle(size_px=14, color=Vec4f(0.1, 0.4, 0.1, 1.0)))
+                ], spacing=8.0f0),
+                style=ContainerStyle(
+                    padding=20.0f0,
+                    background_color=Vec4f(0.96, 0.97, 0.98, 1.0),
+                    border_color=Vec4f(0.85, 0.85, 0.9, 1.0),
+                    border_width=1.0f0,
+                    corner_radius=8.0f0
+                )
+            ),
+            key_bindings
+        )
+    )
+end
+
+screenshot(MyApp, &quot;keylistener_multibind.png&quot;, 600, 200);</code></pre><p><img src="../keylistener_multibind.png" alt="Multi-Key Bindings"/></p><h2 id="Common-Key-Combinations"><a class="docs-heading-anchor" href="#Common-Key-Combinations">Common Key Combinations</a><a id="Common-Key-Combinations-1"></a><a class="docs-heading-anchor-permalink" href="#Common-Key-Combinations" title="Permalink"></a></h2><p>Here are some commonly used GLFW key constants and modifier combinations:</p><h3 id="Keys"><a class="docs-heading-anchor" href="#Keys">Keys</a><a id="Keys-1"></a><a class="docs-heading-anchor-permalink" href="#Keys" title="Permalink"></a></h3><ul><li><code>GLFW.KEY_A</code> through <code>GLFW.KEY_Z</code> - Letter keys</li><li><code>GLFW.KEY_ENTER</code> - Enter key</li><li><code>GLFW.KEY_ESCAPE</code> - Escape key</li><li><code>GLFW.KEY_SPACE</code> - Spacebar</li><li><code>GLFW.KEY_F1</code> through <code>GLFW.KEY_F12</code> - Function keys</li></ul><h3 id="Modifiers"><a class="docs-heading-anchor" href="#Modifiers">Modifiers</a><a id="Modifiers-1"></a><a class="docs-heading-anchor-permalink" href="#Modifiers" title="Permalink"></a></h3><ul><li><code>GLFW.MOD_CONTROL</code> - Ctrl key</li><li><code>GLFW.MOD_SHIFT</code> - Shift key</li><li><code>GLFW.MOD_ALT</code> - Alt key</li><li><code>GLFW.MOD_SUPER</code> - Super/Cmd/Windows key</li></ul><h3 id="Combining-Modifiers"><a class="docs-heading-anchor" href="#Combining-Modifiers">Combining Modifiers</a><a id="Combining-Modifiers-1"></a><a class="docs-heading-anchor-permalink" href="#Combining-Modifiers" title="Permalink"></a></h3><p>Use the bitwise OR operator (<code>|</code>) to combine multiple modifiers:</p><ul><li><code>GLFW.MOD_CONTROL | GLFW.MOD_SHIFT</code> - Ctrl+Shift</li><li><code>GLFW.MOD_CONTROL | GLFW.MOD_ALT</code> - Ctrl+Alt</li><li><code>GLFW.MOD_CONTROL | GLFW.MOD_SHIFT | GLFW.MOD_ALT</code> - Ctrl+Shift+Alt</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../tree/">« Tree</a><a class="docs-footer-nextpage" href="../focus/">Focus »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Wednesday 21 January 2026 18:07">Wednesday 21 January 2026</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

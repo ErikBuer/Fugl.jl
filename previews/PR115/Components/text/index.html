@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Text · Fugl.jl</title><meta name="title" content="Text · Fugl.jl"/><meta property="og:title" content="Text · Fugl.jl"/><meta property="twitter:title" content="Text · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li class="is-active"><a class="tocitem" href>Text</a><ul class="internal"><li><a class="tocitem" href="#Wrapping"><span>Wrapping</span></a></li><li><a class="tocitem" href="#Text-Clipping"><span>Text Clipping</span></a></li><li><a class="tocitem" href="#Horizontal-Alignement"><span>Horizontal Alignement</span></a></li><li><a class="tocitem" href="#Vertical-Alignement"><span>Vertical Alignement</span></a></li><li><a class="tocitem" href="#Word-Wrapping-with-Vertical-Alignment"><span>Word Wrapping with Vertical Alignment</span></a></li><li><a class="tocitem" href="#Text-Style"><span>Text Style</span></a></li><li><a class="tocitem" href="#Text-Rotation"><span>Text Rotation</span></a></li></ul></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../slider/">Sliders</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-20" type="checkbox"/><label class="tocitem" for="menuitem-3-20"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/03_scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/04_heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Text</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Text</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/text.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Text"><a class="docs-heading-anchor" href="#Text">Text</a><a id="Text-1"></a><a class="docs-heading-anchor-permalink" href="#Text" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Text(&quot;Some Text&quot;)
+    )
+end
+
+screenshot(MyApp, &quot;text.png&quot;, 812, 150);</code></pre><p><img src="../text.png" alt="Text"/></p><h2 id="Wrapping"><a class="docs-heading-anchor" href="#Wrapping">Wrapping</a><a id="Wrapping-1"></a><a class="docs-heading-anchor-permalink" href="#Wrapping" title="Permalink"></a></h2><p>The <code>Text</code> component support wrapping by default.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Text(&quot;Some strings may be too long to fit, and must be drawn over multiple lines.&quot;)
+    )
+end
+
+screenshot(MyApp, &quot;text_wrap.png&quot;, 400, 150);</code></pre><p><img src="../text_wrap.png" alt="Text wrapping"/></p><h2 id="Text-Clipping"><a class="docs-heading-anchor" href="#Text-Clipping">Text Clipping</a><a id="Text-Clipping-1"></a><a class="docs-heading-anchor-permalink" href="#Text-Clipping" title="Permalink"></a></h2><p>By setting <code>wrap_text=false</code>, text will be rendered on a single line and clipped if it exceeds the container width, similar to VS Code&#39;s sidebar behavior.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Column([
+            Text(&quot;This text will wrap normally because wrap_text is true by default&quot;, wrap_text=true),
+            Text(&quot;This very long text will be clipped instead of wrapping to multiple lines&quot;, wrap_text=false)
+        ], spacing=10.0)
+    )
+end
+
+screenshot(MyApp, &quot;text_clip.png&quot;, 400, 150);</code></pre><p><img src="../text_clip.png" alt="Text clipping vs wrapping"/></p><h2 id="Horizontal-Alignement"><a class="docs-heading-anchor" href="#Horizontal-Alignement">Horizontal Alignement</a><a id="Horizontal-Alignement-1"></a><a class="docs-heading-anchor-permalink" href="#Horizontal-Alignement" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Column([
+            Text(&quot;Align left&quot;,   horizontal_align=:left),
+            Text(&quot;Align center&quot;, horizontal_align=:center),
+            Text(&quot;Align right&quot;,  horizontal_align=:right)
+        ], padding=0.0, spacing=0.0);
+        style=ContainerStyle(;padding=0.0f0)
+    )
+end
+
+screenshot(MyApp, &quot;text_align.png&quot;, 812, 150);</code></pre><p><img src="../text_align.png" alt="Text horizontal alignement"/></p><h2 id="Vertical-Alignement"><a class="docs-heading-anchor" href="#Vertical-Alignement">Vertical Alignement</a><a id="Vertical-Alignement-1"></a><a class="docs-heading-anchor-permalink" href="#Vertical-Alignement" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Row([
+            Text(&quot;Align top&quot;,    vertical_align=:top),
+            Text(&quot;Align middle&quot;, vertical_align=:middle),
+            Text(&quot;Align bottom&quot;, vertical_align=:bottom)
+        ], padding=0.0, spacing=0.0);
+        style=ContainerStyle(;padding=0.0f0)
+    )
+end
+
+screenshot(MyApp, &quot;text_vertical_align.png&quot;, 812, 150);</code></pre><p><img src="../text_vertical_align.png" alt="Text vertical alignment"/></p><h2 id="Word-Wrapping-with-Vertical-Alignment"><a class="docs-heading-anchor" href="#Word-Wrapping-with-Vertical-Alignment">Word Wrapping with Vertical Alignment</a><a id="Word-Wrapping-with-Vertical-Alignment-1"></a><a class="docs-heading-anchor-permalink" href="#Word-Wrapping-with-Vertical-Alignment" title="Permalink"></a></h2><p>Word wrapping also respects vertical alignment, centering or positioning the entire wrapped text block as a unit.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+function MyApp()
+    Container(
+        Row([
+            Container(
+                Text(&quot;This long text will wrap to multiple lines and be aligned as a block at the top&quot;,
+                     vertical_align=:top, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.3, 0.3, 0.6, 1.0))
+            ),
+            Container(
+                Text(&quot;This long text will wrap to multiple lines and be centered as a complete block in the middle&quot;,
+                     vertical_align=:middle, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.6, 0.4, 0.4, 1.0))
+            ),
+            Container(
+                Text(&quot;This long text will wrap to multiple lines and be positioned as a block at the bottom&quot;,
+                     vertical_align=:bottom, horizontal_align=:center, wrap_text=true),
+                style=ContainerStyle(background_color=Vec4f(0.4, 0.6, 0.4, 1.0))
+            )
+        ]),
+    )
+end
+
+screenshot(MyApp, &quot;wrapped_vertical_align.png&quot;, 600, 200);</code></pre><p><img src="../wrapped_vertical_align.png" alt="Wrapped text vertical alignment"/></p><h2 id="Text-Style"><a class="docs-heading-anchor" href="#Text-Style">Text Style</a><a id="Text-Style-1"></a><a class="docs-heading-anchor-permalink" href="#Text-Style" title="Permalink"></a></h2><p>Style is handeled by the <code>TextStyle</code> struct.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text
+
+my_style = TextStyle(
+    # font_path=&quot;SomeFont.ttf&quot;,
+    size_px=32,
+    color=Vec4f(0.1, 0.7, 0.7, 1.0), # RGBA
+)
+
+
+function MyApp()
+    Container(
+        Text(&quot;Some text&quot;; style=my_style)
+    )
+end
+
+screenshot(MyApp, &quot;text_style.png&quot;, 812, 150);</code></pre><p><img src="../text_style.png" alt="Text Style Example"/></p><h2 id="Text-Rotation"><a class="docs-heading-anchor" href="#Text-Rotation">Text Rotation</a><a id="Text-Rotation-1"></a><a class="docs-heading-anchor-permalink" href="#Text-Rotation" title="Permalink"></a></h2><p>Text can be rotated by wrapping it with the <code>Rotate</code> component. Positive angles rotate counter-clockwise.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, Rotate
+
+function MyApp()
+    Container(
+        Row([
+            Rotate(Text(&quot;0°&quot;, horizontal_align=:center, vertical_align=:middle), rotation_degrees=0.0f0),
+            Rotate(Text(&quot;45°&quot;, horizontal_align=:center, vertical_align=:middle), rotation_degrees=45.0f0),
+            Rotate(Text(&quot;90°&quot;, horizontal_align=:center, vertical_align=:middle), rotation_degrees=90.0f0)
+        ], padding=20.0, spacing=20.0)
+    )
+end
+
+screenshot(MyApp, &quot;text_rotation.png&quot;, 300, 150);</code></pre><p><img src="../text_rotation.png" alt="Text Rotation Example"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../vline_hline/">« Separator Lines</a><a class="docs-footer-nextpage" href="../text_box/">TextBox »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Saturday 20 December 2025 20:21">Saturday 20 December 2025</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

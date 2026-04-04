@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Heatmap · Fugl.jl</title><meta name="title" content="Heatmap · Fugl.jl"/><meta property="og:title" content="Heatmap · Fugl.jl"/><meta property="twitter:title" content="Heatmap · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Fugl.jl</a></li><li><a class="tocitem" href="../../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../../container/">Container</a></li><li><a class="tocitem" href="../../card/">Card</a></li><li><a class="tocitem" href="../../row_col/">Row/Column</a></li><li><a class="tocitem" href="../../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../../align/">Align</a></li><li><a class="tocitem" href="../../padding/">Padding</a></li><li><a class="tocitem" href="../../sizing/">Sizing</a></li><li><a class="tocitem" href="../../Rotate/">Rotate</a></li><li><a class="tocitem" href="../../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../../text/">Text</a></li><li><a class="tocitem" href="../../text_box/">TextBox</a></li><li><a class="tocitem" href="../../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../../image/">Image</a></li><li><a class="tocitem" href="../../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../../text_field/">TextField</a></li><li><a class="tocitem" href="../../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../../number_field/">NumberField</a></li><li><a class="tocitem" href="../../text_button/">TextButton</a></li><li><a class="tocitem" href="../../icon_button/">IconButton</a></li><li><a class="tocitem" href="../../checkbox/">CheckBox</a></li><li><input class="collapse-toggle" id="menuitem-3-23" type="checkbox" checked/><label class="tocitem" for="menuitem-3-23"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../01_line_plot/">Line Plot</a></li><li><a class="tocitem" href="../02_stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../03_scatter_plot/">Scatter Plot</a></li><li class="is-active"><a class="tocitem" href>Heatmap</a><ul class="internal"><li><a class="tocitem" href="#Available-Colormaps"><span>Available Colormaps</span></a></li><li><a class="tocitem" href="#NaN-Value-Handling"><span>NaN Value Handling</span></a></li><li><a class="tocitem" href="#Multiple-Colormaps-Example"><span>Multiple Colormaps Example</span></a></li><li><a class="tocitem" href="#NaN-Values-Example"><span>NaN Values Example</span></a></li><li><a class="tocitem" href="#Grayscale-NaN-Example"><span>Grayscale NaN Example</span></a></li><li><a class="tocitem" href="#Checkerboard-Example"><span>Checkerboard Example</span></a></li><li><a class="tocitem" href="#No-Axes-Example"><span>No Axes Example</span></a></li></ul></li><li><a class="tocitem" href="../05_colorbar/">Colorbar</a></li><li><a class="tocitem" href="../06_plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../07_plot_state/">PlotState</a></li></ul></li><li><a class="tocitem" href="../../table/">Table</a></li><li><a class="tocitem" href="../../tree/">Tree</a></li><li><a class="tocitem" href="../../keylistener/">KeyListener</a></li></ul></li><li><a class="tocitem" href="../../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li><a class="is-disabled">Plot</a></li><li class="is-active"><a href>Heatmap</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Heatmap</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/plot/04_heatmap.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Heatmap"><a class="docs-heading-anchor" href="#Heatmap">Heatmap</a><a id="Heatmap-1"></a><a class="docs-heading-anchor-permalink" href="#Heatmap" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, HeatmapElement
+
+function MyApp()
+    # Create test image data - 2D Gaussian pattern with waves
+    size_x, size_y = 30, 30
+    data = Matrix{Float32}(undef, size_y, size_x)
+    center_x, center_y = size_x / 2, size_y / 2
+
+    for j in 1:size_y
+        for i in 1:size_x
+            # Distance from center
+            dx = i - center_x
+            dy = j - center_y
+            distance_sq = dx^2 + dy^2
+
+            # Gaussian pattern
+            data[j, i] = exp(-distance_sq / (2 * (size_x / 6)^2))
+
+            # Add sinusoidal pattern
+            wave = 0.3 * sin(i * 0.3) * cos(j * 0.3)
+            data[j, i] += wave
+
+            # Add some noise
+            data[j, i] += 0.1 * (rand() - 0.5)
+        end
+    end
+
+    # Create heatmap element with viridis colormap
+    elements = [
+        HeatmapElement(
+            data;
+            x_range=(0.0, 10.0),
+            y_range=(0.0, 10.0),
+            colormap=:viridis,
+        )
+    ]
+
+    Card(
+        &quot;Heatmap&quot;,
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),           # Gray grid
+                axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),           # Black axes
+                show_grid=true,
+                padding=50.0f0
+            )
+        )
+    )
+end
+
+screenshot(MyApp, &quot;heatmap.png&quot;, 812, 400);</code></pre><p><img src="../heatmap.png" alt="Heatmap"/></p><h2 id="Available-Colormaps"><a class="docs-heading-anchor" href="#Available-Colormaps">Available Colormaps</a><a id="Available-Colormaps-1"></a><a class="docs-heading-anchor-permalink" href="#Available-Colormaps" title="Permalink"></a></h2><p>The <code>HeatmapElement</code> supports several built-in colormaps:</p><ul><li><code>:viridis</code> - Perceptually uniform colormap (purple to yellow)</li><li><code>:plasma</code> - High contrast colormap (purple to pink to yellow)  </li><li><code>:hot</code> - Classic hot colormap (black to red to yellow to white)</li><li><code>:grayscale</code> - Simple grayscale mapping</li></ul><p>You can specify the colormap when creating a <code>HeatmapElement</code>:</p><pre><code class="language-julia hljs">HeatmapElement(data; colormap=:viridis)  # Default
+HeatmapElement(data; colormap=:plasma)   # High contrast
+HeatmapElement(data; colormap=:hot)      # Classic hot colors
+HeatmapElement(data; colormap=:grayscale) # Grayscale</code></pre><h2 id="NaN-Value-Handling"><a class="docs-heading-anchor" href="#NaN-Value-Handling">NaN Value Handling</a><a id="NaN-Value-Handling-1"></a><a class="docs-heading-anchor-permalink" href="#NaN-Value-Handling" title="Permalink"></a></h2><p>All colormaps support proper NaN value handling. You can specify a custom color for NaN values using the <code>nan_color</code> parameter:</p><pre><code class="language-julia hljs">HeatmapElement(data; 
+    colormap=:viridis,
+    nan_color=(1.0, 0.0, 1.0, 1.0)  # Magenta for NaN values
+)</code></pre><p>NaN values in the data will be displayed in the specified <code>nan_color</code> regardless of which colormap is used, while valid data points will be colored according to the chosen colormap.</p><h2 id="Multiple-Colormaps-Example"><a class="docs-heading-anchor" href="#Multiple-Colormaps-Example">Multiple Colormaps Example</a><a id="Multiple-Colormaps-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Multiple-Colormaps-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, HeatmapElement
+
+function MyApp()
+    # Create simple test data - radial pattern
+    size_x, size_y = 20, 20
+    data = Matrix{Float32}(undef, size_y, size_x)
+
+    for j in 1:size_y
+        for i in 1:size_x
+            # Create radial pattern
+            x_norm = (i - size_x/2) / (size_x/2)
+            y_norm = (j - size_y/2) / (size_y/2)
+            radius = sqrt(x_norm^2 + y_norm^2)
+            data[j, i] = max(0.0f0, 1.0f0 - radius)
+        end
+    end
+
+    # Create heatmap elements with different colormaps
+    elements = [
+        HeatmapElement(
+            data;
+            x_range=(0.0, 5.0),
+            y_range=(0.0, 5.0),
+            colormap=:viridis,
+        ),
+        HeatmapElement(
+            data;
+            x_range=(6.0, 11.0),
+            y_range=(0.0, 5.0),
+            colormap=:plasma,
+        ),
+        HeatmapElement(
+            data;
+            x_range=(0.0, 5.0),
+            y_range=(6.0, 11.0),
+            colormap=:hot,
+        ),
+        HeatmapElement(
+            data;
+            x_range=(6.0, 11.0),
+            y_range=(6.0, 11.0),
+            colormap=:grayscale,
+        )
+    ]
+
+    Card(
+        &quot;Multiple Colormaps&quot;,
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                grid_color=Vec4{Float32}(0.5, 0.5, 0.5, 1.0),
+                axis_color=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
+                show_grid=true,
+                padding=50.0f0
+            )
+        )
+    )
+end
+
+screenshot(MyApp, &quot;multipleColormaps.png&quot;, 812, 400);</code></pre><p><img src="../multipleColormaps.png" alt="Multiple Colormaps"/></p><h2 id="NaN-Values-Example"><a class="docs-heading-anchor" href="#NaN-Values-Example">NaN Values Example</a><a id="NaN-Values-Example-1"></a><a class="docs-heading-anchor-permalink" href="#NaN-Values-Example" title="Permalink"></a></h2><p>The API support custom colors for NaN-values.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, HeatmapElement
+
+function MyApp()
+    # Create data with NaN values
+    size_x, size_y = 15, 15
+    data = Matrix{Float32}(undef, size_y, size_x)
+
+    for j in 1:size_y
+        for i in 1:size_x
+            # Create pattern with some NaN regions
+            x_norm = (i - size_x/2) / (size_x/2)
+            y_norm = (j - size_y/2) / (size_y/2)
+
+            if abs(x_norm) &lt; 0.3 &amp;&amp; abs(y_norm) &lt; 0.3
+                data[j, i] = NaN32  # NaN in center region
+            else
+                data[j, i] = x_norm^2 + y_norm^2
+            end
+        end
+    end
+
+    elements = [
+        HeatmapElement(
+            data;
+            x_range=(0.0, 10.0),
+            y_range=(0.0, 10.0),
+            colormap=:viridis,
+            nan_color=(1.0, 0.0, 1.0, 1.0)  # Magenta for NaN
+        )
+    ]
+
+    Card(
+        &quot;NaN Values&quot;,
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                show_grid=true,
+                padding=50.0f0
+            )
+        )
+    )
+end
+
+screenshot(MyApp, &quot;nanValues.png&quot;, 812, 400);</code></pre><p><img src="../nanValues.png" alt="NaN Values"/></p><h2 id="Grayscale-NaN-Example"><a class="docs-heading-anchor" href="#Grayscale-NaN-Example">Grayscale NaN Example</a><a id="Grayscale-NaN-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Grayscale-NaN-Example" title="Permalink"></a></h2><p>You can also have a colored NaN cell in grayscale plots.</p><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, HeatmapElement
+
+function MyApp()
+    # Create grayscale data with NaN cross pattern
+    size_x, size_y = 12, 12
+    data = Matrix{Float32}(undef, size_y, size_x)
+
+    for j in 1:size_y
+        for i in 1:size_x
+            # Create NaN cross pattern in the middle
+            if i == 6 || j == 6
+                data[j, i] = NaN32
+            else
+                # Create simple gradient
+                data[j, i] = Float32((i + j) / (size_x + size_y))
+            end
+        end
+    end
+
+    elements = [
+        HeatmapElement(
+            data;
+            x_range=(0.0, 10.0),
+            y_range=(0.0, 10.0),
+            colormap=:grayscale,
+            nan_color=(1.0, 0.0, 1.0, 1.0)  # Magenta for NaN
+        )
+    ]
+
+    Card(
+        &quot;Grayscale with NaN Cross&quot;,
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                show_grid=true,
+                padding=50.0f0
+            )
+        )
+    )
+end
+
+screenshot(MyApp, &quot;grayscaleNaN.png&quot;, 812, 400);</code></pre><p><img src="../grayscaleNaN.png" alt="Grayscale NaN"/></p><h2 id="Checkerboard-Example"><a class="docs-heading-anchor" href="#Checkerboard-Example">Checkerboard Example</a><a id="Checkerboard-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Checkerboard-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, HeatmapElement
+
+function MyApp()
+    # Create checkerboard pattern
+    size_x, size_y = 20, 20
+    data = Float32[mod(i+j, 2) == 0 ? 1.0 : 0.0 for i in 1:size_y, j in 1:size_x]
+
+    elements = [
+        HeatmapElement(
+            data;
+            x_range=(0.0, 10.0),
+            y_range=(0.0, 10.0),
+            colormap=:hot,
+        )
+    ]
+
+    Card(
+        &quot;Checkerboard&quot;,
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                show_grid=true,
+                padding=50.0f0
+            )
+        )
+    )
+end
+
+screenshot(MyApp, &quot;checkerboard.png&quot;, 812, 400);</code></pre><p><img src="../checkerboard.png" alt="Checkerboard"/></p><h2 id="No-Axes-Example"><a class="docs-heading-anchor" href="#No-Axes-Example">No Axes Example</a><a id="No-Axes-Example-1"></a><a class="docs-heading-anchor-permalink" href="#No-Axes-Example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Fugl
+using Fugl: Text, HeatmapElement
+
+function MyApp()
+    # Create spiral pattern
+    size_x, size_y = 25, 25
+    data = Matrix{Float32}(undef, size_y, size_x)
+
+    for j in 1:size_y
+        for i in 1:size_x
+            x_norm = (i - size_x/2) / (size_x/2)
+            y_norm = (j - size_y/2) / (size_y/2)
+            angle = atan(y_norm, x_norm)
+            radius = sqrt(x_norm^2 + y_norm^2)
+            data[j, i] = sin(angle * 3 + radius * 8) * exp(-radius)
+        end
+    end
+
+    elements = [
+        HeatmapElement(
+            data;
+            x_range=(0.0, 10.0),
+            y_range=(0.0, 10.0),
+            colormap=:plasma,
+        )
+    ]
+
+    Card(
+        &quot;No Axes&quot;,
+        Plot(
+            elements,
+            PlotStyle(
+                background_color=Vec4{Float32}(0.88f0, 0.875f0, 0.88f0, 1.0f0),
+                show_grid=false,
+                show_left_axis=false,
+                show_right_axis=false,
+                show_top_axis=false,
+                show_bottom_axis=false,
+                show_x_tick_marks=false,
+                show_y_tick_marks=false,
+                show_x_tick_labels=false,
+                show_y_tick_labels=false,
+                padding=10.0f0
+            )
+        )
+    )
+end
+
+screenshot(MyApp, &quot;noAxes.png&quot;, 812, 400);</code></pre><p><img src="../noAxes.png" alt="No Axes"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../03_scatter_plot/">« Scatter Plot</a><a class="docs-footer-nextpage" href="../05_colorbar/">Colorbar »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Saturday 17 January 2026 13:35">Saturday 17 January 2026</span>. Using Julia version 1.11.8.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

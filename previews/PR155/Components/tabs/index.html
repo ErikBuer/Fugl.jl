@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tabs · Fugl.jl</title><meta name="title" content="Tabs · Fugl.jl"/><meta property="og:title" content="Tabs · Fugl.jl"/><meta property="twitter:title" content="Tabs · Fugl.jl"/><meta name="description" content="Documentation for Fugl.jl."/><meta property="og:description" content="Documentation for Fugl.jl."/><meta property="twitter:description" content="Documentation for Fugl.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Fugl.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Fugl.jl</a></li><li><a class="tocitem" href="../../running_apps/">Running Applications</a></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../container/">Container</a></li><li><a class="tocitem" href="../card/">Card</a></li><li><a class="tocitem" href="../modal/">Modal</a></li><li class="is-active"><a class="tocitem" href>Tabs</a><ul class="internal"><li><a class="tocitem" href="#Basic-Usage"><span>Basic Usage</span></a></li><li><a class="tocitem" href="#Dark-Mode-Example"><span>Dark Mode Example</span></a></li><li><a class="tocitem" href="#Tab-Corner-Radius"><span>Tab Corner Radius</span></a></li><li><a class="tocitem" href="#Text-Style-Customization"><span>Text Style Customization</span></a></li></ul></li><li><a class="tocitem" href="../row_col/">Row/Column</a></li><li><a class="tocitem" href="../align/">Align</a></li><li><a class="tocitem" href="../padding/">Padding</a></li><li><a class="tocitem" href="../sizing/">Sizing</a></li><li><a class="tocitem" href="../scroll_area/">ScrollArea</a></li><li><a class="tocitem" href="../split_container/">SplitContainer</a></li><li><a class="tocitem" href="../Rotate/">Rotate</a></li><li><a class="tocitem" href="../vline_hline/">Separator Lines</a></li><li><a class="tocitem" href="../text/">Text</a></li><li><a class="tocitem" href="../text_box/">TextBox</a></li><li><a class="tocitem" href="../code_editor/">CodeEditor</a></li><li><a class="tocitem" href="../text_field/">TextField</a></li><li><a class="tocitem" href="../formatted_textfield/">FormattedTextField</a></li><li><a class="tocitem" href="../number_field/">NumberField</a></li><li><a class="tocitem" href="../text_button/">TextButton</a></li><li><a class="tocitem" href="../icon_button/">IconButton</a></li><li><a class="tocitem" href="../dropdown/">Dropdown</a></li><li><a class="tocitem" href="../checkbox/">CheckBox</a></li><li><a class="tocitem" href="../slider/">HorizontalSlider</a></li><li><a class="tocitem" href="../keylistener/">KeyListener</a></li><li><a class="tocitem" href="../focus/">Focus</a></li><li><a class="tocitem" href="../image/">Image</a></li><li><a class="tocitem" href="../table/">Table</a></li><li><a class="tocitem" href="../tree/">Tree</a></li><li><input class="collapse-toggle" id="menuitem-3-29" type="checkbox"/><label class="tocitem" for="menuitem-3-29"><span class="docs-label">Plot</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-3-29-1" type="checkbox"/><label class="tocitem" for="menuitem-3-29-1"><span class="docs-label">Cartesian</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/cartesian/line_plot/">Line Plot</a></li><li><a class="tocitem" href="../plot/cartesian/stem_plot/">Stem Plot</a></li><li><a class="tocitem" href="../plot/cartesian/scatter_plot/">Scatter Plot</a></li><li><a class="tocitem" href="../plot/cartesian/heatmap/">Heatmap</a></li><li><a class="tocitem" href="../plot/cartesian/colorbar/">Colorbar</a></li><li><a class="tocitem" href="../plot/cartesian/plot_style/">PlotStyle</a></li><li><a class="tocitem" href="../plot/cartesian/plot_state/">PlotState</a></li><li><a class="tocitem" href="../plot/cartesian/legend/">Legend</a></li><li><a class="tocitem" href="../plot/cartesian/legend_interactive/">Interactive Legend</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-29-2" type="checkbox"/><label class="tocitem" for="menuitem-3-29-2"><span class="docs-label">Polar</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../plot/polar/polar_plot/">Polar Plot</a></li><li><a class="tocitem" href="../plot/polar/polar_scatter/">Polar Scatter Plot</a></li><li><a class="tocitem" href="../plot/polar/polar_stem/">Polar Stem Plot</a></li><li><a class="tocitem" href="../plot/polar/polar_legend/">Polar Plot Legend</a></li><li><a class="tocitem" href="../plot/polar/polar_legend_interactive/">Interactive Polar Legend</a></li></ul></li></ul></li></ul></li><li><a class="tocitem" href="../../adding_shaders/">Adding your own shaders</a></li><li><a class="tocitem" href="../../interaction/">User interaction</a></li><li><a class="tocitem" href="../../api_reference/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Components</a></li><li class="is-active"><a href>Tabs</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tabs</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ErikBuer/Fugl.jl/blob/master/docs/src/Components/tabs.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Tabs"><a class="docs-heading-anchor" href="#Tabs">Tabs</a><a id="Tabs-1"></a><a class="docs-heading-anchor-permalink" href="#Tabs" title="Permalink"></a></h1><h2 id="Basic-Usage"><a class="docs-heading-anchor" href="#Basic-Usage">Basic Usage</a><a id="Basic-Usage-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-Usage" title="Permalink"></a></h2><p>The Tabs component requires user-managed state to track the selected tab index.</p><pre><code class="language-julia hljs">using Fugl
+
+selected_tab = Ref(1)
+
+function MyApp()
+    Tabs(
+        [
+            (&quot;First&quot;, Fugl.Text(&quot;Content of first tab&quot;)),
+            (&quot;Second&quot;, Fugl.Text(&quot;Content of second tab&quot;)),
+            (&quot;Third&quot;, Fugl.Text(&quot;Content of third tab&quot;))
+        ];
+        selected_index=selected_tab[],
+        on_tab_change=(index) -&gt; selected_tab[] = index
+    )
+end
+
+screenshot(MyApp, &quot;tabs_basic.png&quot;, 500, 200);</code></pre><p><img src="../tabs_basic.png" alt="Basic Tabs"/></p><h2 id="Dark-Mode-Example"><a class="docs-heading-anchor" href="#Dark-Mode-Example">Dark Mode Example</a><a id="Dark-Mode-Example-1"></a><a class="docs-heading-anchor-permalink" href="#Dark-Mode-Example" title="Permalink"></a></h2><p>A dark-themed tabs interface using border color to indicate selection.</p><pre><code class="language-julia hljs">using Fugl
+
+selected_tab_dark = Ref(1)
+option1 = Ref(false)
+option2 = Ref(true)
+
+# Dark background colors
+main_bg = Vec4{Float32}(0.12f0, 0.12f0, 0.12f0, 1.0f0)
+tab_area_bg = Vec4{Float32}(0.16f0, 0.16f0, 0.16f0, 1.0f0)
+container_bg = Vec4{Float32}(0.20f0, 0.20f0, 0.22f0, 1.0f0)
+tab_bg_color = Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0)
+selected_border = Vec4{Float32}(0.3f0, 0.6f0, 0.95f0, 1.0f0)
+unselected_border = Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0)
+
+function MyApp()
+    Container(
+        Column([
+            Fugl.Text(&quot;Dark Theme Tabs&quot;; style=TextStyle(size_px=22, color=Vec4{Float32}(0.95f0, 0.95f0, 0.95f0, 1.0f0))),
+            Container(
+                Tabs(
+                    [
+                        (&quot;Overview&quot;,
+                            Container(
+                                Column([
+                                    Fugl.Text(&quot;Welcome&quot;; style=TextStyle(size_px=18, color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0))),
+                                    Fugl.Text(&quot;This is the first tab with some content.&quot;; style=TextStyle(size_px=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0)))
+                                ]);
+                                style=ContainerStyle(background_color=tab_bg_color, padding=10.0f0)
+                            )
+                        ),
+                        (&quot;Settings&quot;,
+                            Container(
+                                Column([
+                                    Fugl.Text(&quot;Options&quot;; style=TextStyle(size_px=18, color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0))),
+                                    Container(
+                                        Column([
+                                            CheckBox(option1[]; label=&quot;Enable feature A&quot;, on_change=(v) -&gt; option1[] = v),
+                                            CheckBox(option2[]; label=&quot;Enable feature B&quot;, on_change=(v) -&gt; option2[] = v)
+                                        ]);
+                                        style=ContainerStyle(
+                                            background_color=container_bg,
+                                            border_color=Vec4{Float32}(0.35f0, 0.35f0, 0.37f0, 1.0f0),
+                                            corner_radius=6.0f0,
+                                            padding=10.0f0
+                                        )
+                                    )
+                                ]);
+                                style=ContainerStyle(background_color=tab_bg_color, padding=10.0f0)
+                            )
+                        ),
+                        (&quot;About&quot;,
+                            Container(
+                                Column([
+                                    Fugl.Text(&quot;Version 1.0&quot;; style=TextStyle(size_px=14, color=Vec4{Float32}(0.7f0, 0.7f0, 0.7f0, 1.0f0)))
+                                ]);
+                                style=ContainerStyle(background_color=tab_bg_color, padding=10.0f0)
+                            )
+                        )
+                    ];
+                    selected_index=selected_tab_dark[],
+                    on_tab_change=(index) -&gt; selected_tab_dark[] = index,
+                    style=TabsStyle(
+                        tab_height=38.0f0,
+                        selected_color=tab_bg_color,
+                        unselected_color=tab_bg_color,
+                        tab_corner_radius=6.0f0,
+                        tab_border_width=2.0f0,
+                        selected_border_color=selected_border,
+                        unselected_border_color=unselected_border
+                    )
+                );
+                style=ContainerStyle(
+                    background_color=tab_area_bg,
+                    padding=8.0f0,
+                    corner_radius=8.0f0
+                )
+            )
+        ]);
+        style=ContainerStyle(background_color=main_bg)
+    )
+end
+
+screenshot(MyApp, &quot;tabs_dark.png&quot;, 600, 300);</code></pre><p><img src="../tabs_dark.png" alt="Dark Mode Tabs"/></p><h2 id="Tab-Corner-Radius"><a class="docs-heading-anchor" href="#Tab-Corner-Radius">Tab Corner Radius</a><a id="Tab-Corner-Radius-1"></a><a class="docs-heading-anchor-permalink" href="#Tab-Corner-Radius" title="Permalink"></a></h2><p>Customize the appearance of tabs with rounded corners.</p><pre><code class="language-julia hljs">using Fugl
+
+tab_state1 = Ref(1)
+tab_state2 = Ref(1)
+
+function MyApp()
+    Container(
+        Column([
+            Fugl.Text(&quot;No rounded corners&quot;; style=TextStyle(size_px=14)),
+            Tabs(
+                [
+                    (&quot;Tab 1&quot;, Fugl.Text(&quot;Content 1&quot;)),
+                    (&quot;Tab 2&quot;, Fugl.Text(&quot;Content 2&quot;)),
+                    (&quot;Tab 3&quot;, Fugl.Text(&quot;Content 3&quot;))
+                ];
+                selected_index=tab_state1[],
+                on_tab_change=(i) -&gt; tab_state1[] = i,
+                style=TabsStyle(tab_corner_radius=0.0f0)
+            ),
+            Fugl.Text(&quot;Rounded corners (12px)&quot;; style=TextStyle(size_px=14)),
+            Tabs(
+                [
+                    (&quot;Tab 1&quot;, Fugl.Text(&quot;Content 1&quot;)),
+                    (&quot;Tab 2&quot;, Fugl.Text(&quot;Content 2&quot;)),
+                    (&quot;Tab 3&quot;, Fugl.Text(&quot;Content 3&quot;))
+                ];
+                selected_index=tab_state2[],
+                on_tab_change=(i) -&gt; tab_state2[] = i,
+                style=TabsStyle(tab_corner_radius=12.0f0)
+            )
+        ])
+    )
+end
+
+screenshot(MyApp, &quot;tabs_corners.png&quot;, 600, 250);</code></pre><p><img src="../tabs_corners.png" alt="Tab Corner Radius"/></p><h2 id="Text-Style-Customization"><a class="docs-heading-anchor" href="#Text-Style-Customization">Text Style Customization</a><a id="Text-Style-Customization-1"></a><a class="docs-heading-anchor-permalink" href="#Text-Style-Customization" title="Permalink"></a></h2><p>Customize the appearance of tab text.</p><pre><code class="language-julia hljs">using Fugl
+
+tab_custom = Ref(2)
+
+custom_text = TextStyle(size_px=16, color=Vec4{Float32}(0.6f0, 0.6f0, 0.6f0, 1.0f0))
+custom_selected = TextStyle(size_px=16, color=Vec4{Float32}(1.0f0, 0.9f0, 0.5f0, 1.0f0))
+
+function MyApp()
+    Tabs(
+        [
+            (&quot;Home&quot;, Fugl.Text(&quot;Home page content&quot;)),
+            (&quot;Profile&quot;, Fugl.Text(&quot;User profile&quot;)),
+            (&quot;Settings&quot;, Fugl.Text(&quot;Application settings&quot;))
+        ];
+        selected_index=tab_custom[],
+        on_tab_change=(i) -&gt; tab_custom[] = i,
+        style=TabsStyle(
+            tab_height=45.0f0,
+            selected_color=Vec4{Float32}(0.2f0, 0.2f0, 0.25f0, 1.0f0),
+            unselected_color=Vec4{Float32}(0.15f0, 0.15f0, 0.15f0, 1.0f0),
+            text_style=custom_text,
+            selected_text_style=custom_selected,
+            tab_corner_radius=8.0f0
+        )
+    )
+end
+
+screenshot(MyApp, &quot;tabs_text.png&quot;, 600, 200);</code></pre><p><img src="../tabs_text.png" alt="Tab Text Style"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../modal/">« Modal</a><a class="docs-footer-nextpage" href="../row_col/">Row/Column »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Sunday 8 March 2026 21:14">Sunday 8 March 2026</span>. Using Julia version 1.11.9.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
