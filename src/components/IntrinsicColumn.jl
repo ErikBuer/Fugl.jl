@@ -14,7 +14,7 @@ end
     return IntrinsicColumnView(collect(AbstractView, children), padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-function apply_layout(view::IntrinsicColumnView, x, y, width, height)
+function apply_layout(view::IntrinsicColumnView, x::Float32, y::Float32, width::Float32, height::Float32)
     padded_x = x + view.padding
     padded_y = y + view.padding
     padded_width = width - 2 * view.padding
@@ -171,4 +171,18 @@ function measure_height(view::IntrinsicColumnView, available_width::Float32)::Fl
     total_height = sum(child_heights) + (length(view.children) - 1) * view.spacing + 2 * view.padding
 
     return total_height
+end
+
+"""
+Preferred width - IntrinsicColumn has preferred width if any child does.
+"""
+function preferred_width(view::IntrinsicColumnView)::Bool
+    return any(preferred_width(child) for child in view.children)
+end
+
+"""
+Preferred height - IntrinsicColumn has preferred height if any child does.
+"""
+function preferred_height(view::IntrinsicColumnView)::Bool
+    return any(preferred_height(child) for child in view.children)
 end
