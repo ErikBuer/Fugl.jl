@@ -48,7 +48,6 @@ run(ui_function;
 !!! warning "Experimental"
     This feature is experimental and the API may change in future versions.
 
-
 Execute functions at regular frame intervals:
 
 ```julia

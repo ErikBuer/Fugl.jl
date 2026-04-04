@@ -12,7 +12,7 @@ Fugl.DEFAULT_FONT_PATH[] = "/path/to/my/font.ttf"
 Fugl.load_default_font!()
 ```
 """
-const DEFAULT_FONT_PATH = Ref(joinpath(@__DIR__, "../../../assets/fonts/FragmentMono-Regular.ttf"))
+const DEFAULT_FONT_PATH = Ref(joinpath(@__DIR__, "../../../assets/fonts/JuliaMono-Regular.ttf"))
 
 const DEFAULT_FONT_CACHE_KEY = :__default_font__
 

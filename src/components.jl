@@ -91,6 +91,10 @@ export clear_texture_cache!
 include("components/CheckBox.jl")
 export CheckBox, CheckBoxStyle, CheckBoxView
 
+include("components/Spinner.jl")
+export Spinner, SpinnerView, SpinnerState, DotsSpinner, DotsLongSpinner, ArrowsSpinner, BarsSpinner, CircleSpinner
+export DEFAULT_SPINNER_SYMBOLS, DOTS_SPINNER, DOTS_SPINNER_LONG, ARROWS_SPINNER, BARS_SPINNER, CIRCLE_SPINNER
+
 include("components/separator_line/HorizontalLine.jl")
 include("components/separator_line/VerticalLine.jl")
 export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
