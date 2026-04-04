@@ -225,3 +225,17 @@ function detect_click(view::ContainerView, mouse_state::InputState, x::Float32, 
 
     return ClickResult(z, container_callbacks)
 end
+
+"""
+Container delegates preferred width to its child.
+"""
+function preferred_width(view::ContainerView)::Bool
+    return preferred_width(view.child)
+end
+
+"""
+Container delegates preferred height to its child.
+"""
+function preferred_height(view::ContainerView)::Bool
+    return preferred_height(view.child)
+end
