@@ -13,7 +13,7 @@ function Card(title::AbstractString="", content::AbstractView=EmptyView(); style
         ], padding=0.0, spacing=5.0f0
     )
 
-    return Container(
+    return BaseContainer(
         cardContents;
         style=style
     )

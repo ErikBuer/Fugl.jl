@@ -6,15 +6,15 @@ struct IntrinsicRowView <: AbstractView
     on_click::Function
 end
 
-function IntrinsicRow(children::Vector{<:AbstractView}; padding=10.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+function IntrinsicRow(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
     return IntrinsicRowView(children, padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-@inline function IntrinsicRow(children::AbstractView...; padding=10.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+@inline function IntrinsicRow(children::AbstractView...; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
     return IntrinsicRowView(collect(AbstractView, children), padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-function apply_layout(view::IntrinsicRowView, x, y, width, height)
+function apply_layout(view::IntrinsicRowView, x::Float32, y::Float32, width::Float32, height::Float32)
     padded_x = x + view.padding
     padded_y = y + view.padding
     padded_height = height - 2 * view.padding
@@ -166,4 +166,18 @@ function measure_height(view::IntrinsicRowView, available_width::Float32)::Float
     max_height = maximum(child_heights) + 2 * view.padding
 
     return max_height
+end
+
+"""
+Preferred width - IntrinsicRow has preferred width if any child does.
+"""
+function preferred_width(view::IntrinsicRowView)::Bool
+    return any(preferred_width(child) for child in view.children)
+end
+
+"""
+Preferred height - IntrinsicRow has preferred height if any child does.
+"""
+function preferred_height(view::IntrinsicRowView)::Bool
+    return any(preferred_height(child) for child in view.children)
 end

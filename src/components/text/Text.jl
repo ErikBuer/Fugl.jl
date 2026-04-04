@@ -195,3 +195,17 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         color                # Text color
     )
 end
+
+"""
+Text prefers its intrinsic width based on content.
+"""
+function preferred_width(view::TextView)::Bool
+    return true
+end
+
+"""
+Text prefers its intrinsic height based on font size and line count.
+"""
+function preferred_height(view::TextView)::Bool
+    return true
+end
