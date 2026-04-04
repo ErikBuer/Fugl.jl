@@ -57,8 +57,9 @@ export IntrinsicColumn
 include("components/IntrinsicRow.jl")
 export IntrinsicRow
 
-include("components/Container.jl")
-export Container, ContainerStyle
+include("components/container/BaseContainer.jl")
+include("components/container/Container.jl")
+export BaseContainer, Container, ContainerStyle
 
 include("components/KeyListener.jl")
 export KeyListener
