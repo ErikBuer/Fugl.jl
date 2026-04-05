@@ -84,11 +84,55 @@ function measure(view::VerticalScrollAreaView)::Tuple{Float32,Float32}
 end
 
 """
+VerticalScrollArea height is the height of its content.
+"""
+function measure_height(view::VerticalScrollAreaView, available_width::Float32)::Float32
+    scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
+    content_width = available_width - scrollbar_space
+    return measure_height(view.content, content_width)
+end
+
+function preferred_height(::VerticalScrollAreaView)::Bool
+    return false  # Flexible: fills remaining space so it can scroll
+end
+
+"""
+VerticalScrollArea width comes from its content (or fills if content is Inf).
+"""
+function measure_width(view::VerticalScrollAreaView, available_height::Float32)::Float32
+    content_width, _ = measure(view.content)
+    scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
+    return isinf(content_width) ? Inf32 : content_width + scrollbar_space
+end
+
+"""
 Measure the horizontal scroll area - measures content width, takes all available space in height
 """
 function measure(view::HorizontalScrollAreaView)::Tuple{Float32,Float32}
     content_width, content_height = measure(view.content)
     return (Inf32, content_height)  # Take all available width, use content height
+end
+
+"""
+HorizontalScrollArea width is the width of its content.
+"""
+function measure_width(view::HorizontalScrollAreaView, available_height::Float32)::Float32
+    scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
+    content_height = available_height - scrollbar_space
+    return measure_width(view.content, content_height)
+end
+
+function preferred_width(::HorizontalScrollAreaView)::Bool
+    return false  # Flexible: fills remaining space so it can scroll
+end
+
+"""
+HorizontalScrollArea height comes from its content (or fills if content is Inf).
+"""
+function measure_height(view::HorizontalScrollAreaView, available_width::Float32)::Float32
+    _, content_height = measure(view.content)
+    scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
+    return isinf(content_height) ? Inf32 : content_height + scrollbar_space
 end
 
 """
@@ -100,13 +144,11 @@ function apply_layout(view::VerticalScrollAreaView, x::Float32, y::Float32, widt
     viewport_width = width - scrollbar_space
     viewport_height = height
 
-    # Measure the content's natural size
-    content_width, content_height = measure(view.content)
-
-    # For vertical scrolling: content takes full viewport width, can expand vertically
+    # Measure the content's full natural height given the viewport width
     content_width = viewport_width
+    content_height = measure_height(view.content, viewport_width)
     if isinf(content_height)
-        content_height = viewport_height  # If content wants to fill, give it viewport height
+        content_height = viewport_height
     end
 
     # Apply vertical scroll offset to content position
@@ -125,13 +167,11 @@ function apply_layout(view::HorizontalScrollAreaView, x::Float32, y::Float32, wi
     viewport_width = width
     viewport_height = height - scrollbar_space
 
-    # Measure the content's natural size
-    content_width, content_height = measure(view.content)
-
-    # For horizontal scrolling: content takes full viewport height, can expand horizontally
+    # Measure the content's full natural width given the viewport height
     content_height = viewport_height
+    content_width = measure_width(view.content, viewport_height)
     if isinf(content_width)
-        content_width = viewport_width  # If content wants to fill, give it viewport width
+        content_width = viewport_width
     end
 
     # Apply horizontal scroll offset to content position
@@ -164,15 +204,18 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
     # Enable scissor test to clip content to viewport
     ModernGL.glEnable(GL_SCISSOR_TEST)
 
-    # Convert from our coordinate system to OpenGL's (bottom-left origin)
+    # Convert point-space coords to hardware pixel coords for glScissor
+    dpi_scaling = get_current_dpi_scaling()
+    total_scale = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
+
     viewport_info = Vector{Int32}(undef, 4)
     ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport_info)
-    window_height = viewport_info[4]
+    window_height_px = viewport_info[4]
 
-    scissor_x = Int(round(x))
-    scissor_y = Int(round(window_height - y - viewport_height))
-    scissor_width = Int(round(viewport_width))
-    scissor_height = Int(round(viewport_height))
+    scissor_x = Int(round(x * total_scale))
+    scissor_y = Int(round(window_height_px - (y + viewport_height) * total_scale))
+    scissor_width = Int(round(viewport_width * total_scale))
+    scissor_height = Int(round(viewport_height * total_scale))
     ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
 
     # Render the scrolled content
@@ -210,15 +253,18 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
     # Enable scissor test to clip content to viewport
     ModernGL.glEnable(GL_SCISSOR_TEST)
 
-    # Convert from our coordinate system to OpenGL's (bottom-left origin)
+    # Convert point-space coords to hardware pixel coords for glScissor
+    dpi_scaling = get_current_dpi_scaling()
+    total_scale = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
+
     viewport_info = Vector{Int32}(undef, 4)
     ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport_info)
-    window_height = viewport_info[4]
+    window_height_px = viewport_info[4]
 
-    scissor_x = Int(round(x))
-    scissor_y = Int(round(window_height - y - viewport_height))
-    scissor_width = Int(round(viewport_width))
-    scissor_height = Int(round(viewport_height))
+    scissor_x = Int(round(x * total_scale))
+    scissor_y = Int(round(window_height_px - (y + viewport_height) * total_scale))
+    scissor_width = Int(round(viewport_width * total_scale))
+    scissor_height = Int(round(viewport_height * total_scale))
     ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
 
     # Render the scrolled content
@@ -414,7 +460,7 @@ end
 Handle vertical mouse wheel scrolling
 """
 function handle_vertical_scroll_wheel(view::VerticalScrollAreaView, wheel_delta_y::Float32)
-    scroll_speed = 30.0f0  # Pixels per wheel tick
+    scroll_speed = 30.0f0  # Points per wheel tick
 
     if view.scroll_state.max_scroll > 0.0f0
         new_offset = clamp(
@@ -439,7 +485,7 @@ end
 Handle horizontal mouse wheel scrolling
 """
 function handle_horizontal_scroll_wheel(view::HorizontalScrollAreaView, wheel_delta_x::Float32)
-    scroll_speed = 30.0f0  # Pixels per wheel tick
+    scroll_speed = 30.0f0  # Points per wheel tick
 
     if view.scroll_state.max_scroll > 0.0f0
         new_offset = clamp(

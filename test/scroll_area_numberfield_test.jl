@@ -1,5 +1,5 @@
 using Fugl
-using Fugl: Text
+using Fugl: Text, VerticalScrollArea, VerticalScrollState, NumberField, TextField, TextBoxStyle, Card, ContainerStyle, TextStyle, TextButton, InteractionState  # Explicitly import components to avoid ambiguity
 
 # Parameter rows state - similar to your app structure
 parameter_rows = Ref(Vector{Tuple{Ref{EditorState},Ref{EditorState}}}())
@@ -224,7 +224,9 @@ function create_parameter_form()
 
                 # Debug information
                 IntrinsicHeight(Fugl.Text("Total Parameters: $(length(parameter_rows[]))"; style=label_text_style))
-            ]; spacing=10.0f0);
+            ]; spacing=10.0f0,
+            reduce_spacing_on_overflow=false # Defaults to true
+        );
         style=card_style,
         title_style=card_title_style
     )
