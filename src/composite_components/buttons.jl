@@ -5,7 +5,7 @@ function TextButton(text::String;
     on_click::Function=() -> nothing,
     on_mouse_down::Function=() -> nothing,
     on_mouse_up::Function=() -> nothing,
-    container_style=ContainerStyle(),
+    container_style=ContainerStyle(padding=0.0f0),
     hover_style::Union{Nothing,ContainerStyle}=nothing,
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
     disabled::Bool=false,

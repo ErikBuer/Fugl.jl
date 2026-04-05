@@ -24,7 +24,7 @@ function heatmap_plot_demo()
         background_color=Vec4f(0.2, 0.4, 0.8, 1.0),
         border_color=Vec4f(0.1, 0.3, 0.7, 1.0),
         border_width=2.0f0,
-        padding=8.0f0,
+        padding=0.0f0,
         corner_radius=4.0f0
     )
 
@@ -32,7 +32,7 @@ function heatmap_plot_demo()
         background_color=Vec4f(0.3, 0.5, 0.9, 1.0),
         border_color=Vec4f(0.2, 0.4, 0.8, 1.0),
         border_width=2.0f0,
-        padding=8.0f0,
+        padding=0.0f0,
         corner_radius=4.0f0
     )
 
@@ -40,7 +40,7 @@ function heatmap_plot_demo()
         background_color=Vec4f(0.1, 0.2, 0.6, 1.0),
         border_color=Vec4f(0.05, 0.15, 0.5, 1.0),
         border_width=2.0f0,
-        padding=8.0f0,
+        padding=0.0f0,
         corner_radius=4.0f0
     )
 

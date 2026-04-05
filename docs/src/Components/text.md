@@ -5,7 +5,7 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Container(
+    BaseContainer(
         Text("Some Text")
     )
 end
@@ -25,7 +25,7 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Container(
+    BaseContainer(
         Text("Some strings may be too long to fit, and must be drawn over multiple lines.")
     )
 end
@@ -38,14 +38,14 @@ nothing #hide
 
 ## Text Clipping
 
-By setting `wrap_text=false`, text will be rendered on a single line and clipped if it exceeds the container width, similar to VS Code's sidebar behavior.
+By setting `wrap_text=false`, text will be rendered on a single line and clipped if it exceeds the container width.
 
 ``` @example TextClippingExample
 using Fugl
 using Fugl: Text
 
 function MyApp()
-    Container(
+    BaseContainer(
         Column([
             Text("This text will wrap normally because wrap_text is true by default", wrap_text=true),
             Text("This very long text will be clipped instead of wrapping to multiple lines", wrap_text=false)
@@ -59,14 +59,56 @@ nothing #hide
 
 ![Text clipping vs wrapping](text_clip.png)
 
-## Horizontal Alignement
+## Glyph Culling
+
+Any glyph whose bounding box does not fit completely inside the available space is automatically culled — no partial characters are ever drawn.
+This happens both horizontally (when `wrap_text=false` and the text is wider than its container) and vertically (when a fixed height is too small to show all wrapped lines).
+
+```@example GlyphCullingExample
+using Fugl
+using Fugl: Text
+
+long_text = "Glyph culling clips at the character boundary — no partial letters"
+
+bounds_style = ContainerStyle(
+    border_color = Vec4f(0.6, 0.6, 0.6, 1.0),
+    border_width = 1.0f0,
+    padding      = 0.0f0
+)
+
+function MyApp()
+    BaseContainer(
+        Column([
+            # Unconstrained — full text visible
+            BaseContainer(
+                Text(long_text, wrap_text=false),
+                style=bounds_style
+            ),
+            # Narrow fixed width — outermost glyphs that don't fit are culled
+            FixedWidth(
+                BaseContainer(
+                    Text(long_text, wrap_text=false),
+                    style=bounds_style
+                ),
+                220.0f0
+            ),
+        ], spacing=10.0),
+        style=ContainerStyle(padding=16.0f0)
+    )
+end
+
+screenshot(MyApp, "text_glyph_culling.png", 812, 120);
+nothing #hide
+```
+
+![Glyph culling](text_glyph_culling.png)
 
 ``` @example TextAlignement
 using Fugl
 using Fugl: Text
 
 function MyApp()
-    Container(
+    BaseContainer(
         Column([
             Text("Align left",   horizontal_align=:left), 
             Text("Align center", horizontal_align=:center), 
@@ -89,7 +131,7 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Container(
+    BaseContainer(
         Row([
             Text("Align top",    vertical_align=:top), 
             Text("Align middle", vertical_align=:middle), 
@@ -114,24 +156,24 @@ using Fugl
 using Fugl: Text
 
 function MyApp()
-    Container(
-        Row([
-            Container(
+    BaseContainer(
+        Row(
+            BaseContainer(
                 Text("This long text will wrap to multiple lines and be aligned as a block at the top", 
                      vertical_align=:top, horizontal_align=:center, wrap_text=true),
                 style=ContainerStyle(background_color=Vec4f(0.3, 0.3, 0.6, 1.0))
             ),
-            Container(
+            BaseContainer(
                 Text("This long text will wrap to multiple lines and be centered as a complete block in the middle", 
                      vertical_align=:middle, horizontal_align=:center, wrap_text=true),
                 style=ContainerStyle(background_color=Vec4f(0.6, 0.4, 0.4, 1.0))
             ),
-            Container(
+            BaseContainer(
                 Text("This long text will wrap to multiple lines and be positioned as a block at the bottom", 
                      vertical_align=:bottom, horizontal_align=:center, wrap_text=true),
                 style=ContainerStyle(background_color=Vec4f(0.4, 0.6, 0.4, 1.0))
             )
-        ]),
+        ),
     )
 end
 
@@ -177,7 +219,6 @@ To load a custom font:
 Fugl.get_font_by_path(:my_custom_font, "/path/to/font.ttf")
 my_style = TextStyle(font_cache_key=:my_custom_font, size_points=32, color=Vec4f(0.1, 0.7, 0.7, 1.0))
 ```
-
 
 ## Text Rotation
 

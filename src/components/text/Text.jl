@@ -183,16 +183,17 @@ function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, 
         current_y += line_height
     end
 
-    # Render all lines in a single batched call for maximum performance
-    # This replaces individual draw_text calls with one optimized batch
+    # Render all lines in a single batched call for maximum performance.
+    # Pass the component bounds so glyphs that are not fully inside are culled.
     draw_multiline_text_batched(
-        font,                # Font face
-        lines,               # All lines of text
-        x_positions,         # X positions for each line
-        y_positions,         # Y positions for each line
-        size_points,         # Text size
-        projection_matrix_points,   # Projection matrix
-        color                # Text color
+        font,                     # Font face
+        lines,                    # All lines of text
+        x_positions,              # X positions for each line
+        y_positions,              # Y positions for each line
+        size_points,              # Text size
+        projection_matrix_points, # Projection matrix
+        color;                    # Text color
+        clip_bounds_points=Rectangle(x, y, width, height)
     )
 end
 

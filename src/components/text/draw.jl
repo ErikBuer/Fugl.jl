@@ -7,7 +7,8 @@ function draw_text(
     y::Float32,
     size_points::Int,
     projection_matrix::Mat4{Float32},
-    color::Vec4{Float32}
+    color::Vec4{Float32};
+    clip_bounds_points::Union{Rectangle,Nothing}=nothing
 )
     # Convert effective coordinates to pixel coordinates for crisp text rendering
     dpi_scaling = get_current_dpi_scaling()
@@ -31,8 +32,19 @@ function draw_text(
     pixel_projection_matrix[2, 2] /= total_scale  # Scale y component for pixel coordinates
     pixel_projection_matrix = Mat4{Float32}(pixel_projection_matrix)  # Convert back to SMatrix
 
+    # Convert clip bounds from points to pixels if provided
+    clip_px = if isnothing(clip_bounds_points)
+        nothing
+    else
+        cb = clip_bounds_points
+        (Float32(round(cb.x * total_scale)),
+            Float32(round(cb.y * total_scale)),
+            Float32(round((cb.x + cb.width) * total_scale)),
+            Float32(round((cb.y + cb.height) * total_scale)))
+    end
+
     batch = get_global_text_batch()
-    return draw_text_batched(font_face, text, snapped_pixel_x, snapped_pixel_y, size_points, pixel_projection_matrix, color, batch)
+    return draw_text_batched(font_face, text, snapped_pixel_x, snapped_pixel_y, size_points, pixel_projection_matrix, color, batch; clip_bounds_px=clip_px)
 end
 
 
@@ -228,7 +240,8 @@ function draw_text_batched(
     size_points::Int,
     projection_matrix::Mat4{Float32},
     color::Vec4{Float32},
-    batch::GlyphBatch=GlyphBatch()
+    batch::GlyphBatch=GlyphBatch();
+    clip_bounds_px::Union{NTuple{4,Float32},Nothing}=nothing
 )
     # Convert from points to pixel coordinates for crisp rendering
     # Use both manual_scale and system_dpi_ratio for proper pixel sizing
@@ -263,15 +276,40 @@ function draw_text_batched(
             glyph_y = y_px - glyph_uv.bearing_y  # Negative because glyph bearing_y is upward
 
             # Snap glyph positions to pixel boundaries for crisp rendering
-            snapped_glyph_x = round(glyph_x)
-            snapped_glyph_y = round(glyph_y)
+            snapped_glyph_x = Float32(round(glyph_x))
+            snapped_glyph_y = Float32(round(glyph_y))
 
-            add_glyph_to_batch!(
-                batch,
-                Float32(snapped_glyph_x), Float32(snapped_glyph_y),
-                Float32(glyph_uv.width), Float32(glyph_uv.height),
-                glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
-            )
+            if isnothing(clip_bounds_px)
+                add_glyph_to_batch!(
+                    batch,
+                    snapped_glyph_x, snapped_glyph_y,
+                    Float32(glyph_uv.width), Float32(glyph_uv.height),
+                    glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
+                )
+            else
+                clip_x_min, clip_y_min, clip_x_max, clip_y_max = clip_bounds_px
+                vis_x_min = max(snapped_glyph_x, clip_x_min)
+                vis_x_max = min(snapped_glyph_x + glyph_uv.width, clip_x_max)
+                vis_y_min = max(snapped_glyph_y, clip_y_min)
+                vis_y_max = min(snapped_glyph_y + glyph_uv.height, clip_y_max)
+
+                if vis_x_min < vis_x_max && vis_y_min < vis_y_max
+                    inv_w = 1.0f0 / Float32(glyph_uv.width)
+                    inv_h = 1.0f0 / Float32(glyph_uv.height)
+                    du = glyph_uv.u_max - glyph_uv.u_min
+                    dv = glyph_uv.v_max - glyph_uv.v_min
+                    u_vis_min = glyph_uv.u_min + (vis_x_min - snapped_glyph_x) * inv_w * du
+                    u_vis_max = glyph_uv.u_min + (vis_x_max - snapped_glyph_x) * inv_w * du
+                    v_vis_min = glyph_uv.v_min + (vis_y_min - snapped_glyph_y) * inv_h * dv
+                    v_vis_max = glyph_uv.v_min + (vis_y_max - snapped_glyph_y) * inv_h * dv
+                    add_glyph_to_batch!(
+                        batch,
+                        vis_x_min, vis_y_min,
+                        vis_x_max - vis_x_min, vis_y_max - vis_y_min,
+                        u_vis_min, v_vis_min, u_vis_max, v_vis_max
+                    )
+                end
+            end
         end
 
         # Advance position
@@ -288,6 +326,11 @@ end
 """
 Multi-line batched text rendering that collects all lines into a single batch.
 This provides maximum performance for rendering multiple lines of text.
+
+An optional `clip_bounds_points` tuple `(x, y, width, height)` (in points) can be
+provided. Glyphs that overlap the boundary are clipped: both the quad geometry and
+the atlas UV coordinates are trimmed proportionally, so partial characters are
+rendered correctly rather than being fully omitted.
 """
 function draw_multiline_text_batched(
     font_face::FreeTypeAbstraction.FTFont,
@@ -297,7 +340,8 @@ function draw_multiline_text_batched(
     size_points::Int,
     projection_matrix_points::Mat4{Float32},
     color::Vec4{Float32},
-    batch::GlyphBatch=GlyphBatch()
+    batch::GlyphBatch=GlyphBatch();
+    clip_bounds_points::Union{Rectangle,Nothing}=nothing
 )
     # Use pixel-based scaling for crisp rendering (matches draw_text_batched)
     dpi_scaling = get_current_dpi_scaling()
@@ -311,6 +355,16 @@ function draw_multiline_text_batched(
     total_scale = manual_scale * system_dpi_ratio
     pixel_x_positions = [Float32(round(x * total_scale)) for x in x_positions]
     pixel_y_positions = [Float32(round(y * total_scale)) for y in y_positions]
+
+    # Pre-compute clip bounds in pixel space (if provided)
+    clip_x_min_px = clip_x_max_px = clip_y_min_px = clip_y_max_px = 0.0f0
+    has_clip = !isnothing(clip_bounds_points)
+    if has_clip
+        clip_x_min_px = Float32(round(clip_bounds_points.x * total_scale))
+        clip_y_min_px = Float32(round(clip_bounds_points.y * total_scale))
+        clip_x_max_px = Float32(round((clip_bounds_points.x + clip_bounds_points.width) * total_scale))
+        clip_y_max_px = Float32(round((clip_bounds_points.y + clip_bounds_points.height) * total_scale))
+    end
 
     # Convert the passed projection matrix from points to pixels
     # The projection matrix is already set up for the correct rendering target (window or framebuffer)
@@ -347,22 +401,56 @@ function draw_multiline_text_batched(
             # Get glyph from atlas using pixel size (matches other text functions)
             glyph_uv = get_or_insert_glyph!(atlas, font_face, char, pixel_size)
 
-            # Add to batch if it has content
+            # Calculate glyph position (always, so advance stays correct)
+            glyph_x = line_origin_x + current_x + glyph_uv.bearing_x
+            glyph_y = line_origin_y - glyph_uv.bearing_y  # Negative because glyph bearing_y is upward
+
+            # Snap glyph positions to pixel boundaries for crisp rendering
+            snapped_glyph_x = Float32(round(glyph_x))
+            snapped_glyph_y = Float32(round(glyph_y))
+
+            # Add to batch only if the glyph has renderable content
             if glyph_uv.width > 0 && glyph_uv.height > 0
-                # Calculate glyph position
-                glyph_x = line_origin_x + current_x + glyph_uv.bearing_x
-                glyph_y = line_origin_y - glyph_uv.bearing_y  # Negative because glyph bearing_y is upward
+                if !has_clip
+                    # No clipping — add the full glyph quad
+                    add_glyph_to_batch!(
+                        batch,
+                        snapped_glyph_x, snapped_glyph_y,
+                        Float32(glyph_uv.width), Float32(glyph_uv.height),
+                        glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
+                    )
+                else
+                    # Clip the glyph quad against the clip bounds.
+                    # Compute the visible screen-space rectangle.
+                    vis_x_min = max(snapped_glyph_x, clip_x_min_px)
+                    vis_x_max = min(snapped_glyph_x + glyph_uv.width, clip_x_max_px)
+                    vis_y_min = max(snapped_glyph_y, clip_y_min_px)
+                    vis_y_max = min(snapped_glyph_y + glyph_uv.height, clip_y_max_px)
 
-                # Snap glyph positions to pixel boundaries for crisp rendering
-                snapped_glyph_x = round(glyph_x)
-                snapped_glyph_y = round(glyph_y)
+                    # Skip glyphs that are fully outside the clip region
+                    if vis_x_min < vis_x_max && vis_y_min < vis_y_max
+                        # Proportionally adjust UV coordinates to match the clipped geometry.
+                        # u/v vary linearly across the glyph quad:
+                        #   u = u_min + (x - x0) / w * (u_max - u_min)
+                        #   v = v_min + (y - y0) / h * (v_max - v_min)
+                        inv_w = 1.0f0 / Float32(glyph_uv.width)
+                        inv_h = 1.0f0 / Float32(glyph_uv.height)
+                        du = glyph_uv.u_max - glyph_uv.u_min
+                        dv = glyph_uv.v_max - glyph_uv.v_min
 
-                add_glyph_to_batch!(
-                    batch,
-                    Float32(snapped_glyph_x), Float32(snapped_glyph_y),
-                    Float32(glyph_uv.width), Float32(glyph_uv.height),
-                    glyph_uv.u_min, glyph_uv.v_min, glyph_uv.u_max, glyph_uv.v_max
-                )
+                        u_vis_min = glyph_uv.u_min + (vis_x_min - snapped_glyph_x) * inv_w * du
+                        u_vis_max = glyph_uv.u_min + (vis_x_max - snapped_glyph_x) * inv_w * du
+                        v_vis_min = glyph_uv.v_min + (vis_y_min - snapped_glyph_y) * inv_h * dv
+                        v_vis_max = glyph_uv.v_min + (vis_y_max - snapped_glyph_y) * inv_h * dv
+
+                        add_glyph_to_batch!(
+                            batch,
+                            vis_x_min, vis_y_min,
+                            vis_x_max - vis_x_min, vis_y_max - vis_y_min,
+                            u_vis_min, v_vis_min, u_vis_max, v_vis_max
+                        )
+                    end
+                end
             end
 
             # Advance position
