@@ -148,6 +148,27 @@ function measure_width(view::IntrinsicRowView, available_height::Float32)::Float
 end
 
 """
+Measure the width of the component when constrained by available height.
+"""
+# function measure_width(view::IntrinsicRowView, available_height::Float32)::Float32
+#     if isempty(view.children)
+#         return 2 * view.padding  # Just padding if no children
+#     end
+
+#     # Account for padding in available height
+#     padded_height = available_height - 2 * view.padding
+
+#     # Only sum children with a fixed preferred width; flexible children contribute 0
+#     # (flexible children will fill remaining space at layout time, not at measure time)
+#     child_widths = [preferred_width(child) ? measure_width(child, padded_height) : 0f0 for child in view.children]
+
+#     # Total width is sum of preferred child widths plus spacing plus padding
+#     total_width = sum(child_widths) + (length(view.children) - 1) * view.spacing + 2 * view.padding
+
+#     return total_width
+# end
+
+"""
 Measure the height of the component when constrained by available width.
 """
 function measure_height(view::IntrinsicRowView, available_width::Float32)::Float32
@@ -158,25 +179,27 @@ function measure_height(view::IntrinsicRowView, available_width::Float32)::Float
     # Account for padding in available width
     padded_width = available_width - 2 * view.padding
 
-    # Measure each child's height given the available width_per_child
-    # Every child gets the full padded width since its an intrinsic row
-    child_heights = [measure_height(child, padded_width) for child in view.children]
+    # Only take max over children with a fixed preferred height
+    # (flexible children fill remaining space, their natural height is unknown)
+    preferred_heights = [measure_height(child, padded_width) for child in view.children if preferred_height(child)]
 
-    # For a row, height is the maximum height of any child, plus padding
-    max_height = maximum(child_heights) + 2 * view.padding
+    # For a row, height is the maximum height of any preferred child, plus padding
+    max_height = isempty(preferred_heights) ? 2 * view.padding : maximum(preferred_heights) + 2 * view.padding
 
     return max_height
 end
 
 """
-Preferred width - IntrinsicRow has preferred width if any child does.
+Preferred width - IntrinsicRow has preferred width only if ALL children do.
+If any child is flexible (fills remaining space), the row's total width is
+unknown at measure time and must be allocated by the parent layout.
 """
 function preferred_width(view::IntrinsicRowView)::Bool
-    return any(preferred_width(child) for child in view.children)
+    return all(preferred_width(child) for child in view.children)
 end
 
 """
-Preferred height - IntrinsicRow has preferred height if any child does.
+Preferred height if any of the children has.
 """
 function preferred_height(view::IntrinsicRowView)::Bool
     return any(preferred_height(child) for child in view.children)

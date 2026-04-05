@@ -174,6 +174,27 @@ function measure_height(view::IntrinsicColumnView, available_width::Float32)::Fl
 end
 
 """
+Measure the height of the component when constrained by available width.
+"""
+# function measure_height(view::IntrinsicColumnView, available_width::Float32)::Float32
+#     if isempty(view.children)
+#         return 2 * view.padding  # Just padding if no children
+#     end
+
+#     # Account for padding in available width
+#     padded_width = available_width - 2 * view.padding
+
+#     # Only sum children with a fixed preferred height; flexible children contribute 0
+#     # (flexible children will fill remaining space at layout time, not at measure time)
+#     child_heights = [preferred_height(child) ? measure_height(child, padded_width) : 0f0 for child in view.children]
+
+#     # Total height is sum of preferred child heights plus spacing plus padding
+#     total_height = sum(child_heights) + (length(view.children) - 1) * view.spacing + 2 * view.padding
+
+#     return total_height
+# end
+
+"""
 Preferred width - IntrinsicColumn has preferred width if any child does.
 """
 function preferred_width(view::IntrinsicColumnView)::Bool
@@ -181,8 +202,10 @@ function preferred_width(view::IntrinsicColumnView)::Bool
 end
 
 """
-Preferred height - IntrinsicColumn has preferred height if any child does.
+Preferred height - IntrinsicColumn has preferred height only if ALL children do.
+If any child is flexible (fills remaining space), the column's total height is
+unknown at measure time and must be allocated by the parent layout.
 """
 function preferred_height(view::IntrinsicColumnView)::Bool
-    return any(preferred_height(child) for child in view.children)
+    return all(preferred_height(child) for child in view.children)
 end
