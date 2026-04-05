@@ -1,12 +1,12 @@
 # Container
 
-The most basic UI component.
+`BaseContainer` is the most basic UI component.
 
 ``` @example ContainerExample
 using Fugl
 
 function MyApp()
-    Container()
+    BaseContainer()
 end
 
 screenshot(MyApp, "container.png", 400, 300);
@@ -21,8 +21,8 @@ You can add a child component to a cointainer, as such:
 using Fugl
 
 function MyApp()
-    Container(
-        Container()
+    BaseContainer(
+        BaseContainer()
     )
 end
 
@@ -53,9 +53,9 @@ my_style2 = ContainerStyle(;
 )
 
 function MyApp()
-    Container(
-        Container(
-            Container(; style=my_style2);
+    BaseContainer(
+        BaseContainer(
+            BaseContainer(; style=my_style2);
             style=my_style
         )
     )
@@ -73,11 +73,11 @@ nothing #hide
 using Fugl
 
 function MyApp()
-    Container(
+    BaseContainer(
         IntrinsicRow([
-            Container(; style=ContainerStyle(corner_radius=0.0f0)),
-            Container(; style=ContainerStyle(corner_radius=15.0f0)),
-            Container(; style=ContainerStyle(corner_radius=40.0f0))
+            BaseContainer(; style=ContainerStyle(corner_radius=0.0f0)),
+            BaseContainer(; style=ContainerStyle(corner_radius=15.0f0)),
+            BaseContainer(; style=ContainerStyle(corner_radius=40.0f0))
         ], spacing=20.0f0)
     )
 end
@@ -94,11 +94,11 @@ nothing #hide
 using Fugl
 
 function MyApp()
-    Container(
+    BaseContainer(
         IntrinsicRow([
-            Container(; style=ContainerStyle(border_width=0.0f0)),
-            Container(; style=ContainerStyle(border_width=4.0f0)),
-            Container(; style=ContainerStyle(border_width=10.0f0))
+            BaseContainer(; style=ContainerStyle(border_width=0.0f0)),
+            BaseContainer(; style=ContainerStyle(border_width=4.0f0)),
+            BaseContainer(; style=ContainerStyle(border_width=10.0f0))
         ], spacing=20.0f0)
     )
 end
@@ -111,7 +111,7 @@ nothing #hide
 
 ## Interactive and Disabled States
 
-Containers can have interactive states (hover, pressed) and disabled states with custom styling:
+`Containers` wraps `BaseContainer` and introduce interactive states (hover, pressed) and disabled states with custom styling:
 
 ```@example ContainerInteraction
 using Fugl

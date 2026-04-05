@@ -6,11 +6,11 @@ struct IntrinsicRowView <: AbstractView
     on_click::Function
 end
 
-function IntrinsicRow(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+function IntrinsicRow(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
     return IntrinsicRowView(children, padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-@inline function IntrinsicRow(children::AbstractView...; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+@inline function IntrinsicRow(children::AbstractView...; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
     return IntrinsicRowView(collect(AbstractView, children), padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
@@ -25,7 +25,7 @@ function apply_layout(view::IntrinsicRowView, x::Float32, y::Float32, width::Flo
     is_intrinsic = Bool[]
     for child in view.children
         if preferred_width(child)
-            push!(intrinsic_widths, measure(child)[1])
+            push!(intrinsic_widths, measure_width(child, padded_height))
             push!(is_intrinsic, true)
         else
             push!(intrinsic_widths, 0f0)

@@ -196,6 +196,20 @@ function measure(view::TableView)::Tuple{Float32,Float32}
     return (total_width, total_height)
 end
 
+function measure_height(view::TableView, available_width::Float32)::Float32
+    num_rows = length(view.data)
+    total_height = view.style.header_height + num_rows * view.style.cell_height
+    if view.style.show_grid
+        total_height += num_rows * view.style.grid_width
+    end
+    total_height += 2 * view.style.border_width
+    return total_height
+end
+
+function preferred_height(view::TableView)::Bool
+    return true
+end
+
 function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
     num_cols = length(view.headers)
     num_rows = length(view.data)

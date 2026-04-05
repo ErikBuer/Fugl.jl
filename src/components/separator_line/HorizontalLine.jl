@@ -16,11 +16,13 @@ end
 Horizontal line separator that fills available width.
 """
 HorizontalLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
+HorizontalLine(style::SeparatorStyle, end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
 
 """
 Convenience constructor for horizontal line
 """
 HLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
+HLine(style::SeparatorStyle, end_length::Float32=0.0f0) = HorizontalLineView(style, end_length)
 
 function measure(view::HorizontalLineView)::Tuple{Float32,Float32}
     # Width: fill available (Inf32), Height: line width
@@ -67,6 +69,10 @@ function interpret_view(view::HorizontalLineView, x::Float32, y::Float32, width:
     GLA.draw(vao)
     GLA.unbind(vao)
     GLA.unbind(prog[])
+end
+
+function measure_height(view::HorizontalLineView, available_width::Float32)::Float32
+    return view.style.line_width
 end
 
 function preferred_height(view::HorizontalLineView)::Bool

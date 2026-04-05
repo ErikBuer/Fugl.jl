@@ -359,3 +359,140 @@ nothing #hide
 ```
 
 ![Dark Interactive Text Buttons](disabled_button.png)
+
+## Hover and Press States
+
+Demonstrates all available interaction-state combinations: hover + press, hover only, press only, no effects, and custom per-state colors.
+
+``` @example HoverDemoExample
+using Fugl
+using Fugl: Text
+
+# Dark theme palette
+const DARK_BG      = Vec4f(0.08, 0.08, 0.08, 1.0)
+const DARK_SURFACE = Vec4f(0.15, 0.15, 0.18, 1.0)
+const DARK_HOVER   = Vec4f(0.22, 0.22, 0.28, 1.0)
+const DARK_PRESSED = Vec4f(0.10, 0.10, 0.12, 1.0)
+const DARK_BORDER  = Vec4f(0.30, 0.30, 0.30, 1.0)
+const DARK_TEXT    = Vec4f(0.90, 0.90, 0.90, 1.0)
+
+const DEFAULT_BTN_STYLE = ContainerStyle(
+    background_color=DARK_SURFACE, border_color=DARK_BORDER,
+    border_width=1.0f0, padding=12.0f0, corner_radius=6.0f0
+)
+const DEFAULT_HOVER_STYLE = ContainerStyle(
+    background_color=DARK_HOVER, border_color=Vec4f(0.4, 0.4, 0.4, 1.0),
+    border_width=1.0f0, padding=12.0f0, corner_radius=6.0f0
+)
+const DEFAULT_PRESSED_STYLE = ContainerStyle(
+    background_color=DARK_PRESSED, border_color=Vec4f(0.5, 0.5, 0.5, 1.0),
+    border_width=2.0f0, padding=12.0f0, corner_radius=6.0f0
+)
+
+# Custom button: surface → blue on hover → red on press
+const CUSTOM_BTN_STYLE = ContainerStyle(
+    background_color=DARK_SURFACE, border_color=DARK_BORDER,
+    border_width=2.0f0, padding=14.0f0, corner_radius=8.0f0
+)
+const CUSTOM_HOVER_STYLE = ContainerStyle(
+    background_color=Vec4f(0.3, 0.5, 0.8, 1.0),
+    border_color=Vec4f(0.2, 0.4, 0.7, 1.0),
+    border_width=2.0f0, padding=14.0f0, corner_radius=8.0f0
+)
+const CUSTOM_PRESSED_STYLE = ContainerStyle(
+    background_color=Vec4f(0.8, 0.3, 0.3, 1.0),
+    border_color=Vec4f(0.7, 0.2, 0.2, 1.0),
+    border_width=3.0f0, padding=14.0f0, corner_radius=8.0f0
+)
+
+const BTN_TEXT_STYLE    = TextStyle(color=DARK_TEXT, size_points=14)
+const CUSTOM_TEXT_STYLE = TextStyle(color=Vec4f(1.0, 1.0, 1.0, 1.0), size_points=14)
+const TITLE_TEXT_STYLE  = TextStyle(color=DARK_TEXT, size_points=16)
+const INFO_TEXT_STYLE   = TextStyle(color=Vec4f(0.7, 0.7, 0.7, 1.0), size_points=12)
+const HINT_TEXT_STYLE   = TextStyle(color=Vec4f(0.6, 0.6, 0.6, 1.0), size_points=10)
+
+const INFO_BOX_STYLE = ContainerStyle(
+    background_color=Vec4f(0.12, 0.12, 0.15, 1.0), padding=8.0f0,
+    corner_radius=4.0f0, border_color=Vec4f(0.2, 0.2, 0.2, 1.0), border_width=1.0f0
+)
+
+# Per-button interaction states
+btn1_state = Ref(InteractionState())
+btn2_state = Ref(InteractionState())
+btn3_state = Ref(InteractionState())
+btn4_state = Ref(InteractionState())
+btn5_state = Ref(InteractionState())
+
+function MyApp()
+    Card("Hover & Press Demo",
+        IntrinsicColumn([
+            # Hover + press feedback
+            TextButton("Hover + Press",
+                container_style=DEFAULT_BTN_STYLE,
+                hover_style=DEFAULT_HOVER_STYLE,
+                pressed_style=DEFAULT_PRESSED_STYLE,
+                text_style=BTN_TEXT_STYLE,
+                interaction_state=btn1_state[],
+                on_interaction_state_change=(s) -> btn1_state[] = s
+            ),
+
+            # Hover feedback only
+            TextButton("Hover Only",
+                container_style=DEFAULT_BTN_STYLE,
+                hover_style=DEFAULT_HOVER_STYLE,
+                text_style=BTN_TEXT_STYLE,
+                interaction_state=btn2_state[],
+                on_interaction_state_change=(s) -> btn2_state[] = s
+            ),
+
+            # Press feedback only
+            TextButton("Press Only",
+                container_style=DEFAULT_BTN_STYLE,
+                pressed_style=DEFAULT_PRESSED_STYLE,
+                text_style=BTN_TEXT_STYLE,
+                interaction_state=btn3_state[],
+                on_interaction_state_change=(s) -> btn3_state[] = s
+            ),
+
+            # No interaction styling
+            TextButton("No Effects", container_style=DEFAULT_BTN_STYLE, text_style=BTN_TEXT_STYLE),
+
+            # Custom per-state colors (surface → blue → red)
+            TextButton("Custom Blue/Red",
+                container_style=CUSTOM_BTN_STYLE,
+                hover_style=CUSTOM_HOVER_STYLE,
+                pressed_style=CUSTOM_PRESSED_STYLE,
+                text_style=CUSTOM_TEXT_STYLE,
+                interaction_state=btn4_state[],
+                on_interaction_state_change=(s) -> btn4_state[] = s
+            ),
+
+            # on_click and on_mouse_down callbacks
+            TextButton("Click & Mouse-Down Callbacks",
+                container_style=DEFAULT_BTN_STYLE,
+                hover_style=DEFAULT_HOVER_STYLE,
+                pressed_style=DEFAULT_PRESSED_STYLE,
+                text_style=BTN_TEXT_STYLE,
+                interaction_state=btn5_state[],
+                on_interaction_state_change=(s) -> btn5_state[] = s,
+                on_click=() -> println("Clicked!"),
+                on_mouse_down=() -> println("Mouse down!")
+            ),
+
+            Fugl.Text("Check the console for callback output", style=INFO_TEXT_STYLE),
+            Container(
+                Text("Pressed style activates immediately; hover activates on mouse-over",
+                    style=HINT_TEXT_STYLE),
+                style=INFO_BOX_STYLE
+            ),
+        ], spacing=12.0f0, padding=20.0f0),
+        style=ContainerStyle(background_color=DARK_BG, padding=0.0f0),
+        title_style=TITLE_TEXT_STYLE
+    )
+end
+
+screenshot(MyApp, "hover_press_demo.png", 650, 500);
+nothing #hide
+```
+
+![Hover and Press Demo](hover_press_demo.png)

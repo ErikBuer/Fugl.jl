@@ -228,10 +228,10 @@ function MyApp()
     )
    
     
-    IntrinsicColumn([
+    Column([
         Card("Auto-sized Columns (TableState())", auto_table),
         Card("Custom Column Widths [50, 120, 300, 80]", custom_table),
-    ], spacing=15.0f0, padding=0.0f0)
+    ], spacing=0.0f0, padding=0.0f0)
 end
 
 screenshot(MyApp, "table_state.png", 812, 800)
