@@ -154,10 +154,6 @@ my_style = TextStyle(
     color=Vec4f(0.1, 0.7, 0.7, 1.0), # RGBA
 )
 
-# To use a custom font:
-# Fugl.get_font_by_path(:my_custom_font, "/path/to/font.ttf")
-# my_style = TextStyle(font_cache_key=:my_custom_font, size_points=32, color=Vec4f(0.1, 0.7, 0.7, 1.0))
-
 function MyApp()
     Container(
         Text("Some text"; style=my_style)
@@ -169,6 +165,19 @@ nothing #hide
 ```
 
 ![Text Style Example](text_style.png)
+
+## Font
+
+You can load any font with the package. The package uses the [JuliaMono](https://juliamono.netlify.app/) font by default.
+This is a font with a [vast glyph coverage](https://juliamono.netlify.app/glyphs/). It is particulartly suitable for scientific applications.
+
+To load a custom font:
+
+```julia
+Fugl.get_font_by_path(:my_custom_font, "/path/to/font.ttf")
+my_style = TextStyle(font_cache_key=:my_custom_font, size_points=32, color=Vec4f(0.1, 0.7, 0.7, 1.0))
+```
+
 
 ## Text Rotation
 

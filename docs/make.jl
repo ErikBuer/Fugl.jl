@@ -51,6 +51,7 @@ makedocs(
             "Components/tooltip.md",
             "Components/dropdown.md",
             "Components/checkbox.md",
+            "Components/spinner.md",
             "Components/slider.md",
             "Components/keylistener.md",
             "Components/focus.md",
