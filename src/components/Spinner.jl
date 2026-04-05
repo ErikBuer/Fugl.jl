@@ -54,22 +54,23 @@ function Spinner(
 end
 
 function measure(view::SpinnerView)::Tuple{Float32,Float32}
-    # Measure using the current symbol
+    font = get_font(view.text_style)
+    size_points = view.text_style.size_points
     current_symbol = string(view.symbols[view.state.current_index])
-    temp_text = Text(current_symbol, style=view.text_style)
-    return measure(temp_text)
+    text_width = measure_word_width_cached(font, current_symbol, size_points) + 2.0f0
+    text_height = Float32(size_points) * 1.3f0 + 2.0f0
+    return (text_width, text_height)
 end
 
 function measure_width(view::SpinnerView, available_height::Float32)::Float32
+    font = get_font(view.text_style)
+    size_points = view.text_style.size_points
     current_symbol = string(view.symbols[view.state.current_index])
-    temp_text = Text(current_symbol, style=view.text_style)
-    return measure_width(temp_text, available_height)
+    return measure_word_width_cached(font, current_symbol, size_points) + 2.0f0
 end
 
 function measure_height(view::SpinnerView, available_width::Float32)::Float32
-    current_symbol = string(view.symbols[view.state.current_index])
-    temp_text = Text(current_symbol, style=view.text_style)
-    return measure_height(temp_text, available_width)
+    return Float32(view.text_style.size_points) * 1.3f0 + 2.0f0
 end
 
 function interpret_view(view::SpinnerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
@@ -110,18 +111,14 @@ end
 Delegate preferred width to the text component.
 """
 function preferred_width(view::SpinnerView)::Bool
-    current_symbol = string(view.symbols[view.state.current_index])
-    temp_text = Text(current_symbol, style=view.text_style)
-    return preferred_width(temp_text)
+    return true
 end
 
 """
 Delegate preferred height to the text component.
 """
 function preferred_height(view::SpinnerView)::Bool
-    current_symbol = string(view.symbols[view.state.current_index])
-    temp_text = Text(current_symbol, style=view.text_style)
-    return preferred_height(temp_text)
+    return true
 end
 
 # Convenience functions for different spinner types
