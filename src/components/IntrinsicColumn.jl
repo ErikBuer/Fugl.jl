@@ -6,11 +6,11 @@ struct IntrinsicColumnView <: AbstractView
     on_click::Function
 end
 
-function IntrinsicColumn(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+function IntrinsicColumn(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
     return IntrinsicColumnView(children, padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-@inline function IntrinsicColumn(children::AbstractView...; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=false, on_click::Function=() -> nothing)
+@inline function IntrinsicColumn(children::AbstractView...; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
     return IntrinsicColumnView(collect(AbstractView, children), padding, spacing, reduce_spacing_on_overflow, on_click)
 end
 
@@ -25,7 +25,7 @@ function apply_layout(view::IntrinsicColumnView, x::Float32, y::Float32, width::
     is_intrinsic = Bool[]
     for child in view.children
         if preferred_height(child)
-            push!(intrinsic_heights, measure(child)[2])
+            push!(intrinsic_heights, measure_height(child, padded_width))
             push!(is_intrinsic, true)
         else
             push!(intrinsic_heights, 0f0)

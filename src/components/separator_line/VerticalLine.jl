@@ -14,11 +14,13 @@ end
 Vertical line separator that fills available height.
 """
 VerticalLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
+VerticalLine(style::SeparatorStyle, end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
 
 """
 Convenience constructor for vertical line
 """
 VLine(; style::SeparatorStyle=SeparatorStyle(), end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
+VLine(style::SeparatorStyle, end_length::Float32=0.0f0) = VerticalLineView(style, end_length)
 
 function measure(view::VerticalLineView)::Tuple{Float32,Float32}
     # Width: line width, Height: fill available (Inf32)
@@ -65,6 +67,10 @@ function interpret_view(view::VerticalLineView, x::Float32, y::Float32, width::F
     GLA.draw(vao)
     GLA.unbind(vao)
     GLA.unbind(prog[])
+end
+
+function measure_width(view::VerticalLineView, available_height::Float32)::Float32
+    return view.style.line_width
 end
 
 function preferred_width(view::VerticalLineView)::Bool

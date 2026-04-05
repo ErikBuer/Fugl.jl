@@ -25,20 +25,16 @@ function measure(view::BaseContainerView)::Tuple{Float32,Float32}
 end
 
 function measure_width(view::BaseContainerView, available_height::Float32)::Float32
-    # Measure the width of the child component
-    child_width = measure_width(view.child, available_height)
-
-    # Add padding
     padding = view.style.padding
+    inner_height = available_height - 2 * padding
+    child_width = measure_width(view.child, inner_height)
     return child_width + 2 * padding
 end
 
 function measure_height(view::BaseContainerView, available_width::Float32)::Float32
-    # Measure the height of the child component
-    child_height = measure_height(view.child, available_width)
-
-    # Add padding
     padding = view.style.padding
+    inner_width = available_width - 2 * padding
+    child_height = measure_height(view.child, inner_width)
     return child_height + 2 * padding
 end
 

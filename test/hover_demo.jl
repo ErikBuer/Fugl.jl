@@ -162,7 +162,7 @@ function HoverDemo()
 
     # Dark container with all elements
     Container(
-        Column([
+        IntrinsicColumn([
                 Fugl.Text("Hover & Press Demo - Try hovering and clicking buttons",
                     style=TITLE_TEXT_STYLE
                 ),

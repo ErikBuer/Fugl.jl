@@ -168,7 +168,8 @@ function render_line_from_cache(
     size_points::Int,
     projection_matrix;
     visible_width::Union{Float32,Nothing}=nothing,
-    start_x::Union{Float32,Nothing}=nothing
+    start_x::Union{Float32,Nothing}=nothing,
+    clip_bounds_points::Union{Rectangle,Nothing}=nothing
 )
     current_x = x
     current_pos = 1
@@ -191,7 +192,7 @@ function render_line_from_cache(
                 gap_width = measure_word_width(font, gap, size_points)
                 # Only draw if within visible bounds
                 if !cull_enabled || (current_x < max_x && current_x + gap_width > min_x)
-                    draw_text(font, gap, current_x, y, size_points, projection_matrix, default_color)
+                    draw_text(font, gap, current_x, y, size_points, projection_matrix, default_color; clip_bounds_points=clip_bounds_points)
                 end
                 current_x += gap_width
             end
@@ -202,7 +203,7 @@ function render_line_from_cache(
             text_width = measure_word_width(font, text, size_points)
             # Only draw if within visible bounds
             if !cull_enabled || (current_x < max_x && current_x + text_width > min_x)
-                draw_text(font, text, current_x, y, size_points, projection_matrix, color)
+                draw_text(font, text, current_x, y, size_points, projection_matrix, color; clip_bounds_points=clip_bounds_points)
             end
             current_x += text_width
         end
@@ -217,7 +218,7 @@ function render_line_from_cache(
             remaining_width = measure_word_width(font, remaining, size_points)
             # Only draw if within visible bounds
             if !cull_enabled || (current_x < max_x && current_x + remaining_width > min_x)
-                draw_text(font, remaining, current_x, y, size_points, projection_matrix, default_color)
+                draw_text(font, remaining, current_x, y, size_points, projection_matrix, default_color; clip_bounds_points=clip_bounds_points)
             end
         end
     end

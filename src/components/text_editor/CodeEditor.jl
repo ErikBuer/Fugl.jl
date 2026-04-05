@@ -112,7 +112,6 @@ function render_codeeditor_to_framebuffer(view::CodeEditorView, cache::RenderCac
 end
 
 function render_codeeditor_immediate(view::CodeEditorView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Render CodeEditor content directly with culling (no scissor test)
     render_codeeditor_content(view, x, y, width, height, projection_matrix)
 end
 
@@ -205,7 +204,8 @@ function render_codeeditor_content(view::CodeEditorView, x::Float32, y::Float32,
             size_points,
             projection_matrix;
             visible_width=visible_width,
-            start_x=x + padding
+            start_x=x + padding,
+            clip_bounds_points=Rectangle(x, y, width, height)
         )
 
         # Draw cursor if it's on this line and editor is focused

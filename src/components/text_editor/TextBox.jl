@@ -149,7 +149,6 @@ function render_textbox_to_framebuffer(view::TextBoxView, cache::RenderCache, wi
 end
 
 function render_textbox_immediate(view::TextBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32})
-    # Render TextBox content directly with culling (no scissor test)
     render_textbox_content(view, x, y, width, height, projection_matrix)
 end
 
@@ -239,7 +238,8 @@ function render_textbox_content(view::TextBoxView, x::Float32, y::Float32, width
             display_y,           # Y position
             size_points,             # Text size
             projection_matrix,   # Projection matrix
-            color                # Text color
+            color;               # Text color
+            clip_bounds_points=Rectangle(x, y, width, height)
         )
 
         # Draw cursor if it's on this line and textbox is focused
