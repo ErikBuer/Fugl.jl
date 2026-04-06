@@ -9,6 +9,7 @@ struct VerticalScrollAreaView <: AbstractView
     scroll_state::VerticalScrollState
     style::ScrollAreaStyle
     show_scrollbar::Bool
+    invert_scroll_on_apple::Bool
     on_scroll_change::Function
     on_click::Function
 end
@@ -21,6 +22,7 @@ struct HorizontalScrollAreaView <: AbstractView
     scroll_state::HorizontalScrollState
     style::ScrollAreaStyle
     show_scrollbar::Bool
+    invert_scroll_on_apple::Bool
     on_scroll_change::Function
     on_click::Function
 end
@@ -41,11 +43,12 @@ function VerticalScrollArea(
     scroll_state::VerticalScrollState=VerticalScrollState(),
     style::ScrollAreaStyle=ScrollAreaStyle(),
     show_scrollbar::Bool=true,
+    invert_scroll_on_apple::Bool=true,
     on_scroll_change::Function=(new_state) -> nothing,
     on_click::Function=(x, y) -> nothing
 )
     return VerticalScrollAreaView(
-        content, scroll_state, style, show_scrollbar,
+        content, scroll_state, style, show_scrollbar, invert_scroll_on_apple,
         on_scroll_change, on_click
     )
 end
@@ -66,11 +69,12 @@ function HorizontalScrollArea(
     scroll_state::HorizontalScrollState=HorizontalScrollState(),
     style::ScrollAreaStyle=ScrollAreaStyle(),
     show_scrollbar::Bool=true,
+    invert_scroll_on_apple::Bool=true,
     on_scroll_change::Function=(new_state) -> nothing,
     on_click::Function=(x, y) -> nothing
 )
     return HorizontalScrollAreaView(
-        content, scroll_state, style, show_scrollbar,
+        content, scroll_state, style, show_scrollbar, invert_scroll_on_apple,
         on_scroll_change, on_click
     )
 end
@@ -297,7 +301,11 @@ function render_vertical_scrollbar(view::VerticalScrollAreaView, x::Float32, y::
     ]
 
     # Draw scrollbar background
-    draw_rectangle(bg_vertices, view.style.scrollbar_background_color, projection_matrix)
+    draw_rounded_rectangle(
+        bg_vertices, vscroll_width, vscroll_height,
+        view.style.scrollbar_background_color, Vec4f(0, 0, 0, 0),
+        0.0f0, view.style.corner_radius, projection_matrix, 1.0f0
+    )
 
     # Scrollbar thumb
     thumb_ratio = viewport_height / state.content_height
@@ -313,7 +321,11 @@ function render_vertical_scrollbar(view::VerticalScrollAreaView, x::Float32, y::
         Point2f(vscroll_x + vscroll_width, thumb_y + thumb_height)  # Top-right
     ]
 
-    draw_rectangle(thumb_vertices, view.style.scrollbar_color, projection_matrix)
+    draw_rounded_rectangle(
+        thumb_vertices, vscroll_width, thumb_height,
+        view.style.scrollbar_color, Vec4f(0, 0, 0, 0),
+        0.0f0, view.style.corner_radius, projection_matrix, 1.0f0
+    )
 end
 
 """
@@ -333,7 +345,12 @@ function render_horizontal_scrollbar(view::HorizontalScrollAreaView, x::Float32,
         Point2f(hscroll_x + hscroll_width, hscroll_y + hscroll_height)  # Top-right
     ]
 
-    draw_rectangle(bg_vertices, view.style.scrollbar_background_color, projection_matrix)
+    # Draw scrollbar background
+    draw_rounded_rectangle(
+        bg_vertices, hscroll_width, hscroll_height,
+        view.style.scrollbar_background_color, Vec4f(0, 0, 0, 0),
+        0.0f0, view.style.corner_radius, projection_matrix, 1.0f0
+    )
 
     # Scrollbar thumb
     thumb_ratio = viewport_width / state.content_width
@@ -349,7 +366,11 @@ function render_horizontal_scrollbar(view::HorizontalScrollAreaView, x::Float32,
         Point2f(thumb_x + thumb_width, hscroll_y + hscroll_height)  # Top-right
     ]
 
-    draw_rectangle(thumb_vertices, view.style.scrollbar_color, projection_matrix)
+    draw_rounded_rectangle(
+        thumb_vertices, thumb_width, hscroll_height,
+        view.style.scrollbar_color, Vec4f(0, 0, 0, 0),
+        0.0f0, view.style.corner_radius, projection_matrix, 1.0f0
+    )
 end
 
 """
@@ -461,10 +482,11 @@ Handle vertical mouse wheel scrolling
 """
 function handle_vertical_scroll_wheel(view::VerticalScrollAreaView, wheel_delta_y::Float32)
     scroll_speed = 30.0f0  # Points per wheel tick
+    delta = (view.invert_scroll_on_apple && Sys.isapple()) ? -wheel_delta_y : wheel_delta_y
 
     if view.scroll_state.max_scroll > 0.0f0
         new_offset = clamp(
-            view.scroll_state.scroll_offset + wheel_delta_y * scroll_speed,
+            view.scroll_state.scroll_offset + delta * scroll_speed,
             0.0f0, view.scroll_state.max_scroll
         )
 
@@ -486,10 +508,11 @@ Handle horizontal mouse wheel scrolling
 """
 function handle_horizontal_scroll_wheel(view::HorizontalScrollAreaView, wheel_delta_x::Float32)
     scroll_speed = 30.0f0  # Points per wheel tick
+    delta = (view.invert_scroll_on_apple && Sys.isapple()) ? -wheel_delta_x : wheel_delta_x
 
     if view.scroll_state.max_scroll > 0.0f0
         new_offset = clamp(
-            view.scroll_state.scroll_offset + wheel_delta_x * scroll_speed,
+            view.scroll_state.scroll_offset + delta * scroll_speed,
             0.0f0, view.scroll_state.max_scroll
         )
 

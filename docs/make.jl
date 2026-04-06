@@ -59,6 +59,7 @@ makedocs(
             "Components/image.md",
             "Components/table.md",
             "Components/tree.md",
+            "Components/file_explorer.md",
             "Plot"=>Any[
                 "Cartesian"=>Any[
                     "Components/plot/cartesian/line_plot.md",

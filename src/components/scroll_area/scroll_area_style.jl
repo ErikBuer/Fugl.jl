@@ -7,6 +7,7 @@ struct ScrollAreaStyle
     scrollbar_background_color::Vec4f
     scrollbar_hover_color::Vec4f
     corner_color::Vec4f  # Color for the corner where scrollbars meet
+    corner_radius::Float32
 end
 
 function ScrollAreaStyle(;
@@ -14,10 +15,11 @@ function ScrollAreaStyle(;
     scrollbar_color::Vec4f=Vec4f(0.6, 0.6, 0.6, 1.0),
     scrollbar_background_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0),
     scrollbar_hover_color::Vec4f=Vec4f(0.4, 0.4, 0.4, 1.0),
-    corner_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0)
+    corner_color::Vec4f=Vec4f(0.9, 0.9, 0.9, 1.0),
+    corner_radius::Float32=4.0f0
 )
     return ScrollAreaStyle(
         scrollbar_width, scrollbar_color, scrollbar_background_color,
-        scrollbar_hover_color, corner_color
+        scrollbar_hover_color, corner_color, corner_radius
     )
 end
