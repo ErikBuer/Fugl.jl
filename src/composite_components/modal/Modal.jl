@@ -80,10 +80,9 @@ function interpret_view(view::ModalView, x::Float32, y::Float32, width::Float32,
 end
 
 function detect_click(view::ModalView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
-    # Convert mouse coordinates from logical space to effective space to match the coordinate system being used
-    pixel_perfect_scale = get_pixel_perfect_scale()
-    mouse_x = Float32(input_state.x) / pixel_perfect_scale
-    mouse_y = Float32(input_state.y) / pixel_perfect_scale
+    # Mouse coordinates are already in effective points — same space as layout coordinates.
+    mouse_x = Float32(input_state.x)
+    mouse_y = Float32(input_state.y)
 
     # Calculate modal position (centers if offset is nothing)
     modal_x, modal_y = calculate_modal_position(view, x, y, width, height)
