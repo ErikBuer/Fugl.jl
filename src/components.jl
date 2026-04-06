@@ -82,7 +82,7 @@ export CodeEditor, CodeEditorStyle
 export TextEditorStyle
 
 include("components/Tabs.jl")
-export Tabs, TabsView, TabsStyle
+export Tabs, TabsView, TabsStyle, TabStyle
 
 include("components/image/Image.jl")
 export Image

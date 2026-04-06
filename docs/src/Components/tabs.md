@@ -58,12 +58,19 @@ function MyApp()
                     on_tab_change=(index) -> selected_tab_dark[] = index,
                     style=TabsStyle(
                         tab_height=38.0f0,
-                        selected_color=tab_bg_color,
-                        unselected_color=tab_bg_color,
-                        tab_corner_radius=6.0f0,
-                        tab_border_width=2.0f0,
-                        selected_border_color=selected_border,
-                        unselected_border_color=unselected_border
+                        normal_style=TabStyle(
+                            background_color=tab_bg_color,
+                            border_color=unselected_border,
+                            border_width=2.0f0,
+                            corner_radius=6.0f0,
+                        ),
+                        selected_style=TabStyle(
+                            background_color=tab_bg_color,
+                            border_color=selected_border,
+                            border_width=2.0f0,
+                            corner_radius=6.0f0,
+                            text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                        ),
                     )
                 );
                 style=ContainerStyle(
@@ -105,7 +112,15 @@ function MyApp()
                 ];
                 selected_index=tab_state1[],
                 on_tab_change=(i) -> tab_state1[] = i,
-                style=TabsStyle(tab_corner_radius=0.0f0)
+                style=TabsStyle(
+                    normal_style=TabStyle(corner_radius=0.0f0),
+                    selected_style=TabStyle(
+                        background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
+                        border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
+                        corner_radius=0.0f0,
+                        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                    ),
+                )
             ),
             Fugl.Text("Rounded corners (12px)"; style=TextStyle(size_points=14)),
             Tabs(
@@ -116,7 +131,15 @@ function MyApp()
                 ];
                 selected_index=tab_state2[],
                 on_tab_change=(i) -> tab_state2[] = i,
-                style=TabsStyle(tab_corner_radius=12.0f0)
+                style=TabsStyle(
+                    normal_style=TabStyle(corner_radius=12.0f0),
+                    selected_style=TabStyle(
+                        background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
+                        border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
+                        corner_radius=12.0f0,
+                        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                    ),
+                )
             )
         ])
     )
@@ -151,11 +174,16 @@ function MyApp()
         on_tab_change=(i) -> tab_custom[] = i,
         style=TabsStyle(
             tab_height=45.0f0,
-            selected_color=Vec4{Float32}(0.2f0, 0.2f0, 0.25f0, 1.0f0),
-            unselected_color=Vec4{Float32}(0.15f0, 0.15f0, 0.15f0, 1.0f0),
-            text_style=custom_text,
-            selected_text_style=custom_selected,
-            tab_corner_radius=8.0f0
+            normal_style=TabStyle(
+                background_color=Vec4{Float32}(0.15f0, 0.15f0, 0.15f0, 1.0f0),
+                corner_radius=8.0f0,
+                text_style=custom_text,
+            ),
+            selected_style=TabStyle(
+                background_color=Vec4{Float32}(0.2f0, 0.2f0, 0.25f0, 1.0f0),
+                corner_radius=8.0f0,
+                text_style=custom_selected,
+            ),
         )
     )
 end
@@ -206,12 +234,19 @@ function MyApp()
                 on_tab_change=on_tab_click,
                 style=TabsStyle(
                     tab_height=38.0f0,
-                    selected_color=Vec4{Float32}(0.25f0, 0.45f0, 0.75f0, 1.0f0),
-                    unselected_color=Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0),
-                    tab_corner_radius=6.0f0,
-                    tab_border_width=1.5f0,
-                    selected_border_color=Vec4{Float32}(0.4f0, 0.6f0, 0.9f0, 1.0f0),
-                    unselected_border_color=Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0)
+                    normal_style=TabStyle(
+                        background_color=Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+                        border_color=Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0),
+                        border_width=1.5f0,
+                        corner_radius=6.0f0,
+                    ),
+                    selected_style=TabStyle(
+                        background_color=Vec4{Float32}(0.25f0, 0.45f0, 0.75f0, 1.0f0),
+                        border_color=Vec4{Float32}(0.4f0, 0.6f0, 0.9f0, 1.0f0),
+                        border_width=1.5f0,
+                        corner_radius=6.0f0,
+                        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                    ),
                 )
             )
         ]);
