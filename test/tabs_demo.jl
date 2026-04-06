@@ -17,6 +17,9 @@ function main()
         # Tab background color matching the tabs
         tab_bg = Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0)
 
+        # Text style for selected tab labels
+        selected_text = TextStyle(size_points=14, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0))
+
         # Create tab content with current state values
         tab1_content = Container(
             Column([
@@ -113,40 +116,39 @@ function main()
 
         Container(
             Column([
-                Fugl.Text("Tabs Component Demo"; style=TextStyle(size_points=24, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0))), Tabs(
+                Fugl.Text("Tabs Component Demo"; style=TextStyle(size_points=24, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0))),
+                Tabs(
                     [
                         ("Home", tab1_content),
                         ("Options", tab2_content),
                         ("Code", tab3_content),
-                        ("Data", tab4_content)
+                        ("Data", tab4_content),
                     ];
                     selected_index=selected_tab[],
                     on_tab_change=(index) -> begin
                         selected_tab[] = index
                         println("Switched to tab $index")
                     end,
-                    style=TabsStyle(
-                        tab_height=40.0f0,
-                        normal_style=TabStyle(
-                            background_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
-                            border_color=Vec4(0.25f0, 0.25f0, 0.25f0, 1.0f0),
-                            border_width=2.5f0,
-                            corner_radius=8.0f0,
-                        ),
-                        selected_style=TabStyle(
-                            background_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
-                            border_color=Vec4(0.3f0, 0.6f0, 0.95f0, 1.0f0),
-                            border_width=2.5f0,
-                            corner_radius=8.0f0,
-                            text_style=TextStyle(size_points=14, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
-                        ),
-                        hover_style=TabStyle(
-                            background_color=Vec4(0.22f0, 0.22f0, 0.22f0, 1.0f0),
-                            border_color=Vec4(0.35f0, 0.35f0, 0.35f0, 1.0f0),
-                            border_width=2.5f0,
-                            corner_radius=8.0f0,
-                        ),
-                    )
+                    style=TabsStyle(tab_height=40.0f0),
+                    normal_style=TabStyle(
+                        background_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+                        border_color=Vec4(0.25f0, 0.25f0, 0.25f0, 1.0f0),
+                        border_width=2.5f0,
+                        corner_radius=8.0f0,
+                    ),
+                    selected_style=TabStyle(
+                        background_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+                        border_color=Vec4(0.3f0, 0.6f0, 0.95f0, 1.0f0),
+                        border_width=2.5f0,
+                        corner_radius=8.0f0,
+                        text_style=selected_text,
+                    ),
+                    hover_style=TabStyle(
+                        background_color=Vec4(0.22f0, 0.22f0, 0.22f0, 1.0f0),
+                        border_color=Vec4(0.35f0, 0.35f0, 0.35f0, 1.0f0),
+                        border_width=2.5f0,
+                        corner_radius=8.0f0,
+                    ),
                 ),
             ]);
             style=ContainerStyle(
