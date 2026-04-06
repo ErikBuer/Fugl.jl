@@ -127,12 +127,25 @@ function main()
                     end,
                     style=TabsStyle(
                         tab_height=40.0f0,
-                        selected_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
-                        unselected_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
-                        tab_corner_radius=8.0f0,
-                        tab_border_width=2.5f0,
-                        selected_border_color=Vec4(0.3f0, 0.6f0, 0.95f0, 1.0f0),
-                        unselected_border_color=Vec4(0.25f0, 0.25f0, 0.25f0, 1.0f0)
+                        normal_style=TabStyle(
+                            background_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+                            border_color=Vec4(0.25f0, 0.25f0, 0.25f0, 1.0f0),
+                            border_width=2.5f0,
+                            corner_radius=8.0f0,
+                        ),
+                        selected_style=TabStyle(
+                            background_color=Vec4(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+                            border_color=Vec4(0.3f0, 0.6f0, 0.95f0, 1.0f0),
+                            border_width=2.5f0,
+                            corner_radius=8.0f0,
+                            text_style=TextStyle(size_points=14, color=Vec4(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                        ),
+                        hover_style=TabStyle(
+                            background_color=Vec4(0.22f0, 0.22f0, 0.22f0, 1.0f0),
+                            border_color=Vec4(0.35f0, 0.35f0, 0.35f0, 1.0f0),
+                            border_width=2.5f0,
+                            corner_radius=8.0f0,
+                        ),
                     )
                 ),
             ]);
