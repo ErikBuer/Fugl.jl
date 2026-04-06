@@ -1,13 +1,12 @@
 """
-Tabs component - displays tabbed content with clickable tab headers.
-Each tab has a name and associated content view.
+Tabs component — displays tabbed content with clickable tab headers.
 """
 
 """
     TabStyle(; background_color, border_color, border_width, corner_radius, text_style)
 
 Visual style for a single tab button — analogous to `ContainerStyle`.
-Used as the per-state style inside `TabsStyle` (normal, selected, hover).
+Passed as `normal_style`, `selected_style`, or `hover_style` directly on the `Tabs` constructor.
 """
 struct TabStyle
     background_color::Vec4{Float32}
@@ -28,94 +27,71 @@ function TabStyle(;
 end
 
 """
-    TabsStyle(; tab_height, tab_padding, separator_color, normal_style, selected_style, hover_style)
+    TabsStyle(; tab_height, tab_padding, separator_color)
 
-Top-level style for the `Tabs` component.
-Uses `TabStyle` values for each interaction state, analogous to `ContainerStyle` with hover/pressed variants.
-
-- `normal_style`: Appearance of unselected tabs.
-- `selected_style`: Appearance of the currently active tab.
-- `hover_style`: Optional override for the tab under the cursor (only applied to unselected tabs).
-
-# Example
-```julia
-TabsStyle(
-    tab_height=38.0f0,
-    normal_style=TabStyle(
-        background_color=Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0),
-        border_color=Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0),
-        border_width=2.0f0,
-        corner_radius=6.0f0,
-    ),
-    selected_style=TabStyle(
-        background_color=Vec4{Float32}(0.25f0, 0.45f0, 0.75f0, 1.0f0),
-        border_color=Vec4{Float32}(0.4f0, 0.6f0, 0.9f0, 1.0f0),
-        border_width=2.0f0,
-        corner_radius=6.0f0,
-        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
-    ),
-    hover_style=TabStyle(
-        background_color=Vec4{Float32}(0.22f0, 0.22f0, 0.26f0, 1.0f0),
-        border_color=Vec4{Float32}(0.35f0, 0.35f0, 0.40f0, 1.0f0),
-        border_width=2.0f0,
-        corner_radius=6.0f0,
-    ),
-)
-```
+Layout and shared-appearance style for the `Tabs` component.
+Per-state visual styles (`normal_style`, `selected_style`, `hover_style`) are
+passed as separate keyword arguments directly on the `Tabs` constructor.
 """
 struct TabsStyle
     tab_height::Float32
     tab_padding::Float32
     separator_color::Vec4{Float32}
-    normal_style::TabStyle
-    selected_style::TabStyle
-    hover_style::Union{Nothing,TabStyle}
 end
 
 function TabsStyle(;
     tab_height::Float32=35.0f0,
     tab_padding::Float32=15.0f0,
     separator_color::Vec4{Float32}=Vec4{Float32}(0.3f0, 0.3f0, 0.3f0, 1.0f0),
-    normal_style::TabStyle=TabStyle(),
-    selected_style::TabStyle=TabStyle(
-        background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
-        border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
-        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
-    ),
-    hover_style::Union{Nothing,TabStyle}=nothing,
 )
-    return TabsStyle(tab_height, tab_padding, separator_color, normal_style, selected_style, hover_style)
+    return TabsStyle(tab_height, tab_padding, separator_color)
 end
+
+const _DEFAULT_SELECTED_TAB_STYLE = TabStyle(
+    background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
+    border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
+    text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+)
 
 struct TabsView <: AbstractView
-    tabs::Vector{Tuple{String,AbstractView,Float32}}  # (name, content, width); width=NaN means flexible
+    tabs::Vector{Tuple{String,AbstractView,Float32}}  # (label, content, width); width=NaN = flexible
     selected_index::Int
     style::TabsStyle
-    on_tab_change::Function  # (new_index) -> nothing
+    normal_style::TabStyle
+    selected_style::TabStyle
+    hover_style::Union{Nothing,TabStyle}
+    on_tab_change::Function
 end
 
+# Constructor: string labels with explicit widths
 function Tabs(
     tabs::Vector{<:Tuple{String,<:AbstractView,Float32}};
     selected_index::Int=1,
     style::TabsStyle=TabsStyle(),
-    on_tab_change::Function=(index) -> nothing
+    normal_style::TabStyle=TabStyle(),
+    selected_style::TabStyle=_DEFAULT_SELECTED_TAB_STYLE,
+    hover_style::Union{Nothing,TabStyle}=nothing,
+    on_tab_change::Function=(index) -> nothing,
 )
     if selected_index < 1 || selected_index > length(tabs)
         selected_index = 1
     end
-    converted_tabs = Vector{Tuple{String,AbstractView,Float32}}([(name, view, width) for (name, view, width) in tabs])
-    return TabsView(converted_tabs, selected_index, style, on_tab_change)
+    converted = Vector{Tuple{String,AbstractView,Float32}}([(name, v, w) for (name, v, w) in tabs])
+    return TabsView(converted, selected_index, style, normal_style, selected_style, hover_style, on_tab_change)
 end
 
-# Convenience constructor for tabs without explicit widths (all flexible)
+# Constructor: string labels without explicit widths (all flexible)
 function Tabs(
     tabs::Vector{<:Tuple{String,<:AbstractView}};
     selected_index::Int=1,
     style::TabsStyle=TabsStyle(),
-    on_tab_change::Function=(index) -> nothing
+    normal_style::TabStyle=TabStyle(),
+    selected_style::TabStyle=_DEFAULT_SELECTED_TAB_STYLE,
+    hover_style::Union{Nothing,TabStyle}=nothing,
+    on_tab_change::Function=(index) -> nothing,
 )
     tabs_with_width = [(name, view, NaN32) for (name, view) in tabs]
-    return Tabs(tabs_with_width; selected_index=selected_index, style=style, on_tab_change=on_tab_change)
+    return Tabs(tabs_with_width; selected_index, style, normal_style, selected_style, hover_style, on_tab_change)
 end
 
 function measure(view::TabsView)::Tuple{Float32,Float32}
@@ -150,7 +126,7 @@ function interpret_view(
     end
 end
 
-# Compute flexible tab width helpers (shared by render and detect_click)
+# Compute the width allocated to each flexible-width tab
 function _tab_flexible_width(tabs::Vector{Tuple{String,AbstractView,Float32}}, total_width::Float32)::Float32
     total_fixed = sum(w for (_, _, w) in tabs if !isnan(w); init=0.0f0)
     num_flex = count(((_, _, w),) -> isnan(w), tabs)
@@ -190,11 +166,11 @@ function render_tab_bar(
 
         # Resolve the active per-tab style
         tab_style = if is_selected
-            view.style.selected_style
-        elseif is_hovered && view.style.hover_style !== nothing
-            view.style.hover_style
+            view.selected_style
+        elseif is_hovered && view.hover_style !== nothing
+            view.hover_style
         else
-            view.style.normal_style
+            view.normal_style
         end
 
         # Draw tab background
@@ -257,18 +233,15 @@ function detect_click(
 
         flexible_width = _tab_flexible_width(view.tabs, width)
         current_x = x
-        clicked_tab = 0
         for (i, (_, _, tab_width)) in enumerate(view.tabs)
             actual_tab_width = isnan(tab_width) ? flexible_width : tab_width
             if mouse_state.x >= current_x && mouse_state.x < current_x + actual_tab_width
-                clicked_tab = i
+                if i != view.selected_index
+                    return ClickResult(z, () -> view.on_tab_change(i))
+                end
                 break
             end
             current_x += actual_tab_width
-        end
-
-        if clicked_tab >= 1 && clicked_tab <= length(view.tabs) && clicked_tab != view.selected_index
-            return ClickResult(z, () -> view.on_tab_change(clicked_tab))
         end
     end
 

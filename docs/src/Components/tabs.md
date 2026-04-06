@@ -56,22 +56,20 @@ function MyApp()
                     ];
                     selected_index=selected_tab_dark[],
                     on_tab_change=(index) -> selected_tab_dark[] = index,
-                    style=TabsStyle(
-                        tab_height=38.0f0,
-                        normal_style=TabStyle(
-                            background_color=tab_bg_color,
-                            border_color=unselected_border,
-                            border_width=2.0f0,
-                            corner_radius=6.0f0,
-                        ),
-                        selected_style=TabStyle(
-                            background_color=tab_bg_color,
-                            border_color=selected_border,
-                            border_width=2.0f0,
-                            corner_radius=6.0f0,
-                            text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
-                        ),
-                    )
+                    style=TabsStyle(tab_height=38.0f0),
+                    normal_style=TabStyle(
+                        background_color=tab_bg_color,
+                        border_color=unselected_border,
+                        border_width=2.0f0,
+                        corner_radius=6.0f0,
+                    ),
+                    selected_style=TabStyle(
+                        background_color=tab_bg_color,
+                        border_color=selected_border,
+                        border_width=2.0f0,
+                        corner_radius=6.0f0,
+                        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                    ),
                 );
                 style=ContainerStyle(
                     background_color=tab_area_bg,
@@ -112,15 +110,13 @@ function MyApp()
                 ];
                 selected_index=tab_state1[],
                 on_tab_change=(i) -> tab_state1[] = i,
-                style=TabsStyle(
-                    normal_style=TabStyle(corner_radius=0.0f0),
-                    selected_style=TabStyle(
-                        background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
-                        border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
-                        corner_radius=0.0f0,
-                        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
-                    ),
-                )
+                normal_style=TabStyle(corner_radius=0.0f0),
+                selected_style=TabStyle(
+                    background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
+                    border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
+                    corner_radius=0.0f0,
+                    text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                ),
             ),
             Fugl.Text("Rounded corners (12px)"; style=TextStyle(size_points=14)),
             Tabs(
@@ -131,15 +127,13 @@ function MyApp()
                 ];
                 selected_index=tab_state2[],
                 on_tab_change=(i) -> tab_state2[] = i,
-                style=TabsStyle(
-                    normal_style=TabStyle(corner_radius=12.0f0),
-                    selected_style=TabStyle(
-                        background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
-                        border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
-                        corner_radius=12.0f0,
-                        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
-                    ),
-                )
+                normal_style=TabStyle(corner_radius=12.0f0),
+                selected_style=TabStyle(
+                    background_color=Vec4{Float32}(0.2f0, 0.4f0, 0.7f0, 1.0f0),
+                    border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.9f0, 1.0f0),
+                    corner_radius=12.0f0,
+                    text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                ),
             )
         ])
     )
@@ -172,19 +166,17 @@ function MyApp()
         ];
         selected_index=tab_custom[],
         on_tab_change=(i) -> tab_custom[] = i,
-        style=TabsStyle(
-            tab_height=45.0f0,
-            normal_style=TabStyle(
-                background_color=Vec4{Float32}(0.15f0, 0.15f0, 0.15f0, 1.0f0),
-                corner_radius=8.0f0,
-                text_style=custom_text,
-            ),
-            selected_style=TabStyle(
-                background_color=Vec4{Float32}(0.2f0, 0.2f0, 0.25f0, 1.0f0),
-                corner_radius=8.0f0,
-                text_style=custom_selected,
-            ),
-        )
+        style=TabsStyle(tab_height=45.0f0),
+        normal_style=TabStyle(
+            background_color=Vec4{Float32}(0.15f0, 0.15f0, 0.15f0, 1.0f0),
+            corner_radius=8.0f0,
+            text_style=custom_text,
+        ),
+        selected_style=TabStyle(
+            background_color=Vec4{Float32}(0.2f0, 0.2f0, 0.25f0, 1.0f0),
+            corner_radius=8.0f0,
+            text_style=custom_selected,
+        ),
     )
 end
 
@@ -193,6 +185,54 @@ nothing #hide
 ```
 
 ![Tab Text Style](tabs_text.png)
+
+## Hover Style
+
+`hover_style` is applied to unselected tabs when the cursor is over them, giving visual feedback before clicking.
+
+```@example TabsHover
+using Fugl
+
+tab_hover = Ref(1)
+
+function MyApp()
+    Tabs(
+        [
+            ("Home",     Fugl.Text("Home page content")),
+            ("Profile",  Fugl.Text("User profile")),
+            ("Settings", Fugl.Text("Application settings"))
+        ];
+        selected_index=tab_hover[],
+        on_tab_change=(i) -> tab_hover[] = i,
+        style=TabsStyle(tab_height=40.0f0),
+        normal_style=TabStyle(
+            background_color=Vec4{Float32}(0.15f0, 0.15f0, 0.15f0, 1.0f0),
+            border_color=Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0),
+            border_width=2.0f0,
+            corner_radius=6.0f0,
+        ),
+        selected_style=TabStyle(
+            background_color=Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+            border_color=Vec4{Float32}(0.3f0, 0.6f0, 0.95f0, 1.0f0),
+            border_width=2.0f0,
+            corner_radius=6.0f0,
+            text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+        ),
+        hover_style=TabStyle(
+            background_color=Vec4{Float32}(0.22f0, 0.22f0, 0.22f0, 1.0f0),
+            border_color=Vec4{Float32}(0.40f0, 0.40f0, 0.40f0, 1.0f0),
+            border_width=2.0f0,
+            corner_radius=6.0f0,
+            text_style=TextStyle(size_points=14, color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)),
+        ),
+    )
+end
+
+screenshot(MyApp, "tabs_hover.png", 600, 200);
+nothing #hide
+```
+
+![Hover Style](tabs_hover.png)
 
 ## Fixed Width Tabs
 
@@ -232,22 +272,20 @@ function MyApp()
                 tab_list[];
                 selected_index=selected_tab_fixed[],
                 on_tab_change=on_tab_click,
-                style=TabsStyle(
-                    tab_height=38.0f0,
-                    normal_style=TabStyle(
-                        background_color=Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0),
-                        border_color=Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0),
-                        border_width=1.5f0,
-                        corner_radius=6.0f0,
-                    ),
-                    selected_style=TabStyle(
-                        background_color=Vec4{Float32}(0.25f0, 0.45f0, 0.75f0, 1.0f0),
-                        border_color=Vec4{Float32}(0.4f0, 0.6f0, 0.9f0, 1.0f0),
-                        border_width=1.5f0,
-                        corner_radius=6.0f0,
-                        text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
-                    ),
-                )
+                style=TabsStyle(tab_height=38.0f0),
+                normal_style=TabStyle(
+                    background_color=Vec4{Float32}(0.18f0, 0.18f0, 0.18f0, 1.0f0),
+                    border_color=Vec4{Float32}(0.25f0, 0.25f0, 0.25f0, 1.0f0),
+                    border_width=1.5f0,
+                    corner_radius=6.0f0,
+                ),
+                selected_style=TabStyle(
+                    background_color=Vec4{Float32}(0.25f0, 0.45f0, 0.75f0, 1.0f0),
+                    border_color=Vec4{Float32}(0.4f0, 0.6f0, 0.9f0, 1.0f0),
+                    border_width=1.5f0,
+                    corner_radius=6.0f0,
+                    text_style=TextStyle(size_points=14, color=Vec4{Float32}(1.0f0, 1.0f0, 1.0f0, 1.0f0)),
+                ),
             )
         ]);
         style=ContainerStyle(
