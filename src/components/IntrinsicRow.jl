@@ -1,6 +1,6 @@
 struct IntrinsicRowView <: AbstractView
     children::Vector{AbstractView}
-    padding::Float32 # Padding around the row
+    padding::Float32 # Padding around the row   #TODO Remove padding from this component. Single purpose per component.
     spacing::Float32 # Space between children
     reduce_spacing_on_overflow::Bool # If true, reduce spacing before clipping when space is tight
     on_click::Function

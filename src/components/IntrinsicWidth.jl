@@ -33,6 +33,10 @@ function measure_width(view::IntrinsicWidthView, available_height::Float32)::Flo
     return measure_width(view.child, available_height)
 end
 
-function preferred_width(view::IntrinsicWidthView)::Bool
+function measure_height(view::IntrinsicWidthView, available_width::Float32)::Float32
+    return measure_height(view.child, available_width)
+end
+
+function preferred_width(::IntrinsicWidthView)::Bool
     return true
 end

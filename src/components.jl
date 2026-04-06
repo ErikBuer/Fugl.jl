@@ -42,6 +42,15 @@ export IntrinsicHeight
 include("components/IntrinsicWidth.jl")
 export IntrinsicWidth
 
+include("components/FlexibleWidth.jl")
+export FlexibleWidth
+
+include("components/FlexibleHeight.jl")
+export FlexibleHeight
+
+include("components/FlexibleSize.jl")
+export FlexibleSize
+
 include("components/Rotate.jl")
 export Rotate
 
@@ -155,3 +164,6 @@ export AbstractPolarElement
 
 include("composite_components/tree/Tree.jl")
 export Tree, TreeNode, TreeStyle, TreeState
+
+include("composite_components/file_explorer/FileExplorer.jl")
+export FileExplorer, FileExplorerView, FileExplorerState, FileExplorerStyle

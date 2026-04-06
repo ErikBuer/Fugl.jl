@@ -197,13 +197,13 @@ end
 """
 Text prefers its intrinsic width based on content.
 """
-function preferred_width(view::TextView)::Bool
+function preferred_width(::TextView)::Bool
     return true
 end
 
 """
 Text prefers its intrinsic height based on font size and line count.
 """
-function preferred_height(view::TextView)::Bool
+function preferred_height(::TextView)::Bool
     return true
 end

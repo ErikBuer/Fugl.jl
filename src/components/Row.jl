@@ -1,15 +1,15 @@
 struct RowView <: AbstractView
     children::Vector{AbstractView}
-    padding::Float32 # Padding around the row
+    padding::Float32 # Padding around the row #TODO Remove padding from this component. Single purpose per component.
     spacing::Float32 # Space between children
     on_click::Function
 end
 
-function Row(children::Vector{<:AbstractView}; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
+function Row(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, on_click::Function=() -> nothing)
     return RowView(children, padding, spacing, on_click)
 end
 
-@inline function Row(children::AbstractView...; padding=10.0, spacing=10.0, on_click::Function=() -> nothing)
+@inline function Row(children::AbstractView...; padding=0.0, spacing=10.0, on_click::Function=() -> nothing)
     return RowView(collect(AbstractView, children), padding, spacing, on_click)
 end
 
