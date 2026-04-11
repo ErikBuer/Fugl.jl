@@ -36,7 +36,7 @@ elements = Ref([
         y_range=(-1.0, 1.0),
         colormap=:viridis,
         value_range=(-1.0, 1.0),
-        label="Heatmap",
+        label="Heatmap long modal that will be truncated",
         muted=false
     ),
     LinePlotElement(

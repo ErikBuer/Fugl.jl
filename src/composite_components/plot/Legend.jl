@@ -59,6 +59,9 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
         return
     end
 
+    # Available width for the text area (constrained to legend width)
+    available_text_width = max(1.0f0, width - view.sample_width - view.spacing)
+
     current_y = y + height  # Start from top
 
     for element in labeled_elements
@@ -80,13 +83,14 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
         else
             view.text_style
         end
-        text_view = Text(element.label, style=text_style)
+        text_view = Text(element.label, style=text_style, horizontal_align=:left, wrap_text=false)
         text_measure = measure(text_view)
 
         # Center text vertically within item height
         text_y = item_y + (view.item_height - text_measure[2]) / 2.0f0
 
-        interpret_view(text_view, text_x, text_y, text_measure[1], text_measure[2], projection_matrix, mouse_x, mouse_y)
+        # Clip text to the available width so long labels don't overflow
+        interpret_view(text_view, text_x, text_y, available_text_width, text_measure[2], projection_matrix, mouse_x, mouse_y)
 
         # Move to next item
         current_y -= (view.item_height + view.spacing)
