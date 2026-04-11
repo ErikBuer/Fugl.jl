@@ -4,6 +4,7 @@ Legend component for displaying plot element labels with visual representations.
 struct LegendView <: AbstractView
     elements::Vector{AbstractPlotElement}
     text_style::TextStyle
+    text_style_hover::TextStyle
     spacing::Float32
     item_height::Float32
     sample_width::Float32  # Width of the visual sample (line/marker)
@@ -13,12 +14,13 @@ end
 function Legend(
     elements::Vector{<:AbstractPlotElement};
     text_style::TextStyle=TextStyle(size_points=12, color=Vec4f(0.9, 0.9, 0.95, 1.0)),
+    text_style_hover::TextStyle=TextStyle(size_points=12, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
     spacing::Float32=8.0f0,
     item_height::Float32=20.0f0,
     sample_width::Float32=30.0f0,
     on_click::Union{Function,Nothing}=nothing
 )
-    return LegendView(elements, text_style, spacing, item_height, sample_width, on_click)
+    return LegendView(elements, text_style, text_style_hover, spacing, item_height, sample_width, on_click)
 end
 
 function measure(view::LegendView)::Tuple{Float32,Float32}
@@ -74,14 +76,18 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
 
         render_legend_sample(element, sample_center_x, sample_center_y, view.sample_width, view.item_height, projection_matrix)
 
-        # Render the label text (with reduced opacity if muted)
+        # Render the label text (with reduced opacity if muted, or hover style)
+        is_hovered = view.on_click !== nothing &&
+                     mouse_x >= x && mouse_x <= x + width &&
+                     mouse_y >= item_y && mouse_y <= item_y + view.item_height
         text_x = x + view.sample_width + view.spacing
+        base_style = is_hovered ? view.text_style_hover : view.text_style
         text_style = if element.muted
             # Reduce opacity for muted elements
-            muted_color = Vec4f(view.text_style.color[1], view.text_style.color[2], view.text_style.color[3], 0.4f0)
-            TextStyle(size_points=view.text_style.size_points, color=muted_color)
+            muted_color = Vec4f(base_style.color[1], base_style.color[2], base_style.color[3], 0.4f0)
+            TextStyle(size_points=base_style.size_points, color=muted_color)
         else
-            view.text_style
+            base_style
         end
         text_view = Text(element.label, style=text_style, horizontal_align=:left, wrap_text=false)
         text_measure = measure(text_view)
