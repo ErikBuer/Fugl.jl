@@ -36,6 +36,7 @@ elements = Ref([
         collect(Float32, theta);
         color=Vec4f(0.8, 0.2, 0.2, 1.0),
         width=2.0f0,
+        hover_width=4.0f0,
         label="Rose",
         muted=false
     ),
@@ -44,6 +45,7 @@ elements = Ref([
         collect(Float32, theta);
         color=Vec4f(0.2, 0.4, 0.8, 1.0),
         width=2.0f0,
+        hover_width=4.0f0,
         label="Spiral",
         muted=false
     ),
@@ -52,6 +54,7 @@ elements = Ref([
         collect(Float32, theta);
         color=Vec4f(0.2, 0.8, 0.2, 1.0),
         width=2.0f0,
+        hover_width=4.0f0,
         line_style=DASH,
         label="Circle",
         muted=false
@@ -61,6 +64,23 @@ elements = Ref([
 # Plot state
 plot_state = Ref(PolarState())
 
+# Shared hover callback — sets hovered on the given element index, clears all others
+function on_hover(idx::Union{Int,Nothing})
+    new_elements = copy(elements[])
+    changed = false
+    for i in 1:length(new_elements)
+        should_hover = idx !== nothing && i == idx
+        old = new_elements[i]
+        if old.hovered != should_hover
+            new_elements[i] = toggle_hover(old)
+            changed = true
+        end
+    end
+    if changed
+        elements[] = new_elements
+    end
+end
+
 function app()
     Card(
         "Interactive Polar Legend Demo",
@@ -69,13 +89,15 @@ function app()
                 elements[],
                 style[],
                 plot_state[],
-                (new_state) -> plot_state[] = new_state
+                (new_state) -> plot_state[] = new_state;
+                on_element_hover=on_hover
             ),
             FixedWidth(
                 Container(
                     Legend(
                         elements[],
-                        text_style=TextStyle(size_points=12, color=Vec4f(0.9, 0.9, 0.95, 1.0)),
+                        text_style=TextStyle(size_points=12, color=Vec4f(0.6, 0.6, 0.65, 1.0)),
+                        text_style_hover=TextStyle(size_points=12, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
                         on_click=(idx) -> begin
                             # Toggle muted state of clicked element
                             old_elem = elements[][idx]
@@ -85,7 +107,8 @@ function app()
                             new_elements = copy(elements[])
                             new_elements[idx] = new_elem
                             elements[] = new_elements
-                        end
+                        end,
+                        on_element_hover=on_hover
                     ),
                     style=ContainerStyle(
                         background_color=Vec4f(0.18, 0.18, 0.22, 0.95),

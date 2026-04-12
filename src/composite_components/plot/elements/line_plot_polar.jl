@@ -28,17 +28,21 @@ function PolarLine(
     theta_data::Vector{<:Real};
     color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.5f0, 1.0f0, 1.0f0),
     width::Float32=2.0f0,
+    hover_width::Union{Float32,Nothing}=nothing,
     line_style::LinePattern=SOLID,
     label::String="",
     muted::Bool=false
 )::LinePlotElement
+    hw = hover_width === nothing ? width : hover_width
     return LinePlotElement(
         Float32.(theta_data),  # x = theta (angle)
         Float32.(r_data),      # y = r (radius)
         color,
         width,
+        hw,
         line_style,
         label,
-        muted
+        muted,
+        false
     )
 end

@@ -8,6 +8,7 @@ struct HeatmapElement <: AbstractPlotElement
     value_range::Tuple{Float32,Float32}  # For color normalization
     label::String
     muted::Bool
+    hovered::Bool
 end
 
 function HeatmapElement(
@@ -19,7 +20,8 @@ function HeatmapElement(
     background_color::Tuple{Real,Real,Real,Real}=(0.0, 0.0, 0.0, 1.0),  # Black background
     value_range::Union{Nothing,Tuple{Real,Real}}=nothing,
     label::String="",
-    muted::Bool=false
+    muted::Bool=false,
+    hovered::Bool=false
 )
     data_f32 = Float32.(data)
     x_range_f32 = (Float32(x_range[1]), Float32(x_range[2]))
@@ -35,7 +37,7 @@ function HeatmapElement(
         value_range_f32 = (Float32(value_range[1]), Float32(value_range[2]))
     end
 
-    return HeatmapElement(data_f32, x_range_f32, y_range_f32, colormap, nan_color_f32, background_color_f32, value_range_f32, label, muted)
+    return HeatmapElement(data_f32, x_range_f32, y_range_f32, colormap, nan_color_f32, background_color_f32, value_range_f32, label, muted, hovered)
 end
 
 """
@@ -50,15 +52,21 @@ function HeatmapElement(elem::HeatmapElement;
     background_color=elem.background_color,
     value_range=elem.value_range,
     label=elem.label,
-    muted=elem.muted
+    muted=elem.muted,
+    hovered=elem.hovered
 )
-    return HeatmapElement(data, x_range, y_range, colormap, nan_color, background_color, value_range, label, muted)
+    return HeatmapElement(data, x_range, y_range, colormap, nan_color, background_color, value_range, label, muted, hovered)
 end
 
 """
 Toggle the muted state of a HeatmapElement.
 """
 toggle_mute(elem::HeatmapElement) = HeatmapElement(elem; muted=!elem.muted)
+
+"""
+Toggle the hovered state of a HeatmapElement.
+"""
+toggle_hover(elem::HeatmapElement) = HeatmapElement(elem; hovered=!elem.hovered)
 
 # Draw heatmap image with clipping to effective bounds (plot axes)
 function draw_image_plot_clipped(

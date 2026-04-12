@@ -44,56 +44,86 @@ plot_card_style = ContainerStyle(
 )
 
 title_text_style = TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
-legend_text_style = TextStyle(size_points=12, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+legend_text_style = TextStyle(size_points=12, color=Vec4f(0.6, 0.6, 0.65, 1.0))
+legend_text_style_hover = TextStyle(size_points=12, color=Vec4f(1.0, 1.0, 1.0, 1.0))
+
+# Generate sample data
+x_data = collect(0.0:0.1:10.0)
+y1_data = sin.(x_data)
+y2_data = cos.(x_data)
+y3_data = sin.(x_data .* 2) .* 0.5
+
+# Create plot elements with labels
+elements = Ref([
+    LinePlotElement(y1_data; x_data=x_data,
+        color=Vec4{Float32}(0.4, 0.6, 0.9, 1.0),
+        width=3.0f0,
+        hover_width=5.0f0,
+        line_style=SOLID,
+        label="Sine"
+    ),
+    LinePlotElement(y2_data; x_data=x_data,
+        color=Vec4{Float32}(0.9, 0.4, 0.4, 1.0),
+        width=2.5f0,
+        hover_width=4.5f0,
+        line_style=DASH,
+        label="Cosine"
+    ),
+    ScatterPlotElement(y3_data; x_data=x_data,
+        fill_color=Vec4{Float32}(0.4, 0.9, 0.4, 1.0),
+        border_color=Vec4{Float32}(0.2, 0.7, 0.2, 1.0),
+        marker_size=6.0f0,
+        hover_marker_size=9.0f0,
+        border_width=1.5f0,
+        hover_border_width=2.5f0,
+        marker_type=CIRCLE,
+        label="Double Frequency"
+    )
+])
+
+# Shared hover callback
+function on_hover(idx::Union{Int,Nothing})
+    new_elements = copy(elements[])
+    changed = false
+    for i in 1:length(new_elements)
+        should_hover = idx !== nothing && i == idx
+        old = new_elements[i]
+        if old.hovered != should_hover
+            new_elements[i] = toggle_hover(old)
+            changed = true
+        end
+    end
+    if changed
+        elements[] = new_elements
+    end
+end
 
 function MyApp()
-    # Generate sample data
-    x_data = collect(0.0:0.1:10.0)
-    y1_data = sin.(x_data)
-    y2_data = cos.(x_data)
-    y3_data = sin.(x_data .* 2) .* 0.5
-
-    # Create plot elements with labels
-    elements = [
-        LinePlotElement(y1_data; x_data=x_data,
-            color=Vec4{Float32}(0.4, 0.6, 0.9, 1.0),
-            width=3.0f0,
-            line_style=SOLID,
-            label="Sine"
-        ),
-        LinePlotElement(y2_data; x_data=x_data,
-            color=Vec4{Float32}(0.9, 0.4, 0.4, 1.0),
-            width=2.5f0,
-            line_style=DASH,
-            label="Cosine"
-        ),
-        ScatterPlotElement(y3_data; x_data=x_data,
-            fill_color=Vec4{Float32}(0.4, 0.9, 0.4, 1.0),
-            border_color=Vec4{Float32}(0.2, 0.7, 0.2, 1.0),
-            marker_size=6.0f0,
-            border_width=1.5f0,
-            marker_type=CIRCLE,
-            label="Double Frequency"
-        )
-    ]
-
     # Wrap plot in modal with legend
     Modal(
         # Background: The plot
         Card(
             "Plot with Draggable Legend",
             Plot(
-                elements,
+                elements[],
                 plot_style,
                 plot_state[],
-                (new_state) -> plot_state[] = new_state
+                (new_state) -> plot_state[] = new_state;
+                on_element_hover=on_hover
             ),
             style=plot_card_style,
             title_style=title_text_style
         ),
         # Modal child: The legend
         Container(
-            Legend(elements, text_style=legend_text_style, spacing=8.0f0, item_height=24.0f0),
+            Legend(
+                elements[],
+                text_style=legend_text_style,
+                text_style_hover=legend_text_style_hover,
+                spacing=8.0f0,
+                item_height=24.0f0,
+                on_element_hover=on_hover
+            ),
             style=legend_card_style
         ),
         child_width=200.0f0,

@@ -119,3 +119,126 @@ nothing #hide
 ```
 
 ![Interactive Polar Legend](cartesianLegendInteractive.png)
+
+## Hover Highlighting
+
+Hover over a trace in the plot or a row in the legend to highlight it in both. `hover_width` controls the line width when hovered. The `on_element_hover` callback is shared between `Plot` and `Legend` so hover always stays in sync. The example below pre-highlights the cosine trace to show the effect.
+
+``` @example InteractiveLegendHover
+using Fugl
+
+style = Ref(PlotStyle(
+    background_color=Vec4f(0.08, 0.10, 0.14, 1.0),
+    show_grid=true,
+    grid_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+    axis_color=Vec4f(0.9, 0.9, 0.95, 1.0),
+    show_left_axis=true,
+    show_bottom_axis=true,
+    show_x_tick_labels=true,
+    show_y_tick_labels=true
+))
+
+x = range(0, 2π, length=100)
+line1_data = (collect(Float32, x), sin.(x) .|> Float32)
+line2_data = (collect(Float32, x), cos.(x) .|> Float32)
+line3_data = (collect(Float32, x), sin.(x .* 2) .* 0.5 .|> Float32)
+
+# Pre-hover the cosine trace (index 2) to illustrate the effect
+elements = Ref([
+    LinePlotElement(
+        line1_data[2];
+        x_data=line1_data[1],
+        color=Vec4f(0.2, 0.4, 0.8, 1.0),
+        width=2.0f0,
+        hover_width=4.0f0,
+        label="sin(x)"
+    ),
+    LinePlotElement(
+        line2_data[2];
+        x_data=line2_data[1],
+        color=Vec4f(0.8, 0.2, 0.2, 1.0),
+        width=2.0f0,
+        hover_width=4.0f0,
+        label="cos(x)",
+        hovered=true   # pre-highlighted
+    ),
+    LinePlotElement(
+        line3_data[2];
+        x_data=line3_data[1],
+        color=Vec4f(0.2, 0.8, 0.2, 1.0),
+        width=2.0f0,
+        hover_width=4.0f0,
+        line_style=DASH,
+        label="sin(2x) / 2"
+    )
+])
+
+plot_state = Ref(PlotState())
+
+# Shared hover callback — highlights the given index, clears all others
+function on_hover(idx::Union{Int,Nothing})
+    new_elements = copy(elements[])
+    changed = false
+    for i in 1:length(new_elements)
+        should_hover = idx !== nothing && i == idx
+        if new_elements[i].hovered != should_hover
+            new_elements[i] = toggle_hover(new_elements[i])
+            changed = true
+        end
+    end
+    if changed
+        elements[] = new_elements
+    end
+end
+
+function app()
+    Card(
+        "Hover Highlighting Demo",
+        IntrinsicRow([
+            Plot(
+                elements[],
+                style[],
+                plot_state[],
+                (new_state) -> plot_state[] = new_state;
+                on_element_hover=on_hover
+            ),
+            FixedWidth(
+                Container(
+                    Legend(
+                        elements[],
+                        text_style=TextStyle(size_points=12, color=Vec4f(0.6, 0.6, 0.65, 1.0)),
+                        text_style_hover=TextStyle(size_points=12, color=Vec4f(1.0, 1.0, 1.0, 1.0)),
+                        on_click=(idx) -> begin
+                            new_elements = copy(elements[])
+                            new_elements[idx] = toggle_mute(new_elements[idx])
+                            elements[] = new_elements
+                        end,
+                        on_element_hover=on_hover
+                    ),
+                    style=ContainerStyle(
+                        background_color=Vec4f(0.18, 0.18, 0.22, 0.95),
+                        border_color=Vec4f(0.3, 0.3, 0.35, 1.0),
+                        border_width=2.0f0,
+                        padding=10.0f0,
+                        corner_radius=8.0f0
+                    )
+                ),
+                200.0f0
+            )
+        ]),
+        style=ContainerStyle(
+            background_color=Vec4f(0.15, 0.15, 0.18, 1.0),
+            border_color=Vec4f(0.25, 0.25, 0.30, 1.0),
+            border_width=1.5f0,
+            padding=12.0f0,
+            corner_radius=6.0f0
+        ),
+        title_style=TextStyle(size_points=18, color=Vec4f(0.9, 0.9, 0.95, 1.0))
+    )
+end
+
+screenshot(app, "cartesianLegendHover.png", 812, 812);
+nothing #hide
+```
+
+![Hover Highlighting](cartesianLegendHover.png)

@@ -56,6 +56,7 @@ function PolarStem(
         marker_type,
         baseline,
         label,
-        muted
+        muted,
+        false
     )
 end

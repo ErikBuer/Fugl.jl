@@ -31,20 +31,27 @@ function PolarScatter(
     fill_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.5f0, 1.0f0, 1.0f0),
     border_color::Vec4{Float32}=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
     marker_size::Float32=8.0f0,
+    hover_marker_size::Union{Float32,Nothing}=nothing,
     border_width::Float32=1.0f0,
+    hover_border_width::Union{Float32,Nothing}=nothing,
     marker_type::MarkerType=CIRCLE,
     label::String="",
     muted::Bool=false
 )::ScatterPlotElement
+    hms = hover_marker_size === nothing ? marker_size : hover_marker_size
+    hbw = hover_border_width === nothing ? border_width : hover_border_width
     return ScatterPlotElement(
         Float32.(theta_data),  # x = theta (angle)
         Float32.(r_data),      # y = r (radius)
         fill_color,
         border_color,
         marker_size,
+        hms,
         border_width,
+        hbw,
         marker_type,
         label,
-        muted
+        muted,
+        false
     )
 end
