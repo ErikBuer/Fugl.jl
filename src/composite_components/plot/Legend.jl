@@ -9,6 +9,7 @@ struct LegendView <: AbstractView
     item_height::Float32
     sample_width::Float32  # Width of the visual sample (line/marker)
     on_click::Union{Function,Nothing}  # Callback(index::Int) when legend item clicked
+    on_element_hover::Union{Function,Nothing}  # Callback(idx::Union{Int,Nothing}) when hover changes
 end
 
 function Legend(
@@ -18,9 +19,10 @@ function Legend(
     spacing::Float32=8.0f0,
     item_height::Float32=20.0f0,
     sample_width::Float32=30.0f0,
-    on_click::Union{Function,Nothing}=nothing
+    on_click::Union{Function,Nothing}=nothing,
+    on_element_hover::Union{Function,Nothing}=nothing
 )
-    return LegendView(elements, text_style, text_style_hover, spacing, item_height, sample_width, on_click)
+    return LegendView(elements, text_style, text_style_hover, spacing, item_height, sample_width, on_click, on_element_hover)
 end
 
 function measure(view::LegendView)::Tuple{Float32,Float32}
@@ -77,11 +79,11 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
         render_legend_sample(element, sample_center_x, sample_center_y, view.sample_width, view.item_height, projection_matrix)
 
         # Render the label text (with reduced opacity if muted, or hover style)
-        is_hovered = view.on_click !== nothing &&
-                     mouse_x >= x && mouse_x <= x + width &&
-                     mouse_y >= item_y && mouse_y <= item_y + view.item_height
+        is_locally_hovered = mouse_x >= x && mouse_x <= x + width &&
+                             mouse_y >= item_y && mouse_y <= item_y + view.item_height
+        is_visually_hovered = element.hovered || is_locally_hovered
         text_x = x + view.sample_width + view.spacing
-        base_style = is_hovered ? view.text_style_hover : view.text_style
+        base_style = is_visually_hovered ? view.text_style_hover : view.text_style
         text_style = if element.muted
             # Reduce opacity for muted elements
             muted_color = Vec4f(base_style.color[1], base_style.color[2], base_style.color[3], 0.4f0)
@@ -104,6 +106,33 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
 end
 
 function detect_click(view::LegendView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
+    mouse_x = input_state.x
+    mouse_y = input_state.y
+
+    labeled_elements = filter(e -> !isempty(e.label), view.elements)
+
+    # Hover detection — fires callback only when mouse is within legend bounds
+    if view.on_element_hover !== nothing && !isempty(labeled_elements) &&
+       mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height
+        current_y = y + height
+        new_hover_idx::Union{Int,Nothing} = nothing
+
+        for element in labeled_elements
+            item_y = current_y - view.item_height
+            if mouse_x >= x && mouse_x <= x + width &&
+               mouse_y >= item_y && mouse_y <= item_y + view.item_height
+                new_hover_idx = findfirst(e -> e === element, view.elements)
+                break
+            end
+            current_y -= (view.item_height + view.spacing)
+        end
+
+        current_hover_idx = findfirst(e -> e.hovered, view.elements)
+        if new_hover_idx !== current_hover_idx
+            view.on_element_hover(new_hover_idx)
+        end
+    end
+
     # If no click callback, don't handle clicks
     if view.on_click === nothing
         return nothing
@@ -114,17 +143,12 @@ function detect_click(view::LegendView, input_state::InputState, x::Float32, y::
         return nothing
     end
 
-    mouse_x = input_state.x
-    mouse_y = input_state.y
-
     # Check if click is within legend bounds
     if mouse_x < x || mouse_x > x + width || mouse_y < y || mouse_y > y + height
         return nothing
     end
 
     # Filter elements that have labels
-    labeled_elements = filter(e -> !isempty(e.label), view.elements)
-
     if isempty(labeled_elements)
         return nothing
     end
@@ -160,11 +184,12 @@ function render_legend_sample(element::LinePlotElement, center_x::Float32, cente
 
     # Apply reduced opacity if muted
     color = element.muted ? Vec4f(element.color[1], element.color[2], element.color[3], element.color[4] * 0.4f0) : element.color
+    draw_width = element.hovered ? element.hover_width : element.width
 
     # Create a simple line batch
     batch = LineBatch()
     line_points = [Point2f(line_start_x, center_y), Point2f(line_end_x, center_y)]
-    add_line!(batch, line_points, color, element.width, element.line_style)
+    add_line!(batch, line_points, color, draw_width, element.line_style)
     draw_lines(batch, projection_matrix)
 end
 
@@ -172,10 +197,12 @@ function render_legend_sample(element::ScatterPlotElement, center_x::Float32, ce
     # Apply reduced opacity if muted
     fill_color = element.muted ? Vec4f(element.fill_color[1], element.fill_color[2], element.fill_color[3], element.fill_color[4] * 0.4f0) : element.fill_color
     border_color = element.muted ? Vec4f(element.border_color[1], element.border_color[2], element.border_color[3], element.border_color[4] * 0.4f0) : element.border_color
+    draw_size = element.hovered ? element.hover_marker_size : element.marker_size
+    draw_bw = element.hovered ? element.hover_border_width : element.border_width
 
     # Draw a single marker in the element's style
     batch = MarkerBatch()
-    add_marker!(batch, Point2f(center_x, center_y), element.marker_size, fill_color, border_color, element.border_width, element.marker_type)
+    add_marker!(batch, Point2f(center_x, center_y), draw_size, fill_color, border_color, draw_bw, element.marker_type)
     draw_markers(batch, projection_matrix)
 end
 

@@ -41,6 +41,7 @@ struct PlotView <: AbstractView
     state::PlotState
     style::PlotStyle
     on_state_change::Function
+    on_element_hover::Union{Function,Nothing}  # Callback(idx::Union{Int,Nothing}) when hovered element changes
 end
 
 """
@@ -50,14 +51,15 @@ function Plot(
     elements::Vector{<:AbstractPlotElement},
     style::PlotStyle=PlotStyle(),
     state::PlotState=PlotState(),
-    on_state_change::Function=(new_state) -> nothing
+    on_state_change::Function=(new_state) -> nothing;
+    on_element_hover::Union{Function,Nothing}=nothing
 )::PlotView
     # If state has no initial bounds and auto_scale is true, calculate bounds from elements
     if isnothing(state.initial_bounds) && state.auto_scale && !isempty(elements)
         calculated_bounds = calculate_bounds_from_elements(Vector{AbstractPlotElement}(elements))
         state = PlotState(state; initial_bounds=calculated_bounds)
     end
-    return PlotView(elements, state, style, on_state_change)
+    return PlotView(Vector{AbstractPlotElement}(elements), state, style, on_state_change, on_element_hover)
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}
@@ -274,7 +276,7 @@ function draw_plot_element_culled(element::LinePlotElement, data_to_screen::Func
                     final_y,
                     data_to_screen,
                     element.color,
-                    element.width,
+                    element.hovered ? element.hover_width : element.width,
                     element.line_style,
                     projection_matrix;
                     anti_aliasing_width=style.anti_aliasing_width
@@ -318,8 +320,8 @@ function draw_plot_element_culled(element::ScatterPlotElement, data_to_screen::F
                     data_to_screen,
                     element.fill_color,
                     element.border_color,
-                    element.marker_size,
-                    element.border_width,
+                    element.hovered ? element.hover_marker_size : element.marker_size,
+                    element.hovered ? element.hover_border_width : element.border_width,
                     element.marker_type,
                     projection_matrix;
                     anti_aliasing_width=style.anti_aliasing_width
@@ -485,10 +487,104 @@ function draw_plot_element_culled(element::HorizontalColorbar, data_to_screen::F
         data_to_screen, projection_matrix, effective_bounds)
 end
 
+# --- Line hover detection helpers ---
+
+function _point_to_segment_dist(px::Float32, py::Float32, ax::Float32, ay::Float32, bx::Float32, by::Float32)::Float32
+    dx = bx - ax
+    dy = by - ay
+    len_sq = dx * dx + dy * dy
+    if len_sq < 1.0f-10
+        return sqrt((px - ax)^2 + (py - ay)^2)
+    end
+    t = clamp(((px - ax) * dx + (py - ay) * dy) / len_sq, 0.0f0, 1.0f0)
+    return sqrt((px - (ax + t * dx))^2 + (py - (ay + t * dy))^2)
+end
+
+function _min_dist_to_line_screen(
+    x_data::Vector{Float32}, y_data::Vector{Float32},
+    px::Float32, py::Float32,
+    to_screen_x::Function, to_screen_y::Function
+)::Float32
+    min_d = Inf32
+    for i in 1:(length(x_data)-1)
+        if isnan(x_data[i]) || isnan(y_data[i]) || isnan(x_data[i+1]) || isnan(y_data[i+1])
+            continue
+        end
+        d = _point_to_segment_dist(
+            px, py,
+            to_screen_x(x_data[i]), to_screen_y(y_data[i]),
+            to_screen_x(x_data[i+1]), to_screen_y(y_data[i+1])
+        )
+        min_d = min(min_d, d)
+    end
+    return min_d
+end
+
+function _detect_line_hover(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
+    style = view.style
+    plot_x = x + style.padding
+    plot_y = y + style.padding
+    plot_width = width - 2 * style.padding
+    plot_height = height - 2 * style.padding
+
+    mouse_x = Float32(mouse_state.x)
+    mouse_y = Float32(mouse_state.y)
+
+    # Only update hover when mouse is within the plot area; otherwise let other
+    # components (e.g. Legend) manage hover state without interference.
+    if !(plot_width > 0 && plot_height > 0 &&
+         mouse_x >= plot_x && mouse_x <= plot_x + plot_width &&
+         mouse_y >= plot_y && mouse_y <= plot_y + plot_height)
+        return
+    end
+
+    new_hover_idx::Union{Int,Nothing} = nothing
+
+    effective_bounds = get_effective_bounds(view.state, view.elements)
+    if effective_bounds.width > 0 && effective_bounds.height > 0
+        to_sx(dx) = plot_x + (dx - effective_bounds.x) / effective_bounds.width * plot_width
+        to_sy(dy) = plot_y + (1.0f0 - (dy - effective_bounds.y) / effective_bounds.height) * plot_height
+
+        hover_threshold = 8.0f0  # points
+        best_dist = hover_threshold
+
+        for (i, elem) in enumerate(view.elements)
+            if elem isa LinePlotElement && !elem.muted && length(elem.x_data) >= 2
+                d = _min_dist_to_line_screen(elem.x_data, elem.y_data, mouse_x, mouse_y, to_sx, to_sy)
+                if d < best_dist
+                    best_dist = d
+                    new_hover_idx = i
+                end
+            elseif elem isa ScatterPlotElement && !elem.muted && length(elem.x_data) >= 1
+                for j in 1:length(elem.x_data)
+                    sx = to_sx(elem.x_data[j])
+                    sy = to_sy(elem.y_data[j])
+                    d = sqrt((mouse_x - sx)^2 + (mouse_y - sy)^2)
+                    if d < best_dist
+                        best_dist = d
+                        new_hover_idx = i
+                    end
+                end
+            end
+        end
+    end
+
+    # Only fire callback when hover changes
+    current_hover_idx = findfirst(e -> e.hovered, view.elements)
+    if new_hover_idx !== current_hover_idx
+        view.on_element_hover(new_hover_idx)
+    end
+end
+
 function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     # Get plot render cache using state's cache ID
     cache = get_render_cache(view.state.cache_id)
     z = Int32(parent_z + 1)
+
+    # Hover detection over line traces (transparent — does not consume click)
+    if view.on_element_hover !== nothing
+        _detect_line_hover(view, mouse_state, x, y, width, height)
+    end
 
     # Check for scroll wheel zoom with Ctrl/Cmd modifier
     if (mouse_state.scroll_y != 0.0) && is_command_key(mouse_state.modifier_keys)

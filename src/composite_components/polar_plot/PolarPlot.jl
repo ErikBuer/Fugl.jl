@@ -12,6 +12,7 @@ struct PolarPlotView <: AbstractView
     state::PolarState
     style::PolarStyle
     on_state_change::Function
+    on_element_hover::Union{Function,Nothing}  # Callback(idx::Union{Int,Nothing}) when hover changes
 end
 
 """
@@ -39,7 +40,8 @@ function PolarPlot(
     elements::Vector{<:AbstractPlotElement},
     style::PolarStyle=PolarStyle(),
     state::PolarState=PolarState(),
-    on_state_change::Function=(new_state) -> nothing
+    on_state_change::Function=(new_state) -> nothing;
+    on_element_hover::Union{Function,Nothing}=nothing
 )::PolarPlotView
     # Auto-scale r_max if enabled and elements exist
     if state.auto_scale_r && !isempty(elements)
@@ -59,7 +61,7 @@ function PolarPlot(
         state = PolarState(state; r_max=max_r, auto_scale_r=false)
     end
 
-    return PolarPlotView(elements, state, style, on_state_change)
+    return PolarPlotView(elements, state, style, on_state_change, on_element_hover)
 end
 
 function measure(view::PolarPlotView)::Tuple{Float32,Float32}
@@ -364,12 +366,13 @@ function draw_polar_element(
 
     # Draw line
     if length(x_screen) >= 2
+        draw_width = element.hovered ? element.hover_width : element.width
         draw_line_plot(
             x_screen,
             y_screen,
             identity_transform,
             element.color,
-            element.width,
+            draw_width,
             element.line_style,
             projection_matrix;
             anti_aliasing_width=style.anti_aliasing_width
@@ -482,6 +485,81 @@ function draw_polar_element(
     end
 end
 
+function _detect_polar_line_hover(
+    view::PolarPlotView,
+    mouse_state::InputState,
+    x::Float32,
+    y::Float32,
+    width::Float32,
+    height::Float32
+)
+    style = view.style
+    state = view.state
+
+    plot_area_x = x + style.padding
+    plot_area_y = y + style.padding
+    plot_area_width = width - 2.0f0 * style.padding
+    plot_area_height = height - 2.0f0 * style.padding
+
+    mouse_x = Float32(mouse_state.x)
+    mouse_y = Float32(mouse_state.y)
+
+    # Only update hover when mouse is within the plot area
+    if !(plot_area_width > 0 && plot_area_height > 0 &&
+         mouse_x >= x && mouse_x <= x + width &&
+         mouse_y >= y && mouse_y <= y + height)
+        return
+    end
+
+    max_plot_radius = min(plot_area_width, plot_area_height) / 2.0f0
+    center_x = plot_area_x + plot_area_width / 2.0f0
+    center_y = plot_area_y + plot_area_height / 2.0f0
+
+    function polar_to_screen(r::Float32, theta::Float32)::Tuple{Float32,Float32}
+        theta_normalized = mod2pi(theta)
+        theta_min, theta_max = state.theta_range
+        if theta_normalized < theta_min || theta_normalized > theta_max
+            return (NaN32, NaN32)
+        end
+        if r > state.r_max
+            return (NaN32, NaN32)
+        end
+        r_clamped = max(r, state.r_min)
+        r_normalized = (r_clamped - state.r_min) / (state.r_max - state.r_min)
+        screen_radius = r_normalized * max_plot_radius
+        return polar_to_cartesian(screen_radius, theta_normalized, state.theta_start, state.theta_direction, center_x, center_y)
+    end
+
+    hover_threshold = 8.0f0
+    best_dist = hover_threshold
+    new_hover_idx::Union{Int,Nothing} = nothing
+
+    for (i, elem) in enumerate(view.elements)
+        if elem isa LinePlotElement && !elem.muted && length(elem.x_data) >= 2
+            # x_data = theta, y_data = r
+            min_d = Inf32
+            for j in 1:(length(elem.x_data)-1)
+                ax, ay = polar_to_screen(elem.y_data[j], elem.x_data[j])
+                bx, by = polar_to_screen(elem.y_data[j+1], elem.x_data[j+1])
+                if isnan(ax) || isnan(ay) || isnan(bx) || isnan(by)
+                    continue
+                end
+                d = _point_to_segment_dist(mouse_x, mouse_y, ax, ay, bx, by)
+                min_d = min(min_d, d)
+            end
+            if min_d < best_dist
+                best_dist = min_d
+                new_hover_idx = i
+            end
+        end
+    end
+
+    current_hover_idx = findfirst(e -> e.hovered, view.elements)
+    if new_hover_idx !== current_hover_idx
+        view.on_element_hover(new_hover_idx)
+    end
+end
+
 function detect_click(
     view::PolarPlotView,
     mouse_state::InputState,
@@ -492,6 +570,11 @@ function detect_click(
     parent_z::Int32
 )::Union{ClickResult,Nothing}
     z = Int32(parent_z + 1)
+
+    # Hover detection over line traces (transparent — does not consume click)
+    if view.on_element_hover !== nothing
+        _detect_polar_line_hover(view, mouse_state, x, y, width, height)
+    end
 
     # Check for scroll wheel zoom with Ctrl/Cmd modifier (adjust r_max)
     # or Shift modifier (adjust r_min)

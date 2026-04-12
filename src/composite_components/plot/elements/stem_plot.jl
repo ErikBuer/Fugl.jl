@@ -11,6 +11,7 @@ struct StemPlotElement <: AbstractPlotElement
     baseline::Float32  # Y value for stem baseline
     label::String
     muted::Bool
+    hovered::Bool
 end
 
 function StemPlotElement(
@@ -25,11 +26,12 @@ function StemPlotElement(
     marker_type::MarkerType=CIRCLE,
     baseline::Float32=0.0f0,
     label::String="",
-    muted::Bool=false
+    muted::Bool=false,
+    hovered::Bool=false
 )
     y_f32 = Float32.(y_data)
     x_f32 = x_data === nothing ? Float32.(1:length(y_data)) : Float32.(x_data)
-    return StemPlotElement(x_f32, y_f32, line_color, fill_color, border_color, line_width, marker_size, border_width, marker_type, baseline, label, muted)
+    return StemPlotElement(x_f32, y_f32, line_color, fill_color, border_color, line_width, marker_size, border_width, marker_type, baseline, label, muted, hovered)
 end
 
 """
@@ -47,12 +49,18 @@ function StemPlotElement(elem::StemPlotElement;
     marker_type=elem.marker_type,
     baseline=elem.baseline,
     label=elem.label,
-    muted=elem.muted
+    muted=elem.muted,
+    hovered=elem.hovered
 )
-    return StemPlotElement(x_data, y_data, line_color, fill_color, border_color, line_width, marker_size, border_width, marker_type, baseline, label, muted)
+    return StemPlotElement(x_data, y_data, line_color, fill_color, border_color, line_width, marker_size, border_width, marker_type, baseline, label, muted, hovered)
 end
 
 """
 Toggle the muted state of a StemPlotElement.
 """
 toggle_mute(elem::StemPlotElement) = StemPlotElement(elem; muted=!elem.muted)
+
+"""
+Toggle the hovered state of a StemPlotElement.
+"""
+toggle_hover(elem::StemPlotElement) = StemPlotElement(elem; hovered=!elem.hovered)
