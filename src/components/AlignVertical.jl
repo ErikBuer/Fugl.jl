@@ -67,12 +67,12 @@ function apply_layout(view::AlignVerticalView, x::Float32, y::Float32, width::Fl
     return (child_x, child_y, final_child_width, final_child_height)
 end
 
-function interpret_view(view::AlignVerticalView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::AlignVerticalView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     # Get the child's layout
     child_x, child_y, child_width, child_height = apply_layout(view, x, y, width, height)
 
     # Render the child
-    interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix, mouse_x, mouse_y)
+    interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix, cursor_position)
 end
 
 function detect_click(view::AlignVerticalView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}

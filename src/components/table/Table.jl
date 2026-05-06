@@ -210,7 +210,7 @@ function preferred_height(view::TableView)::Bool
     return true
 end
 
-function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     num_cols = length(view.headers)
     num_rows = length(view.data)
 
@@ -310,7 +310,7 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
             col_width - 2 * view.style.cell_padding,
             view.style.header_height,
             projection_matrix,
-            mouse_x, mouse_y
+            cursor_position
         )
 
         # Move to next column
@@ -406,7 +406,7 @@ function interpret_view(view::TableView, x::Float32, y::Float32, width::Float32,
                             available_text_width,
                             min(line_height, view.style.cell_height - (line_y - row_y)),
                             projection_matrix,
-                            mouse_x, mouse_y
+                            cursor_position
                         )
                     end
                 end

@@ -31,7 +31,7 @@ function apply_layout(view::CodeEditorView, x::Float32, y::Float32, width::Float
     return (x, y, width, height)
 end
 
-function interpret_view(view::CodeEditorView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::CodeEditorView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     # Get DPI scaling to convert logical points to pixel coordinates
     dpi_scaling = get_current_dpi_scaling()
     scale_factor = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)

@@ -11,8 +11,8 @@ function FlexibleSize(child::AbstractView=EmptyView())
     return FlexibleSizeView(child)
 end
 
-function interpret_view(view::FlexibleSizeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
-    interpret_view(view.child, x, y, width, height, projection_matrix, mouse_x, mouse_y)
+function interpret_view(view::FlexibleSizeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+    interpret_view(view.child, x, y, width, height, projection_matrix, cursor_position)
 end
 
 function detect_click(view::FlexibleSizeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}

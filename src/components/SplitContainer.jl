@@ -317,7 +317,7 @@ function detect_click(container::VerticalSplitContainerView, input_state::InputS
 end
 
 
-function interpret_view(container::HorizontalSplitContainerView, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(container::HorizontalSplitContainerView, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     # Calculate split position in pixels
     split_pixel = container.state.split_position <= 1.0f0 ?
                   container.state.split_position * width :
@@ -330,11 +330,11 @@ function interpret_view(container::HorizontalSplitContainerView, x_offset::Float
 
     # Render children
     if left_width > 0
-        interpret_view(container.left, x_offset, y_offset, left_width, height, projection_matrix, mouse_x, mouse_y)
+        interpret_view(container.left, x_offset, y_offset, left_width, height, projection_matrix, cursor_position)
     end
 
     if right_width > 0
-        interpret_view(container.right, x_offset + right_x, y_offset, right_width, height, projection_matrix, mouse_x, mouse_y)
+        interpret_view(container.right, x_offset + right_x, y_offset, right_width, height, projection_matrix, cursor_position)
     end
 
     # Render the vertical handle
@@ -348,7 +348,7 @@ function interpret_view(container::HorizontalSplitContainerView, x_offset::Float
     draw_rectangle(handle_vertices, color, projection_matrix)
 end
 
-function interpret_view(container::VerticalSplitContainerView, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(container::VerticalSplitContainerView, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     # Calculate split position in pixels
     split_pixel = container.state.split_position <= 1.0f0 ?
                   container.state.split_position * height :
@@ -361,11 +361,11 @@ function interpret_view(container::VerticalSplitContainerView, x_offset::Float32
 
     # Render children
     if top_height > 0
-        interpret_view(container.top, x_offset, y_offset, width, top_height, projection_matrix, mouse_x, mouse_y)
+        interpret_view(container.top, x_offset, y_offset, width, top_height, projection_matrix, cursor_position)
     end
 
     if bottom_height > 0
-        interpret_view(container.bottom, x_offset, y_offset + bottom_y, width, bottom_height, projection_matrix, mouse_x, mouse_y)
+        interpret_view(container.bottom, x_offset, y_offset + bottom_y, width, bottom_height, projection_matrix, cursor_position)
     end
 
     # Render the horizontal handle
