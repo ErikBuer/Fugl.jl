@@ -95,7 +95,14 @@ data_update_callback = PeriodicCallback(() -> update_data(), 300)
 run(MyApp, periodic_callbacks=[file_check_callback, data_update_callback])
 ```
 """
-function run(ui_function::Function; title::String="Fugl", window_width_points::Integer=1920, window_height_points::Integer=1080, fps_overlay::Bool=false, periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[], dpi_scaling::Union{Ref{DPIScaling},Nothing}=nothing)
+function run(ui_function::Function;
+    title::String="Fugl",
+    window_width_points::Integer=1920, window_height_points::Integer=1080,
+    fps_overlay::Bool=false,
+    periodic_callbacks::Vector{PeriodicCallback}=PeriodicCallback[],
+    dpi_scaling::Union{Ref{DPIScaling},Nothing}=nothing,
+    frames_between_gc::Int=300
+)
     # Initialize the GLFW window
     gl_window = GLFW.Window(name=title, resolution=(window_width_points, window_height_points))
     GLA.set_context!(gl_window)
@@ -243,7 +250,7 @@ function run(ui_function::Function; title::String="Fugl", window_width_points::I
                 end
 
                 # Periodic GC management
-                if frame_count % 300 == 0
+                if frame_count % frames_between_gc == 0
                     GC.gc(false)
                 end
 
