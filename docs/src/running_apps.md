@@ -39,25 +39,7 @@ run(ui_function;
     window_width_points=1920,            # Initial window width
     window_height_points=1080,           # Initial window height
     fps_overlay=false,               # Show FPS counter
-    periodic_callbacks=PeriodicCallback[]  # Callbacks executed every N frames (Experimental)
 )
-```
-
-### Periodic Callbacks
-
-!!! warning "Experimental"
-    This feature is experimental and the API may change in future versions.
-
-Execute functions at regular frame intervals:
-
-```julia
-# Run every 60 frames (~1 second at 60fps)
-file_check = PeriodicCallback(() -> check_files(), 60)
-
-# Run every 300 frames (~5 seconds at 60fps)  
-data_update = PeriodicCallback(() -> update_data(), 300)
-
-run(MyApp, periodic_callbacks=[file_check, data_update])
 ```
 
 ## Documentation Screenshots
