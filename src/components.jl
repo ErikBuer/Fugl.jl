@@ -3,6 +3,8 @@ include("components/common/draw.jl")
 include("components/common/render_cache.jl")
 include("components/common/rectangle.jl")
 export Rectangle
+include("components/common/size.jl")
+export Size
 
 include("components/common/enum_utils.jl")
 include("components/common/LinePattern.jl")
