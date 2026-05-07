@@ -42,7 +42,7 @@ function draw_dropdown_button(view::DropdownView, x::Float32, y::Float32, width:
     available_text_width = width - 2 * view.style.padding - 20.0f0  # Reserve space for arrow
     text_height = height - 2 * view.style.padding
 
-    interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix, mouse_x, mouse_y)
+    interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix, Point2f(mouse_x, mouse_y))
 
     # Draw dropdown arrow
     draw_dropdown_arrow(view, x + width - view.style.padding - 10.0f0, y + height / 2.0f0, projection_matrix)
@@ -115,7 +115,7 @@ function draw_dropdown_list(view::DropdownView, x::Float32, y::Float32, width::F
         available_text_width = width - 2 * view.style.padding
         text_height = item_height
 
-        interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix, 0.0f0, 0.0f0)
+        interpret_view(text_component, text_x, text_y, available_text_width, text_height, projection_matrix, Point2f(0.0f0, 0.0f0))
     end
 end
 
@@ -135,5 +135,5 @@ function draw_dropdown_arrow(view::DropdownView, x::Float32, y::Float32, project
     arrow_x = x - arrow_size / 2.0f0
     arrow_y = y - arrow_size / 2.0f0
 
-    interpret_view(arrow_component, arrow_x, arrow_y, arrow_size, arrow_size, projection_matrix, 0.0f0, 0.0f0)
+    interpret_view(arrow_component, arrow_x, arrow_y, arrow_size, arrow_size, projection_matrix, Point2f(0.0f0, 0.0f0))
 end

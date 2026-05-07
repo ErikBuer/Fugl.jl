@@ -166,7 +166,7 @@ function preferred_width(view::MultiSelectListView)::Bool
     return false  # Flexible component
 end
 
-function interpret_view(view::MultiSelectListView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::MultiSelectListView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     # Draw container background
     draw_rounded_rectangle(
         [Point2f(x, y + height),

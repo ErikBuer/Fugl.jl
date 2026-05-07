@@ -55,7 +55,7 @@ function apply_layout(view::LegendView, x::Float32, y::Float32, width::Float32, 
     return (x, y, width, height)
 end
 
-function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     # Filter elements that have labels
     labeled_elements = filter(e -> !isempty(e.label), view.elements)
 
@@ -79,8 +79,8 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
         render_legend_sample(element, sample_center_x, sample_center_y, view.sample_width, view.item_height, projection_matrix)
 
         # Render the label text (with reduced opacity if muted, or hover style)
-        is_locally_hovered = mouse_x >= x && mouse_x <= x + width &&
-                             mouse_y >= item_y && mouse_y <= item_y + view.item_height
+        is_locally_hovered = cursor_position[1] >= x && cursor_position[1] <= x + width &&
+                             cursor_position[2] >= item_y && cursor_position[2] <= item_y + view.item_height
         is_visually_hovered = element.hovered || is_locally_hovered
         text_x = x + view.sample_width + view.spacing
         base_style = is_visually_hovered ? view.text_style_hover : view.text_style
@@ -98,7 +98,7 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
         text_y = item_y + (view.item_height - text_measure[2]) / 2.0f0
 
         # Clip text to the available width so long labels don't overflow
-        interpret_view(text_view, text_x, text_y, available_text_width, text_measure[2], projection_matrix, mouse_x, mouse_y)
+        interpret_view(text_view, text_x, text_y, available_text_width, text_measure[2], projection_matrix, cursor_position)
 
         # Move to next item
         current_y -= (view.item_height + view.spacing)

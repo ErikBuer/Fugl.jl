@@ -111,18 +111,18 @@ function interpret_view(
     view::TabsView,
     x::Float32, y::Float32, width::Float32, height::Float32,
     projection_matrix::Mat4{Float32},
-    mouse_x::Float32, mouse_y::Float32
+    cursor_position::Point2f
 )
     isempty(view.tabs) && return
 
     tab_height = view.style.tab_height
-    render_tab_bar(view, x, y, width, tab_height, projection_matrix, mouse_x, mouse_y)
+    render_tab_bar(view, x, y, width, tab_height, projection_matrix, cursor_position[1], cursor_position[2])
 
     content_y = y + tab_height
     content_height = height - tab_height
     if content_height > 0
         _, selected_content, _ = view.tabs[view.selected_index]
-        interpret_view(selected_content, x, content_y, width, content_height, projection_matrix, mouse_x, mouse_y)
+        interpret_view(selected_content, x, content_y, width, content_height, projection_matrix, cursor_position)
     end
 end
 

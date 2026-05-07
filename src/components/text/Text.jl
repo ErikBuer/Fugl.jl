@@ -103,7 +103,7 @@ function apply_layout(view::TextView, x::Float32, y::Float32, width::Float32, he
     return (x, y, width, height)
 end
 
-function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix_points::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::TextView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix_points::Mat4{Float32}, cursor_position::Point2f)
     # Extract style properties
     font = get_font(view.style)
     size_points = view.style.size_points

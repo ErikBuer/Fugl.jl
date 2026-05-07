@@ -48,9 +48,9 @@ function apply_layout(view::FocusView, x::Float32, y::Float32, width::Float32, h
 end
 
 # Rendering - just pass through to child
-function interpret_view(view::FocusView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::FocusView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     # Just render the child - Focus is invisible
-    interpret_view(view.child, x, y, width, height, projection_matrix, mouse_x, mouse_y)
+    interpret_view(view.child, x, y, width, height, projection_matrix, cursor_position)
 end
 
 function blur(view::FocusView)

@@ -92,7 +92,7 @@ function interpret_view(
     view::FileExplorerView,
     x::Float32, y::Float32, width::Float32, height::Float32,
     projection_matrix::Mat4{Float32},
-    mouse_x::Float32, mouse_y::Float32,
+    cursor_position::Point2f,
 )
     # Background
     bg_verts = generate_rectangle_vertices(x, y, width, height)
@@ -110,8 +110,8 @@ function interpret_view(
         row_x = x + depth * indent
 
         is_selected = rel_path == view.state.selected
-        is_hovered = mouse_x >= x && mouse_x < x + width &&
-                     mouse_y >= row_y && mouse_y < row_y + row_h
+        is_hovered = cursor_position[1] >= x && cursor_position[1] < x + width &&
+                     cursor_position[2] >= row_y && cursor_position[2] < row_y + row_h
 
         # Row background: selected > hover > transparent
         if is_selected
@@ -141,7 +141,7 @@ function interpret_view(
 
         text_view = Fugl.Text(label; style=ts, horizontal_align=:left, wrap_text=false)
         text_y = row_y + (row_h - Float32(ts.size_points)) / 2.0f0
-        interpret_view(text_view, row_x, text_y, width - depth * indent, row_h, projection_matrix, mouse_x, mouse_y)
+        interpret_view(text_view, row_x, text_y, width - depth * indent, row_h, projection_matrix, cursor_position)
     end
 end
 

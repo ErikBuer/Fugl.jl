@@ -73,7 +73,7 @@ function measure_height(view::SpinnerView, available_width::Float32)::Float32
     return Float32(view.text_style.size_points) * 1.3f0 + 2.0f0
 end
 
-function interpret_view(view::SpinnerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function interpret_view(view::SpinnerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
     current_state = view.state
 
     # Update animation if spinning is enabled
@@ -97,7 +97,7 @@ function interpret_view(view::SpinnerView, x::Float32, y::Float32, width::Float3
     # Render the current symbol using Text component
     current_symbol = string(view.symbols[view.state.current_index])
     text_component = Text(current_symbol, style=view.text_style)
-    interpret_view(text_component, x, y, width, height, projection_matrix, mouse_x, mouse_y)
+    interpret_view(text_component, x, y, width, height, projection_matrix, cursor_position)
 end
 
 function detect_click(view::SpinnerView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
