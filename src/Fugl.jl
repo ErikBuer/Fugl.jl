@@ -34,6 +34,9 @@ export ButtonState, IsPressed, IsReleased
 export mouse_button_callback
 export ModifierKeys, is_command_key, has_any_modifier
 
+include("components/common/size.jl")
+export Size
+
 include("abstract_view.jl")
 export AbstractView, SizedView, interpret_view
 
@@ -197,7 +200,7 @@ function run(ui_function::Function;
                         click_result.action()
                     end
 
-                    interpret_view(ui, 0.0f0, 0.0f0, effective_width_points, effective_height_points, effective_projection_matrix, Point2f(Float32(mouse_state.x), Float32(mouse_state.y)))
+                    interpret_view(ui, 0.0f0, 0.0f0, effective_width_points, effective_height_points, effective_projection_matrix, Point2f(Float32(mouse_state.x), Float32(mouse_state.y)), Size(effective_width_points, effective_height_points))
 
                     # Render overlays after main content
                     render_overlays()

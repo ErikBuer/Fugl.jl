@@ -93,6 +93,7 @@ function interpret_view(
     x::Float32, y::Float32, width::Float32, height::Float32,
     projection_matrix::Mat4{Float32},
     cursor_position::Point2f,
+    window_size::Size,
 )
     # Background
     bg_verts = generate_rectangle_vertices(x, y, width, height)
@@ -141,7 +142,7 @@ function interpret_view(
 
         text_view = Fugl.Text(label; style=ts, horizontal_align=:left, wrap_text=false)
         text_y = row_y + (row_h - Float32(ts.size_points)) / 2.0f0
-        interpret_view(text_view, row_x, text_y, width - depth * indent, row_h, projection_matrix, cursor_position)
+        interpret_view(text_view, row_x, text_y, width - depth * indent, row_h, projection_matrix, cursor_position, window_size)
     end
 end
 

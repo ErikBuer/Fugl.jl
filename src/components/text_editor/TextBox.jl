@@ -69,7 +69,7 @@ function apply_layout(view::TextBoxView, x::Float32, y::Float32, width::Float32,
     return (x, y, width, height)
 end
 
-function interpret_view(view::TextBoxView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::TextBoxView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Skip caching when inside clipped contexts to avoid rendering issues
     if !view.cache_rendering
         render_textbox_immediate(view, x_points, y_points, width_points, height_points, projection_matrix)

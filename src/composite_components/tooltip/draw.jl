@@ -38,7 +38,7 @@ end
 """
 Draw the tooltip text with proper wrapping and layout.
 """
-function draw_tooltip_text(text::String, style::TooltipStyle, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function draw_tooltip_text(text::String, style::TooltipStyle, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Create text component with wrapping enabled
     text_component = Text(
         text;
@@ -55,7 +55,7 @@ function draw_tooltip_text(text::String, style::TooltipStyle, x::Float32, y::Flo
     text_height = height - 2 * style.padding
 
     # Render the text
-    interpret_view(text_component, text_x, text_y, text_width, text_height, projection_matrix, cursor_position)
+    interpret_view(text_component, text_x, text_y, text_width, text_height, projection_matrix, cursor_position, window_size)
 end
 
 """
@@ -82,7 +82,7 @@ end
 """
 Main function to draw the entire tooltip.
 """
-function draw_tooltip(text::String, style::TooltipStyle, x::Float32, y::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function draw_tooltip(text::String, style::TooltipStyle, x::Float32, y::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     if isempty(text)
         return
     end
@@ -95,5 +95,5 @@ function draw_tooltip(text::String, style::TooltipStyle, x::Float32, y::Float32,
     draw_tooltip_background(style, x, y, tooltip_width, tooltip_height, projection_matrix)
 
     # Draw text on top
-    draw_tooltip_text(text, style, x, y, tooltip_width, tooltip_height, projection_matrix, cursor_position)
+    draw_tooltip_text(text, style, x, y, tooltip_width, tooltip_height, projection_matrix, cursor_position, window_size)
 end

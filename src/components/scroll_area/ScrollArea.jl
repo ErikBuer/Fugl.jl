@@ -188,7 +188,7 @@ end
 """
 Render the vertical scroll area with content and optional scrollbar
 """
-function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Get layout for content and viewport
     content_x, content_y, content_width, content_height, viewport_width, viewport_height = apply_layout(view, x, y, width, height)
 
@@ -223,7 +223,7 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
     ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
 
     # Render the scrolled content
-    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position)
+    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
 
     # Disable scissor test
     ModernGL.glDisable(GL_SCISSOR_TEST)
@@ -237,7 +237,7 @@ end
 """
 Render the horizontal scroll area with content and optional scrollbar
 """
-function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Get layout for content and viewport
     content_x, content_y, content_width, content_height, viewport_width, viewport_height = apply_layout(view, x, y, width, height)
 
@@ -272,7 +272,7 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
     ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
 
     # Render the scrolled content
-    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position)
+    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
 
     # Disable scissor test
     ModernGL.glDisable(GL_SCISSOR_TEST)

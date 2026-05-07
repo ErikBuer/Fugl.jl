@@ -50,9 +50,9 @@ end
 """
 Render the wrapped component and handle tooltip overlay.
 """
-function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # First, render the wrapped component
-    interpret_view(view.wrapped_component, x, y, width, height, projection_matrix, cursor_position)
+    interpret_view(view.wrapped_component, x, y, width, height, projection_matrix, cursor_position, window_size)
 
     # Handle timing-based state updates every frame
     current_time = time()
@@ -89,7 +89,7 @@ function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float3
         tooltip_x, tooltip_y = calculate_tooltip_position(view, x, y, width, height)
 
         # Add overlay function to render tooltip on top of everything
-        add_overlay_function(() -> draw_tooltip(view.tooltip_text, view.style, tooltip_x, tooltip_y, projection_matrix, cursor_position))
+        add_overlay_function(() -> draw_tooltip(view.tooltip_text, view.style, tooltip_x, tooltip_y, projection_matrix, cursor_position, window_size))
     end
 end
 

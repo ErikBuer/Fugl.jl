@@ -62,7 +62,7 @@ end
 """                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
 Render the container and its child.
 """
-function interpret_view(container::BaseContainerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(container::BaseContainerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Compute the layout for the container
     (child_x, child_y, child_width, child_height) = apply_layout(container, x, y, width, height)
 
@@ -78,7 +78,7 @@ function interpret_view(container::BaseContainerView, x::Float32, y::Float32, wi
     )
 
     # Render the child
-    interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix, cursor_position)
+    interpret_view(container.child, child_x, child_y, child_width, child_height, projection_matrix, cursor_position, window_size)
 end
 
 """

@@ -111,7 +111,8 @@ function interpret_view(
     view::TabsView,
     x::Float32, y::Float32, width::Float32, height::Float32,
     projection_matrix::Mat4{Float32},
-    cursor_position::Point2f
+    cursor_position::Point2f,
+    window_size::Size
 )
     isempty(view.tabs) && return
 
@@ -122,7 +123,7 @@ function interpret_view(
     content_height = height - tab_height
     if content_height > 0
         _, selected_content, _ = view.tabs[view.selected_index]
-        interpret_view(selected_content, x, content_y, width, content_height, projection_matrix, cursor_position)
+        interpret_view(selected_content, x, content_y, width, content_height, projection_matrix, cursor_position, window_size)
     end
 end
 

@@ -12,9 +12,9 @@ function FixedWidth(child::AbstractView, width::Real)::FixedWidthView
     FixedWidthView(child, Float32(width))
 end
 
-function interpret_view(view::FixedWidthView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::FixedWidthView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     final_width = min(view.width, width)
-    interpret_view(view.child, x, y, final_width, height, projection_matrix, cursor_position)
+    interpret_view(view.child, x, y, final_width, height, projection_matrix, cursor_position, window_size)
 end
 
 function detect_click(view::FixedWidthView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}

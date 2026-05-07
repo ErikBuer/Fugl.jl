@@ -4,7 +4,7 @@ function Empty()::EmptyView
     return EmptyView()
 end
 
-function interpret_view(view::EmptyView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::EmptyView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Do nothing, as this is an empty view
 end
 

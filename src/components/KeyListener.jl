@@ -59,9 +59,9 @@ end
 
 # Rendering - just pass through to child
 # TODO consider passing focus state for visual indication. This would require changes to interpret_view signatures.
-function interpret_view(view::KeyListenerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::KeyListenerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Just render the child - KeyListener is invisible
-    interpret_view(view.child, x, y, width, height, projection_matrix, cursor_position)
+    interpret_view(view.child, x, y, width, height, projection_matrix, cursor_position, window_size)
 end
 
 # Key detection - processes keys only when focused

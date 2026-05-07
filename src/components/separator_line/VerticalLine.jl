@@ -34,7 +34,7 @@ function apply_layout(view::VerticalLineView, x::Float32, y::Float32, width::Flo
     return (x, actual_y, width, actual_height)
 end
 
-function interpret_view(view::VerticalLineView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::VerticalLineView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Draw a vertical line rectangle
     x, actual_y, width, actual_height = apply_layout(view, x, y, width, height)
 

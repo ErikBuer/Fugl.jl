@@ -57,9 +57,9 @@ function calculate_modal_position(view::ModalView, x::Float32, y::Float32, width
     return (x + offset_x, y + offset_y)
 end
 
-function interpret_view(view::ModalView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::ModalView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # First, render the background content
-    interpret_view(view.background, x, y, width, height, projection_matrix, cursor_position)
+    interpret_view(view.background, x, y, width, height, projection_matrix, cursor_position, window_size)
 
     # Draw the darkened overlay
     background_vertices = generate_rectangle_vertices(x, y, width, height)
@@ -76,7 +76,7 @@ function interpret_view(view::ModalView, x::Float32, y::Float32, width::Float32,
 
     # Interpret the modal child at the modal position using the full modal dimensions
     # The modal dimensions from state define the available space for the child
-    interpret_view(view.child, modal_x, modal_y, modal_width, modal_height, projection_matrix, cursor_position)
+    interpret_view(view.child, modal_x, modal_y, modal_width, modal_height, projection_matrix, cursor_position, window_size)
 end
 
 function detect_click(view::ModalView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}

@@ -75,10 +75,10 @@ end
 """
 Render the container using BaseContainer with selected style.
 """
-function interpret_view(container::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(container::ContainerView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Create BaseContainer with appropriate style and delegate rendering
     base_container = _create_base_container(container)
-    interpret_view(base_container, x, y, width, height, projection_matrix, cursor_position)
+    interpret_view(base_container, x, y, width, height, projection_matrix, cursor_position, window_size)
 end
 
 function blur(view::ContainerView)
