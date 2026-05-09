@@ -112,7 +112,7 @@ include("components/scroll_area/ScrollArea.jl")
 export VerticalScrollState, HorizontalScrollState, VerticalScrollArea, HorizontalScrollArea, ScrollAreaStyle
 
 include("components/SplitContainer.jl")
-export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState
+export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState, SplitContainerStyle
 
 include("components/table/Table.jl")
 export Table, TableStyle, TableState
