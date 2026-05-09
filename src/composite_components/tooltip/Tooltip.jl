@@ -50,9 +50,9 @@ end
 """
 Render the wrapped component and handle tooltip overlay.
 """
-function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # First, render the wrapped component
-    interpret_view(view.wrapped_component, x, y, width, height, projection_matrix, cursor_position)
+    interpret_view(view.wrapped_component, x, y, width, height, projection_matrix, cursor_position, window_size)
 
     # Handle timing-based state updates every frame
     current_time = time()
@@ -86,10 +86,10 @@ function interpret_view(view::TooltipView, x::Float32, y::Float32, width::Float3
     # If tooltip is visible, add it to the overlay system
     if current_tooltip_state.is_visible && !isempty(view.tooltip_text)
         # Calculate tooltip position relative to wrapped component
-        tooltip_x, tooltip_y = calculate_tooltip_position(view, x, y, width, height)
+        tooltip_x, tooltip_y = calculate_tooltip_position(view, x, y, width, height, window_size)
 
         # Add overlay function to render tooltip on top of everything
-        add_overlay_function(() -> draw_tooltip(view.tooltip_text, view.style, tooltip_x, tooltip_y, projection_matrix, cursor_position))
+        add_overlay_function(() -> draw_tooltip(view.tooltip_text, view.style, tooltip_x, tooltip_y, projection_matrix, cursor_position, window_size))
     end
 end
 
@@ -135,41 +135,34 @@ end
 
 """
 Calculate where to position the tooltip relative to the wrapped component.
-Positions tooltip on the specified side of the component.
+Positions tooltip on the specified side of the component, then shifts it
+inward on either axis to keep it fully within the window.
 """
-function calculate_tooltip_position(view::TooltipView, x::Float32, y::Float32, width::Float32, height::Float32)::Tuple{Float32,Float32}
-    # Calculate tooltip dimensions
+function calculate_tooltip_position(view::TooltipView, x::Float32, y::Float32, width::Float32, height::Float32, window_size::Size)::Tuple{Float32,Float32}
     tooltip_height = calculate_tooltip_text_height(view.tooltip_text, view.style, view.style.width)
     tooltip_width = view.style.width
-    gap = 8.0f0  # Gap between component and tooltip
-
-    tooltip_x = x
-    tooltip_y = y
+    gap = 8.0f0
 
     if view.position == :right
-        # Position to the right of the wrapped component
         tooltip_x = x + width + gap
         tooltip_y = y
     elseif view.position == :left
-        # Position to the left of the wrapped component
         tooltip_x = x - tooltip_width - gap
         tooltip_y = y
     elseif view.position == :top
-        # Position above the wrapped component
         tooltip_x = x
         tooltip_y = y - tooltip_height - gap
     elseif view.position == :bottom
-        # Position below the wrapped component
         tooltip_x = x
         tooltip_y = y + height + gap
     else
-        # Default to right if unknown position
         tooltip_x = x + width + gap
         tooltip_y = y
     end
 
-    # TODO: Add smarter positioning logic to avoid screen edges
-    # For now, just use the calculated position
+    # Shift inward on each axis independently so the tooltip stays within the window
+    tooltip_x = clamp(tooltip_x, 0.0f0, max(0.0f0, window_size.width - tooltip_width))
+    tooltip_y = clamp(tooltip_y, 0.0f0, max(0.0f0, window_size.height - tooltip_height))
 
     return (tooltip_x, tooltip_y)
 end

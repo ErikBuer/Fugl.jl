@@ -6,12 +6,12 @@ function IntrinsicHeight(child::AbstractView=EmptyView())
     return IntrinsicHeightView(child)
 end
 
-function interpret_view(view::IntrinsicHeightView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::IntrinsicHeightView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Render the child view using its intrinsic size
     intrinsic_height = measure_height(view.child, width)
     final_height = min(intrinsic_height, height)
 
-    interpret_view(view.child, x, y, width, final_height, projection_matrix, cursor_position)
+    interpret_view(view.child, x, y, width, final_height, projection_matrix, cursor_position, window_size)
 end
 
 function detect_click(view::IntrinsicHeightView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, z_order::Int32=Int32(0))::Union{ClickResult,Nothing}

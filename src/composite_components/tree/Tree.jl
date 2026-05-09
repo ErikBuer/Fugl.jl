@@ -36,7 +36,7 @@ function apply_layout(view::TreeView, x::Float32, y::Float32, width::Float32, he
     return (x, y, width, height)
 end
 
-function interpret_view(view::TreeView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::TreeView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Get DPI scaling to convert logical points to pixel coordinates
     dpi_scaling = get_current_dpi_scaling()
     scale_factor = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
@@ -71,7 +71,7 @@ function interpret_view(view::TreeView, x_points::Float32, y_points::Float32, wi
             @warn "Failed to create plot framebuffer: $e"
             return  # Skip rendering if framebuffer creation fails
         end
-        render_tree_to_framebuffer(view, cache, width_points, height_points, projection_matrix, cursor_position[1], cursor_position[2])
+        render_tree_to_framebuffer(view, cache, width_points, height_points, projection_matrix, cursor_position[1], cursor_position[2], window_size)
         cache.is_valid = true
     end
 
@@ -82,7 +82,7 @@ function interpret_view(view::TreeView, x_points::Float32, y_points::Float32, wi
     end
 end
 
-function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32)
+function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, mouse_x::Float32, mouse_y::Float32, window_size::Size)
     # Push framebuffer and viewport
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
@@ -96,7 +96,7 @@ function render_tree_to_framebuffer(view::TreeView, cache::RenderCache, width_po
         fb_projection = get_orthographic_matrix(0.0f0, width_points, height_points, 0.0f0, -1.0f0, 1.0f0)
 
         # Draw the tree into the framebuffer using shared function
-        render_tree_content(view, 0.0f0, 0.0f0, width_points, height_points, fb_projection, GeometryBasics.Point{2,Float32}((mouse_x, mouse_y)))
+        render_tree_content(view, 0.0f0, 0.0f0, width_points, height_points, fb_projection, GeometryBasics.Point{2,Float32}((mouse_x, mouse_y)), window_size)
     finally
         pop_viewport!()
         pop_framebuffer!()
@@ -106,7 +106,7 @@ end
 """
 Render the tree content (shared between direct and framebuffer drawing)
 """
-function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     current_y = y
     function draw_node(node::TreeNode, depth::Int, parent_path::String="")
         # Build the current path, but skip the root folder name
@@ -125,7 +125,7 @@ function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Floa
         is_selected = current_path == view.state.selected_item
         style = is_selected ? view.style.selected : view.style.normal
 
-        interpret_view(Text(text; style=style, horizontal_align=:left, wrap_text=false), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix, cursor_position)
+        interpret_view(Text(text; style=style, horizontal_align=:left, wrap_text=false), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix, cursor_position, window_size)
         current_y += 22f0
 
         # Always show children for root node

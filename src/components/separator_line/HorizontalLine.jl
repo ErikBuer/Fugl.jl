@@ -36,7 +36,7 @@ function apply_layout(view::HorizontalLineView, x::Float32, y::Float32, width::F
     return (actual_x, y, actual_width, height)
 end
 
-function interpret_view(view::HorizontalLineView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::HorizontalLineView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Draw a horizontal line rectangle
     actual_x, y, actual_width, height = apply_layout(view, x, y, width, height)
 

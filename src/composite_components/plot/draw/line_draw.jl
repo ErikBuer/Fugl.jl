@@ -416,7 +416,7 @@ function draw_axes_with_labels(
                 label_y = tick_screen_y + tick_length_px + label_offset_px  # Below tick mark
 
                 # Render the text component
-                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, Point2f(0.0f0, 0.0f0))
+                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, Point2f(0.0f0, 0.0f0), Size(0.0f0, 0.0f0))
             end
         end
     end
@@ -444,7 +444,7 @@ function draw_axes_with_labels(
                 label_y = tick_screen_y - text_height / 2.0f0  # Centered vertically on tick
 
                 # Render the text component
-                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, Point2f(0.0f0, 0.0f0))
+                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, Point2f(0.0f0, 0.0f0), Size(0.0f0, 0.0f0))
             end
         end
     end
@@ -462,7 +462,7 @@ function draw_axes_with_labels(
         x_label_y = bottom_edge_screen_y + tick_length_px + label_offset_px + Float32(label_size_points) + label_offset_px  # Below tick labels
 
         # Render the x-axis label
-        interpret_view(x_label_text, x_label_x, x_label_y, x_label_width, x_label_height, projection_matrix_points, Point2f(0.0f0, 0.0f0))
+        interpret_view(x_label_text, x_label_x, x_label_y, x_label_width, x_label_height, projection_matrix_points, Point2f(0.0f0, 0.0f0), Size(0.0f0, 0.0f0))
     end
 
     if show_y_label && !isempty(y_label)
@@ -479,6 +479,6 @@ function draw_axes_with_labels(
         y_label_y = left_edge_screen_y - y_label_height / 2.0f0  # Center vertically
 
         # Render the y-axis label
-        interpret_view(y_label_text, y_label_x, y_label_y, y_label_width, y_label_height, projection_matrix_points, Point2f(0.0f0, 0.0f0))
+        interpret_view(y_label_text, y_label_x, y_label_y, y_label_width, y_label_height, projection_matrix_points, Point2f(0.0f0, 0.0f0), Size(0.0f0, 0.0f0))
     end
 end

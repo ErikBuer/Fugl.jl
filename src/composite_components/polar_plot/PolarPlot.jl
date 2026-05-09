@@ -80,7 +80,8 @@ function interpret_view(
     width_points::Float32,
     height_points::Float32,
     projection_matrix::Mat4{Float32},
-    cursor_position::Point2f
+    cursor_position::Point2f,
+    window_size::Size
 )
     # Get DPI scaling to convert logical points to pixel coordinates
     dpi_scaling = get_current_dpi_scaling()

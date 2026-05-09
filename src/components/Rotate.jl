@@ -59,13 +59,13 @@ function apply_layout(view::RotateView, x::Float32, y::Float32, width::Float32, 
     return (x, y, width, height)
 end
 
-function interpret_view(view::RotateView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::RotateView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # If no rotation, render child directly
     if abs(view.rotation_degrees) < 0.1f0
         child_width, child_height = measure(view.child)
         child_x = x_points + (width_points - child_width) / 2.0f0
         child_y = y_points + (height_points - child_height) / 2.0f0
-        interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix, cursor_position)
+        interpret_view(view.child, child_x, child_y, child_width, child_height, projection_matrix, cursor_position, window_size)
         return
     end
 
@@ -101,7 +101,7 @@ function interpret_view(view::RotateView, x_points::Float32, y_points::Float32, 
         end
 
         # Render child to framebuffer
-        render_child_to_framebuffer(view, cache, child_width, child_height)
+        render_child_to_framebuffer(view, cache, child_width, child_height, window_size)
         cache.is_valid = true
     end
 
@@ -114,7 +114,7 @@ end
 """
 Render the child component to the framebuffer
 """
-function render_child_to_framebuffer(view::RotateView, cache::RenderCache, child_width_points::Float32, child_height_points::Float32)
+function render_child_to_framebuffer(view::RotateView, cache::RenderCache, child_width_points::Float32, child_height_points::Float32, window_size::Size)
     # Push framebuffer and viewport
     push_framebuffer!(cache.framebuffer)
     push_viewport!(Int32(0), Int32(0), cache.cache_width, cache.cache_height)
@@ -128,7 +128,7 @@ function render_child_to_framebuffer(view::RotateView, cache::RenderCache, child
         fb_projection = get_orthographic_matrix(0.0f0, child_width_points, child_height_points, 0.0f0, -1.0f0, 1.0f0)
 
         # Render child at its natural size for crisp rendering
-        interpret_view(view.child, 0.0f0, 0.0f0, child_width_points, child_height_points, fb_projection, Point2f(0.0f0, 0.0f0))
+        interpret_view(view.child, 0.0f0, 0.0f0, child_width_points, child_height_points, fb_projection, Point2f(0.0f0, 0.0f0), window_size)
     finally
         pop_viewport!()
         pop_framebuffer!()

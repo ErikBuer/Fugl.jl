@@ -60,12 +60,12 @@ function measure_height(view::DropdownView, available_width::Float32)::Float32
     return button_height
 end
 
-function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Calculate button height
     button_height = view.style.text_style.size_points + 2 * view.style.padding
 
     # Draw the main dropdown button
-    draw_dropdown_button(view, x, y, width, button_height, projection_matrix, cursor_position[1], cursor_position[2])
+    draw_dropdown_button(view, x, y, width, button_height, projection_matrix, cursor_position[1], cursor_position[2], window_size)
 
     # If open, add dropdown list to overlay system, ensuring it draws on top of other UI.
     if view.state.is_open
@@ -75,7 +75,7 @@ function interpret_view(view::DropdownView, x::Float32, y::Float32, width::Float
         dropdown_height = visible_items * view.style.item_height_px
 
         # Add overlay function to render dropdown list on top
-        add_overlay_function(() -> draw_dropdown_list(view, x, dropdown_y, width, dropdown_height, projection_matrix))
+        add_overlay_function(() -> draw_dropdown_list(view, x, dropdown_y, width, dropdown_height, projection_matrix, window_size))
     end
 end
 

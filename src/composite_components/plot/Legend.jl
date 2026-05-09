@@ -55,7 +55,7 @@ function apply_layout(view::LegendView, x::Float32, y::Float32, width::Float32, 
     return (x, y, width, height)
 end
 
-function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f)
+function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
     # Filter elements that have labels
     labeled_elements = filter(e -> !isempty(e.label), view.elements)
 
@@ -98,7 +98,7 @@ function interpret_view(view::LegendView, x::Float32, y::Float32, width::Float32
         text_y = item_y + (view.item_height - text_measure[2]) / 2.0f0
 
         # Clip text to the available width so long labels don't overflow
-        interpret_view(text_view, text_x, text_y, available_text_width, text_measure[2], projection_matrix, cursor_position)
+        interpret_view(text_view, text_x, text_y, available_text_width, text_measure[2], projection_matrix, cursor_position, window_size)
 
         # Move to next item
         current_y -= (view.item_height + view.spacing)
