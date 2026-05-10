@@ -485,7 +485,7 @@ function MyApp()
                     style=HINT_TEXT_STYLE),
                 style=INFO_BOX_STYLE
             ),
-        ], spacing=12.0f0, padding=20.0f0),
+        ], spacing=12.0f0),
         style=ContainerStyle(background_color=DARK_BG, padding=0.0f0),
         title_style=TITLE_TEXT_STYLE
     )

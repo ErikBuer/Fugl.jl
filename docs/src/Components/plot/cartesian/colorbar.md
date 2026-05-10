@@ -132,7 +132,7 @@ function colormap_types_demo()
                 "Hot",
                 MyColorBar(hot_bar)
             )
-        ], spacing=0.0, padding=0.0)
+        ], spacing=0.0)
     return ui
 end
 
@@ -185,8 +185,8 @@ function gradient_resolution_demo()
                     "240 pixels",
                     MyColorBar(high_res_bar)
                 ),
-            ], spacing=0.0, padding=0.0)
-        ], spacing=10.0, padding=0.0)
+            ], spacing=0.0)
+        ], spacing=10.0)
     )
     return ui
 end

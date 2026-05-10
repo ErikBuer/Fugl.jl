@@ -1,23 +1,19 @@
 struct IntrinsicRowView <: AbstractView
     children::Vector{AbstractView}
-    padding::Float32 # Padding around the row   #TODO Remove padding from this component. Single purpose per component.
     spacing::Float32 # Space between children
     reduce_spacing_on_overflow::Bool # If true, reduce spacing before clipping when space is tight
     on_click::Function
 end
 
-function IntrinsicRow(children::Vector{<:AbstractView}; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
-    return IntrinsicRowView(children, padding, spacing, reduce_spacing_on_overflow, on_click)
+function IntrinsicRow(children::Vector{<:AbstractView}; spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
+    return IntrinsicRowView(children, spacing, reduce_spacing_on_overflow, on_click)
 end
 
-@inline function IntrinsicRow(children::AbstractView...; padding=0.0, spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
-    return IntrinsicRowView(collect(AbstractView, children), padding, spacing, reduce_spacing_on_overflow, on_click)
+@inline function IntrinsicRow(children::AbstractView...; spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
+    return IntrinsicRowView(collect(AbstractView, children), spacing, reduce_spacing_on_overflow, on_click)
 end
 
 function apply_layout(view::IntrinsicRowView, x::Float32, y::Float32, width::Float32, height::Float32)
-    padded_x = x + view.padding
-    padded_y = y + view.padding
-    padded_height = height - 2 * view.padding
     n = length(view.children)
 
     # First pass: gather intrinsic widths
@@ -25,7 +21,7 @@ function apply_layout(view::IntrinsicRowView, x::Float32, y::Float32, width::Flo
     is_intrinsic = Bool[]
     for child in view.children
         if preferred_width(child)
-            push!(intrinsic_widths, measure_width(child, padded_height))
+            push!(intrinsic_widths, measure_width(child, height))
             push!(is_intrinsic, true)
         else
             push!(intrinsic_widths, 0f0)
@@ -38,7 +34,7 @@ function apply_layout(view::IntrinsicRowView, x::Float32, y::Float32, width::Flo
     # Calculate spacing - reduce if needed when reduce_spacing_on_overflow is true
     effective_spacing = view.spacing
     if view.reduce_spacing_on_overflow && n > 1
-        available_width = width - 2 * view.padding
+        available_width = width
         total_spacing_needed = (n - 1) * view.spacing
         total_content_width = total_intrinsic_width + total_spacing_needed
 
@@ -50,15 +46,15 @@ function apply_layout(view::IntrinsicRowView, x::Float32, y::Float32, width::Flo
     end
 
     total_spacing = (n - 1) * effective_spacing
-    remaining_width = max(0f0, width - 2 * view.padding - total_spacing - total_intrinsic_width)
+    remaining_width = max(0f0, width - total_spacing - total_intrinsic_width)
     flexible_width = n_flexible > 0 ? remaining_width / n_flexible : 0f0
 
     # Second pass: assign layouts
-    child_x = padded_x
+    child_x = x
     child_layouts = []
     for (i, child) in enumerate(view.children)
         child_width = is_intrinsic[i] ? intrinsic_widths[i] : flexible_width
-        push!(child_layouts, (child_x, padded_y, child_width, padded_height))
+        push!(child_layouts, (child_x, y, child_width, height))
         child_x += child_width + effective_spacing
     end
 
@@ -123,8 +119,8 @@ function measure(view::IntrinsicRowView)::Tuple{Float32,Float32}
     child_sizes = [measure(child) for child in view.children]
     max_height = maximum(s[2] for s in child_sizes)
     total_width = sum(s[1] for s in child_sizes) + (length(view.children) - 1) * view.spacing
-    total_width += 2 * view.padding
-    return (total_width, max_height + 2 * view.padding)
+
+    return (total_width, max_height)
 end
 
 """
@@ -132,59 +128,31 @@ Measure the width of the component when constrained by available height.
 """
 function measure_width(view::IntrinsicRowView, available_height::Float32)::Float32
     if isempty(view.children)
-        return 2 * view.padding  # Just padding if no children
+        return 0.0f0
     end
 
-    # Account for padding in available height
-    padded_height = available_height - 2 * view.padding
-
     # Measure each child's width given the available height
-    child_widths = [measure_width(child, padded_height) for child in view.children]
+    child_widths = [measure_width(child, available_height) for child in view.children]
 
-    # Total width is sum of child widths plus spacing plus padding
-    total_width = sum(child_widths) + (length(view.children) - 1) * view.spacing + 2 * view.padding
+    # Total width is sum of child widths plus spacing
+    total_width = sum(child_widths) + (length(view.children) - 1) * view.spacing
 
     return total_width
 end
-
-"""
-Measure the width of the component when constrained by available height.
-"""
-# function measure_width(view::IntrinsicRowView, available_height::Float32)::Float32
-#     if isempty(view.children)
-#         return 2 * view.padding  # Just padding if no children
-#     end
-
-#     # Account for padding in available height
-#     padded_height = available_height - 2 * view.padding
-
-#     # Only sum children with a fixed preferred width; flexible children contribute 0
-#     # (flexible children will fill remaining space at layout time, not at measure time)
-#     child_widths = [preferred_width(child) ? measure_width(child, padded_height) : 0f0 for child in view.children]
-
-#     # Total width is sum of preferred child widths plus spacing plus padding
-#     total_width = sum(child_widths) + (length(view.children) - 1) * view.spacing + 2 * view.padding
-
-#     return total_width
-# end
 
 """
 Measure the height of the component when constrained by available width.
 """
 function measure_height(view::IntrinsicRowView, available_width::Float32)::Float32
     if isempty(view.children)
-        return 2 * view.padding  # Just padding if no children
+        return 0.0f0
     end
 
-    # Account for padding in available width
-    padded_width = available_width - 2 * view.padding
-
     # Only take max over children with a fixed preferred height
-    # (flexible children fill remaining space, their natural height is unknown)
-    preferred_heights = [measure_height(child, padded_width) for child in view.children if preferred_height(child)]
+    preferred_heights = [measure_height(child, available_width) for child in view.children if preferred_height(child)]
 
-    # For a row, height is the maximum height of any preferred child, plus padding
-    max_height = isempty(preferred_heights) ? 2 * view.padding : maximum(preferred_heights) + 2 * view.padding
+    # For a row, height is the maximum height of any preferred child
+    max_height = isempty(preferred_heights) ? 0f0 : maximum(preferred_heights)
 
     return max_height
 end
