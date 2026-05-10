@@ -1,15 +1,15 @@
 struct AlignHorizontalView <: AbstractView
-    child::SizedView
+    child::AbstractView
     alignment::Symbol  # :left, :center, :right
 end
 
 """
-    AlignHorizontal(child::SizedView, alignment::Symbol)
+    AlignHorizontal(child::AbstractView, alignment::Symbol)
 
 Aligns a sized child component horizontally within its container.
 
 # Arguments
-- `child`: A SizedView component that has intrinsic dimensions
+- `child`: A AbstractView component that has intrinsic dimensions
 - `alignment`: Horizontal alignment (:left, :center, :right)
 
 # Example
@@ -18,16 +18,16 @@ AlignHorizontal(IntrinsicSize(Image("logo.png")), :left)
 AlignHorizontal(FixedSize(Text("Hello"), 100.0f0, 50.0f0), :right)
 ```
 """
-function AlignHorizontal(child::SizedView, alignment::Symbol=:center)
+function AlignHorizontal(child::AbstractView, alignment::Symbol=:center)
     if alignment ∉ (:left, :center, :right)
         error("Invalid horizontal alignment: $alignment. Must be :left, :center, or :right")
     end
     return AlignHorizontalView(child, alignment)
 end
 
-@inline AlignLeft(child::SizedView) = AlignHorizontal(child, :left)
-@inline AlignCenter(child::SizedView) = AlignHorizontal(child, :center)
-@inline AlignRight(child::SizedView) = AlignHorizontal(child, :right)
+@inline AlignLeft(child::AbstractView) = AlignHorizontal(child, :left)
+@inline AlignCenter(child::AbstractView) = AlignHorizontal(child, :center)
+@inline AlignRight(child::AbstractView) = AlignHorizontal(child, :right)
 
 function measure(view::AlignHorizontalView)::Tuple{Float32,Float32}
     # Return the child's preferred size
@@ -81,4 +81,18 @@ function detect_click(view::AlignHorizontalView, mouse_state::InputState, x::Flo
     # Get the child's layout and forward click detection
     child_x, child_y, child_width, child_height = apply_layout(view, x, y, width, height)
     return detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height, parent_z)
+end
+
+"""
+Check if the component has a preferred width.
+"""
+function preferred_width(view::AlignHorizontalView)::Bool
+    return preferred_width(view.child)
+end
+
+"""
+Check if the component has a preferred height.
+"""
+function preferred_height(view::AlignHorizontalView)::Bool
+    return preferred_height(view.child)
 end
