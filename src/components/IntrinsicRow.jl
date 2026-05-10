@@ -101,7 +101,7 @@ function detect_click(view::IntrinsicRowView, mouse_state::InputState, x::Float3
         return click_result
     end
 
-    if !inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+    if !inside_component(view, x, y, width, height, Float32(mouse_state.x), Float32(mouse_state.y))
         return nothing
     end
 
