@@ -63,7 +63,7 @@ function colorbar_demo()
                                                         show_y_ticks=true
                                                 )), 100.0f0)
                                 ], spacing=0.0
-                        ),], spacing=0.0, padding=0.0)
+                        ),], spacing=0.0,)
 
         return ui
 end

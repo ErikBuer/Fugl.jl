@@ -88,10 +88,10 @@ function MyApp()
                     IntrinsicHeight(Fugl.Text("Name: \"$(name_state[].text)\"", style=TextStyle(size_points=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
                     IntrinsicHeight(Fugl.Text("Email: \"$(email_state[].text)\" ($(length(email_state[].text)) chars)", style=TextStyle(size_points=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
                     IntrinsicHeight(Fugl.Text("Phone: \"$(phone_state[].text)\" ($(length(phone_state[].text)) chars)", style=TextStyle(size_points=14, color=Vec4f(0.7, 0.7, 0.7, 1.0)))),
-                ], padding=10.0, spacing=5.0),
+                ], spacing=5.0),
                 style=dark_container_style
             )
-        ], padding=0.0, spacing=5.0),
+        ], spacing=5.0),
         style=ContainerStyle(
             background_color=Vec4f(0.08, 0.08, 0.08, 1.0),
             padding=5.0f0

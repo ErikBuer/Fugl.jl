@@ -51,7 +51,7 @@ function MyApp()
                 )
             )
         ),
-    ], padding=0.0, spacing=0.0)
+    ], spacing=0.0)
 end
 
 screenshot(MyApp, "scatterPlot.png", 812, 400);

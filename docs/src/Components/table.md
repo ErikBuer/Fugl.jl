@@ -127,7 +127,7 @@ function MyApp()
     IntrinsicColumn([
         Card("Text Clipping (max_wrapped_rows=0)", clipping_table),
         Card("Text Wrapping (max_wrapped_rows=2)", wrapping_table)
-    ], spacing=10.0f0, padding=0.0f0)
+    ], spacing=10.0f0)
 end
 
 screenshot(MyApp, "table_clipping.png", 812, 600)

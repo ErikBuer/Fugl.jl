@@ -116,7 +116,7 @@ function MyApp()
                 )
             ),
             IntrinsicHeight(Container(Text("View: X=[0,8], Y=[-0.8,1.0] (data extends beyond view)"))),
-        ], padding=0.0, spacing=0.0
+        ], spacing=0.0
     )
 end
 
@@ -169,7 +169,7 @@ function MyApp()
                     (new_state) -> plot_state[] = new_state
                 )
             ),
-        ], padding=0.0, spacing=0.0)
+        ], spacing=0.0)
 end
 
 screenshot(MyApp, "stateManagementPlot.png", 812, 500);
