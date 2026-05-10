@@ -1,5 +1,5 @@
 struct AlignVerticalView <: AbstractView
-    child::AbstractView
+    child::SizedView
     alignment::Symbol  # :top, :middle, :bottom
 end
 

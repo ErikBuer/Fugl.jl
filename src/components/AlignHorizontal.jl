@@ -1,5 +1,5 @@
 struct AlignHorizontalView <: AbstractView
-    child::AbstractView
+    child::SizedView
     alignment::Symbol  # :left, :center, :right
 end
 
