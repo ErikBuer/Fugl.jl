@@ -36,7 +36,7 @@ function main()
                 IntrinsicHeight(Container(Text("Current Values:"))),
                 IntrinsicHeight(Container(Text("Integer: $(int_state[].text)"))),
                 IntrinsicHeight(Container(Text("Float32: $(float_state[].text)"))),
-            ], padding=0.0, spacing=0.0)
+            ], spacing=0.0)
     end
 
     Fugl.run(MyApp, title="Number Field Demo", window_width_points=600, window_height_points=400, fps_overlay=true)

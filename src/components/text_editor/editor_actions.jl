@@ -554,8 +554,8 @@ function apply_start_mouse_selection(state::EditorState, action::StartMouseSelec
         state.text,
         action.start_position,  # Move cursor to start position
         state.is_focused,
-        action.start_position,  # Start selection
-        action.start_position,  # End selection (initially same as start)
+        nothing,  # Don't create selection yet — wait for drag
+        nothing,  # Don't create selection yet — wait for drag
         state.cached_lines,
         state.text_hash,
         state.cache_id,
