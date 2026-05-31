@@ -13,7 +13,13 @@ struct TreeView <: AbstractView
     on_select::Function        # Callback for file selection (path, name)
 end
 
-function Tree(state::TreeState; indent=18f0, style=TreeStyle(), on_state_change=(new_state) -> nothing, on_select=(path, name) -> nothing)
+function Tree(
+    state::TreeState;
+    indent=18f0,
+    style=TreeStyle(),
+    on_state_change=(new_state) -> nothing,
+    on_select=(path, name) -> nothing
+)
     return TreeView(state, indent, style, on_state_change, on_select)
 end
 
@@ -123,7 +129,48 @@ function render_tree_content(view::TreeView, x::Float32, y::Float32, width::Floa
         end
 
         is_selected = current_path == view.state.selected_item
-        style = is_selected ? view.style.selected : view.style.normal
+        is_hovered = depth > 0 && current_path == view.state.hovered_item
+        is_active = depth > 0 && current_path == view.state.pressed_item
+
+        # Draw row background for hovered / active / selected rows
+        row_bg_color = if is_active
+            view.style.active_background
+        elseif is_hovered
+            view.style.hover_background
+        elseif is_selected
+            view.style.selected_background
+        else
+            nothing
+        end
+
+        if row_bg_color !== nothing
+            bg_x = x + 2.0f0
+            bg_y = current_y + 1.0f0
+            bg_width = max(0.0f0, width - 4.0f0)
+            bg_height = 20.0f0
+            bg_vertices = generate_rectangle_vertices(bg_x, bg_y, bg_width, bg_height)
+            draw_rounded_rectangle(
+                bg_vertices,
+                bg_width,
+                bg_height,
+                row_bg_color,
+                row_bg_color,
+                0.0f0,
+                view.style.corner_radius,
+                projection_matrix,
+                1.0f0
+            )
+        end
+
+        style = if is_active
+            view.style.active_text
+        elseif is_hovered
+            view.style.hover_text
+        elseif is_selected
+            view.style.selected_text
+        else
+            view.style.normal_text
+        end
 
         interpret_view(Text(text; style=style, horizontal_align=:left, wrap_text=false), x + view.indent * depth, current_y, width - view.indent * depth, 22f0, projection_matrix, cursor_position, window_size)
         current_y += 22f0
@@ -151,9 +198,14 @@ end
 function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     current_y = y
     z = Int32(parent_z + 1)
+    hovered_item::Union{String,Nothing} = nothing
+    click_action::Union{Function,Nothing} = nothing
 
     # Guard: do nothing if tree is missing or empty
     if view.state.tree === nothing || isempty(view.state.tree.children)
+        if view.state.hovered_item !== nothing || view.state.pressed_item !== nothing
+            view.on_state_change(TreeState(view.state; hovered_item=nothing, pressed_item=nothing))
+        end
         return nothing
     end
 
@@ -166,56 +218,74 @@ function detect_click(view::TreeView, mouse_state::InputState, x::Float32, y::Fl
             current_y += 22f0
             for child in node.children
                 # For children of root, parent_path is "" so path starts from here
-                result = click_node(child, depth + 1, "")
-                if result !== nothing
-                    return result
-                end
+                click_node(child, depth + 1, "")
             end
-            return nothing
+            return
         end
 
         # Check if mouse is within this row
         if mouse_state.y >= current_y && mouse_state.y < current_y + 22f0 &&
            mouse_state.x >= x + view.indent * depth && mouse_state.x < x + width
+            hovered_item = current_path
 
-            # Folder: toggle open/closed in immutable state
-            if node.is_folder && mouse_state.was_clicked[LeftButton]
-                toggle_folder() = begin
-                    new_open = copy(view.state.open_folders)
-                    if node.name in new_open
-                        delete!(new_open, node.name)
-                    else
-                        push!(new_open, node.name)
+            # Click is detected on mouse-up, but only if this row had mouse-down first.
+            if mouse_state.mouse_up[LeftButton] && view.state.pressed_item == current_path
+                if node.is_folder
+                    click_action = () -> begin
+                        new_open = copy(view.state.open_folders)
+                        if node.name in new_open
+                            delete!(new_open, node.name)
+                        else
+                            push!(new_open, node.name)
+                        end
+                        new_state = TreeState(view.state.tree;
+                            open_folders=new_open,
+                            selected_item=view.state.selected_item,
+                            hovered_item=hovered_item,
+                            pressed_item=nothing
+                        )
+                        view.on_state_change(new_state)
                     end
-                    new_state = TreeState(view.state.tree; open_folders=new_open, selected_item=view.state.selected_item)
-                    view.on_state_change(new_state)
+                else
+                    click_action = () -> begin
+                        new_state = TreeState(view.state.tree;
+                            open_folders=view.state.open_folders,
+                            selected_item=current_path,
+                            hovered_item=hovered_item,
+                            pressed_item=nothing
+                        )
+                        view.on_state_change(new_state)
+                        view.on_select(current_path, node.name)
+                    end
                 end
-                return ClickResult(z, () -> toggle_folder())
-            end
-
-            # File: select item in immutable state
-            if !node.is_folder && mouse_state.was_clicked[LeftButton]
-                select_file() = begin
-                    new_state = TreeState(view.state.tree; open_folders=view.state.open_folders, selected_item=current_path)
-                    view.on_state_change(new_state)
-                    # Call on_select hook with (path, name)
-                    view.on_select(current_path, node.name)
-                end
-                return ClickResult(z, () -> select_file())
             end
         end
 
         current_y += 22f0
         if node.is_folder && (node.name in view.state.open_folders)
             for child in node.children
-                result = click_node(child, depth + 1, current_path)
-                if result !== nothing
-                    return result
-                end
+                click_node(child, depth + 1, current_path)
             end
         end
-        return nothing
+        return
     end
 
-    return click_node(view.state.tree, 0)
+    click_node(view.state.tree, 0)
+
+    new_pressed_item = view.state.pressed_item
+    if mouse_state.mouse_down[LeftButton]
+        new_pressed_item = hovered_item
+    elseif mouse_state.mouse_up[LeftButton]
+        new_pressed_item = nothing
+    end
+
+    if click_action === nothing && (hovered_item != view.state.hovered_item || new_pressed_item != view.state.pressed_item)
+        view.on_state_change(TreeState(view.state; hovered_item=hovered_item, pressed_item=new_pressed_item))
+    end
+
+    if click_action !== nothing
+        return ClickResult(z, click_action)
+    end
+
+    return nothing
 end
