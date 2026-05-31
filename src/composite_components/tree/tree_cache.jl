@@ -13,7 +13,9 @@ function hash_tree_content(tree::Union{TreeNode,Nothing}, state::TreeState, styl
     if tree !== nothing
         h = hash_node(tree, h)
     end
-    h = hash((state.open_folders, state.selected_item), h)
-    h = hash((style.selected, style.normal), h)
+    h = hash((state.open_folders, state.selected_item, state.hovered_item, state.pressed_item), h)
+    h = hash((style.normal_text, style.hover_text, style.hover_background,
+            style.selected_text, style.selected_background,
+            style.active_text, style.active_background, style.corner_radius), h)
     return h
 end
