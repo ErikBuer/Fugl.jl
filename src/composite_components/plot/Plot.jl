@@ -333,101 +333,91 @@ end
 
 function draw_plot_element_culled(element::StemPlotElement, data_to_screen::Function, projection_matrix::Mat4{Float32}, style::PlotStyle, effective_bounds::Rectangle)
     if length(element.x_data) >= 1 && length(element.y_data) >= 1
-        # Use margin for data selection but exact bounds for final culling
         margin_x = effective_bounds.width * 0.02f0
-        margin_y = effective_bounds.height * 0.02f0
+        x_min = effective_bounds.x - margin_x
+        x_max = effective_bounds.x + effective_bounds.width + margin_x
+        y_min = effective_bounds.y
+        y_max = effective_bounds.y + effective_bounds.height
 
-        # First pass: select points with margin
-        culled_x, culled_y = cull_point_data(
-            element.x_data,
-            element.y_data,
-            effective_bounds.x - margin_x,
-            effective_bounds.x + effective_bounds.width + margin_x,
-            effective_bounds.y - margin_y,
-            effective_bounds.y + effective_bounds.height + margin_y
-        )
+        # Clamp baseline to visible Y bounds
+        clipped_baseline = clamp(element.baseline, y_min, y_max)
 
-        # Second pass: final culling to exact bounds
-        if length(culled_x) >= 1
-            final_x, final_y = cull_point_data(
-                culled_x,
-                culled_y,
+        # Build stem lines and marker lists in a single pass.
+        # We cull by X only here — cull_line_data (Cohen-Sutherland) clips the
+        # vertical stem lines at the exact Y viewport boundary, so stems whose
+        # marker is outside the view still appear clipped to the edge.
+        batched_x = Float32[]
+        batched_y = Float32[]
+        marker_x = Float32[]
+        marker_y = Float32[]
+
+        for i in 1:length(element.x_data)
+            x_val = element.x_data[i]
+            y_val = element.y_data[i]
+
+            # Skip stems whose X is completely outside the visible range
+            x_val < x_min && continue
+            x_val > x_max && continue
+
+            # Only draw stems that have non-zero length after baseline clamping
+            if abs(clipped_baseline - y_val) > 1e-6
+                if !isempty(batched_x)
+                    push!(batched_x, NaN32)
+                    push!(batched_y, NaN32)
+                end
+                push!(batched_x, x_val)
+                push!(batched_y, clipped_baseline)
+                push!(batched_x, x_val)
+                push!(batched_y, y_val)
+            end
+
+            # Only draw the marker when the data point is fully within both axes
+            if y_val >= y_min && y_val <= y_max &&
+               x_val >= effective_bounds.x && x_val <= effective_bounds.x + effective_bounds.width
+                push!(marker_x, x_val)
+                push!(marker_y, y_val)
+            end
+        end
+
+        # Draw stem lines — cull_line_data clips each stem at the viewport edge
+        if length(batched_x) >= 2
+            stem_clipped_x, stem_clipped_y = cull_line_data(
+                batched_x,
+                batched_y,
                 effective_bounds.x,
                 effective_bounds.x + effective_bounds.width,
-                effective_bounds.y,
-                effective_bounds.y + effective_bounds.height
+                y_min,
+                y_max
             )
 
-            if length(final_x) >= 1
-                # Clamp baseline to visible Y bounds to avoid drawing outside plot area
-                clipped_baseline = clamp(element.baseline, effective_bounds.y, effective_bounds.y + effective_bounds.height)
-
-                # Batch all stem lines into a single draw call for performance
-                # Each stem is represented as two points: baseline and data point
-                # We'll use NaN values to separate individual stems
-                batched_x = Float32[]
-                batched_y = Float32[]
-
-                for i in 1:length(final_x)
-                    x_val = final_x[i]
-                    y_val = final_y[i]
-
-                    # Only include the stem if the data point and clipped baseline are different
-                    if abs(clipped_baseline - y_val) > 1e-6  # Avoid drawing zero-length lines
-                        # Add stem line points
-                        push!(batched_x, x_val)
-                        push!(batched_y, clipped_baseline)
-                        push!(batched_x, x_val)
-                        push!(batched_y, y_val)
-
-                        # Add NaN separator to break the line between stems
-                        if i < length(final_x)
-                            push!(batched_x, NaN32)
-                            push!(batched_y, NaN32)
-                        end
-                    end
-                end
-
-                # Draw all stems in a single batched call
-                if length(batched_x) >= 2
-                    # Clip the entire batched line data to exact bounds
-                    stem_clipped_x, stem_clipped_y = cull_line_data(
-                        batched_x,
-                        batched_y,
-                        effective_bounds.x,
-                        effective_bounds.x + effective_bounds.width,
-                        effective_bounds.y,
-                        effective_bounds.y + effective_bounds.height
-                    )
-
-                    if length(stem_clipped_x) >= 2
-                        draw_line_plot(
-                            stem_clipped_x,
-                            stem_clipped_y,
-                            data_to_screen,
-                            element.line_color,
-                            element.line_width,
-                            SOLID,  # SOLID line style
-                            projection_matrix;
-                            anti_aliasing_width=style.anti_aliasing_width
-                        )
-                    end
-                end
-
-                # Draw markers at data points (only for visible points)
-                draw_scatter_plot(
-                    final_x,
-                    final_y,
+            if length(stem_clipped_x) >= 2
+                draw_line_plot(
+                    stem_clipped_x,
+                    stem_clipped_y,
                     data_to_screen,
-                    element.fill_color,
-                    element.border_color,
-                    element.marker_size,
-                    element.border_width,
-                    element.marker_type,
+                    element.line_color,
+                    element.line_width,
+                    SOLID,
                     projection_matrix;
                     anti_aliasing_width=style.anti_aliasing_width
                 )
             end
+        end
+
+        # Draw markers only for data points whose tip is inside the viewport
+        if !isempty(marker_x)
+            draw_scatter_plot(
+                marker_x,
+                marker_y,
+                data_to_screen,
+                element.fill_color,
+                element.border_color,
+                element.marker_size,
+                element.border_width,
+                element.marker_type,
+                projection_matrix;
+                anti_aliasing_width=style.anti_aliasing_width
+            )
         end
     end
 end
