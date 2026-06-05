@@ -141,7 +141,6 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
     end
 
     if isempty(all_positions)
-        GLA.unbind(plot_line_prog[])
         return
     end
 
@@ -164,9 +163,6 @@ function draw_lines(batch::LineBatch, projection_matrix::Mat4{Float32}; anti_ali
     GLA.bind(vao)
     GLA.draw(vao)
     GLA.unbind(vao)
-
-    # Unbind shader program
-    GLA.unbind(plot_line_prog[])
 end
 
 # Generate efficient line geometry - minimal triangles, optimized for performance

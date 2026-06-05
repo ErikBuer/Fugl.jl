@@ -80,7 +80,6 @@ function draw_matrix_with_colormap(
         GLA.bind(vao)
         GLA.draw(vao)
         GLA.unbind(vao)
-        GLA.unbind(plot_image_prog[])
 
     catch e
         @warn "Failed to draw textured quad: $e"

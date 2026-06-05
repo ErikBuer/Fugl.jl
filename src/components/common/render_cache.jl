@@ -336,6 +336,5 @@ function draw_cached_texture(texture_id::UInt32, x::Float32, y::Float32, width::
 
     # Cleanup
     GLA.unbind(vao)
-    GLA.unbind(prog[])
     ModernGL.glBindTexture(ModernGL.GL_TEXTURE_2D, 0)
 end

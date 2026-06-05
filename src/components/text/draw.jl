@@ -108,7 +108,7 @@ function draw_glyph_from_atlas(
 
     # Unbind
     GLA.unbind(vao)
-    GLA.unbind(glyph_prog[])
+
 end
 
 """
@@ -173,7 +173,6 @@ function draw_glyph_atlas_debug(
 
     # Unbind
     GLA.unbind(vao)
-    GLA.unbind(glyph_prog[])
 end
 
 
@@ -225,7 +224,6 @@ function render_glyph_batch!(
 
     # Cleanup
     GLA.unbind(vao)
-    GLA.unbind(glyph_prog[])
 end
 
 """

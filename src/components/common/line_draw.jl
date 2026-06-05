@@ -153,8 +153,6 @@ function draw_line(
     GLA.draw(vao)
     GLA.unbind(vao)
 
-    # Unbind shader program
-    GLA.unbind(line_prog[])
 end
 
 """
@@ -225,9 +223,6 @@ function draw_lines(
     GLA.bind(vao)
     GLA.draw(vao)
     GLA.unbind(vao)
-
-    # Unbind shader program
-    GLA.unbind(line_prog[])
 end
 
 """

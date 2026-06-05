@@ -68,7 +68,6 @@ function interpret_view(view::HorizontalLineView, x::Float32, y::Float32, width:
     GLA.bind(vao)
     GLA.draw(vao)
     GLA.unbind(vao)
-    GLA.unbind(prog[])
 end
 
 function measure_height(view::HorizontalLineView, available_width::Float32)::Float32
