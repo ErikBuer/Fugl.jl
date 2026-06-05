@@ -427,34 +427,32 @@ function draw_polar_element(
     style::PolarStyle,
     state::PolarState
 )
-    # Convert polar data to Cartesian screen coordinates, filtering out NaN values
-    x_screen = Float32[]
-    y_screen = Float32[]
-    valid_indices = Int[]
-
-    for i in 1:length(element.y_data)  # y_data = r
-        x, y = polar_to_screen(element.y_data[i], element.x_data[i])  # x_data = theta
-        # Skip NaN values (culled or out-of-range points)
-        if !isnan(x) && !isnan(y)
-            push!(x_screen, x)
-            push!(y_screen, y)
-            push!(valid_indices, i)
-        end
-    end
-
     # Use identity transform since we're already in screen coordinates
     identity_transform(x, y) = (x, y)
 
-    # Draw stem lines from appropriate origin to each point
-    # Stem origin should be at r=0 if visible, otherwise at the edge of visible range
-    stem_origin_r = clamp(0.0f0, state.r_min, state.r_max)
+    # Clamp baseline radius to the visible radial range
+    stem_origin_r = clamp(element.baseline, state.r_min, state.r_max)
 
-    for (idx, i) in enumerate(valid_indices)
-        # Calculate stem origin for this angle at the clamped origin radius
-        stem_origin_x, stem_origin_y = polar_to_screen(stem_origin_r, element.x_data[i])  # x_data = theta
+    # Separate screen coords for markers (only in-range tips)
+    marker_x_screen = Float32[]
+    marker_y_screen = Float32[]
 
-        stem_x = Float32[stem_origin_x, x_screen[idx]]
-        stem_y = Float32[stem_origin_y, y_screen[idx]]
+    for i in 1:length(element.y_data)  # y_data = r
+        r = element.y_data[i]
+        theta = element.x_data[i]
+
+        # Skip if theta is out of the visible angular range
+        stem_origin_x, stem_origin_y = polar_to_screen(stem_origin_r, theta)
+        isnan(stem_origin_x) && continue  # theta out of range
+
+        # Clamp the tip radius to r_max so the stem is drawn up to the boundary
+        # even when the data point is outside the visible radial range.
+        r_clamped = clamp(r, state.r_min, state.r_max)
+        tip_x, tip_y = polar_to_screen(r_clamped, theta)
+        isnan(tip_x) && continue  # shouldn't happen after clamping, but guard
+
+        stem_x = Float32[stem_origin_x, tip_x]
+        stem_y = Float32[stem_origin_y, tip_y]
 
         draw_line_plot(
             stem_x,
@@ -466,13 +464,19 @@ function draw_polar_element(
             projection_matrix;
             anti_aliasing_width=style.anti_aliasing_width
         )
+
+        # Only draw the marker when the tip is within the visible radial range
+        if r >= state.r_min && r <= state.r_max
+            push!(marker_x_screen, tip_x)
+            push!(marker_y_screen, tip_y)
+        end
     end
 
-    # Draw markers at each data point
-    if length(x_screen) >= 1
+    # Draw markers for all in-range data points
+    if !isempty(marker_x_screen)
         draw_scatter_plot(
-            x_screen,
-            y_screen,
+            marker_x_screen,
+            marker_y_screen,
             identity_transform,
             element.fill_color,
             element.border_color,
