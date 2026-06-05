@@ -10,7 +10,7 @@ function Card(title::AbstractString="", content::AbstractView=EmptyView(); style
                 style=SeparatorStyle(line_width=1.0f0, color=style.border_color)
             ),
             content
-        ], padding=0.0, spacing=5.0f0
+        ], spacing=5.0f0
     )
 
     return BaseContainer(

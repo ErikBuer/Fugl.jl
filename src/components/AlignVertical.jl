@@ -4,12 +4,12 @@ struct AlignVerticalView <: AbstractView
 end
 
 """
-    AlignVertical(child::SizedView, alignment::Symbol)
+    AlignVertical(child::AbstractView, alignment::Symbol)
 
 Aligns a sized child component vertically within its container.
 
 # Arguments
-- `child`: A SizedView component that has intrinsic dimensions
+- `child`: A AbstractView component that has intrinsic dimensions
 - `alignment`: Vertical alignment (:top, :middle, :bottom)
 
 # Example
@@ -18,16 +18,16 @@ AlignVertical(IntrinsicSize(Image("logo.png")), :top)
 AlignVertical(FixedSize(Text("Hello"), 100.0f0, 50.0f0), :middle)
 ```
 """
-function AlignVertical(child::SizedView, alignment::Symbol=:middle)
+function AlignVertical(child::AbstractView, alignment::Symbol=:middle)
     if alignment ∉ (:top, :middle, :bottom)
         error("Invalid vertical alignment: $alignment. Must be :top, :middle, or :bottom")
     end
     return AlignVerticalView(child, alignment)
 end
 
-@inline AlignTop(child::SizedView) = AlignVertical(child, :top)
-@inline AlignMiddle(child::SizedView) = AlignVertical(child, :middle)
-@inline AlignBottom(child::SizedView) = AlignVertical(child, :bottom)
+@inline AlignTop(child::AbstractView) = AlignVertical(child, :top)
+@inline AlignMiddle(child::AbstractView) = AlignVertical(child, :middle)
+@inline AlignBottom(child::AbstractView) = AlignVertical(child, :bottom)
 
 function measure(view::AlignVerticalView)::Tuple{Float32,Float32}
     # Return the child's preferred size
@@ -79,4 +79,18 @@ function detect_click(view::AlignVerticalView, mouse_state::InputState, x::Float
     # Get the child's layout and forward click detection
     child_x, child_y, child_width, child_height = apply_layout(view, x, y, width, height)
     return detect_click(view.child, mouse_state, child_x, child_y, child_width, child_height, parent_z)
+end
+
+"""
+Check if the component has a preferred width.
+"""
+function preferred_width(view::AlignVerticalView)::Bool
+    return preferred_width(view.child)
+end
+
+"""
+Check if the component has a preferred height.
+"""
+function preferred_height(view::AlignVerticalView)::Bool
+    return preferred_height(view.child)
 end

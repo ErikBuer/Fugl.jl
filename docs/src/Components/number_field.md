@@ -40,9 +40,9 @@ function MyApp()
                 IntrinsicHeight(Fugl.Text("Current Values:")),
                 IntrinsicHeight(Fugl.Text("Integer: $(int_state[].text)")),
                 IntrinsicHeight(Fugl.Text("Float32: $(float_state[].text)")),
-            ], padding=0.0, spacing=5.0)
+            ], spacing=5.0)
         )
-    ], padding=0.0, spacing=0.0)
+    ], spacing=0.0)
 end
 
 screenshot(MyApp, "numberField.png", 812, 400);

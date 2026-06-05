@@ -137,7 +137,7 @@ function axis_control_demo()
         IntrinsicColumn([
             IntrinsicHeight(Text("Granular Axis Control Examples", style=TextStyle(size_points=20))),
             Column(rows, spacing=0.0)
-        ], spacing=0.0, padding=0.0)
+        ], spacing=0.0)
     )
 
     return ui

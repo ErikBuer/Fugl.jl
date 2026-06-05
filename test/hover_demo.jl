@@ -181,7 +181,7 @@ function HoverDemo()
                     ),
                     style=INFO_CONTAINER_STYLE
                 )
-            ], spacing=12.0f0, padding=20.0f0),
+            ], spacing=12.0f0),
         style=MAIN_CONTAINER_STYLE
     )
 end

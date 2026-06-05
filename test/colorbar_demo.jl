@@ -51,19 +51,19 @@ function colorbar_demo()
                 ], spacing=0.0
             ),
 
-            # Example 3: Different colormap with custom styling
-            IntrinsicRow([
-                    Plot([HeatmapElement(z_data, x_range=(x_data[1], x_data[end]), y_range=(y_data[1], y_data[end]), colormap=:plasma)]),
-                    FixedWidth(Plot([VerticalColorbar(:plasma, (-1.0f0, 1.0f0))], PlotStyle(
-                            show_left_axis=true,
-                            show_right_axis=true,
-                            show_top_axis=true,
-                            show_bottom_axis=true,
-                            show_x_ticks=false,
-                            show_y_ticks=true
-                        )), 100.0f0)
-                ], spacing=0.0
-            ),], spacing=0.0, padding=0.0)
+                        # Example 3: Different colormap with custom styling
+                        IntrinsicRow([
+                                        Plot([HeatmapElement(z_data, x_range=(x_data[1], x_data[end]), y_range=(y_data[1], y_data[end]), colormap=:plasma)]),
+                                        FixedWidth(Plot([VerticalColorbar(:plasma, (-1.0f0, 1.0f0))], PlotStyle(
+                                                        show_left_axis=true,
+                                                        show_right_axis=true,
+                                                        show_top_axis=true,
+                                                        show_bottom_axis=true,
+                                                        show_x_ticks=false,
+                                                        show_y_ticks=true
+                                                )), 100.0f0)
+                                ], spacing=0.0
+                        ),], spacing=0.0,)
 
     return ui
 end
