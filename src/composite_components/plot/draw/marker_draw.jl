@@ -67,9 +67,6 @@ function draw_markers(batch::MarkerBatch, projection_matrix::Mat4{Float32}; anti
     GLA.bind(vao)
     GLA.draw(vao)
     GLA.unbind(vao)
-
-    # Unbind shader program
-    GLA.unbind(marker_prog[])
 end
 
 """

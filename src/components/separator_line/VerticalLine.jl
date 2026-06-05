@@ -66,7 +66,6 @@ function interpret_view(view::VerticalLineView, x::Float32, y::Float32, width::F
     GLA.bind(vao)
     GLA.draw(vao)
     GLA.unbind(vao)
-    GLA.unbind(prog[])
 end
 
 function measure_width(view::VerticalLineView, available_height::Float32)::Float32

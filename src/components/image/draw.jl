@@ -54,7 +54,6 @@ function draw_image(texture::GLAbstraction.Texture, x_px::Float32, y_px::Float32
     GLA.bind(vao)
     GLA.draw(vao)
 
-    # Unbind the VAO and shader program
+    # Unbind the VAO
     GLA.unbind(vao)
-    GLA.unbind(prog[])
 end

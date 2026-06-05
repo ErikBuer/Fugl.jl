@@ -20,9 +20,8 @@ function draw_closed_lines(vertices::Vector{Point2f}, color_rgba::Vec4{<:Float32
     # Draw the vertices using the VAO
     GLA.draw(vao)
 
-    # Unbind the VAO and shader program
+    # Unbind the VAO
     GLA.unbind(vao)
-    GLA.unbind(prog[])
 end
 
 """
@@ -57,9 +56,8 @@ function draw_rectangle(vertices::Vector{Point2f}, color_rgba::Vec4{<:Float32}, 
     # Draw the rectangle using the VAO
     GLA.draw(vao)
 
-    # Unbind the VAO and shader program
+    # Unbind the VAO
     GLA.unbind(vao)
-    GLA.unbind(prog[])
 end
 
 """
@@ -119,7 +117,6 @@ function draw_rounded_rectangle(
     GLA.draw(vao)
 
     GLA.unbind(vao)
-    GLA.unbind(rounded_rect_prog[])
 end
 
 """
@@ -184,5 +181,4 @@ function draw_configurable_rectangle(
     GLA.draw(vao)
 
     GLA.unbind(vao)
-    GLA.unbind(configurable_rect_prog[])
 end
