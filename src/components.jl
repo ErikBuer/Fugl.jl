@@ -80,6 +80,9 @@ include("components/text/Text.jl")
 export Text, TextStyle
 export DEFAULT_FONT_PATH, load_default_font!, get_default_font, get_font_by_path, get_font_by_name, get_font
 
+include("components/text/Markdown.jl")
+export Markdown, MarkdownStyle
+
 include("components/text_editor/TextBox.jl")
 export TextBox, TextBoxStyle
 export EditorState
