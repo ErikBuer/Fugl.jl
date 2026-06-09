@@ -78,6 +78,9 @@ makedocs(
                     "Components/plot/polar/polar_legend.md",
                     "Components/plot/polar/polar_legend_interactive.md",
                 ],
+                "Smith"=>Any[
+                    "Components/plot/smith_plot.md",
+                ],
             ],
         ],
         "adding_shaders.md",

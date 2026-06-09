@@ -165,6 +165,10 @@ export PolarPlot, PolarPlotView, PolarStyle, PolarState
 export PolarLine, PolarScatter, PolarStem
 export AbstractPolarElement
 
+include("composite_components/smith_plot/smith_plot.jl")
+export SmithPlot, SmithPlotView, SmithStyle, SmithState, SmithTrace
+export SmithTraceFromImpedance, SmithTraceFromNormalizedImpedance, SmithTraceFromNormalizedAdmittance
+
 include("composite_components/tree/Tree.jl")
 export Tree, TreeNode, TreeStyle, TreeState
 
