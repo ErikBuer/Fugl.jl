@@ -108,6 +108,8 @@ mutable struct InputState
     scroll_y::Float32                            # Vertical scroll delta
     # Modifier keys tracking
     modifier_keys::ModifierKeys                  # Current modifier keys state
+    # File drop tracking
+    dropped_files::Vector{String}                # Paths of files dropped onto the window this frame
 end
 
 function InputState()
@@ -129,7 +131,8 @@ function InputState()
         Dict(LeftButton => false, RightButton => false, MiddleButton => false),  # No double-clicks initially
         0.0f0,        # No horizontal scroll initially
         0.0f0,        # No vertical scroll initially
-        ModifierKeys()  # No modifier keys initially
+        ModifierKeys(),  # No modifier keys initially
+        String[]         # No dropped files initially
     )
 end
 
@@ -222,6 +225,14 @@ function mouse_position_callback(gl_window, x_pos, y_pos, mouse_state::InputStat
 end
 
 """
+File drop callback to receive paths of files dragged onto the window.
+Paths are accumulated in `mouse_state.dropped_files` and cleared each frame by `collect_state!`.
+"""
+function file_drop_callback(gl_window, paths::Vector{String}, mouse_state::InputState)
+    append!(mouse_state.dropped_files, paths)
+end
+
+"""
 Mouse scroll callback to track scroll wheel input
 """
 function scroll_callback(gl_window, xoffset, yoffset, mouse_state::InputState)
@@ -307,7 +318,8 @@ function collect_state!(mouse_state::InputState)::InputState
         deepcopy(mouse_state.was_double_clicked),
         mouse_state.scroll_x,
         mouse_state.scroll_y,
-        mouse_state.modifier_keys
+        mouse_state.modifier_keys,
+        deepcopy(mouse_state.dropped_files)
     )
 
     # Reset `was_clicked`, `was_double_clicked`, `was_pressed_down`, `was_released`, and scroll in the original state
@@ -325,6 +337,9 @@ function collect_state!(mouse_state::InputState)::InputState
     # Reset scroll values
     mouse_state.scroll_x = 0.0f0
     mouse_state.scroll_y = 0.0f0
+
+    # Reset dropped files
+    empty!(mouse_state.dropped_files)
 
     return locked_state
 end
