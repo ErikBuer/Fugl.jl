@@ -56,6 +56,7 @@ makedocs(
             "Components/slider.md",
             "Components/keylistener.md",
             "Components/focus.md",
+            "Components/drop_area.md",
             "Components/image.md",
             "Components/table.md",
             "Components/tree.md",
