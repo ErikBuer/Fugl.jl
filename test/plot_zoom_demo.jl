@@ -102,7 +102,7 @@ function plot_zoom_demo()
                             end
                         )
                     )
-                ], padding=0.0, spacing=0.0)
+                ], spacing=0.0)
         )
     end
 

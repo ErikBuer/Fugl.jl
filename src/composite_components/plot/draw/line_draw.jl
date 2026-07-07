@@ -386,33 +386,27 @@ function draw_axes_with_labels(
     # Draw the axis lines and tick marks
     draw_lines(axis_batch, projection_matrix_points; anti_aliasing_width=anti_aliasing_width)
 
-    # Create text style for labels
-    text_style = TextStyle(size_points=label_size_points, color=label_color)
+    # Get font once for all label rendering — avoids repeated Dict lookups
+    font = get_default_font()
+    # line_height matches what TextView.measure returns for a single line
+    line_height = Float32(label_size_points)
+    # text_height = line_height * 1.3 + 2 (matches measure(TextView))
+    tick_text_height = line_height * 1.3f0 + 2.0f0
 
     # Draw x-axis labels along the bottom edge (outside plot area) if x-tick labels are enabled
     if show_x_tick_labels
         for x_tick in x_ticks
             if x_tick >= plot_bounds.x && x_tick <= plot_bounds.x + plot_bounds.width
-                # Transform tick position to screen coordinates (at bottom edge)
                 tick_screen_x, tick_screen_y = transform_func(x_tick, plot_bounds.y)
 
-                # Format the number
-                label_text = if x_tick == round(x_tick)
-                    string(Int(round(x_tick)))
-                else
-                    string(round(x_tick, digits=2))
-                end
+                label_text = string(round(x_tick, digits=2))
 
-                # Create Text component and measure it
-                text_component = Text(label_text, style=text_style, horizontal_align=:center, vertical_align=:top)
-                text_width, text_height = measure(text_component)
-
-                # Position label below the bottom axis line and tick mark, outside plot area
+                text_width = measure_word_width_cached(font, label_text, label_size_points) + 2.0f0
                 label_x = tick_screen_x - text_width / 2.0f0
-                label_y = tick_screen_y + tick_length_px + label_offset_px  # Below tick mark
+                # draw_text y is the baseline; for :top alignment that is component_y + line_height
+                label_y = tick_screen_y + tick_length_px + label_offset_px + line_height
 
-                # Render the text component
-                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, Point2f(0.0f0, 0.0f0), Size(0.0f0, 0.0f0))
+                draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix_points, label_color)
             end
         end
     end
@@ -421,44 +415,33 @@ function draw_axes_with_labels(
     if show_y_tick_labels
         for y_tick in y_ticks
             if y_tick >= plot_bounds.y && y_tick <= plot_bounds.y + plot_bounds.height
-                # Transform tick position to screen coordinates (at left edge)
                 tick_screen_x, tick_screen_y = transform_func(plot_bounds.x, y_tick)
 
-                # Format the number
-                label_text = if y_tick == round(y_tick)
-                    string(Int(round(y_tick)))
-                else
-                    string(round(y_tick, digits=2))
-                end
+                label_text = string(round(y_tick, digits=2))
 
-                # Create Text component and measure it
-                text_component = Text(label_text, style=text_style, horizontal_align=:right, vertical_align=:middle)
-                text_width, text_height = measure(text_component)
+                text_width = measure_word_width_cached(font, label_text, label_size_points) + 2.0f0
+                label_x = tick_screen_x - tick_length_px - text_width - label_offset_px
+                # draw_text y is the baseline; for :middle alignment:
+                #   component_y = tick_screen_y - tick_text_height / 2
+                #   vertical_offset = (tick_text_height - line_height*1.3) / 2 + line_height = 1.0 + line_height
+                label_y = tick_screen_y - tick_text_height / 2.0f0 + 1.0f0 + line_height
 
-                # Position label to the left of the left axis line and tick mark, outside plot area
-                label_x = tick_screen_x - tick_length_px - text_width - label_offset_px  # Left of tick mark
-                label_y = tick_screen_y - text_height / 2.0f0  # Centered vertically on tick
-
-                # Render the text component
-                interpret_view(text_component, label_x, label_y, text_width, text_height, projection_matrix_points, Point2f(0.0f0, 0.0f0), Size(0.0f0, 0.0f0))
+                draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix_points, label_color)
             end
         end
     end
 
     # Draw axis labels if enabled
     if show_x_label && !isempty(x_label)
-        # Create Text component for x-axis label
-        x_label_style = TextStyle(size_points=label_size_points + 4, color=label_color)  # Slightly larger for axis labels
-        x_label_text = Text(x_label, style=x_label_style, horizontal_align=:center, vertical_align=:top)
-        x_label_width, x_label_height = measure(x_label_text)
+        axis_label_size = label_size_points + 4
+        x_label_width = measure_word_width_cached(font, x_label, axis_label_size) + 2.0f0
 
-        # Position x-axis label centered below the plot, below tick labels
         bottom_edge_screen_x, bottom_edge_screen_y = transform_func(plot_bounds.x + plot_bounds.width / 2, plot_bounds.y)
         x_label_x = bottom_edge_screen_x - x_label_width / 2.0f0
-        x_label_y = bottom_edge_screen_y + tick_length_px + label_offset_px + Float32(label_size_points) + label_offset_px  # Below tick labels
+        # Below tick labels; draw_text y is the baseline (:top alignment → + axis_label_size)
+        x_label_y = bottom_edge_screen_y + tick_length_px + label_offset_px + Float32(label_size_points) + label_offset_px + Float32(axis_label_size)
 
-        # Render the x-axis label
-        interpret_view(x_label_text, x_label_x, x_label_y, x_label_width, x_label_height, projection_matrix_points, Point2f(0.0f0, 0.0f0), Size(0.0f0, 0.0f0))
+        draw_text(font, x_label, x_label_x, x_label_y, axis_label_size, projection_matrix_points, label_color)
     end
 
     if show_y_label && !isempty(y_label)
