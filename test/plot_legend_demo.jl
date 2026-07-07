@@ -1,5 +1,5 @@
 using Fugl
-using Fugl: Text, LinePlotElement, ScatterPlotElement, StemPlotElement, SOLID, DASH, DOT, CIRCLE, TRIANGLE, RECTANGLE
+using Fugl: Text, LinePlotElement, ScatterPlotElement, StemPlotElement, SOLID, DASH, DOT, CIRCLE, TRIANGLE, RECTANGLE, XAreaElement, YAreaElement
 
 # Modal state for legend position (nothing = centered)
 legend_modal_state = Ref(ModalState(
@@ -55,6 +55,15 @@ y3_data = sin.(x_data .* 2) .* 0.5
 
 # Create plot elements with labels
 elements = Ref([
+    # Bands are placed first so they render behind the data lines
+    XAreaElement(3.0, 5.0;
+        color=Vec4f(0.3, 0.7, 1.0, 0.15),
+        label="X band (3–5 s)"
+    ),
+    YAreaElement(-0.4, 0.4;
+        color=Vec4f(1.0, 0.8, 0.2, 0.15),
+        label="Y zone (±0.4)"
+    ),
     LinePlotElement(y1_data; x_data=x_data,
         color=Vec4{Float32}(0.4, 0.6, 0.9, 1.0),
         width=3.0f0,

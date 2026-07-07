@@ -68,6 +68,7 @@ makedocs(
                     "Components/plot/cartesian/scatter_plot.md",
                     "Components/plot/cartesian/heatmap.md",
                     "Components/plot/cartesian/colorbar.md",
+                    "Components/plot/cartesian/area_elements.md",
                     "Components/plot/cartesian/plot_style.md",
                     "Components/plot/cartesian/plot_state.md",
                     "Components/plot/cartesian/legend.md",
