@@ -156,6 +156,7 @@ include("composite_components/plot/Plot.jl")
 export Plot, PlotView, PlotStyle
 export PlotState, reset_plot_view_bounds, calculate_bounds_from_elements
 export LinePlotElement, ScatterPlotElement, StemPlotElement, HeatmapElement
+export XAreaElement, YAreaElement
 export AbstractPlotElement
 export toggle_mute, toggle_hover
 export MarkerType, CIRCLE, TRIANGLE, RECTANGLE

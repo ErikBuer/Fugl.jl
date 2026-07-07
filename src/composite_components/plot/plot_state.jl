@@ -107,8 +107,9 @@ function calculate_bounds_from_elements(elements::Vector{AbstractPlotElement})::
 
     for element in elements
         min_x, max_x, min_y, max_y = get_element_bounds(element)
-        push!(all_x, min_x, max_x)
-        push!(all_y, min_y, max_y)
+        # Elements that return NaN (e.g. area decorations) opt out of bounds calculation
+        isnan(min_x) || push!(all_x, min_x, max_x)
+        isnan(min_y) || push!(all_y, min_y, max_y)
     end
 
     if !isempty(all_x) && !isempty(all_y)
