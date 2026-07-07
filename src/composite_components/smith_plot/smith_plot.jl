@@ -293,9 +293,6 @@ function _draw_vertical_line(
     )
 end
 
-# Draw a circle defined in the Gamma plane (center + radius) as a dense arc,
-# clipping to the Smith unit disk. Sampling uniformly by angle gives constant
-# segment density everywhere, unlike sampling in impedance/admittance space.
 function _draw_smith_circle_arc(
     c_re::Float32,
     c_im::Float32,
@@ -544,7 +541,7 @@ function _draw_trace(
     y_points = Float32[]
     identity_transform(x, y) = (x, y)
 
-    # Same conservative clipping as grid curves to avoid tiny overdraw outside boundary.
+    # Clipping as grid curves to avoid tiny overdraw outside boundary.
     clip_radius2 = 0.9985f0 * 0.9985f0
 
     for i in 1:n
@@ -556,7 +553,7 @@ function _draw_trace(
             continue
         end
 
-        # Culling: keep only physically valid points inside Smith unit disk.
+        # Culling
         mag2 = re * re + im * im
         if mag2 > 1.0f0
             push!(x_points, NaN32)
