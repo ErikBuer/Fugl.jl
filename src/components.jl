@@ -73,6 +73,9 @@ export BaseContainer, Container, ContainerStyle
 include("components/KeyListener.jl")
 export KeyListener
 
+include("components/DropArea.jl")
+export DropArea
+
 include("components/slider/HorizontalSlider.jl")
 export HorizontalSlider, SliderState, SliderStyle
 

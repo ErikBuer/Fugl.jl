@@ -32,6 +32,7 @@ export MouseButton, LeftButton, RightButton, MiddleButton
 export InputState, mouse_position_callback, char_callback, KeyEvent
 export ButtonState, IsPressed, IsReleased
 export mouse_button_callback
+export file_drop_callback
 export ModifierKeys, is_command_key, has_any_modifier
 
 include("components/common/size.jl")
@@ -92,12 +93,14 @@ function run(ui_function::Function;
     key_callback_func = (gl_window, key, scancode, action, mods) -> key_callback(gl_window, key, scancode, action, mods, mouse_state)
     char_callback_func = (gl_window, codepoint) -> char_callback(gl_window, codepoint, mouse_state)
     scroll_callback_func = (gl_window, xoffset, yoffset) -> scroll_callback(gl_window, xoffset, yoffset, mouse_state)
+    drop_callback_func = (gl_window, paths) -> file_drop_callback(gl_window, paths, mouse_state)
 
     GLFW.SetMouseButtonCallback(gl_window, mouse_callback)
     GLFW.SetCursorPosCallback(gl_window, mouse_pos_callback)
     GLFW.SetKeyCallback(gl_window, key_callback_func)
     GLFW.SetCharCallback(gl_window, char_callback_func)
     GLFW.SetScrollCallback(gl_window, scroll_callback_func)
+    GLFW.SetDropCallback(gl_window, drop_callback_func)
 
     # Initialize DPI scaling state
     # Create default DPI scaling if none provided 
