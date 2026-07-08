@@ -4,7 +4,7 @@ The `Tooltip` component provides overlay tooltips that appear when hovering over
 
 ## Basic Tooltip
 
-```@example tooltip_basic
+```@example Tooltip
 using Fugl
 using Fugl: Tooltip, TooltipStyle, Card
 
@@ -71,8 +71,7 @@ nothing # hide
 
 ## Positioned Tooltips
 
-```@example tooltip_positioning
-using Fugl
+```@example Tooltip
 using Fugl: Tooltip, TooltipStyle, Card
 
 # Persistent states for each tooltip
@@ -169,8 +168,7 @@ nothing # hide
 
 ## Timing and Delay Customization
 
-```@example tooltip_timing
-using Fugl
+```@example Tooltip
 using Fugl: Tooltip, TooltipStyle, Card
 
 # Dark theme card style

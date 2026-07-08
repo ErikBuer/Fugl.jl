@@ -6,16 +6,15 @@ Separator lines are visual elements used to divide content in your UI.
 
 Horizontal line separator that fills the available width.
 
-```@example HLineExample
+```@example VlineHline
 using Fugl
-using Fugl: Text
 
 function MyApp()
     Container(
         IntrinsicColumn([
-            IntrinsicHeight(Container(Text("Default Line"))),
+            IntrinsicHeight(Container(Fugl.Text("Default Line"))),
             HLine(),  # Basic horizontal line
-            IntrinsicHeight(Container(Text("Oversize Line"))),
+            IntrinsicHeight(Container(Fugl.Text("Oversize Line"))),
             HLine(style=SeparatorStyle(line_width=3.0f0, color=Vec4{Float32}(1.0f0, 0.2f0, 0.2f0, 1.0f0)), end_length=6.0f0),  # Thick red line
         ],
         spacing=10.0f0)
@@ -32,16 +31,13 @@ nothing #hide
 
 Vertical line separator that fills the available height.
 
-```@example VLineExample
-using Fugl
-using Fugl: Text
-
+```@example VlineHline
 function MyApp()
     Container(
         IntrinsicRow([
-            Container(Text("Undersized Line")),
+            Container(Fugl.Text("Undersized Line")),
             VLine(end_length=-10.0f0),  # Basic vertical line
-            Container(Text("Styled Line")),
+            Container(Fugl.Text("Styled Line")),
             VLine(style=SeparatorStyle(line_width=3.0f0, color=Vec4{Float32}(0.2f0, 0.8f0, 0.2f0, 1.0f0))),  # Thick green line
         ],
         spacing=10.0f0)

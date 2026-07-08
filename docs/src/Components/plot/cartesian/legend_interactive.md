@@ -2,7 +2,7 @@
 
 Click on legend items to toggle visibility of plot elements.
 
-``` @example InteractiveLegendCartesian
+``` @example InteractiveLegend
 using Fugl
 
 # Dark theme plot style
@@ -124,9 +124,7 @@ nothing #hide
 
 Hover over a trace in the plot or a row in the legend to highlight it in both. `hover_width` controls the line width when hovered. The `on_element_hover` callback is shared between `Plot` and `Legend` so hover always stays in sync. The example below pre-highlights the cosine trace to show the effect.
 
-``` @example InteractiveLegendHover
-using Fugl
-
+``` @example InteractiveLegend
 style = Ref(PlotStyle(
     background_color=Vec4f(0.08, 0.10, 0.14, 1.0),
     show_grid=true,

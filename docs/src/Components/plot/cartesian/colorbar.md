@@ -91,10 +91,7 @@ nothing #hide
 
 This example shows all four available colormaps with the same data range:
 
-``` @example ColormapTypesExample
-using Fugl
-using Fugl: Text
-
+``` @example ColorbarExample
 function colormap_types_demo()
     # Create colorbars with different colormaps
     grayscale_bar = HorizontalColorbar(:grayscale, (0.0f0, 1.0f0))
@@ -147,10 +144,7 @@ nothing #hide
 
 This example shows the effect of different `gradient_pixels` values on the smoothness of the colorbar gradient:
 
-``` @example GradientResolutionExample
-using Fugl
-using Fugl: Text
-
+``` @example ColorbarExample
 function gradient_resolution_demo()
     # Create colorbars with different gradient resolutions
     low_res_bar = HorizontalColorbar(:viridis, (0.0f0, 1.0f0), gradient_pixels=10)
@@ -171,7 +165,7 @@ function gradient_resolution_demo()
 
     ui = Container(
         IntrinsicColumn([
-            IntrinsicHeight(Text("Different Gradient Resolutions")),
+            IntrinsicHeight(Fugl.Text("Different Gradient Resolutions")),
             IntrinsicRow([
                 Card(
                     "10 pixels",

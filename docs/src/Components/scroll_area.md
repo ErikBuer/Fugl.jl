@@ -4,7 +4,7 @@ The `ScrollArea` component provides scrollable containers for content that excee
 
 ## Basic Vertical ScrollArea
 
-```@example scroll_basic
+```@example ScrollArea
 using Fugl
 using Fugl: VerticalScrollArea, Table, TableStyle, TextStyle, Card, VerticalScrollState, ScrollAreaStyle, ContainerStyle
 
@@ -74,8 +74,7 @@ nothing # hide
 
 ## Interactive ScrollArea with Table
 
-```@example scroll_interactive
-using Fugl
+```@example ScrollArea
 using Fugl: VerticalScrollArea, Table, TableStyle, TextStyle, Card, VerticalScrollState, ScrollAreaStyle, ContainerStyle
 
 function MyApp()
@@ -162,8 +161,7 @@ nothing # hide
 
 ## Horizontal ScrollArea
 
-```@example scroll_horizontal
-using Fugl
+```@example ScrollArea
 using Fugl: HorizontalScrollArea, Row, Fugl.Text, TextStyle, Card, HorizontalScrollState, ScrollAreaStyle, Container, ContainerStyle
 
 function MyApp()

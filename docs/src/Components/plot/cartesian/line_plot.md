@@ -75,8 +75,7 @@ nothing #hide
 
 ## Fixed Axis Bounds Example
 
-``` @example FixedBoundsExample
-using Fugl
+``` @example PlotExample
 using Fugl: Text, LinePlotElement, SOLID
 
 function MyApp()
@@ -128,8 +127,7 @@ nothing #hide
 
 ## State Management Example
 
-``` @example StateManagementExample
-using Fugl
+``` @example PlotExample
 using Fugl: Text, TextButton, LinePlotElement, SOLID
 
 function MyApp()

@@ -17,9 +17,7 @@ nothing #hide
 
 You can add a child component to a cointainer, as such:
 
-``` @example ContainerExample2
-using Fugl
-
+``` @example ContainerExample
 function MyApp()
     BaseContainer(
         BaseContainer()
@@ -34,9 +32,7 @@ nothing #hide
 
 ## Style
 
-``` @example ContainerStyle
-using Fugl
-
+``` @example ContainerExample
 my_style = ContainerStyle(;
     background_color=Vec4{Float32}(0.3f0, 0.7f0, 0.7f0, 1.0f0),
     border_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),
@@ -69,9 +65,7 @@ nothing #hide
 
 ### Corner Radius
 
-```@example ContainerCornerRadius
-using Fugl
-
+```@example ContainerExample
 function MyApp()
     BaseContainer(
         IntrinsicRow([
@@ -90,9 +84,7 @@ nothing #hide
 
 ### Border Width
 
-```@example ContainerBorderWidth
-using Fugl
-
+```@example ContainerExample
 function MyApp()
     BaseContainer(
         IntrinsicRow([
@@ -113,9 +105,7 @@ nothing #hide
 
 `Containers` wraps `BaseContainer` and introduce interactive states (hover, pressed) and disabled states with custom styling:
 
-```@example ContainerInteraction
-using Fugl
-
+```@example ContainerExample
 # Dark mode container styles
 const CONTAINER_STYLE = ContainerStyle(
     background_color=Vec4f(0.08, 0.10, 0.14, 1.0f0),

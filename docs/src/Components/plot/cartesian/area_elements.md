@@ -11,7 +11,7 @@ Area elements do not affect auto-scaling.
 
 `XAreaElement` draws a vertical band between two X data-space values, spanning the full visible Y range.
 
-``` @example XAreaExample
+``` @example AreaExample
 using Fugl
 using Fugl: Text, LinePlotElement, XAreaElement, SOLID
 
@@ -69,8 +69,7 @@ nothing #hide
 
 `YAreaElement` draws a horizontal band between two Y data-space values, spanning the full visible X range.
 
-``` @example YAreaExample
-using Fugl
+``` @example AreaExample
 using Fugl: Text, LinePlotElement, YAreaElement, SOLID
 
 function MyApp()
