@@ -204,7 +204,13 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
 end
 
 function detect_click(view::CheckBoxView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
-    is_mouse_inside = inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
+    # Use the measured size for hit-testing so clicks outside the checkbox+label
+    # area are ignored, regardless of how much space the parent allocated.
+    # Apply the same vertical centering offset used in interpret_view.
+    hit_width, hit_height = measure(view)
+    y_offset = (height - hit_height) / 2.0f0
+    is_mouse_inside = mouse_state.x >= x && mouse_state.x <= x + hit_width &&
+                      mouse_state.y >= y + y_offset && mouse_state.y <= y + y_offset + hit_height
 
     # Track interaction state if provided
     if view.interaction_state !== nothing
