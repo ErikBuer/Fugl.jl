@@ -6,7 +6,7 @@ click-based:
 
 ## Basic Usage
 
-```@example FileExplorerBasic
+```@example FileExplorer
 using Fugl
 
 fe_state = Ref(FileExplorerState(homedir()))
@@ -29,9 +29,7 @@ nothing #hide
 
 Wrap the explorer in a `VerticalScrollArea` so that large directories can be scrolled.
 
-```@example FileExplorerScroll
-using Fugl
-
+```@example FileExplorer
 fe_state     = Ref(FileExplorerState(homedir()))
 scroll_state = Ref(VerticalScrollState())
 
@@ -58,9 +56,7 @@ nothing #hide
 file icon per extension. All icons are single `Char` values — only monochrome glyphs
 from the loaded font are supported (no emoji).
 
-```@example FileExplorerIcons
-using Fugl
-
+```@example FileExplorer
 fe_state     = Ref(FileExplorerState(homedir()))
 scroll_state = Ref(VerticalScrollState())
 
@@ -93,9 +89,7 @@ nothing #hide
 
 Use `FileExplorerStyle` to control colours, row height, and indent width.
 
-```@example FileExplorerStyle
-using Fugl
-
+```@example FileExplorer
 fe_state     = Ref(FileExplorerState(homedir()))
 scroll_state = Ref(VerticalScrollState())
 

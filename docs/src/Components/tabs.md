@@ -4,7 +4,7 @@
 
 The Tabs component requires user-managed state to track the selected tab index.
 
-```@example TabsBasic
+```@example Tabs
 using Fugl
 
 selected_tab = Ref(1)
@@ -31,8 +31,7 @@ nothing #hide
 
 A dark-themed tabs interface using border color to indicate selection.
 
-```@example TabsDark
-using Fugl
+```@example Tabs
 
 selected_tab_dark = Ref(1)
 
@@ -92,8 +91,7 @@ nothing #hide
 
 Customize the appearance of tabs with rounded corners.
 
-```@example TabsCorners
-using Fugl
+```@example Tabs
 
 tab_state1 = Ref(1)
 tab_state2 = Ref(1)
@@ -149,8 +147,7 @@ nothing #hide
 
 Customize the appearance of tab text.
 
-```@example TabsText
-using Fugl
+```@example Tabs
 
 tab_custom = Ref(2)
 
@@ -190,8 +187,7 @@ nothing #hide
 
 `hover_style` is applied to unselected tabs when the cursor is over them, giving visual feedback before clicking.
 
-```@example TabsHover
-using Fugl
+```@example Tabs
 
 tab_hover = Ref(1)
 
@@ -238,8 +234,7 @@ nothing #hide
 
 Tabs can have fixed or flexible widths. Use `NaN32` for flexible tabs that share space equally, or specify a width in pixels for fixed-width tabs. This is useful for creating special tabs like "add new" buttons.
 
-```@example TabsFixed
-using Fugl
+```@example Tabs
 
 
 

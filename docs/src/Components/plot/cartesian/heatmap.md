@@ -93,8 +93,7 @@ NaN values in the data will be displayed in the specified `nan_color` regardless
 
 ## Multiple Colormaps Example
 
-``` @example MultipleColormapsExample
-using Fugl
+``` @example HeatmapExample
 using Fugl: Text, HeatmapElement
 
 function MyApp()
@@ -165,8 +164,7 @@ nothing #hide
 
 The API support custom colors for NaN-values.
 
-``` @example NaNExample
-using Fugl
+``` @example HeatmapExample
 using Fugl: Text, HeatmapElement
 
 function MyApp()
@@ -221,8 +219,7 @@ nothing #hide
 
 You can also have a colored NaN cell in grayscale plots.
 
-``` @example GrayscaleNaNExample
-using Fugl
+``` @example HeatmapExample
 using Fugl: Text, HeatmapElement
 
 function MyApp()
@@ -273,8 +270,7 @@ nothing #hide
 
 ## Checkerboard Example
 
-``` @example CheckerboardExample
-using Fugl
+``` @example HeatmapExample
 using Fugl: Text, HeatmapElement
 
 function MyApp()
@@ -312,8 +308,7 @@ nothing #hide
 
 ## No Axes Example
 
-``` @example NoAxesExample
-using Fugl
+``` @example HeatmapExample
 using Fugl: Text, HeatmapElement
 
 function MyApp()

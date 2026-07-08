@@ -2,7 +2,7 @@
 
 A tree componnent, primarily intended to show file structure/select files.
 
-```@example TreeExample
+```@example Tree
 using Fugl
 
 function MyApp()
@@ -28,9 +28,7 @@ nothing #hide
 
 ## Dark Mode Example
 
-```@example TreeDarkExample
-using Fugl
-
+```@example Tree
 function MyApp()
     project_dir = pwd()
     items = [item for item in walkdir(project_dir)]
@@ -91,9 +89,7 @@ nothing #hide
 
 ## Empty contents
 
-```@example TreeEmptyExample
-using Fugl
-
+```@example Tree
 function MyApp()
     tree_state = Ref(TreeState(nothing))
     Card("Explorer", Tree(tree_state[]))
@@ -107,9 +103,7 @@ nothing #hide
 
 ---
 
-```@example TreeEmptyFolderExample
-using Fugl
-
+```@example Tree
 function MyApp()
     empty_node = TreeNode("EmptyFolder", TreeNode[], true)
     tree_state = Ref(TreeState(empty_node; open_folders=Set([empty_node.name])))

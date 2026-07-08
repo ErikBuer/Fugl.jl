@@ -6,7 +6,7 @@ State is managed externally via `MultiSelectState`, following the same pattern a
 
 ## Basic Usage
 
-```@example MultiSelectBasic
+```@example MultiSelectList
 using Fugl
 
 options = ["Apple", "Banana", "Cherry", "Date", "Elderberry"]
@@ -34,9 +34,7 @@ nothing #hide
 
 Pass a `Set{Int}` of 1-based indices to `MultiSelectState` to start with items already selected.
 
-```@example MultiSelectPreselected
-using Fugl
-
+```@example MultiSelectList
 toppings = ["Cheese", "Tomato", "Pepperoni", "Mushrooms", "Olives", "Jalapeños"]
 
 # Start with Cheese and Pepperoni pre-selected
@@ -62,9 +60,7 @@ nothing #hide
 
 ## Dark Theme
 
-```@example MultiSelectDark
-using Fugl
-
+```@example MultiSelectList
 fruits = ["Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grape"]
 toppings = ["Cheese", "Tomato", "Pepperoni", "Mushrooms", "Olives", "Jalapeños"]
 
@@ -142,9 +138,7 @@ nothing #hide
 
 Wrap in a `VerticalScrollArea` and `FixedHeight` to make a long list scrollable.
 
-```@example MultiSelectScroll
-using Fugl
-
+```@example MultiSelectList
 long_options = ["Option $i" for i in 1:20]
 long_state   = Ref(MultiSelectState(length(long_options)))
 scroll_state = Ref(VerticalScrollState())

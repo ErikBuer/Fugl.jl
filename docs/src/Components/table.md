@@ -4,7 +4,7 @@ The `Table` component provides a flexible way to display tabular data with custo
 
 ## Basic Table
 
-```@example table_basic
+```@example Table
 using Fugl
 using Fugl: Table, TableStyle, Card
 
@@ -33,8 +33,7 @@ nothing # hide
 
 ## Styled Table with Alternating Row Colors
 
-```@example table_styled
-using Fugl
+```@example Table
 using Fugl: Table, TableStyle, TextStyle, Card
 
 function MyApp()
@@ -83,8 +82,7 @@ nothing # hide
 
 ## Text Clipping and Wrapping
 
-```@example table_clipping
-using Fugl
+```@example Table
 using Fugl: Table, TableStyle, TextStyle, Card, IntrinsicColumn
 
 function MyApp()
@@ -138,8 +136,7 @@ nothing # hide
 
 ## Interactive Table
 
-```@example table_interactive
-using Fugl
+```@example Table
 using Fugl: Table, TableStyle, TextStyle, Card
 
 function MyApp()
@@ -180,8 +177,7 @@ nothing # hide
 
 ## Table with Custom Column Widths
 
-```@example table_state
-using Fugl
+```@example Table
 
 function MyApp()
     # Product data with varying content lengths

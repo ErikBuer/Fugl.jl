@@ -30,10 +30,14 @@ end
 
 struct CheckBoxView <: AbstractView
     checked::Bool                    # Current checked state
-    style::CheckBoxStyle            # Visual styling
-    label::String                   # Optional label text
-    on_change::Function             # Callback when checkbox is clicked: (new_value::Bool) -> nothing
-    on_click::Function              # Additional click callback
+    style::CheckBoxStyle             # Visual styling (default)
+    hover_style::Union{Nothing,CheckBoxStyle}    # Style when hovered
+    pressed_style::Union{Nothing,CheckBoxStyle}  # Style when pressed
+    label::String                    # Optional label text
+    on_change::Function              # Callback when checkbox is clicked: (new_value::Bool) -> nothing
+    on_click::Function               # Additional click callback
+    interaction_state::Union{Nothing,InteractionState}
+    on_interaction_state_change::Function
 end
 
 """
@@ -67,21 +71,37 @@ function CheckBox(
     checked::Bool;
     label::String="",
     style::CheckBoxStyle=CheckBoxStyle(),
+    hover_style::Union{Nothing,CheckBoxStyle}=nothing,
+    pressed_style::Union{Nothing,CheckBoxStyle}=nothing,
     on_change::Function=(new_value::Bool) -> nothing,
-    on_click::Function=() -> nothing
+    on_click::Function=() -> nothing,
+    interaction_state::Union{Nothing,InteractionState}=nothing,
+    on_interaction_state_change::Function=(new_state) -> nothing
 )
-    return CheckBoxView(checked, style, label, on_change, on_click)
+    return CheckBoxView(checked, style, hover_style, pressed_style, label, on_change, on_click, interaction_state, on_interaction_state_change)
+end
+
+function _active_style(view::CheckBoxView)::CheckBoxStyle
+    if view.interaction_state !== nothing
+        if view.interaction_state.is_pressed && view.pressed_style !== nothing
+            return view.pressed_style
+        elseif view.interaction_state.is_hovered && view.hover_style !== nothing
+            return view.hover_style
+        end
+    end
+    return view.style
 end
 
 function measure(view::CheckBoxView)::Tuple{Float32,Float32}
-    checkbox_size = view.style.size + 2 * view.style.padding
+    style = _active_style(view)
+    checkbox_size = style.size + 2 * style.padding
 
     if isempty(view.label)
         return (checkbox_size, checkbox_size)
     else
         # Measure label text
-        label_width = measure_word_width_cached(view.style.label_style, view.label)
-        label_height = Float32(view.style.label_style.size_points)
+        label_width = measure_word_width_cached(style.label_style, view.label)
+        label_height = Float32(style.label_style.size_points)
 
         # Total width: checkbox + spacing + label
         spacing = 8.0f0  # Gap between checkbox and label
@@ -93,27 +113,26 @@ function measure(view::CheckBoxView)::Tuple{Float32,Float32}
 end
 
 function measure_width(view::CheckBoxView, available_height::Float32)::Float32
-    checkbox_size = view.style.size + 2 * view.style.padding
+    style = _active_style(view)
+    checkbox_size = style.size + 2 * style.padding
 
     if isempty(view.label)
         return checkbox_size
     else
-        # Measure label text
-        label_width = measure_word_width_cached(view.style.label_style, view.label)
-
-        # Total width: checkbox + spacing + label
+        label_width = measure_word_width_cached(style.label_style, view.label)
         spacing = 8.0f0
         return checkbox_size + spacing + label_width
     end
 end
 
 function measure_height(view::CheckBoxView, available_width::Float32)::Float32
-    checkbox_size = view.style.size + 2 * view.style.padding
+    style = _active_style(view)
+    checkbox_size = style.size + 2 * style.padding
 
     if isempty(view.label)
         return checkbox_size
     else
-        label_height = Float32(view.style.label_style.size_points)
+        label_height = Float32(style.label_style.size_points)
         return max(checkbox_size, label_height)
     end
 end
@@ -123,15 +142,16 @@ function apply_layout(view::CheckBoxView, x::Float32, y::Float32, width::Float32
 end
 
 function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float32, height::Float32, projection_matrix::Mat4{Float32}, cursor_position::Point2f, window_size::Size)
-    checkbox_size = view.style.size
-    padding = view.style.padding
+    style = _active_style(view)
+    checkbox_size = style.size
+    padding = style.padding
 
     # Position the checkbox (vertically centered)
     checkbox_x = x + padding
     checkbox_y = y + (height - checkbox_size) / 2
 
     # Draw checkbox background
-    bg_color = view.checked ? view.style.background_color_checked : view.style.background_color
+    bg_color = view.checked ? style.background_color_checked : style.background_color
 
     checkbox_vertices = [
         Point2f(checkbox_x, checkbox_y),
@@ -146,11 +166,11 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
         checkbox_size,
         checkbox_size,
         bg_color,
-        view.style.border_color,
-        view.style.border_width,
-        view.style.corner_radius,
+        style.border_color,
+        style.border_width,
+        style.corner_radius,
         projection_matrix,
-        1.0f0  # Anti-aliasing width
+        1.0f0
     )
 
     # Draw checkmark if checked
@@ -159,7 +179,7 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
             checkbox_x,
             checkbox_y,
             checkbox_size,
-            view.style.check_color,
+            style.check_color,
             projection_matrix
         )
     end
@@ -168,38 +188,58 @@ function interpret_view(view::CheckBoxView, x::Float32, y::Float32, width::Float
     if !isempty(view.label)
         spacing = 8.0f0
         label_x = checkbox_x + checkbox_size + spacing
-        label_y = y + (height + view.style.label_style.size_points) / 2  # Vertically center the text
+        label_y = y + (height + style.label_style.size_points) / 2
 
-        label_font = get_font(view.style.label_style)
+        label_font = get_font(style.label_style)
         draw_text(
             label_font,
             view.label,
             label_x,
             label_y,
-            view.style.label_style.size_points,
+            style.label_style.size_points,
             projection_matrix,
-            view.style.label_style.color
+            style.label_style.color
         )
     end
 end
 
 function detect_click(view::CheckBoxView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
-    # Check if mouse is within the component bounds
-    if inside_component(view, x, y, width, height, mouse_state.x, mouse_state.y)
-        if get(mouse_state.was_clicked, LeftButton, false)
-            # Toggle the checkbox value
-            new_value = !view.checked
+    # Use the measured size for hit-testing so clicks outside the checkbox+label
+    # area are ignored, regardless of how much space the parent allocated.
+    # Apply the same vertical centering offset used in interpret_view.
+    hit_width, hit_height = measure(view)
+    y_offset = (height - hit_height) / 2.0f0
+    is_mouse_inside = mouse_state.x >= x && mouse_state.x <= x + hit_width &&
+                      mouse_state.y >= y + y_offset && mouse_state.y <= y + y_offset + hit_height
 
-            runn_callbacks = () -> begin
-                # Call the change callback
-                view.on_change(new_value)
-
-                # Call additional click callback
-                view.on_click()
-            end
-
-            return ClickResult(Int32(parent_z + 1), runn_callbacks)
+    # Track interaction state if provided
+    if view.interaction_state !== nothing
+        is_mouse_pressed = view.interaction_state.is_pressed
+        if mouse_state.mouse_down[LeftButton] && is_mouse_inside
+            is_mouse_pressed = true
+        elseif mouse_state.mouse_up[LeftButton]
+            is_mouse_pressed = false
         end
+
+        new_interaction_state = update_interaction_state(
+            view.interaction_state;
+            is_mouse_inside=is_mouse_inside,
+            is_mouse_pressed=is_mouse_pressed,
+            current_time=time()
+        )
+
+        if new_interaction_state != view.interaction_state
+            view.on_interaction_state_change(new_interaction_state)
+        end
+    end
+
+    if is_mouse_inside && get(mouse_state.was_clicked, LeftButton, false)
+        new_value = !view.checked
+        callbacks = () -> begin
+            view.on_change(new_value)
+            view.on_click()
+        end
+        return ClickResult(Int32(parent_z + 1), callbacks)
     end
 
     return nothing

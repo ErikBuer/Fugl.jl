@@ -3,9 +3,8 @@
 The `Dropdown` component provides a dropdown selection interface that allows users to choose from a list of options.
 It follows the same immutable state management pattern as other Fugl components.
 
-```@example DropDown
+```@example Dropdown
 using Fugl
-using Fugl: Text
 
 # Initialize dropdown state
 options = ["Small", "Medium", "Large", "Extra Large"]
@@ -41,10 +40,7 @@ nothing #hide
 
 ## Dark Theme Example
 
-```@example DarkDropdown
-using Fugl
-using Fugl: Text
-
+```@example Dropdown
 # Initialize dark dropdown state
 dark_options = ["Dark Small", "Dark Medium", "Dark Large", "Dark Extra Large"]
 dark_dropdown_state = Ref(DropdownState(dark_options; selected_index=2, is_open=true)) # force it open for demonstration
@@ -100,11 +96,9 @@ nothing #hide
 
 ![Dark Dropdown](dark_dropdown.png)
 
-
 ## IntrinsicColumn with Multiple Dropdowns
 
-```@example DarkDropdown
-
+```@example Dropdown
 # Initialize states for multiple dropdowns
 size_options = ["Small", "Medium", "Large", "Extra Large"]
 color_options = ["Red", "Green", "Blue", "Yellow", "Purple"]

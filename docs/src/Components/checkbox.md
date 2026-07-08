@@ -6,7 +6,7 @@ The `CheckBox` component provides a boolean input control with an optional text 
 
 The CheckBox requires user-managed state using a `Ref{Bool}` and provides callbacks for state changes.
 
-```@example CheckBoxBasic
+```@example CheckBox
 using Fugl
 
 # Checkbox state  
@@ -45,9 +45,7 @@ nothing #hide
 
 ## Dark Theme Example
 
-```@example CheckBoxDark
-using Fugl
-
+```@example CheckBox
 # Checkbox states
 checkbox_state3 = Ref(false)
 checkbox_state4 = Ref(true)

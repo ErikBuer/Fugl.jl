@@ -8,9 +8,8 @@ State is managed externally via an immutable `SpinnerState` and an `on_state_cha
 
 Fugl ships with several predefined symbol sequences. Each has a convenience constructor.
 
-```@example SpinnerTypes
+```@example Spinner
 using Fugl
-using Fugl: Text
 
 s1 = Ref(SpinnerState())
 s2 = Ref(SpinnerState())
@@ -27,27 +26,27 @@ function MyApp()
         IntrinsicColumn([
             IntrinsicRow([
                 FixedWidth(Spinner(state = s1[], on_state_change = ns -> s1[] = ns, text_style = spinner_style), 32.0f0),
-                Text("Spinner  (default)", style = label_style)
+                Fugl.Text("Spinner  (default)", style = label_style)
             ], spacing = 10.0f0),
             IntrinsicRow([
                 FixedWidth(DotsSpinner(state = s2[], on_state_change = ns -> s2[] = ns, text_style = spinner_style), 32.0f0),
-                Text("DotsSpinner", style = label_style)
+                Fugl.Text("DotsSpinner", style = label_style)
             ], spacing = 10.0f0),
             IntrinsicRow([
                 FixedWidth(DotsLongSpinner(state = s3[], on_state_change = ns -> s3[] = ns, text_style = spinner_style), 32.0f0),
-                Text("DotsLongSpinner", style = label_style)
+                Fugl.Text("DotsLongSpinner", style = label_style)
             ], spacing = 10.0f0),
             IntrinsicRow([
                 FixedWidth(CircleSpinner(state = s4[], on_state_change = ns -> s4[] = ns, text_style = spinner_style), 32.0f0),
-                Text("CircleSpinner", style = label_style)
+                Fugl.Text("CircleSpinner", style = label_style)
             ], spacing = 10.0f0),
             IntrinsicRow([
                 FixedWidth(ArrowsSpinner(state = s5[], on_state_change = ns -> s5[] = ns, text_style = spinner_style), 32.0f0),
-                Text("ArrowsSpinner", style = label_style)
+                Fugl.Text("ArrowsSpinner", style = label_style)
             ], spacing = 10.0f0),
             IntrinsicRow([
                 FixedWidth(BarsSpinner(state = s6[], on_state_change = ns -> s6[] = ns, text_style = spinner_style), 32.0f0),
-                Text("BarsSpinner", style = label_style)
+                Fugl.Text("BarsSpinner", style = label_style)
             ], spacing = 10.0f0),
         ], spacing = 12.0f0),
         style = ContainerStyle(
@@ -67,10 +66,7 @@ nothing #hide
 
 The `is_spinning` field on `SpinnerState` pauses or resumes animation. Toggle it by constructing a new state and propagating it via the callback.
 
-```@example SpinnerControl
-using Fugl
-using Fugl: Text
-
+```@example Spinner
 spinner_state = Ref(SpinnerState())
 btn_state     = Ref(InteractionState())
 
@@ -89,7 +85,7 @@ function MyApp()
                 ),
                 36.0f0
             ),
-            Text("Loading…", style = label_style),
+            Fugl.Text("Loading…", style = label_style),
             FixedWidth(
                 TextButton(
                     spinner_state[].is_spinning ? "Pause" : "Resume",
@@ -120,9 +116,7 @@ nothing #hide
 
 Pass any `Vector{Char}` to use a completely custom animation sequence.
 
-```@example SpinnerCustom
-using Fugl
-
+```@example Spinner
 pacman_symbols = ['𜱫', '𜱬', '𜱭', '𜱮']
 spinner_state  = Ref(SpinnerState())
 spinner_style  = TextStyle(size_points = 28, color = Vec4f(0.4, 0.6, 0.9, 1.0))
