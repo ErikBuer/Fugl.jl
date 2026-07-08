@@ -21,12 +21,20 @@ jobs:
     environment: production
     steps:
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y xorg-dev mesa-utils xvfb libgl1 freeglut3-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev xsettingsd x11-xserver-utils
+        run: |
+          # Remove Microsoft repos that intermittently fail signature validation on GitHub-hosted runners
+          sudo rm -f /etc/apt/sources.list.d/azure-cli.list \
+                     /etc/apt/sources.list.d/microsoft-prod.list \
+                     /etc/apt/sources.list.d/packages.microsoft.com*.list
+          sudo apt-get update && sudo apt-get install -y \
+            xorg-dev mesa-utils xvfb libgl1 freeglut3-dev \
+            libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev \
+            xsettingsd x11-xserver-utils
 
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@latest
         with:
-          version: '1.11'
+          version: '1.12'
 
       - name: Install Julia dependencies
         run: |
