@@ -317,6 +317,7 @@ function render_polar_content(
             state.theta_start,
             style.label_color,
             style.label_size_points,
+            style.radial_significant_digits,
             projection_matrix
         )
     end

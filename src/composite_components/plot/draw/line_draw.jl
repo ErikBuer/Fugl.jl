@@ -292,6 +292,8 @@ function draw_axes_with_labels(
     width::Float32,
     projection_matrix_points::Mat4{Float32};    # Projection matrix for points, not screen pixels (used for axis lines and tick marks)
     label_size_points::Int=12,
+    x_tick_significant_digits::Int=4,
+    y_tick_significant_digits::Int=3,
     label_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
     label_offset_px::Float32=5.0f0,
     axis_color::Vec4{Float32}=Vec4{Float32}(0.0, 0.0, 0.0, 1.0),
@@ -389,13 +391,23 @@ function draw_axes_with_labels(
     # Get font once for all label rendering — avoids repeated Dict lookups
     font = get_default_font()
 
+    # Tick spacing keeps adjacent labels distinct even when rounding for the budget
+    x_tick_step = length(x_ticks) >= 2 ? x_ticks[2] - x_ticks[1] : nothing
+    y_tick_step = length(y_ticks) >= 2 ? y_ticks[2] - y_ticks[1] : nothing
+
+    # Deep zoom: when ticks share a large common value with tiny spacing, factor
+    # that value out as a per-axis offset (drawn once as an annotation) so the
+    # tick labels only show the varying part
+    x_offset = resolve_tick_offset(x_ticks, x_tick_significant_digits)
+    y_offset = resolve_tick_offset(y_ticks, y_tick_significant_digits)
+
     # Draw x-axis labels along the bottom edge (outside plot area) if x-tick labels are enabled
     if show_x_tick_labels
         for x_tick in x_ticks
             if x_tick >= plot_bounds.x && x_tick <= plot_bounds.x + plot_bounds.width
                 tick_screen_x, tick_screen_y = transform_func(x_tick, plot_bounds.y)
 
-                label_text = string(round(x_tick, digits=2))
+                label_text = format_tick_label(Float64(x_tick) - x_offset, x_tick_significant_digits; step=x_tick_step)
 
                 # Centered under the tick, text top anchored below the tick mark
                 label_y = tick_screen_y + tick_length_px + label_offset_px
@@ -411,7 +423,7 @@ function draw_axes_with_labels(
             if y_tick >= plot_bounds.y && y_tick <= plot_bounds.y + plot_bounds.height
                 tick_screen_x, tick_screen_y = transform_func(plot_bounds.x, y_tick)
 
-                label_text = string(round(y_tick, digits=2))
+                label_text = format_tick_label(Float64(y_tick) - y_offset, y_tick_significant_digits; step=y_tick_step)
 
                 # Right edge anchored left of the tick mark, vertically centered on the tick
                 label_x = tick_screen_x - tick_length_px - label_offset_px
@@ -419,6 +431,22 @@ function draw_axes_with_labels(
                     anchor_x=:right, anchor_y=:middle)
             end
         end
+    end
+
+    # Draw the factored-out axis offsets once, inside the plot corners:
+    # y offset at the top-left (by the y axis), x offset at the bottom-right
+    annotation_pad = 4.0f0
+    if show_y_tick_labels && y_offset != 0.0
+        corner_x, corner_y = transform_func(plot_bounds.x, plot_bounds.y + plot_bounds.height)
+        offset_text = format_axis_offset(y_offset, Float64(y_tick_step))
+        draw_text_anchored(font, offset_text, corner_x + annotation_pad, corner_y + annotation_pad, label_size_points, projection_matrix_points, label_color;
+            anchor_x=:left, anchor_y=:top)
+    end
+    if show_x_tick_labels && x_offset != 0.0
+        corner_x, corner_y = transform_func(plot_bounds.x + plot_bounds.width, plot_bounds.y)
+        offset_text = format_axis_offset(x_offset, Float64(x_tick_step))
+        draw_text_anchored(font, offset_text, corner_x - annotation_pad, corner_y - annotation_pad, label_size_points, projection_matrix_points, label_color;
+            anchor_x=:right, anchor_y=:bottom)
     end
 
     # Draw axis labels if enabled
@@ -442,8 +470,9 @@ function draw_axes_with_labels(
         # Position y-axis label centered to the left of the plot, left of tick labels
         left_edge_screen_x, left_edge_screen_y = transform_func(plot_bounds.x, plot_bounds.y + plot_bounds.height / 2)
 
-        # For rotated text, adjust positioning
-        y_label_x = left_edge_screen_x - tick_length_px - label_offset_px - Float32(label_size_points) * 3.0f0 - label_offset_px  # Left of tick labels
+        # For rotated text, position left of the space reserved for tick labels
+        tick_labels_width = measure_word_width_cached(font, "0", label_size_points) * (y_tick_significant_digits + 5)
+        y_label_x = left_edge_screen_x - tick_length_px - label_offset_px - tick_labels_width - label_offset_px - y_label_width
         y_label_y = left_edge_screen_y - y_label_height / 2.0f0  # Center vertically
 
         # Render the y-axis label

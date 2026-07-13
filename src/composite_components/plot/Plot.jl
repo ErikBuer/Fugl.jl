@@ -144,16 +144,74 @@ function render_plot_to_framebuffer(view::PlotView, cache::RenderCache, width_po
     end
 end
 
+# Axis rendering constants shared by inset computation and label drawing
+const TICK_LENGTH_PX = 8.0f0
+const TICK_LABEL_OFFSET_PX = 5.0f0
+
+"""
+    plot_area_insets(view::PlotView)::NTuple{4,Float32}
+
+Compute the `(left, top, right, bottom)` insets between the component bounds and
+the plot area. `style.padding` is the outer margin on every side. The space the
+tick labels need is measured from the actual label strings for the current view
+bounds (via `tick_label_strings`, the same formatting the axis renderer draws),
+so the reserved columns always fit exactly.
+"""
+function plot_area_insets(view::PlotView)::NTuple{4,Float32}
+    style = view.style
+    font = get_default_font()
+    line_height = Float32(style.label_size_points)
+    tick_text_height = line_height * 1.3f0 + 2.0f0
+    axis_title_height = Float32(style.label_size_points + 4) * 1.3f0
+
+    effective_bounds = get_effective_bounds(view.state, view.elements)
+
+    left = style.padding
+    if style.show_y_tick_labels
+        y_ticks = generate_tick_positions(effective_bounds.y, effective_bounds.y + effective_bounds.height)
+        y_labels, _ = tick_label_strings(y_ticks, style.y_tick_significant_digits)
+        widest = isempty(y_labels) ? 0.0f0 :
+                 maximum(measure_word_width_cached(font, label, style.label_size_points) for label in y_labels)
+        left += TICK_LENGTH_PX + TICK_LABEL_OFFSET_PX + widest
+    end
+    if style.show_y_label && !isempty(style.y_label)
+        left += axis_title_height + TICK_LABEL_OFFSET_PX
+    end
+
+    bottom = style.padding
+    if style.show_x_tick_labels
+        bottom += TICK_LENGTH_PX + TICK_LABEL_OFFSET_PX + tick_text_height
+    end
+    if style.show_x_label && !isempty(style.x_label)
+        bottom += axis_title_height + TICK_LABEL_OFFSET_PX
+    end
+
+    # Keep the topmost y tick label and the rightmost x tick label from clipping:
+    # x labels are centered under their tick, so half the widest label can stick out
+    top = style.show_y_tick_labels ? max(style.padding, tick_text_height / 2.0f0) : style.padding
+    right = style.padding
+    if style.show_x_tick_labels
+        x_ticks = generate_tick_positions(effective_bounds.x, effective_bounds.x + effective_bounds.width)
+        x_labels, _ = tick_label_strings(x_ticks, style.x_tick_significant_digits)
+        widest = isempty(x_labels) ? 0.0f0 :
+                 maximum(measure_word_width_cached(font, label, style.label_size_points) for label in x_labels)
+        right = max(style.padding, widest / 2.0f0)
+    end
+
+    return (left, top, right, bottom)
+end
+
 function render_plot_content(view::PlotView, x_points::Float32, y_points::Float32, width_points::Float32, height_points::Float32, projection_matrix_points::Mat4{Float32})
     state = view.state
     style = view.style
     elements = view.elements
 
-    # Calculate plot area (subtract padding)
-    plot_x = x_points + style.padding
-    plot_y = y_points + style.padding
-    plot_width = width_points - 2 * style.padding
-    plot_height = height_points - 2 * style.padding
+    # Calculate plot area (component bounds minus computed label insets)
+    inset_left, inset_top, inset_right, inset_bottom = plot_area_insets(view)
+    plot_x = x_points + inset_left
+    plot_y = y_points + inset_top
+    plot_width = width_points - inset_left - inset_right
+    plot_height = height_points - inset_top - inset_bottom
 
     screen_bounds_points = Rectangle(x_points, y_points, width_points, height_points)
 
@@ -212,10 +270,12 @@ function render_plot_content(view::PlotView, x_points::Float32, y_points::Float3
             4.0f0,  # Axis line width
             projection_matrix_points;
             label_size_points=style.label_size_points,
+            x_tick_significant_digits=style.x_tick_significant_digits,
+            y_tick_significant_digits=style.y_tick_significant_digits,
             label_color=style.axis_color,
             axis_color=style.axis_color,
-            label_offset_px=5.0f0,
-            tick_length_px=8.0f0,
+            label_offset_px=TICK_LABEL_OFFSET_PX,
+            tick_length_px=TICK_LENGTH_PX,
             anti_aliasing_width=style.anti_aliasing_width,
             show_left_axis=style.show_left_axis,
             show_right_axis=style.show_right_axis,
@@ -514,10 +574,12 @@ end
 
 function _detect_line_hover(view::PlotView, mouse_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32)
     style = view.style
-    plot_x = x + style.padding
-    plot_y = y + style.padding
-    plot_width = width - 2 * style.padding
-    plot_height = height - 2 * style.padding
+    # Must match the plot area used for rendering
+    inset_left, inset_top, inset_right, inset_bottom = plot_area_insets(view)
+    plot_x = x + inset_left
+    plot_y = y + inset_top
+    plot_width = width - inset_left - inset_right
+    plot_height = height - inset_top - inset_bottom
 
     mouse_x = Float32(mouse_state.x)
     mouse_y = Float32(mouse_state.y)

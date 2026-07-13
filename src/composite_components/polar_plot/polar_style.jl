@@ -22,6 +22,7 @@ struct PolarStyle
     show_angular_labels::Bool
     label_color::Vec4f
     label_size_points::Int
+    radial_significant_digits::Int # Significant digits in radial tick labels; larger magnitudes switch to scientific notation
 
     # Tick marks
     show_radial_ticks::Bool
@@ -58,6 +59,7 @@ function PolarStyle(;
     show_angular_labels::Bool=true,
     label_color::Vec4f=Vec4f(0.2, 0.2, 0.2, 1.0),
     label_size_points::Int=12,
+    radial_significant_digits::Int=3,
     show_radial_ticks::Bool=true,
     radial_tick_size::Float32=6.0f0,
     radial_tick_width::Float32=1.0f0,
@@ -84,6 +86,7 @@ function PolarStyle(;
         show_angular_labels,
         label_color,
         label_size_points,
+        radial_significant_digits,
         show_radial_ticks,
         radial_tick_size,
         radial_tick_width,
@@ -115,6 +118,7 @@ function PolarStyle(base::PolarStyle;
     show_angular_labels=base.show_angular_labels,
     label_color=base.label_color,
     label_size_points=base.label_size_points,
+    radial_significant_digits=base.radial_significant_digits,
     show_radial_ticks=base.show_radial_ticks,
     radial_tick_size=base.radial_tick_size,
     radial_tick_width=base.radial_tick_width,
@@ -141,6 +145,7 @@ function PolarStyle(base::PolarStyle;
         show_angular_labels,
         label_color,
         label_size_points,
+        radial_significant_digits,
         show_radial_ticks,
         radial_tick_size,
         radial_tick_width,
