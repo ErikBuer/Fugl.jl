@@ -79,7 +79,7 @@ function plot_zoom_demo()
         background_color=Vec4{Float32}(0.12f0, 0.12f0, 0.14f0, 1.0f0),  # Dark background
         grid_color=Vec4{Float32}(0.35f0, 0.35f0, 0.4f0, 1.0f0),         # Muted grid
         axis_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),           # Light axes and labels
-        label_size_points=10,
+        label_size_points=16f0,
         show_grid=true,
         show_legend=true
     )
@@ -103,10 +103,29 @@ function plot_zoom_demo()
                             "Reset View";
                             on_click=() -> begin
                                 plot_state[] = PlotState()  # Reset to auto-scale
-                            end
+                            end,
+                            container_style=ContainerStyle(
+                                background_color=Vec4{Float32}(0.2f0, 0.2f0, 0.25f0, 1.0f0),
+                                border_color=Vec4{Float32}(0.4f0, 0.4f0, 0.45f0, 1.0f0),
+                                border_width=1.5f0,
+                                padding=5.0f0
+                            ),
+                            text_style=TextStyle(
+                                color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)
+                            )
                         )
                     )
-                ], spacing=0.0)
+                ], spacing=0.0
+            ),
+            style=ContainerStyle(
+                background_color=Vec4{Float32}(0.15f0, 0.15f0, 0.18f0, 1.0f0),
+                border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.35f0, 1.0f0),
+                border_width=1.5f0,
+                padding=10.0f0
+            ),
+            title_style=TextStyle(
+                color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)
+            )
         )
     end
 

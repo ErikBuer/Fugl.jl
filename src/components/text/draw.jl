@@ -47,6 +47,48 @@ function draw_text(
     return draw_text_batched(font_face, text, snapped_pixel_x, snapped_pixel_y, size_points, pixel_projection_matrix, color, batch; clip_bounds_px=clip_px)
 end
 
+"""
+    draw_text_anchored(font_face, text, x, y, size_points, projection_matrix, color; anchor_x=:left, anchor_y=:baseline, clip_bounds_points=nothing)
+
+Draw a single line of text with `(x, y)` interpreted as an anchor point on the text
+instead of the left/baseline position `draw_text` uses.
+
+- `anchor_x`: `:left`, `:center`, or `:right` edge of the text at `x`
+- `anchor_y`: `:baseline`, `:top`, `:middle`, or `:bottom` of the text at `y`
+
+Vertical metrics match `measure(TextView)`: line height is `size_points` and the
+text block height is `size_points * 1.3 + 2`.
+"""
+function draw_text_anchored(
+    font_face::FreeTypeAbstraction.FTFont,
+    text::AbstractString,
+    x::Float32,
+    y::Float32,
+    size_points::Int,
+    projection_matrix::Mat4{Float32},
+    color::Vec4{Float32};
+    anchor_x::Symbol=:left,
+    anchor_y::Symbol=:baseline,
+    clip_bounds_points::Union{Rectangle,Nothing}=nothing
+)
+    # Point-anchoring is box-alignment in a zero-size container: reuse the
+    # offset helpers backing the Text component so the metrics stay in one place.
+    if anchor_x !== :left
+        text_width = measure_word_width_cached(font_face, text, size_points)
+        x += calculate_horizontal_offset(0.0f0, text_width, anchor_x)
+    end
+
+    line_height = Float32(size_points)
+    baseline_y = if anchor_y === :baseline
+        y
+    else
+        # Single line: total text height matches TextView (line height + descender space)
+        y + calculate_text_vertical_offset(0.0f0, line_height * 1.3f0, line_height, anchor_y)
+    end
+
+    return draw_text(font_face, text, x, baseline_y, size_points, projection_matrix, color; clip_bounds_points=clip_bounds_points)
+end
+
 
 """
     draw_glyph_from_atlas(texture, x, y, width, height, u_min, v_min, u_max, v_max, projection_matrix, color)
