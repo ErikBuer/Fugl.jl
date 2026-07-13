@@ -231,6 +231,7 @@ function draw_radial_labels(
     projection_matrix::Mat4{Float32}
 )
     text_style = TextStyle(size_points=label_size_points, color=label_color)
+    font = get_font(text_style)
 
     # Place labels at theta_start + π/2 (perpendicular to starting direction)
     label_angle = theta_start + Float32(π) / 2.0f0
@@ -257,9 +258,9 @@ function draw_radial_labels(
         label_x = center_x + (radius + 5.0f0) * cos(label_angle)
         label_y = center_y + (radius + 5.0f0) * sin(label_angle)
 
-        # Draw label
-        font = get_font(text_style)
-        draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix, label_color)
+        # Draw label centered on the label position
+        draw_text_anchored(font, label_text, label_x, label_y, label_size_points, projection_matrix, label_color;
+            anchor_x=:center, anchor_y=:middle)
     end
 end
 
@@ -279,6 +280,7 @@ function draw_angular_labels(
     projection_matrix::Mat4{Float32}
 )
     text_style = TextStyle(size_points=label_size_points, color=label_color)
+    font = get_font(text_style)
     label_offset = 15.0f0  # Pixels beyond max radius
 
     for angle in angles
@@ -305,12 +307,8 @@ function draw_angular_labels(
             center_y
         )
 
-        # Center text at label position
-        font = get_font(text_style)
-        text_width = measure_word_width(font, label_text, text_style.size_points)
-        label_x -= text_width / 2.0f0
-
-        # Draw label
-        draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix, label_color)
+        # Draw label centered on the label position
+        draw_text_anchored(font, label_text, label_x, label_y, label_size_points, projection_matrix, label_color;
+            anchor_x=:center, anchor_y=:middle)
     end
 end

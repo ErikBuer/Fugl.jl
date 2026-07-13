@@ -500,24 +500,29 @@ function _draw_smith_labels(
     text_style = TextStyle(size_points=style.label_size_points, color=style.label_color)
     font = get_font(text_style)
 
+    # Resistance labels centered on the real-axis crossing of each circle: Γ = (r - 1) / (r + 1)
     labels = [
-        ("0", -0.98f0, 0.03f0),
-        ("0.2", -0.52f0, 0.03f0),
-        ("0.5", -0.18f0, 0.03f0),
-        ("1", 0.02f0, 0.03f0),
-        ("2", 0.34f0, 0.03f0),
-        ("5", 0.67f0, 0.03f0),
-        ("inf", 0.92f0, 0.03f0)
+        ("0", -1.0f0),
+        ("0.2", -0.6667f0),
+        ("0.5", -0.3333f0),
+        ("1", 0.0f0),
+        ("2", 0.3333f0),
+        ("5", 0.6667f0),
+        ("inf", 1.0f0)
     ]
 
-    for (txt, gx, gy) in labels
+    label_gap = 0.03f0 * chart_radius  # Gap between text bottom and the real axis
+    for (txt, gx) in labels
         tx = center_x + gx * chart_radius
-        ty = center_y - gy * chart_radius
-        draw_text(font, txt, tx, ty, text_style.size_points, projection_matrix, style.label_color)
+        draw_text_anchored(font, txt, tx, center_y - label_gap, text_style.size_points, projection_matrix, style.label_color;
+            anchor_x=:center, anchor_y=:bottom)
     end
 
-    draw_text(font, "+j", center_x + 0.03f0 * chart_radius, center_y - 0.76f0 * chart_radius, text_style.size_points, projection_matrix, style.label_color)
-    draw_text(font, "-j", center_x + 0.03f0 * chart_radius, center_y + 0.81f0 * chart_radius, text_style.size_points, projection_matrix, style.label_color)
+    # Reactance labels just right of the vertical center line, symmetric about the real axis
+    draw_text_anchored(font, "+j", center_x + 0.03f0 * chart_radius, center_y - 0.78f0 * chart_radius, text_style.size_points, projection_matrix, style.label_color;
+        anchor_x=:left, anchor_y=:middle)
+    draw_text_anchored(font, "-j", center_x + 0.03f0 * chart_radius, center_y + 0.78f0 * chart_radius, text_style.size_points, projection_matrix, style.label_color;
+        anchor_x=:left, anchor_y=:middle)
 end
 
 function _draw_trace(

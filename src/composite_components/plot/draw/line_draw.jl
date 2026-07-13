@@ -388,10 +388,6 @@ function draw_axes_with_labels(
 
     # Get font once for all label rendering — avoids repeated Dict lookups
     font = get_default_font()
-    # line_height matches what TextView.measure returns for a single line
-    line_height = Float32(label_size_points)
-    # text_height = line_height * 1.3 + 2 (matches measure(TextView))
-    tick_text_height = line_height * 1.3f0 + 2.0f0
 
     # Draw x-axis labels along the bottom edge (outside plot area) if x-tick labels are enabled
     if show_x_tick_labels
@@ -401,12 +397,10 @@ function draw_axes_with_labels(
 
                 label_text = string(round(x_tick, digits=2))
 
-                text_width = measure_word_width_cached(font, label_text, label_size_points) + 2.0f0
-                label_x = tick_screen_x - text_width / 2.0f0
-                # draw_text y is the baseline; for :top alignment that is component_y + line_height
-                label_y = tick_screen_y + tick_length_px + label_offset_px + line_height
-
-                draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix_points, label_color)
+                # Centered under the tick, text top anchored below the tick mark
+                label_y = tick_screen_y + tick_length_px + label_offset_px
+                draw_text_anchored(font, label_text, tick_screen_x, label_y, label_size_points, projection_matrix_points, label_color;
+                    anchor_x=:center, anchor_y=:top)
             end
         end
     end
@@ -419,14 +413,10 @@ function draw_axes_with_labels(
 
                 label_text = string(round(y_tick, digits=2))
 
-                text_width = measure_word_width_cached(font, label_text, label_size_points) + 2.0f0
-                label_x = tick_screen_x - tick_length_px - text_width - label_offset_px
-                # draw_text y is the baseline; for :middle alignment:
-                #   component_y = tick_screen_y - tick_text_height / 2
-                #   vertical_offset = (tick_text_height - line_height*1.3) / 2 + line_height = 1.0 + line_height
-                label_y = tick_screen_y - tick_text_height / 2.0f0 + 1.0f0 + line_height
-
-                draw_text(font, label_text, label_x, label_y, label_size_points, projection_matrix_points, label_color)
+                # Right edge anchored left of the tick mark, vertically centered on the tick
+                label_x = tick_screen_x - tick_length_px - label_offset_px
+                draw_text_anchored(font, label_text, label_x, tick_screen_y, label_size_points, projection_matrix_points, label_color;
+                    anchor_x=:right, anchor_y=:middle)
             end
         end
     end
@@ -434,14 +424,13 @@ function draw_axes_with_labels(
     # Draw axis labels if enabled
     if show_x_label && !isempty(x_label)
         axis_label_size = label_size_points + 4
-        x_label_width = measure_word_width_cached(font, x_label, axis_label_size) + 2.0f0
 
         bottom_edge_screen_x, bottom_edge_screen_y = transform_func(plot_bounds.x + plot_bounds.width / 2, plot_bounds.y)
-        x_label_x = bottom_edge_screen_x - x_label_width / 2.0f0
-        # Below tick labels; draw_text y is the baseline (:top alignment → + axis_label_size)
-        x_label_y = bottom_edge_screen_y + tick_length_px + label_offset_px + Float32(label_size_points) + label_offset_px + Float32(axis_label_size)
+        # Below the tick labels
+        x_label_y = bottom_edge_screen_y + tick_length_px + label_offset_px + Float32(label_size_points) + label_offset_px
 
-        draw_text(font, x_label, x_label_x, x_label_y, axis_label_size, projection_matrix_points, label_color)
+        draw_text_anchored(font, x_label, bottom_edge_screen_x, x_label_y, axis_label_size, projection_matrix_points, label_color;
+            anchor_x=:center, anchor_y=:top)
     end
 
     if show_y_label && !isempty(y_label)
