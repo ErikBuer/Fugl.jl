@@ -76,6 +76,10 @@ function plot_zoom_demo()
 
     # Define plot style (visual appearance only)
     plot_style = PlotStyle(
+        background_color=Vec4{Float32}(0.12f0, 0.12f0, 0.14f0, 1.0f0),  # Dark background
+        grid_color=Vec4{Float32}(0.35f0, 0.35f0, 0.4f0, 1.0f0),         # Muted grid
+        axis_color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0),           # Light axes and labels
+        label_size_points=10,
         show_grid=true,
         show_legend=true
     )

@@ -6,7 +6,7 @@ Provides a common structure for tracking user interactions like hover, press, fo
 struct InteractionState
     is_hovered::Bool
     is_pressed::Bool
-    is_focused::Bool
+    is_focused::Bool        # TODO is this in use? Should we use the Focus comopennt instead?
     hover_duration::Float64
     hover_start_time::Float64
     just_hovered::Bool

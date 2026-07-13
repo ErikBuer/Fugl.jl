@@ -211,6 +211,7 @@ function render_plot_content(view::PlotView, x_points::Float32, y_points::Float3
             style.axis_color,
             4.0f0,  # Axis line width
             projection_matrix_points;
+            label_size_points=style.label_size_points,
             label_color=style.axis_color,
             axis_color=style.axis_color,
             label_offset_px=5.0f0,

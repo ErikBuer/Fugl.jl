@@ -1,11 +1,14 @@
 name: Documentation
 
+# Temporarily disabled: docs build works locally but times out in CI.
+# Re-enable by restoring the push/pull_request triggers below.
 on:
-  push:
-    branches:
-      - master
-    tags: '*'
-  pull_request:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - master
+  #   tags: '*'
+  # pull_request:
 
 # Cancel previous runs if a new one is triggered (by push on PR)
 concurrency:

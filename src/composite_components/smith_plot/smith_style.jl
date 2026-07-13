@@ -5,6 +5,7 @@ struct SmithStyle
     outer_circle_color::Vec4f
     trace_color::Vec4f
     label_color::Vec4f
+    label_size_points::Int
     marker_fill_color::Vec4f
     marker_border_color::Vec4f
     grid_width::Float32
@@ -27,6 +28,7 @@ function SmithStyle(;
     outer_circle_color::Vec4f=Vec4f(0.2, 0.2, 0.2, 1.0),
     trace_color::Vec4f=Vec4f(0.05, 0.45, 0.85, 1.0),
     label_color::Vec4f=Vec4f(0.2, 0.2, 0.2, 1.0),
+    label_size_points::Int=11,
     marker_fill_color::Vec4f=Vec4f(0.05, 0.45, 0.85, 1.0),
     marker_border_color::Vec4f=Vec4f(0.05, 0.2, 0.4, 1.0),
     grid_width::Float32=1.0f0,
@@ -48,6 +50,7 @@ function SmithStyle(;
         outer_circle_color,
         trace_color,
         label_color,
+        label_size_points,
         marker_fill_color,
         marker_border_color,
         grid_width,
@@ -71,6 +74,7 @@ function SmithStyle(base::SmithStyle;
     outer_circle_color=base.outer_circle_color,
     trace_color=base.trace_color,
     label_color=base.label_color,
+    label_size_points=base.label_size_points,
     marker_fill_color=base.marker_fill_color,
     marker_border_color=base.marker_border_color,
     grid_width=base.grid_width,
@@ -92,6 +96,7 @@ function SmithStyle(base::SmithStyle;
         outer_circle_color,
         trace_color,
         label_color,
+        label_size_points,
         marker_fill_color,
         marker_border_color,
         grid_width,
