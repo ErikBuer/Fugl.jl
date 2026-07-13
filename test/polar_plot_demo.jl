@@ -16,7 +16,8 @@ rose_style = PolarStyle(
     show_outer_circle=true,
     outer_circle_color=Vec4f(0.9, 0.9, 0.95, 1.0),   # Light outer circle
     outer_circle_width=2.0f0,
-    label_color=Vec4f(0.9, 0.9, 0.95, 1.0)           # Light labels
+    label_color=Vec4f(0.9, 0.9, 0.95, 1.0),          # Light labels
+    label_size_points=12
 )
 
 # Configure state: 0° points to the right (default)

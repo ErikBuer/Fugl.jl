@@ -36,7 +36,8 @@ smith_style = SmithStyle(
     marker_border_color=Vec4f(0.05, 0.16, 0.25, 1.0),
     show_admittance_grid=false,
     padding=42.0f0,
-    anti_aliasing_width=1.1f0
+    anti_aliasing_width=1.1f0,
+    label_size_points=14
 )
 
 function MyApp()

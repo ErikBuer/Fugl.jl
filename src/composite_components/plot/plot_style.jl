@@ -16,6 +16,7 @@ struct PlotStyle
     # Tick label controls (numbers/text)
     show_x_tick_labels::Bool # Show x-axis tick labels
     show_y_tick_labels::Bool # Show y-axis tick labels
+    label_size_points::Int   # Font size (points) for tick labels and axis labels
     # Axis label controls (new)
     x_label::String          # Label for x-axis
     y_label::String          # Label for y-axis
@@ -45,6 +46,7 @@ function PlotStyle(;
     show_y_tick_marks=nothing,  # Will default to show_y_ticks if not specified
     show_x_tick_labels=nothing, # Will default to show_x_ticks if not specified
     show_y_tick_labels=nothing, # Will default to show_y_ticks if not specified
+    label_size_points=12,       # Font size (points) for tick labels and axis labels
     # Axis label controls (new)
     x_label="",                # Label for x-axis
     y_label="",                # Label for y-axis
@@ -65,7 +67,7 @@ function PlotStyle(;
     return PlotStyle(background_color, grid_color, grid_width, axis_color, padding, show_grid,
         show_left_axis, show_right_axis, show_top_axis, show_bottom_axis,
         final_show_x_tick_marks, final_show_y_tick_marks,
-        final_show_x_tick_labels, final_show_y_tick_labels,
+        final_show_x_tick_labels, final_show_y_tick_labels, label_size_points,
         x_label, y_label, show_x_label, show_y_label,
         show_x_ticks, show_y_ticks, show_legend, anti_aliasing_width)
 end

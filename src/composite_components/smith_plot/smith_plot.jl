@@ -497,7 +497,7 @@ function _draw_smith_labels(
         return
     end
 
-    text_style = TextStyle(size_points=11, color=style.label_color)
+    text_style = TextStyle(size_points=style.label_size_points, color=style.label_color)
     font = get_font(text_style)
 
     labels = [
