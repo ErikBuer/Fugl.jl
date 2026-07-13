@@ -66,6 +66,152 @@ function generate_tick_positions(min_val::Float32, max_val::Float32, approx_num_
 end
 
 
+const SUPERSCRIPT_DIGITS = ('⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹')
+
+"""
+Convert an integer exponent to a unicode superscript string, e.g. `-3` → `"⁻³"`.
+"""
+function superscript_exponent(n::Integer)::String
+    io = IOBuffer()
+    n < 0 && print(io, '⁻')
+    for d in string(abs(n))
+        print(io, SUPERSCRIPT_DIGITS[d-'0'+1])
+    end
+    return String(take!(io))
+end
+
+"""
+Number of decimals needed to represent values spaced `step` apart without
+collapsing adjacent values onto the same string, e.g. `0.25` → 2, `0.1` → 1.
+"""
+function step_decimals(step::Float64)::Int
+    step <= 0.0 && return 2
+    d = max(0, ceil(Int, -log10(step) - 1e-9))
+    # Increase until the step is (nearly) an integer multiple of 10^-d,
+    # so e.g. a step of 0.25 gets 2 decimals, not 1. The tolerance is loose
+    # enough to absorb Float32 noise accumulated during tick generation.
+    while d < 12
+        scaled = step * exp10(d)
+        isapprox(scaled, round(scaled); rtol=1e-4, atol=1e-4) && break
+        d += 1
+    end
+    return d
+end
+
+"""
+    resolve_tick_offset(ticks::Vector{Float32}, significant_digits::Int)::Float64
+
+Common offset to subtract from tick values before formatting; `0.0` when none
+is needed. When ticks sit on a large shared value with comparatively tiny
+spacing (deep zoom), no significant-digit budget can keep the labels short and
+distinct — the offset is then displayed once as an axis annotation (see
+[`format_axis_offset`](@ref)) and each tick label shows only `value - offset`.
+
+The offset is the first tick exactly, so the residuals are clean multiples of
+the tick step (`0`, `step`, `2·step`, …) and stay short.
+"""
+function resolve_tick_offset(ticks::Vector{Float32}, significant_digits::Int)::Float64
+    length(ticks) < 2 && return 0.0
+    step = Float64(ticks[2]) - Float64(ticks[1])
+    step <= 0.0 && return 0.0
+    magnitude = max(abs(Float64(ticks[1])), abs(Float64(ticks[end])))
+    magnitude == 0.0 && return 0.0
+
+    # Digits needed to write the largest tick at the step's resolution
+    needed = floor(Int, log10(magnitude)) - floor(Int, log10(step)) + 1
+    needed <= max(significant_digits, 1) && return 0.0
+
+    return Float64(ticks[1])
+end
+
+"""
+    tick_label_strings(ticks::Vector{Float32}, significant_digits::Int)
+
+Produce the label string for every tick, plus the factored-out axis offset
+(`0.0` when none is active). Single source of truth for tick label text: the
+axis renderer draws these strings and the layout measures them, so the space
+reserved for labels always matches what is drawn.
+"""
+function tick_label_strings(ticks::Vector{Float32}, significant_digits::Int)::Tuple{Vector{String},Float64}
+    step = length(ticks) >= 2 ? ticks[2] - ticks[1] : nothing
+    offset = resolve_tick_offset(ticks, significant_digits)
+    labels = String[format_tick_label(Float64(t) - offset, significant_digits; step=step) for t in ticks]
+    return labels, offset
+end
+
+"""
+Format a factored-out axis offset for its annotation, e.g. `"+0.06682935"`.
+Shown at full step resolution — the tick labels are exact residuals from this
+value, so rounding it would misreport the axis.
+"""
+function format_axis_offset(offset::Float64, step::Float64)::String
+    digits = floor(Int, log10(abs(offset))) - floor(Int, log10(abs(step))) + 3
+    text = format_tick_label(offset, max(digits, 1))
+    return offset > 0 ? "+" * text : text
+end
+
+"""
+    format_tick_label(value::Real, significant_digits::Int; step=nothing, max_leading_zeros=1)::String
+
+Format a tick value with at most `significant_digits` significant digits.
+Values use plain decimal notation while the integer part stays within the
+significant-digit budget; values too large for that, or with more than
+`max_leading_zeros` zeros between the decimal point and the first significant
+digit (e.g. `0.008917` at the default of 1), use scientific notation `m×10ⁿ`
+with a unicode superscript exponent.
+
+When `step` (the spacing between adjacent ticks) is given, labels always carry
+enough digits to keep adjacent ticks distinct, even where that exceeds
+`significant_digits`.
+"""
+function format_tick_label(value::Real, significant_digits::Int; step::Union{Real,Nothing}=nothing, max_leading_zeros::Int=1)::String
+    v = Float64(value)
+    (isnan(v) || isinf(v)) && return string(v)
+    v == 0.0 && return "0"
+    # Values far below the tick resolution are zero plus float noise
+    step !== nothing && abs(v) < abs(Float64(step)) * 1e-2 && return "0"
+
+    sig = max(significant_digits, 1)
+    exponent = floor(Int, log10(abs(v)))
+
+    # Zeros between the decimal point and the first significant digit (0 for |v| ≥ 0.1)
+    leading_zeros = max(-exponent - 1, 0)
+
+    # Plain decimal notation while the integer part fits the budget and the
+    # leading zeros stay readable
+    if leading_zeros <= max_leading_zeros && exponent < sig
+        decimals = step === nothing ? clamp(sig - 1 - exponent, 0, 12) : step_decimals(Float64(step))
+        if step !== nothing
+            # Ticks may sit off the step grid (e.g. 0.5, 1.5, … with step 1):
+            # add decimals until the label is faithful to the value
+            while decimals < 12 && abs(round(v, digits=decimals) - v) > Float64(step) * 1e-3
+                decimals += 1
+            end
+        end
+        rounded = round(v, digits=decimals)
+        if rounded != 0.0
+            return decimals == 0 ? string(round(Int, v)) : string(rounded)
+        end
+    end
+
+    # Scientific notation: m×10ⁿ
+    mantissa = v / exp10(exponent)
+    decimals = if step === nothing
+        clamp(sig - 1, 0, 12)
+    else
+        # Enough mantissa decimals to resolve the tick spacing
+        clamp(exponent - floor(Int, log10(Float64(step)) + 1e-9), 0, 12)
+    end
+    m = round(mantissa, digits=decimals)
+    if abs(m) >= 10.0  # Rounding pushed the mantissa into the next decade
+        m /= 10.0
+        exponent += 1
+    end
+    # Integer mantissas drop the superfluous ".0" (1×10⁻⁵, not 1.0×10⁻⁵)
+    m_str = (decimals == 0 || m == round(m)) ? string(round(Int, m)) : string(m)
+    return string(m_str, "×10", superscript_exponent(exponent))
+end
+
 """
 Cull point data to only include points within the specified bounds.
 Returns culled x and y data arrays.

@@ -29,7 +29,7 @@ polar_state = Ref(PolarState(
 ))
 
 function MyApp()
-    Column(
+    IntrinsicColumn(
         Card(
             "Polar Plot - Rose Curve (Ctrl+Scroll: r_max, Shift+Scroll: r_min, Mid-Drag: Pan):",
             PolarPlot(

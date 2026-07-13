@@ -17,6 +17,8 @@ struct PlotStyle
     show_x_tick_labels::Bool # Show x-axis tick labels
     show_y_tick_labels::Bool # Show y-axis tick labels
     label_size_points::Int   # Font size (points) for tick labels and axis labels
+    x_tick_significant_digits::Int # Significant digits in x tick labels; larger magnitudes switch to scientific notation
+    y_tick_significant_digits::Int # Significant digits in y tick labels; larger magnitudes switch to scientific notation
     # Axis label controls (new)
     x_label::String          # Label for x-axis
     y_label::String          # Label for y-axis
@@ -34,7 +36,7 @@ function PlotStyle(;
     grid_color=Vec4{Float32}(0.5f0, 0.5f0, 0.5f0, 1.0f0),  # Light gray grid
     grid_width=1.5f0,
     axis_color=Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 1.0f0),  # Black axes
-    padding=40.0f0,  # More padding to accommodate axis labels outside plot area
+    padding=10.0f0,  # Outer margin; space for tick/axis labels is computed and added on top of this
     show_grid=true,
     # Individual axis line controls
     show_left_axis=true,     # Show left axis line by default
@@ -47,6 +49,8 @@ function PlotStyle(;
     show_x_tick_labels=nothing, # Will default to show_x_ticks if not specified
     show_y_tick_labels=nothing, # Will default to show_y_ticks if not specified
     label_size_points=12,       # Font size (points) for tick labels and axis labels
+    x_tick_significant_digits=5, # Significant digits in x tick labels; larger magnitudes switch to scientific notation
+    y_tick_significant_digits=3, # Significant digits in y tick labels; larger magnitudes switch to scientific notation
     # Axis label controls (new)
     x_label="",                # Label for x-axis
     y_label="",                # Label for y-axis
@@ -67,7 +71,7 @@ function PlotStyle(;
     return PlotStyle(background_color, grid_color, grid_width, axis_color, padding, show_grid,
         show_left_axis, show_right_axis, show_top_axis, show_bottom_axis,
         final_show_x_tick_marks, final_show_y_tick_marks,
-        final_show_x_tick_labels, final_show_y_tick_labels, label_size_points,
+        final_show_x_tick_labels, final_show_y_tick_labels, label_size_points, x_tick_significant_digits, y_tick_significant_digits,
         x_label, y_label, show_x_label, show_y_label,
         show_x_ticks, show_y_ticks, show_legend, anti_aliasing_width)
 end

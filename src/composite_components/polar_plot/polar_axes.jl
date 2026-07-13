@@ -228,6 +228,7 @@ function draw_radial_labels(
     theta_start::Float32,
     label_color::Vec4f,
     label_size_points::Int,
+    significant_digits::Int,
     projection_matrix::Mat4{Float32}
 )
     text_style = TextStyle(size_points=label_size_points, color=label_color)
@@ -235,6 +236,9 @@ function draw_radial_labels(
 
     # Place labels at theta_start + π/2 (perpendicular to starting direction)
     label_angle = theta_start + Float32(π) / 2.0f0
+
+    # Value spacing between adjacent rings, so labels keep enough decimals to stay distinct
+    r_step = length(radii) >= 2 ? (radii[2] - radii[1]) / radii[end] * (r_max - r_min) : nothing
 
     for (i, radius) in enumerate(radii)
         # Skip the center point
@@ -245,14 +249,8 @@ function draw_radial_labels(
         # Calculate actual r value for this radius
         r_value = r_min + (radius / radii[end]) * (r_max - r_min)
 
-        # Format label
-        if r_value >= 100 || r_value <= -100
-            label_text = string(round(Int, r_value))
-        elseif abs(r_value) < 0.01
-            label_text = "0"
-        else
-            label_text = string(round(r_value, digits=2))
-        end
+        # Format label; falls back to scientific notation (m×10ⁿ) for extreme magnitudes
+        label_text = format_tick_label(r_value, significant_digits; step=r_step)
 
         # Position label slightly outside the circle
         label_x = center_x + (radius + 5.0f0) * cos(label_angle)

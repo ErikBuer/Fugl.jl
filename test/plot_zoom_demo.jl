@@ -74,6 +74,9 @@ function plot_zoom_demo()
     # Create plot state for zoom control
     plot_state = Ref(PlotState(y_min=-0.2f0))
 
+    # Interaction state for the reset button (required for click detection)
+    reset_button_state = Ref(InteractionState())
+
     # Define plot style (visual appearance only)
     plot_style = PlotStyle(
         background_color=Vec4{Float32}(0.12f0, 0.12f0, 0.14f0, 1.0f0),  # Dark background
@@ -101,6 +104,8 @@ function plot_zoom_demo()
                     IntrinsicHeight(
                         TextButton(
                             "Reset View";
+                            interaction_state=reset_button_state[],
+                            on_interaction_state_change=(new_state) -> reset_button_state[] = new_state,
                             on_click=() -> begin
                                 plot_state[] = PlotState()  # Reset to auto-scale
                             end,
@@ -121,7 +126,7 @@ function plot_zoom_demo()
                 background_color=Vec4{Float32}(0.15f0, 0.15f0, 0.18f0, 1.0f0),
                 border_color=Vec4{Float32}(0.3f0, 0.3f0, 0.35f0, 1.0f0),
                 border_width=1.5f0,
-                padding=10.0f0
+                padding=0.0f0
             ),
             title_style=TextStyle(
                 color=Vec4{Float32}(0.9f0, 0.9f0, 0.9f0, 1.0f0)
