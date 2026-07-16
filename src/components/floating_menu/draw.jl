@@ -2,9 +2,10 @@
     draw_floating_menu(options, state, style, x, y, width, projection_matrix, window_size)
 
 Draw the floating menu panel background and its currently visible rows (per
-`floating_menu_visible_range`), highlighting `state.hover_index` with `style.hover_color`
-and `state.pressed_index` with `style.pressed_color` (pressed takes priority over hover,
-same as `Container`'s `pressed_style`/`hover_style`). `(x, y, width)` should come from
+`floating_menu_visible_range`). Each row is rendered as a `BaseContainer` using
+`style.item_style`, `style.hover_style`, or `style.pressed_style` — same
+priority `Container` uses for its own `hover_style`/`pressed_style` (pressed beats
+hover, `src/components/container/Container.jl`). `(x, y, width)` should come from
 `floating_menu_geometry` so the drawn panel matches whatever rectangle was used for
 hit-testing.
 """
@@ -30,27 +31,12 @@ function draw_floating_menu(options::Vector{String}, state::FloatingMenuState, s
         row = option_index - state.scroll_offset
         item_y = y + (row - 1) * style.item_height_px
 
-        row_color = if state.pressed_index == option_index
-            style.pressed_color
-        elseif state.hover_index == option_index
-            style.hover_color
+        active_style = if state.pressed_index == option_index && style.pressed_style !== nothing
+            style.pressed_style
+        elseif state.hover_index == option_index && style.hover_style !== nothing
+            style.hover_style
         else
-            nothing
-        end
-
-        if row_color !== nothing
-            highlight_vertices = generate_rectangle_vertices(x, item_y, width, style.item_height_px)
-            draw_rounded_rectangle(
-                highlight_vertices,
-                width,
-                style.item_height_px,
-                row_color,
-                Vec4{Float32}(0.0f0, 0.0f0, 0.0f0, 0.0f0),
-                0.0f0,
-                0.0f0,
-                projection_matrix,
-                1.5f0
-            )
+            style.item_style
         end
 
         text_component = Text(
@@ -59,10 +45,8 @@ function draw_floating_menu(options::Vector{String}, state::FloatingMenuState, s
             horizontal_align=:left,
             vertical_align=:middle
         )
+        row_container = BaseContainer(text_component; style=active_style)
 
-        text_x = x + style.padding
-        available_text_width = width - 2 * style.padding
-
-        interpret_view(text_component, text_x, item_y, available_text_width, style.item_height_px, projection_matrix, Point2f(0.0f0, 0.0f0), window_size)
+        interpret_view(row_container, x, item_y, width, style.item_height_px, projection_matrix, Point2f(0.0f0, 0.0f0), window_size)
     end
 end
