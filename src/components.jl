@@ -117,6 +117,13 @@ export HorizontalLineView, VerticalLineView, HLine, VLine, SeparatorStyle
 include("components/scroll_area/ScrollArea.jl")
 export VerticalScrollState, HorizontalScrollState, VerticalScrollArea, HorizontalScrollArea, ScrollAreaStyle
 
+include("components/floating_menu/floating_menu.jl")
+export FloatingMenuState, FloatingMenuStyle
+export draw_floating_menu, floating_menu_geometry, floating_menu_height, floating_menu_row_capacity
+export floating_menu_visible_range, floating_menu_item_at, floating_menu_contains, floating_menu_max_scroll, step_floating_menu_scroll
+export floating_menu_press_item, floating_menu_release_item
+export FLOATING_MENU_Z_BUMP
+
 include("components/SplitContainer.jl")
 export HorizontalSplitContainer, VerticalSplitContainer, SplitContainerState, SplitContainerStyle
 
@@ -149,6 +156,9 @@ export Modal, ModalState, ModalStyle
 
 include("composite_components/tooltip/Tooltip.jl")
 export Tooltip, TooltipState, TooltipStyle
+
+include("composite_components/context_menu/ContextMenu.jl")
+export ContextMenu, ContextMenuState, ContextMenuStyle
 
 include("components/AtlasDebug.jl")
 
