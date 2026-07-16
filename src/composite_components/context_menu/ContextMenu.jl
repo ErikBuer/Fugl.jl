@@ -1,23 +1,24 @@
 include("context_menu_state.jl")
-include("context_menu_style.jl")
 
 struct ContextMenuView <: AbstractView
     child::AbstractView
     options::Vector{String}
-    style::ContextMenuStyle
+    style::FloatingMenuStyle
+    width::Float32
     state::ContextMenuState
     on_state_change::Function
     on_select::Function
 end
 
 """
-    ContextMenu(child, options; style=ContextMenuStyle(), state=ContextMenuState(),
+    ContextMenu(child, options; style=FloatingMenuStyle(), width=200.0f0, state=ContextMenuState(),
                 on_state_change=(new_state) -> nothing, on_select=(index) -> nothing)
 
 Wrap `child` with right-click context-menu support. Right-clicking `child` opens a
 floating text menu at the cursor, built on the `FloatingMenu` primitive
 (`src/components/floating_menu/floating_menu.jl`) — the same building blocks any other
-component (a `Plot`, a custom canvas, etc.) can use to add its own popup menu.
+component (a `Plot`, a custom canvas, etc.) can use to add its own popup menu. `width`
+is the popup's fixed width (independent of `child`'s width).
 
 Behavior:
 - Opening the menu and selecting an item both use a press-then-release-on-target
@@ -25,7 +26,7 @@ Behavior:
   that drags off `child` before releasing does not open the menu, and a left-mouse-down
   that drags off a menu row before releasing does not select it.
 - Discrete ("hard") wheel-scroll, one row per tick, when there are more options than
-  `style.menu_style.max_visible_items`.
+  `style.max_visible_items`.
 - Clicking outside the open panel closes it immediately.
 
 # Examples
@@ -43,12 +44,13 @@ true
 function ContextMenu(
     child::AbstractView,
     options::Vector{String};
-    style::ContextMenuStyle=ContextMenuStyle(),
+    style::FloatingMenuStyle=FloatingMenuStyle(),
+    width::Float32=200.0f0,
     state::ContextMenuState=ContextMenuState(),
     on_state_change::Function=(new_state) -> nothing,
     on_select::Function=(index) -> nothing
 )::ContextMenuView
-    return ContextMenuView(child, options, style, state, on_state_change, on_select)
+    return ContextMenuView(child, options, style, width, state, on_state_change, on_select)
 end
 
 measure(view::ContextMenuView)::Tuple{Float32,Float32} = measure(view.child)
@@ -62,17 +64,17 @@ function interpret_view(view::ContextMenuView, x::Float32, y::Float32, width::Fl
 
     if view.state.is_open
         n_options = length(view.options)
-        (mx, my, _) = floating_menu_geometry(view.state.anchor_x, view.state.anchor_y, n_options, view.style.menu_style)
-        menu_width = view.style.width
-        add_overlay_function(() -> draw_floating_menu(view.options, view.state.menu, view.style.menu_style, mx, my, menu_width, projection_matrix, window_size))
+        (mx, my, _) = floating_menu_geometry(view.state.anchor_x, view.state.anchor_y, n_options, view.style)
+        menu_width = view.width
+        add_overlay_function(() -> draw_floating_menu(view.options, view.state.menu, view.style, mx, my, menu_width, projection_matrix, window_size))
     end
 end
 
 function detect_click(view::ContextMenuView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}
     mouse_x, mouse_y = input_state.x, input_state.y
     n_options = length(view.options)
-    menu_style = view.style.menu_style
-    menu_width = view.style.width
+    menu_style = view.style
+    menu_width = view.width
     child_hovered = inside_component(view, x, y, width, height, mouse_x, mouse_y)
 
     if view.state.is_open

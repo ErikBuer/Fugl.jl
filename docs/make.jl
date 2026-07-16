@@ -50,6 +50,7 @@ makedocs(
             "Components/icon_button.md",
             "Components/tooltip.md",
             "Components/dropdown.md",
+            "Components/context_menu.md",
             "Components/checkbox.md",
             "Components/multi_select_list.md",
             "Components/spinner.md",

@@ -158,7 +158,7 @@ include("composite_components/tooltip/Tooltip.jl")
 export Tooltip, TooltipState, TooltipStyle
 
 include("composite_components/context_menu/ContextMenu.jl")
-export ContextMenu, ContextMenuState, ContextMenuStyle
+export ContextMenu, ContextMenuState
 
 include("components/AtlasDebug.jl")
 
