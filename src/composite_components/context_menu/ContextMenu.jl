@@ -27,7 +27,7 @@ Behavior:
   that drags off a menu row before releasing does not select it.
 - Discrete ("hard") wheel-scroll, one row per tick, when there are more options than
   `style.max_visible_items`.
-- Clicking outside the open panel closes it immediately.
+- Clicking outside the open panel closes it immediately (either mouse button).
 
 # Examples
 ```jldoctest
@@ -64,8 +64,8 @@ function interpret_view(view::ContextMenuView, x::Float32, y::Float32, width::Fl
 
     if view.state.is_open
         n_options = length(view.options)
-        (mx, my, _) = floating_menu_geometry(view.state.anchor_x, view.state.anchor_y, n_options, view.style)
         menu_width = view.width
+        (mx, my, _) = floating_menu_geometry(view.state.anchor_x, view.state.anchor_y, menu_width, n_options, view.style, window_size)
         add_overlay_function(() -> draw_floating_menu(view.options, view.state.menu, view.style, mx, my, menu_width, projection_matrix, window_size))
     end
 end
@@ -77,10 +77,16 @@ function detect_click(view::ContextMenuView, input_state::InputState, x::Float32
     menu_width = view.width
     child_hovered = inside_component(view, x, y, width, height, mouse_x, mouse_y)
 
+    hovering_menu = false
+    mx, my = 0.0f0, 0.0f0
+    if view.state.is_open
+        window_size = Size(get_effective_window_size()...)
+        (mx, my, _) = floating_menu_geometry(view.state.anchor_x, view.state.anchor_y, menu_width, n_options, menu_style, window_size)
+        hovering_menu = floating_menu_contains(mx, my, menu_width, n_options, menu_style, mouse_x, mouse_y)
+    end
+
     if view.state.is_open
         z = parent_z + FLOATING_MENU_Z_BUMP
-        (mx, my, _) = floating_menu_geometry(view.state.anchor_x, view.state.anchor_y, n_options, menu_style)
-        hovering_menu = floating_menu_contains(mx, my, menu_width, n_options, menu_style, mouse_x, mouse_y)
 
         # Hard (discrete) scroll while hovering the open menu.
         if input_state.scroll_y != 0.0f0 && hovering_menu
@@ -134,13 +140,22 @@ function detect_click(view::ContextMenuView, input_state::InputState, x::Float32
         end
     end
 
-    # Right-click trigger: press-then-release-on-target, same convention as above.
-    if input_state.mouse_down[RightButton] && child_hovered
-        new_state = ContextMenuState(view.state; trigger_pressed=true)
-        return ClickResult(parent_z, () -> view.on_state_change(new_state))
-    end
-
-    if input_state.mouse_up[RightButton] && view.state.trigger_pressed
+    # Right-click: press-then-release-on-target opens/repositions the menu, same
+    # convention as item selection above. A right-click outside the currently open
+    # panel closes it immediately (mirrors the left-click-outside-close above, and
+    # runs unconditionally rather than through ClickResult z-arbitration, same as that
+    # branch) — this is also what stops two ContextMenus from being open at once: right-
+    # clicking a second trigger closes this one right away and, independently, lets the
+    # second instance's own press-then-release sequence open it.
+    if input_state.mouse_down[RightButton]
+        if view.state.is_open && !hovering_menu
+            new_state = ContextMenuState(view.state; is_open=false, menu=FloatingMenuState(), trigger_pressed=child_hovered)
+            view.on_state_change(new_state)
+        elseif child_hovered
+            new_state = ContextMenuState(view.state; trigger_pressed=true)
+            return ClickResult(parent_z, () -> view.on_state_change(new_state))
+        end
+    elseif input_state.mouse_up[RightButton] && view.state.trigger_pressed
         new_state = if child_hovered
             ContextMenuState(view.state; trigger_pressed=false, is_open=true, anchor_x=mouse_x, anchor_y=mouse_y, menu=FloatingMenuState())
         else

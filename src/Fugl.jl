@@ -18,6 +18,7 @@ export fugl_to_pixels, fugl_to_pixels_x, fugl_to_pixels_y
 export pixels_to_fugl, pixels_to_fugl_x, pixels_to_fugl_y
 export get_dpi_scale, get_logical_size, get_pixel_size
 export set_manual_scaling!, get_effective_scale, adjust_manual_scaling!, get_manual_scaling
+export get_effective_window_size
 export get_system_dpi_ratio, get_pixel_perfect_scale
 export create_dpi_scaling_ref
 include("interaction_state.jl")

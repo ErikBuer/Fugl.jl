@@ -30,21 +30,24 @@ function floating_menu_max_scroll(n_options::Int, style::FloatingMenuStyle)::Int
 end
 
 """
-    floating_menu_geometry(anchor_x, anchor_y, n_options, style)
+    floating_menu_geometry(anchor_x, anchor_y, width, n_options, style, window_size)
 
 Resolve the anchor position into the actual on-screen `(x, y, height)` of the floating
-menu panel. Call this identically from both `interpret_view` (to draw) and `detect_click`
-(to hit-test) so the two can never disagree.
+menu panel, shifted inward on each axis independently so it stays fully inside the
+window — same clamp `Tooltip` uses (`calculate_tooltip_position`,
+`src/composite_components/tooltip/Tooltip.jl`). Call this identically from both
+`interpret_view` (to draw) and `detect_click` (to hit-test) so the two can never
+disagree.
 
-Note: unlike `Tooltip`, this does not clamp to window bounds — `detect_click` is only ever
-given the local rect of the component it's called on, not the window size, so a clamp
-applied in `interpret_view` alone would desync from hit-testing. This matches `Dropdown`'s
-existing behavior (its popup list isn't clamped either); a caller that needs on-screen
-clamping should pick `anchor_x`/`anchor_y` conservatively (e.g. flip the anchor point when
-it's near a known edge) rather than relying on this function to do it.
+`window_size` must be the same "effective" window size passed to `interpret_view` —
+from `detect_click`, which isn't given `window_size` directly, use
+`get_effective_window_size()` (`src/dpi_scaling.jl`).
 """
-function floating_menu_geometry(anchor_x::Float32, anchor_y::Float32, n_options::Int, style::FloatingMenuStyle)::Tuple{Float32,Float32,Float32}
-    return (anchor_x, anchor_y, floating_menu_height(n_options, style))
+function floating_menu_geometry(anchor_x::Float32, anchor_y::Float32, width::Float32, n_options::Int, style::FloatingMenuStyle, window_size::Size)::Tuple{Float32,Float32,Float32}
+    height = floating_menu_height(n_options, style)
+    x = clamp(anchor_x, 0.0f0, max(0.0f0, window_size.width - width))
+    y = clamp(anchor_y, 0.0f0, max(0.0f0, window_size.height - height))
+    return (x, y, height)
 end
 
 """
