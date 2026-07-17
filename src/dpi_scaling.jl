@@ -231,6 +231,23 @@ Get the effective scaling factor using the current DPI scaling context.
 get_effective_scale()::Float32 = get_effective_scale(get_current_dpi_scaling())
 
 """
+    get_effective_window_size()::Tuple{Float32,Float32}
+
+Get the current window size in the same "effective" coordinate space used for layout
+and rendering (logical window size divided by the manual scale factor) — the same value
+passed as `window_size` to `interpret_view`. Unlike `window_size`, this is available
+from anywhere during a frame, including `detect_click`, which isn't given `window_size`
+as an argument. Only valid during rendering (after `set_current_dpi_scaling!` has run
+for this frame).
+"""
+function get_effective_window_size()::Tuple{Float32,Float32}
+    dpi_scaling_ref = get_current_dpi_scaling()
+    logical_width, logical_height = get_logical_size(dpi_scaling_ref)
+    scale = get_manual_scaling(dpi_scaling_ref)
+    return (logical_width / scale, logical_height / scale)
+end
+
+"""
     get_dpi_scale()::Tuple{Float32, Float32}
 
 Get the current DPI scaling factors using the current DPI scaling context.
