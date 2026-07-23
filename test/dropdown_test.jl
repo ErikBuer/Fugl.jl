@@ -24,7 +24,7 @@ function test_dropdown()
                     dropdown_state[].options[dropdown_state[].selected_index] : 
                     "None"
                 )"))),
-            ], padding=0.0, spacing=0.0)
+            ], spacing=0.0)
     end
 
     Fugl.run(MyApp, title="Dropdown Test", window_width_points=400, window_height_points=300, fps_overlay=true)
