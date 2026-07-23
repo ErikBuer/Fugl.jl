@@ -205,9 +205,6 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
         view.scroll_state
     end
 
-    # Enable scissor test to clip content to viewport
-    ModernGL.glEnable(GL_SCISSOR_TEST)
-
     # Convert point-space coords to hardware pixel coords for glScissor
     dpi_scaling = get_current_dpi_scaling()
     total_scale = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
@@ -216,17 +213,15 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
     ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport_info)
     window_height_px = viewport_info[4]
 
-    scissor_x = Int(round(x * total_scale))
-    scissor_y = Int(round(window_height_px - (y + viewport_height) * total_scale))
-    scissor_width = Int(round(viewport_width * total_scale))
-    scissor_height = Int(round(viewport_height * total_scale))
-    ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
+    scissor_x = Int32(round(x * total_scale))
+    scissor_y = Int32(round(window_height_px - (y + viewport_height) * total_scale))
+    scissor_width = Int32(round(viewport_width * total_scale))
+    scissor_height = Int32(round(viewport_height * total_scale))
 
-    # Render the scrolled content
-    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
-
-    # Disable scissor test
-    ModernGL.glDisable(GL_SCISSOR_TEST)
+    # Clip content to viewport, intersected with any enclosing scissor region
+    with_scissor_clip(scissor_x, scissor_y, scissor_width, scissor_height) do
+        interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
+    end
 
     # Render scrollbar if enabled
     if view.show_scrollbar && updated_state.max_scroll > 0.0f0
@@ -254,9 +249,6 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
         view.scroll_state
     end
 
-    # Enable scissor test to clip content to viewport
-    ModernGL.glEnable(GL_SCISSOR_TEST)
-
     # Convert point-space coords to hardware pixel coords for glScissor
     dpi_scaling = get_current_dpi_scaling()
     total_scale = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
@@ -265,17 +257,15 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
     ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport_info)
     window_height_px = viewport_info[4]
 
-    scissor_x = Int(round(x * total_scale))
-    scissor_y = Int(round(window_height_px - (y + viewport_height) * total_scale))
-    scissor_width = Int(round(viewport_width * total_scale))
-    scissor_height = Int(round(viewport_height * total_scale))
-    ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
+    scissor_x = Int32(round(x * total_scale))
+    scissor_y = Int32(round(window_height_px - (y + viewport_height) * total_scale))
+    scissor_width = Int32(round(viewport_width * total_scale))
+    scissor_height = Int32(round(viewport_height * total_scale))
 
-    # Render the scrolled content
-    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
-
-    # Disable scissor test
-    ModernGL.glDisable(GL_SCISSOR_TEST)
+    # Clip content to viewport, intersected with any enclosing scissor region
+    with_scissor_clip(scissor_x, scissor_y, scissor_width, scissor_height) do
+        interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
+    end
 
     # Render scrollbar if enabled
     if view.show_scrollbar && updated_state.max_scroll > 0.0f0
