@@ -17,7 +17,7 @@ function main()
                     IntrinsicHeight(Container(Text("Content above vertical lines"))),
                     HLine(SeparatorStyle(line_width=2.0f0, color=Vec4{Float32}(0.2f0, 0.2f0, 1.0f0, 1.0f0)), -20.0f0),  # Blue line
                 ],
-                padding=10.0f0, spacing=10.0f0)
+                spacing=10.0f0)
         )
     end
 

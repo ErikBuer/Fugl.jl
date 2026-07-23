@@ -47,7 +47,7 @@ function test_wrapping_modes()
                 IntrinsicHeight(Table(headers, [data[1]], style=no_wrap_style)), IntrinsicHeight(Container(Text("2 Row Wrapping (max_wrapped_rows=2):"))),
                 IntrinsicHeight(Table(headers, [data[2]], style=two_row_style)), IntrinsicHeight(Container(Text("3 Row Wrapping (max_wrapped_rows=3):"))),
                 IntrinsicHeight(Table(headers, [data[3]], style=three_row_style)),
-            ], spacing=20.0f0, padding=20.0f0)
+            ], spacing=20.0f0)
     end
 
     Fugl.run(MyApp, title="Table Wrapping Modes Demo", window_width_points=800, window_height_points=600, fps_overlay=true)

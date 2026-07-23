@@ -155,7 +155,7 @@ function detect_click(view::ModalView, input_state::InputState, x::Float32, y::F
 
     child_action = detect_click(view.child, input_state, modal_x, modal_y, modal_width, modal_height, z)
     if !isnothing(child_action) || !isnothing(modal_action)
-        #unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
+        # Any interaction with the modal blurs whatever was focused in the background.
         blur(view.background)
 
         if !isnothing(child_action)
@@ -173,7 +173,6 @@ function detect_click(view::ModalView, input_state::InputState, x::Float32, y::F
         end
 
         if view.capture_clicks_outside
-            #unfocus_components(view.background, input_state, x, y, width, height, Int32(0))
             blur(view.background)
             return nothing
         end
@@ -182,27 +181,4 @@ function detect_click(view::ModalView, input_state::InputState, x::Float32, y::F
     end
 
     return nothing
-end
-
-"""
-Defocus all components in a view by simulating a click outside their bounds.
-"""
-function unfocus_components(view::AbstractView, input_state::InputState, x::Float32, y::Float32, width::Float32, height::Float32, parent_z::Int32)
-    # Save original state
-    original_x = input_state.x
-    original_y = input_state.y
-    original_mouse_down = input_state.mouse_down[LeftButton]
-
-    # Simulate a click outside all components
-    input_state.x = -1000.0
-    input_state.y = -1000.0
-    input_state.mouse_down[LeftButton] = true
-
-    # Trigger detect_click to process the defocus
-    detect_click(view, input_state, x, y, width, height, parent_z)
-
-    # Restore original state
-    input_state.x = original_x
-    input_state.y = original_y
-    input_state.mouse_down[LeftButton] = original_mouse_down
 end

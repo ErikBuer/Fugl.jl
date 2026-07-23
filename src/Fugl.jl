@@ -13,6 +13,9 @@ const OPENGL_LOCK = ReentrantLock()
 
 include("matrices.jl")
 include("gl_context_state.jl")
+export push_scissor!, pop_scissor!, with_scissor_clip
+include("input_context.jl")
+export push_input_clip!, pop_input_clip!, with_input_clip, current_input_clip, pointer_in_clip, hit_test
 include("dpi_scaling.jl")
 export fugl_to_pixels, fugl_to_pixels_x, fugl_to_pixels_y
 export pixels_to_fugl, pixels_to_fugl_x, pixels_to_fugl_y
@@ -190,6 +193,9 @@ function run(ui_function::Function;
 
                 empty!(mouse_state.key_buffer)
                 empty!(mouse_state.key_events)
+
+                # Reset hit-test clip stack for this frame's detect_click pass
+                reset_input_clip!()
 
                 # Generate the UI dynamically with error handling
                 try

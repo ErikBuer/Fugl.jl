@@ -251,7 +251,7 @@ function main()
                         style=dark_card_style,
                         title_style=dark_card_title_style
                     )
-                ], spacing=5, padding=5),
+                ], spacing=5),
             style=dark_card_style,
             title_style=dark_card_title_style
         )
