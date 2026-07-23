@@ -9,7 +9,7 @@ struct VerticalScrollAreaView <: AbstractView
     scroll_state::VerticalScrollState
     style::ScrollAreaStyle
     show_scrollbar::Bool
-    invert_scroll_on_apple::Bool
+    invert_scroll::Bool
     on_scroll_change::Function
     on_click::Function
 end
@@ -22,7 +22,7 @@ struct HorizontalScrollAreaView <: AbstractView
     scroll_state::HorizontalScrollState
     style::ScrollAreaStyle
     show_scrollbar::Bool
-    invert_scroll_on_apple::Bool
+    invert_scroll::Bool
     on_scroll_change::Function
     on_click::Function
 end
@@ -35,6 +35,8 @@ Create a VerticalScrollArea component
 - `scroll_state::VerticalScrollState`: Current scroll state
 - `style::ScrollAreaStyle`: Styling for the scroll area
 - `show_scrollbar::Bool`: Show visual scrollbar
+- `invert_scroll::Bool`: Invert the sign of vertical mouse wheel scroll deltas. Matches the natural-scrolling
+  convention on both macOS and Linux/Windows wheel input; set to `false` to use the raw wheel sign instead.
 - `on_scroll_change::Function`: Callback when scroll state changes
 - `on_click::Function`: Callback for click events
 """
@@ -43,12 +45,12 @@ function VerticalScrollArea(
     scroll_state::VerticalScrollState=VerticalScrollState(),
     style::ScrollAreaStyle=ScrollAreaStyle(),
     show_scrollbar::Bool=true,
-    invert_scroll_on_apple::Bool=true,
+    invert_scroll::Bool=true,
     on_scroll_change::Function=(new_state) -> nothing,
     on_click::Function=(x, y) -> nothing
 )
     return VerticalScrollAreaView(
-        content, scroll_state, style, show_scrollbar, invert_scroll_on_apple,
+        content, scroll_state, style, show_scrollbar, invert_scroll,
         on_scroll_change, on_click
     )
 end
@@ -61,6 +63,8 @@ Create a HorizontalScrollArea component
 - `scroll_state::HorizontalScrollState`: Current scroll state
 - `style::ScrollAreaStyle`: Styling for the scroll area
 - `show_scrollbar::Bool`: Show visual scrollbar
+- `invert_scroll::Bool`: Invert the sign of horizontal mouse wheel scroll deltas. Matches the natural-scrolling
+  convention on both macOS and Linux/Windows wheel input; set to `false` to use the raw wheel sign instead.
 - `on_scroll_change::Function`: Callback when scroll state changes
 - `on_click::Function`: Callback for click events
 """
@@ -69,12 +73,12 @@ function HorizontalScrollArea(
     scroll_state::HorizontalScrollState=HorizontalScrollState(),
     style::ScrollAreaStyle=ScrollAreaStyle(),
     show_scrollbar::Bool=true,
-    invert_scroll_on_apple::Bool=true,
+    invert_scroll::Bool=true,
     on_scroll_change::Function=(new_state) -> nothing,
     on_click::Function=(x, y) -> nothing
 )
     return HorizontalScrollAreaView(
-        content, scroll_state, style, show_scrollbar, invert_scroll_on_apple,
+        content, scroll_state, style, show_scrollbar, invert_scroll,
         on_scroll_change, on_click
     )
 end
@@ -205,9 +209,6 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
         view.scroll_state
     end
 
-    # Enable scissor test to clip content to viewport
-    ModernGL.glEnable(GL_SCISSOR_TEST)
-
     # Convert point-space coords to hardware pixel coords for glScissor
     dpi_scaling = get_current_dpi_scaling()
     total_scale = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
@@ -216,17 +217,15 @@ function interpret_view(view::VerticalScrollAreaView, x::Float32, y::Float32, wi
     ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport_info)
     window_height_px = viewport_info[4]
 
-    scissor_x = Int(round(x * total_scale))
-    scissor_y = Int(round(window_height_px - (y + viewport_height) * total_scale))
-    scissor_width = Int(round(viewport_width * total_scale))
-    scissor_height = Int(round(viewport_height * total_scale))
-    ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
+    scissor_x = Int32(round(x * total_scale))
+    scissor_y = Int32(round(window_height_px - (y + viewport_height) * total_scale))
+    scissor_width = Int32(round(viewport_width * total_scale))
+    scissor_height = Int32(round(viewport_height * total_scale))
 
-    # Render the scrolled content
-    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
-
-    # Disable scissor test
-    ModernGL.glDisable(GL_SCISSOR_TEST)
+    # Clip content to viewport, intersected with any enclosing scissor region
+    with_scissor_clip(scissor_x, scissor_y, scissor_width, scissor_height) do
+        interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
+    end
 
     # Render scrollbar if enabled
     if view.show_scrollbar && updated_state.max_scroll > 0.0f0
@@ -254,9 +253,6 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
         view.scroll_state
     end
 
-    # Enable scissor test to clip content to viewport
-    ModernGL.glEnable(GL_SCISSOR_TEST)
-
     # Convert point-space coords to hardware pixel coords for glScissor
     dpi_scaling = get_current_dpi_scaling()
     total_scale = dpi_scaling[].manual_scale * get_system_dpi_ratio(dpi_scaling)
@@ -265,17 +261,15 @@ function interpret_view(view::HorizontalScrollAreaView, x::Float32, y::Float32, 
     ModernGL.glGetIntegerv(ModernGL.GL_VIEWPORT, viewport_info)
     window_height_px = viewport_info[4]
 
-    scissor_x = Int(round(x * total_scale))
-    scissor_y = Int(round(window_height_px - (y + viewport_height) * total_scale))
-    scissor_width = Int(round(viewport_width * total_scale))
-    scissor_height = Int(round(viewport_height * total_scale))
-    ModernGL.glScissor(scissor_x, scissor_y, scissor_width, scissor_height)
+    scissor_x = Int32(round(x * total_scale))
+    scissor_y = Int32(round(window_height_px - (y + viewport_height) * total_scale))
+    scissor_width = Int32(round(viewport_width * total_scale))
+    scissor_height = Int32(round(viewport_height * total_scale))
 
-    # Render the scrolled content
-    interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
-
-    # Disable scissor test
-    ModernGL.glDisable(GL_SCISSOR_TEST)
+    # Clip content to viewport, intersected with any enclosing scissor region
+    with_scissor_clip(scissor_x, scissor_y, scissor_width, scissor_height) do
+        interpret_view(view.content, content_x, content_y, content_width, content_height, projection_matrix, cursor_position, window_size)
+    end
 
     # Render scrollbar if enabled
     if view.show_scrollbar && updated_state.max_scroll > 0.0f0
@@ -482,7 +476,7 @@ Handle vertical mouse wheel scrolling
 """
 function handle_vertical_scroll_wheel(view::VerticalScrollAreaView, wheel_delta_y::Float32)
     scroll_speed = 30.0f0  # Points per wheel tick
-    delta = (view.invert_scroll_on_apple && Sys.isapple()) ? -wheel_delta_y : wheel_delta_y
+    delta = view.invert_scroll ? -wheel_delta_y : wheel_delta_y
 
     if view.scroll_state.max_scroll > 0.0f0
         new_offset = clamp(
@@ -508,7 +502,7 @@ Handle horizontal mouse wheel scrolling
 """
 function handle_horizontal_scroll_wheel(view::HorizontalScrollAreaView, wheel_delta_x::Float32)
     scroll_speed = 30.0f0  # Points per wheel tick
-    delta = (view.invert_scroll_on_apple && Sys.isapple()) ? -wheel_delta_x : wheel_delta_x
+    delta = view.invert_scroll ? -wheel_delta_x : wheel_delta_x
 
     if view.scroll_state.max_scroll > 0.0f0
         new_offset = clamp(
