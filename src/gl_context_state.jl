@@ -94,6 +94,22 @@ function pop_viewport!()
 end
 
 """
+Intersect two axis-aligned rectangles given as `(x, y, width, height)` tuples,
+returning their overlap as a `(x, y, width, height)` tuple. A non-overlapping pair
+yields zero width and/or height. Shared by the render scissor stack (pixel space)
+and the input clip stack (effective-point space) so the two can never drift.
+"""
+function intersect_rect(a::Tuple{T,T,T,T}, b::Tuple{T,T,T,T}) where {T<:Real}
+    ax, ay, aw, ah = a
+    bx, by, bw, bh = b
+    ix = max(ax, bx)
+    iy = max(ay, by)
+    iright = min(ax + aw, bx + bw)
+    itop = min(ay + ah, by + bh)
+    return (ix, iy, max(zero(T), iright - ix), max(zero(T), itop - iy))
+end
+
+"""
 Push the current scissor rect onto the stack and set a new one, intersected with
 the currently active scissor rect (if any) so nested clips can only shrink the
 effective region, never grow it. All inputs/outputs are in absolute pixel space.
@@ -102,16 +118,7 @@ function push_scissor!(x::Int32, y::Int32, width::Int32, height::Int32)
     push!(GL_STATE.scissor_stack, GL_STATE.current_scissor)
 
     previous = GL_STATE.current_scissor
-    new_rect = if previous === nothing
-        (x, y, width, height)
-    else
-        px, py, pwidth, pheight = previous
-        ix = max(x, px)
-        iy = max(y, py)
-        iright = min(x + width, px + pwidth)
-        itop = min(y + height, py + pheight)
-        (ix, iy, max(Int32(0), iright - ix), max(Int32(0), itop - iy))
-    end
+    new_rect = previous === nothing ? (x, y, width, height) : intersect_rect((x, y, width, height), previous)
 
     GL_STATE.current_scissor = new_rect
     ModernGL.glEnable(ModernGL.GL_SCISSOR_TEST)

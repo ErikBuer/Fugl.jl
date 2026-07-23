@@ -37,7 +37,7 @@ function test_table_clipping()
                 IntrinsicHeight(Container(Text("Character-level clipping with ellipsis (max_wrapped_rows=0):"))),
                 IntrinsicHeight(Table(headers, data, style=clipping_style)), IntrinsicHeight(Container(Text("Word wrapping with final line clipping (max_wrapped_rows=2):"))),
                 IntrinsicHeight(Table(headers, data, style=wrapping_style)),
-            ], spacing=20.0f0, padding=20.0f0)
+            ], spacing=20.0f0)
     end
 
     Fugl.run(MyApp, title="Table Text Clipping Demo", window_width_points=900, window_height_points=600)

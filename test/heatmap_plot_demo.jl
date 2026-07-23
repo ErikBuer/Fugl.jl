@@ -135,13 +135,13 @@ function heatmap_plot_demo()
                         PlotStyle(
                             show_grid=true,
                             show_legend=true,
-                            padding=50.0f0
+                            padding=0f0
                         ),
                         plot1_state[],
                         (new_state) -> plot1_state[] = new_state
                     )
                 ),
-            ], padding=0.0, spacing=0.0)
+            ], spacing=0.0)
     end
 
     Fugl.run(MyApp, title="Heatmap Demo", window_width_points=812, window_height_points=600, fps_overlay=true, dpi_scaling=dpi_ref)

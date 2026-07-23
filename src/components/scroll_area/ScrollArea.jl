@@ -377,43 +377,40 @@ function detect_click(view::VerticalScrollAreaView, mouse_state::InputState, x::
     mouse_x = Float32(mouse_state.x) - x
     mouse_y = Float32(mouse_state.y) - y
 
-    # Check if mouse is within the scroll area bounds
-    if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height
+    # Calculate viewport dimensions (content area excludes the scrollbar column)
+    scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
+    viewport_width = width - scrollbar_space
+    viewport_height = height
 
-        # Handle mouse wheel scrolling (vertical only)
-        if mouse_state.scroll_y != 0.0
-            scroll_action() = handle_vertical_scroll_wheel(view, Float32(mouse_state.scroll_y))
-            return ClickResult(z, () -> scroll_action())
-        end
+    px = Float32(mouse_state.x)
+    py = Float32(mouse_state.y)
 
-        # Calculate viewport dimensions
-        scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
-        viewport_width = width - scrollbar_space
-        viewport_height = height
+    # Own mouse wheel handling (clip-aware; outer scroll area takes priority over nested
+    # content, preserving prior behavior). Gated on the full area incl. scrollbar column.
+    if mouse_state.scroll_y != 0.0 && hit_test(x, y, width, height, px, py)
+        scroll_action() = handle_vertical_scroll_wheel(view, Float32(mouse_state.scroll_y))
+        return ClickResult(z, () -> scroll_action())
+    end
 
-        # Handle content area clicks
-        if mouse_x >= 0 && mouse_x <= viewport_width &&
-           mouse_y >= 0 && mouse_y <= viewport_height
+    # Always recurse into content so focused/hovered descendants stay visited even when the
+    # pointer is outside the viewport. Clip hit-testing to the viewport so content scrolled
+    # out of view isn't treated as under the pointer.
+    content_layout = apply_layout(view, x, y, width, height)
+    content_x, content_y, content_width, content_height = content_layout[1:4]
+    content_result = with_input_clip(x, y, viewport_width, viewport_height) do
+        detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height, z)
+    end
+    if content_result !== nothing
+        return content_result  # Forward child's result with higher z
+    end
 
-            # Calculate mouse position in content space
-            content_mouse_x = mouse_x
-            content_mouse_y = mouse_y + view.scroll_state.scroll_offset
-
-            # Check click on the content
-            content_layout = apply_layout(view, x, y, width, height)
-            content_x, content_y, content_width, content_height = content_layout[1:4]
-
-            content_result = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height, z)
-            if content_result !== nothing
-                return content_result  # Forward child's result with higher z
-            end
-
-            # Call our own click callback if clicked
-            if get(mouse_state.was_clicked, LeftButton, false)
-                click_action() = view.on_click(content_mouse_x, content_mouse_y)
-                return ClickResult(z, () -> click_action())
-            end
-        end
+    # Own click callback (clip-aware, gated on the viewport)
+    if get(mouse_state.was_clicked, LeftButton, false) &&
+       hit_test(x, y, viewport_width, viewport_height, px, py)
+        content_mouse_x = mouse_x
+        content_mouse_y = mouse_y + view.scroll_state.scroll_offset
+        click_action() = view.on_click(content_mouse_x, content_mouse_y)
+        return ClickResult(z, () -> click_action())
     end
 
     return nothing
@@ -429,43 +426,40 @@ function detect_click(view::HorizontalScrollAreaView, mouse_state::InputState, x
     mouse_x = Float32(mouse_state.x) - x
     mouse_y = Float32(mouse_state.y) - y
 
-    # Check if mouse is within the scroll area bounds
-    if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height
+    # Calculate viewport dimensions (content area excludes the scrollbar row)
+    scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
+    viewport_width = width
+    viewport_height = height - scrollbar_space
 
-        # Handle mouse wheel scrolling (horizontal only)
-        if mouse_state.scroll_x != 0.0
-            scroll_action() = handle_horizontal_scroll_wheel(view, Float32(mouse_state.scroll_x))
-            return ClickResult(z, () -> scroll_action())
-        end
+    px = Float32(mouse_state.x)
+    py = Float32(mouse_state.y)
 
-        # Calculate viewport dimensions
-        scrollbar_space = view.show_scrollbar ? view.style.scrollbar_width : 0.0f0
-        viewport_width = width
-        viewport_height = height - scrollbar_space
+    # Own mouse wheel handling (clip-aware; outer scroll area takes priority over nested
+    # content, preserving prior behavior). Gated on the full area incl. scrollbar row.
+    if mouse_state.scroll_x != 0.0 && hit_test(x, y, width, height, px, py)
+        scroll_action() = handle_horizontal_scroll_wheel(view, Float32(mouse_state.scroll_x))
+        return ClickResult(z, () -> scroll_action())
+    end
 
-        # Handle content area clicks
-        if mouse_x >= 0 && mouse_x <= viewport_width &&
-           mouse_y >= 0 && mouse_y <= viewport_height
+    # Always recurse into content so focused/hovered descendants stay visited even when the
+    # pointer is outside the viewport. Clip hit-testing to the viewport so content scrolled
+    # out of view isn't treated as under the pointer.
+    content_layout = apply_layout(view, x, y, width, height)
+    content_x, content_y, content_width, content_height = content_layout[1:4]
+    content_result = with_input_clip(x, y, viewport_width, viewport_height) do
+        detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height, z)
+    end
+    if content_result !== nothing
+        return content_result  # Forward child's result with higher z
+    end
 
-            # Calculate mouse position in content space
-            content_mouse_x = mouse_x + view.scroll_state.scroll_offset
-            content_mouse_y = mouse_y
-
-            # Check click on the content
-            content_layout = apply_layout(view, x, y, width, height)
-            content_x, content_y, content_width, content_height = content_layout[1:4]
-
-            content_result = detect_click(view.content, mouse_state, content_x, content_y, content_width, content_height, z)
-            if content_result !== nothing
-                return content_result  # Forward child's result with higher z
-            end
-
-            # Call our own click callback if clicked
-            if get(mouse_state.was_clicked, LeftButton, false)
-                click_action() = view.on_click(content_mouse_x, content_mouse_y)
-                return ClickResult(z, () -> click_action())
-            end
-        end
+    # Own click callback (clip-aware, gated on the viewport)
+    if get(mouse_state.was_clicked, LeftButton, false) &&
+       hit_test(x, y, viewport_width, viewport_height, px, py)
+        content_mouse_x = mouse_x + view.scroll_state.scroll_offset
+        content_mouse_y = mouse_y
+        click_action() = view.on_click(content_mouse_x, content_mouse_y)
+        return ClickResult(z, () -> click_action())
     end
 
     return nothing

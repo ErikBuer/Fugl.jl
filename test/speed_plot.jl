@@ -68,7 +68,7 @@ function main()
                             show_grid=true,
                         )
                     )
-                ),], padding=0.0, spacing=0.0)
+                ),], spacing=0.0)
     end
 
     Fugl.run(MyApp, title="Multi-Type Plot Demo - Line, Scatter, Stem", window_width_points=1200, window_height_points=1000, fps_overlay=true)
