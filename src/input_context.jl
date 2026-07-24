@@ -77,6 +77,27 @@ function with_input_clip(f::Function, x::Float32, y::Float32, width::Float32, he
 end
 
 """
+Run `f` with hit-test clipping fully suspended, saving and restoring the previous clip
+state (stack and active rect) regardless of what an ancestor pushed. For overlay content
+(e.g. `Popover`) that renders unclipped via `add_overlay_function` — hit-testing must
+match that, or a trigger nested inside a `ScrollArea`/clipped container would make its
+overlay panel unclickable outside the ancestor's viewport even though it's drawn on top
+of everything.
+"""
+function with_unclipped_input(f::Function)
+    saved_stack = INPUT_CONTEXT.clip_stack
+    saved_clip = INPUT_CONTEXT.current_clip
+    INPUT_CONTEXT.clip_stack = Union{Nothing,Tuple{Float32,Float32,Float32,Float32}}[]
+    INPUT_CONTEXT.current_clip = nothing
+    try
+        return f()
+    finally
+        INPUT_CONTEXT.clip_stack = saved_stack
+        INPUT_CONTEXT.current_clip = saved_clip
+    end
+end
+
+"""
 Get the current hit-test clip rect (`nothing` when unclipped).
 """
 function current_input_clip()::Union{Nothing,Tuple{Float32,Float32,Float32,Float32}}
