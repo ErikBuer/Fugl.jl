@@ -157,6 +157,9 @@ export Modal, ModalState, ModalStyle
 include("composite_components/tooltip/Tooltip.jl")
 export Tooltip, TooltipState, TooltipStyle
 
+include("composite_components/popover/Popover.jl")
+export Popover, PopoverState, PopoverStyle
+
 include("composite_components/context_menu/ContextMenu.jl")
 export ContextMenu, ContextMenuState
 
