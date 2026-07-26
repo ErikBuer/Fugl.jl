@@ -4,19 +4,22 @@ include("dropdown_state.jl")
 struct DropdownView <: AbstractView
     state::DropdownState
     style::DropdownStyle
-    on_state_change::Function    # Callback for state changes
-    on_select::Function          # Callback when an option is selected
+    on_state_change::StateCallback{DropdownState}    # Callback for state changes
+    on_select::FunctionWrapper{Nothing,Tuple{String,Int}}          # Callback when an option is selected
     placeholder_text::String
 end
 
 function Dropdown(
     state::DropdownState;
     style=DropdownStyle(),
-    on_state_change::Function=(new_state) -> nothing,
-    on_select::Function=(selected_value, selected_index) -> nothing,
+    on_state_change=(new_state) -> nothing,
+    on_select=(selected_value, selected_index) -> nothing,
     placeholder_text="Select option..."
 )::DropdownView
-    return DropdownView(state, style, on_state_change, on_select, placeholder_text)
+    return DropdownView(state, style,
+        wrap_callback(StateCallback{DropdownState}, on_state_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{String,Int}}, on_select),
+        placeholder_text)
 end
 
 include("draw.jl")

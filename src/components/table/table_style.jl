@@ -55,6 +55,6 @@ struct TableView <: AbstractView
     data::Vector{Vector{String}}  # Vector of rows, each row is a vector of cell strings
     style::TableStyle
     state::TableState
-    on_cell_click::Function  # Callback for cell clicks: (row_index, col_index) -> nothing
-    on_state_change::Function  # Callback for state changes: (new_state) -> nothing
+    on_cell_click::FunctionWrapper{Nothing,Tuple{Int,Int}}  # Callback for cell clicks: (row_index, col_index) -> nothing
+    on_state_change::StateCallback{TableState}  # Callback for state changes: (new_state) -> nothing
 end

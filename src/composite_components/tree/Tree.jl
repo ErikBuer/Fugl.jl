@@ -9,8 +9,8 @@ struct TreeView <: AbstractView
     state::TreeState
     indent::Float32
     style::TreeStyle
-    on_state_change::Function  # Callback for state changes (expand/collapse/select)
-    on_select::Function        # Callback for file selection (path, name)
+    on_state_change::StateCallback{TreeState}  # Callback for state changes (expand/collapse/select)
+    on_select::FunctionWrapper{Nothing,Tuple{String,String}}        # Callback for file selection (path, name)
 end
 
 function Tree(
@@ -20,7 +20,9 @@ function Tree(
     on_state_change=(new_state) -> nothing,
     on_select=(path, name) -> nothing
 )
-    return TreeView(state, indent, style, on_state_change, on_select)
+    return TreeView(state, indent, style,
+        wrap_callback(StateCallback{TreeState}, on_state_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{String,String}}, on_select))
 end
 
 function measure(view::TreeView)::Tuple{Float32,Float32}

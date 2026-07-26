@@ -43,7 +43,7 @@ struct HorizontalSplitContainerView <: AbstractView
     right::AbstractView
     style::SplitContainerStyle  # Style configuration
     state::SplitContainerState  # External state for interactions (includes split_position)
-    on_state_change::Function   # Callback for state changes (including split position)
+    on_state_change::StateCallback{SplitContainerState}   # Callback for state changes (including split position)
 end
 
 """
@@ -55,7 +55,7 @@ struct VerticalSplitContainerView <: AbstractView
     bottom::AbstractView
     style::SplitContainerStyle  # Style configuration
     state::SplitContainerState  # External state for interactions (includes split_position)
-    on_state_change::Function   # Callback for state changes (including split position)
+    on_state_change::StateCallback{SplitContainerState}   # Callback for state changes (including split position)
 end
 
 """
@@ -68,16 +68,16 @@ Create a horizontal split container with left and right child components.
 - `right::AbstractView`: Right child component
 - `style::SplitContainerStyle=SplitContainerStyle()`: Style configuration
 - `state::SplitContainerState=SplitContainerState()`: State including split position and interactions
-- `on_state_change::Function=() -> nothing`: Callback for state changes (including split position)
+- `on_state_change=(new_state) -> nothing`: Callback for state changes (including split position)
 """
 function HorizontalSplitContainer(
     left::AbstractView,
     right::AbstractView;
     style::SplitContainerStyle=SplitContainerStyle(),
     state::SplitContainerState=SplitContainerState(),
-    on_state_change::Function=() -> nothing
+    on_state_change=(new_state) -> nothing
 )
-    return HorizontalSplitContainerView(left, right, style, state, on_state_change)
+    return HorizontalSplitContainerView(left, right, style, state, wrap_callback(StateCallback{SplitContainerState}, on_state_change))
 end
 
 """
@@ -90,16 +90,16 @@ Create a vertical split container with top and bottom child components.
 - `bottom::AbstractView`: Bottom child component
 - `style::SplitContainerStyle=SplitContainerStyle()`: Style configuration
 - `state::SplitContainerState=SplitContainerState()`: State including split position and interactions
-- `on_state_change::Function=() -> nothing`: Callback for state changes (including split position)
+- `on_state_change=(new_state) -> nothing`: Callback for state changes (including split position)
 """
 function VerticalSplitContainer(
     top::AbstractView,
     bottom::AbstractView;
     style::SplitContainerStyle=SplitContainerStyle(),
     state::SplitContainerState=SplitContainerState(),
-    on_state_change::Function=() -> nothing
+    on_state_change=(new_state) -> nothing
 )
-    return VerticalSplitContainerView(top, bottom, style, state, on_state_change)
+    return VerticalSplitContainerView(top, bottom, style, state, wrap_callback(StateCallback{SplitContainerState}, on_state_change))
 end
 
 function detect_click(container::HorizontalSplitContainerView, input_state::InputState, x_offset::Float32, y_offset::Float32, width::Float32, height::Float32, parent_z::Int32)::Union{ClickResult,Nothing}

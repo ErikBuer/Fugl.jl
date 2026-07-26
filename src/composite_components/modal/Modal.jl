@@ -8,8 +8,8 @@ struct ModalView <: AbstractView
     child_height::Float32       # Height of the modal content
     state::ModalState           # Position state
     style::ModalStyle           # Appearance style
-    on_state_change::Function   # Callback for state changes
-    on_click_outside::Function  # Callback for clicking outside the modal
+    on_state_change::StateCallback{ModalState}   # Callback for state changes
+    on_click_outside::VoidCallback  # Callback for clicking outside the modal
     capture_clicks_outside::Bool          # Whether to capture clicks outside the modal to prevent them from passing through
 end
 
@@ -20,11 +20,14 @@ function Modal(
     child_height::Real=100.0f0,
     state::ModalState=ModalState(),
     style::ModalStyle=ModalStyle(),
-    on_state_change::Function=(new_state) -> nothing,
-    on_click_outside::Function=() -> nothing,
+    on_state_change=(new_state) -> nothing,
+    on_click_outside=() -> nothing,
     capture_clicks_outside::Bool=true
 )
-    return ModalView(background, child, Float32(child_width), Float32(child_height), state, style, on_state_change, on_click_outside, capture_clicks_outside)
+    return ModalView(background, child, Float32(child_width), Float32(child_height), state, style,
+        wrap_callback(StateCallback{ModalState}, on_state_change),
+        wrap_callback(VoidCallback, on_click_outside),
+        capture_clicks_outside)
 end
 
 function measure(view::ModalView)::Tuple{Float32,Float32}

@@ -5,10 +5,10 @@
         parser::Union{Function, Nothing}=nothing,
         validator::Union{Function, Nothing}=nothing,
         style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
-        on_state_change::Function=(new_state::EditorState) -> nothing,
-        on_change::Function=(parsed_value) -> nothing,
-        on_focus::Function=() -> nothing,
-        on_blur::Function=() -> nothing
+        on_state_change=(new_state::EditorState) -> nothing,
+        on_change=(parsed_value) -> nothing,
+        on_focus=() -> nothing,
+        on_blur=() -> nothing
     )
 
 Single-line form field with custom formatting, validation, and parsing.
@@ -56,10 +56,10 @@ function FormattedTextField(
     parser::Union{Function,Nothing}=nothing,
     validator::Union{Function,Nothing}=nothing,
     style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
-    on_state_change::Function=(new_state::EditorState) -> nothing,
-    on_change::Function=(parsed_value) -> nothing,
-    on_focus::Function=() -> nothing,
-    on_blur::Function=() -> nothing
+    on_state_change=(new_state::EditorState) -> nothing,
+    on_change=(parsed_value) -> nothing,
+    on_focus=() -> nothing,
+    on_blur=() -> nothing
 )
     height = style.text_style.size_points + 2 * style.padding + 1
 

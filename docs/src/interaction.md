@@ -67,3 +67,17 @@ nothing #hide
 ```
 
 ![KeyListener Basic](keylistener_basic_interaction.png)
+
+## Defining callbacks
+
+Components store their callbacks as fixed-signature `FunctionWrapper`s rather than
+type-erased `Function` fields:
+
+```julia
+TextButton("Save", on_click=() -> save_file())
+CheckBox(state[], on_change=(new_value) -> state[] = new_value)
+```
+
+This design means a callback is compiled when the view tree is *built* (every frame),
+not when it is first *invoked* — so the first click on a button doesn't pause for
+JIT compilation, and ahead-of-time compilation can see through callback fields.

@@ -10,7 +10,7 @@ struct TooltipView <: AbstractView
     show_delay::Float64              # Delay before showing tooltip (seconds)
     hide_delay::Float64              # Delay before hiding tooltip (seconds)
     state::TooltipState              # Current tooltip state (hover timing, visibility)
-    on_state_change::Function        # Callback for state changes
+    on_state_change::StateCallback{TooltipState}        # Callback for state changes
 end
 
 function Tooltip(
@@ -21,9 +21,9 @@ function Tooltip(
     show_delay::Float64=0.5,         # 500 ms delay before showing
     hide_delay::Float64=0.1,         # 100 ms delay before hiding
     state::TooltipState=TooltipState(),
-    on_state_change::Function=(new_state) -> nothing
+    on_state_change=(new_state) -> nothing
 )::TooltipView
-    return TooltipView(wrapped_component, tooltip_text, position, style, show_delay, hide_delay, state, on_state_change)
+    return TooltipView(wrapped_component, tooltip_text, position, style, show_delay, hide_delay, state, wrap_callback(StateCallback{TooltipState}, on_state_change))
 end
 
 """

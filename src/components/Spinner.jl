@@ -23,7 +23,7 @@ struct SpinnerView <: AbstractView
     interval_seconds::Float64
     text_style::TextStyle
     state::SpinnerState
-    on_state_change::Function
+    on_state_change::StateCallback{SpinnerState}
 end
 
 """
@@ -42,14 +42,14 @@ function Spinner(
     interval_seconds::Float64=0.1,
     text_style::TextStyle=TextStyle(),
     state::SpinnerState=SpinnerState(),
-    on_state_change::Function=(new_state) -> nothing
+    on_state_change=(new_state) -> nothing
 )
     return SpinnerView(
         symbols,
         interval_seconds,
         text_style,
         state,
-        on_state_change
+        wrap_callback(StateCallback{SpinnerState}, on_state_change)
     )
 end
 

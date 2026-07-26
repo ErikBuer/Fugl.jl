@@ -10,23 +10,28 @@ include("text_editor_style.jl")
 struct TextBoxView <: AbstractTextEditorView
     state::EditorState           # Editor state containing text, cursor, etc.
     style::TextEditorStyle       # Style for the TextBox (using unified style)
-    on_state_change::Function    # Callback for all state changes (focus, text, cursor)
-    on_change::Function          # Optional callback for text changes only
-    on_focus::Function           # Optional callback for when component gains focus
-    on_blur::Function            # Optional callback for when component loses focus
+    on_state_change::StateCallback{EditorState}    # Callback for all state changes (focus, text, cursor)
+    on_change::FunctionWrapper{Nothing,Tuple{String}}  # Optional callback for text changes only
+    on_focus::VoidCallback       # Optional callback for when component gains focus
+    on_blur::VoidCallback        # Optional callback for when component loses focus
     cache_rendering::Bool        # Whether to use render caching for performance
 end
 
 function TextBox(
     state::EditorState;
     style=TextBoxStyle(),  # Use the TextBox-specific default style
-    on_state_change::Function=(new_state) -> nothing,
-    on_change::Function=(new_text) -> nothing,
-    on_focus::Function=() -> nothing,
-    on_blur::Function=() -> nothing,
+    on_state_change=(new_state) -> nothing,
+    on_change=(new_text) -> nothing,
+    on_focus=() -> nothing,
+    on_blur=() -> nothing,
     cache_rendering::Bool=true
 )::TextBoxView
-    return TextBoxView(state, style, on_state_change, on_change, on_focus, on_blur, cache_rendering)
+    return TextBoxView(state, style,
+        wrap_callback(StateCallback{EditorState}, on_state_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{String}}, on_change),
+        wrap_callback(VoidCallback, on_focus),
+        wrap_callback(VoidCallback, on_blur),
+        cache_rendering)
 end
 
 function measure(view::TextBoxView)::Tuple{Float32,Float32}

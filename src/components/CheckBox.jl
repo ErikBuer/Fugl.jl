@@ -34,10 +34,10 @@ struct CheckBoxView <: AbstractView
     hover_style::Union{Nothing,CheckBoxStyle}    # Style when hovered
     pressed_style::Union{Nothing,CheckBoxStyle}  # Style when pressed
     label::String                    # Optional label text
-    on_change::Function              # Callback when checkbox is clicked: (new_value::Bool) -> nothing
-    on_click::Function               # Additional click callback
+    on_change::BoolCallback          # Callback when checkbox is clicked: (new_value::Bool) -> nothing
+    on_click::VoidCallback           # Additional click callback
     interaction_state::Union{Nothing,InteractionState}
-    on_interaction_state_change::Function
+    on_interaction_state_change::StateCallback{InteractionState}
 end
 
 """
@@ -73,12 +73,16 @@ function CheckBox(
     style::CheckBoxStyle=CheckBoxStyle(),
     hover_style::Union{Nothing,CheckBoxStyle}=nothing,
     pressed_style::Union{Nothing,CheckBoxStyle}=nothing,
-    on_change::Function=(new_value::Bool) -> nothing,
-    on_click::Function=() -> nothing,
+    on_change=(new_value::Bool) -> nothing,
+    on_click=() -> nothing,
     interaction_state::Union{Nothing,InteractionState}=nothing,
-    on_interaction_state_change::Function=(new_state) -> nothing
+    on_interaction_state_change=(new_state) -> nothing
 )
-    return CheckBoxView(checked, style, hover_style, pressed_style, label, on_change, on_click, interaction_state, on_interaction_state_change)
+    return CheckBoxView(checked, style, hover_style, pressed_style, label,
+        wrap_callback(BoolCallback, on_change),
+        wrap_callback(VoidCallback, on_click),
+        interaction_state,
+        wrap_callback(StateCallback{InteractionState}, on_interaction_state_change))
 end
 
 function _active_style(view::CheckBoxView)::CheckBoxStyle

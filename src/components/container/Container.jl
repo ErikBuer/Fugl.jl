@@ -5,11 +5,11 @@ struct ContainerView <: AbstractView
     pressed_style::Union{Nothing,ContainerStyle}
     disabled::Bool
     disabled_style::Union{Nothing,ContainerStyle}
-    on_click::Function
-    on_mouse_down::Function
-    on_mouse_up::Function
+    on_click::VoidCallback
+    on_mouse_down::VoidCallback
+    on_mouse_up::VoidCallback
     interaction_state::Union{Nothing,InteractionState}
-    on_interaction_state_change::Function
+    on_interaction_state_change::StateCallback{InteractionState}
 end
 
 """
@@ -23,13 +23,18 @@ function Container(child::AbstractView=EmptyView();
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
     disabled::Bool=false,
     disabled_style::Union{Nothing,ContainerStyle}=nothing,
-    on_click::Function=() -> nothing,
-    on_mouse_down::Function=() -> nothing,
-    on_mouse_up::Function=() -> nothing,
+    on_click=() -> nothing,
+    on_mouse_down=() -> nothing,
+    on_mouse_up=() -> nothing,
     interaction_state::Union{Nothing,InteractionState}=nothing,
-    on_interaction_state_change::Function=(new_state) -> nothing
+    on_interaction_state_change=(new_state) -> nothing
 )
-    return ContainerView(child, style, hover_style, pressed_style, disabled, disabled_style, on_click, on_mouse_down, on_mouse_up, interaction_state, on_interaction_state_change)
+    return ContainerView(child, style, hover_style, pressed_style, disabled, disabled_style,
+        wrap_callback(VoidCallback, on_click),
+        wrap_callback(VoidCallback, on_mouse_down),
+        wrap_callback(VoidCallback, on_mouse_up),
+        interaction_state,
+        wrap_callback(StateCallback{InteractionState}, on_interaction_state_change))
 end
 
 """

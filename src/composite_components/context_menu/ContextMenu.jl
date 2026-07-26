@@ -6,8 +6,8 @@ struct ContextMenuView <: AbstractView
     style::FloatingMenuStyle
     width::Float32
     state::ContextMenuState
-    on_state_change::Function
-    on_select::Function
+    on_state_change::StateCallback{ContextMenuState}
+    on_select::IntCallback
 end
 
 """
@@ -47,10 +47,12 @@ function ContextMenu(
     style::FloatingMenuStyle=FloatingMenuStyle(),
     width::Float32=200.0f0,
     state::ContextMenuState=ContextMenuState(),
-    on_state_change::Function=(new_state) -> nothing,
-    on_select::Function=(index) -> nothing
+    on_state_change=(new_state) -> nothing,
+    on_select=(index) -> nothing
 )::ContextMenuView
-    return ContextMenuView(child, options, style, width, state, on_state_change, on_select)
+    return ContextMenuView(child, options, style, width, state,
+        wrap_callback(StateCallback{ContextMenuState}, on_state_change),
+        wrap_callback(IntCallback, on_select))
 end
 
 measure(view::ContextMenuView)::Tuple{Float32,Float32} = measure(view.child)

@@ -60,7 +60,7 @@ struct TabsView <: AbstractView
     normal_style::TabStyle
     selected_style::TabStyle
     hover_style::Union{Nothing,TabStyle}
-    on_tab_change::Function
+    on_tab_change::IntCallback
 end
 
 # Constructor: string labels with explicit widths
@@ -71,13 +71,13 @@ function Tabs(
     normal_style::TabStyle=TabStyle(),
     selected_style::TabStyle=_DEFAULT_SELECTED_TAB_STYLE,
     hover_style::Union{Nothing,TabStyle}=nothing,
-    on_tab_change::Function=(index) -> nothing,
+    on_tab_change=(index) -> nothing,
 )
     if selected_index < 1 || selected_index > length(tabs)
         selected_index = 1
     end
     converted = Vector{Tuple{String,AbstractView,Float32}}([(name, v, w) for (name, v, w) in tabs])
-    return TabsView(converted, selected_index, style, normal_style, selected_style, hover_style, on_tab_change)
+    return TabsView(converted, selected_index, style, normal_style, selected_style, hover_style, wrap_callback(IntCallback, on_tab_change))
 end
 
 # Constructor: string labels without explicit widths (all flexible)
@@ -88,7 +88,7 @@ function Tabs(
     normal_style::TabStyle=TabStyle(),
     selected_style::TabStyle=_DEFAULT_SELECTED_TAB_STYLE,
     hover_style::Union{Nothing,TabStyle}=nothing,
-    on_tab_change::Function=(index) -> nothing,
+    on_tab_change=(index) -> nothing,
 )
     tabs_with_width = [(name, view, NaN32) for (name, view) in tabs]
     return Tabs(tabs_with_width; selected_index, style, normal_style, selected_style, hover_style, on_tab_change)

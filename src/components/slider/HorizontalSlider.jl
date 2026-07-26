@@ -17,9 +17,9 @@ struct HorizontalSliderView{T<:Real} <: SizedView
     style::SliderStyle              # Normal style for the slider
     focused_style::Union{Nothing,SliderStyle}  # Style when focused
     dragging_style::Union{Nothing,SliderStyle} # Style when dragging
-    on_state_change::Function       # Callback for state changes
-    on_change::Function             # Callback for value changes only
-    on_interaction_state_change::Function  # Callback for interaction state changes
+    on_state_change::StateCallback{SliderState{T}}       # Callback for state changes
+    on_change::FunctionWrapper{Nothing,Tuple{T}}         # Callback for value changes only
+    on_interaction_state_change::StateCallback{InteractionState}  # Callback for interaction state changes
 end
 
 function HorizontalSlider(
@@ -28,11 +28,14 @@ function HorizontalSlider(
     style=SliderStyle(),
     focused_style::Union{Nothing,SliderStyle}=nothing,
     dragging_style::Union{Nothing,SliderStyle}=nothing,
-    on_state_change::Function=(new_state) -> nothing,
-    on_change::Function=(new_value) -> nothing,
-    on_interaction_state_change::Function=(new_interaction_state) -> nothing
+    on_state_change=(new_state) -> nothing,
+    on_change=(new_value) -> nothing,
+    on_interaction_state_change=(new_interaction_state) -> nothing
 ) where T<:Real
-    return HorizontalSliderView(state, steps, style, focused_style, dragging_style, on_state_change, on_change, on_interaction_state_change)
+    return HorizontalSliderView{T}(state, steps, style, focused_style, dragging_style,
+        wrap_callback(StateCallback{SliderState{T}}, on_state_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{T}}, on_change),
+        wrap_callback(StateCallback{InteractionState}, on_interaction_state_change))
 end
 
 function apply_layout(view::HorizontalSliderView, x::Float32, y::Float32, width::Float32, height::Float32)

@@ -2,15 +2,15 @@ struct IntrinsicColumnView <: AbstractView
     children::Vector{AbstractView}
     spacing::Float32 # Space between children
     reduce_spacing_on_overflow::Bool # If true, reduce spacing before clipping when space is tight
-    on_click::Function
+    on_click::VoidCallback
 end
 
-function IntrinsicColumn(children::Vector{<:AbstractView}; spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
-    return IntrinsicColumnView(children, spacing, reduce_spacing_on_overflow, on_click)
+function IntrinsicColumn(children::Vector{<:AbstractView}; spacing=10.0, reduce_spacing_on_overflow=true, on_click=() -> nothing)
+    return IntrinsicColumnView(children, spacing, reduce_spacing_on_overflow, wrap_callback(VoidCallback, on_click))
 end
 
-@inline function IntrinsicColumn(children::AbstractView...; spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
-    return IntrinsicColumnView(collect(AbstractView, children), spacing, reduce_spacing_on_overflow, on_click)
+@inline function IntrinsicColumn(children::AbstractView...; spacing=10.0, reduce_spacing_on_overflow=true, on_click=() -> nothing)
+    return IntrinsicColumnView(collect(AbstractView, children), spacing, reduce_spacing_on_overflow, wrap_callback(VoidCallback, on_click))
 end
 
 function apply_layout(view::IntrinsicColumnView, x::Float32, y::Float32, width::Float32, height::Float32)

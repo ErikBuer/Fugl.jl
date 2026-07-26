@@ -11,6 +11,9 @@ using ColorTypes
 
 const OPENGL_LOCK = ReentrantLock()
 
+include("callbacks.jl")
+export VoidCallback, StateCallback, wrap_callback
+
 include("matrices.jl")
 include("gl_context_state.jl")
 export push_scissor!, pop_scissor!, with_scissor_clip
