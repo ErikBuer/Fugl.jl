@@ -349,5 +349,9 @@ Struct with Mouse click function with z-height for layering.
 """
 struct ClickResult
     z_height::Int32
-    action::Function
+    action::VoidCallback
+
+    # Converting constructor: accepts any callable so the ~40 `ClickResult(z, () -> ...)`
+    # construction sites stay unchanged; wrapping pins the signature at construction.
+    ClickResult(z_height::Integer, action) = new(Int32(z_height), wrap_callback(VoidCallback, action))
 end

@@ -1,6 +1,6 @@
 struct KeyListenerView <: AbstractView
     child::AbstractView  # Wrapped component
-    key_map::Dict{Tuple{Int32,Union{Nothing,Int32}},Function}  # Fast lookup: (key, modifiers) => callback
+    key_map::Dict{Tuple{Int32,Union{Nothing,Int32}},VoidCallback}  # Fast lookup: (key, modifiers) => callback
 end
 
 """
@@ -14,32 +14,32 @@ Usage:
 - `KeyListener(my_component, [(GLFW.KEY_A, callback1), (GLFW.KEY_B, callback2)])` Multiple simple keys
 """
 function KeyListener(child::AbstractView, target_key::GLFW.Key, on_key_press::Function)
-    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
-    key_map[(Int32(target_key), nothing)] = on_key_press
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},VoidCallback}()
+    key_map[(Int32(target_key), nothing)] = wrap_callback(VoidCallback, on_key_press)
     return KeyListenerView(child, key_map)
 end
 
 # Single key with modifiers  
 function KeyListener(child::AbstractView, target_key::GLFW.Key, modifiers::Union{Int32,UInt16}, on_key_press::Function)
-    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
-    key_map[(Int32(target_key), Int32(modifiers))] = on_key_press
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},VoidCallback}()
+    key_map[(Int32(target_key), Int32(modifiers))] = wrap_callback(VoidCallback, on_key_press)
     return KeyListenerView(child, key_map)
 end
 
 # Multiple keys with optional modifiers
 function KeyListener(child::AbstractView, key_bindings::Vector{Tuple{GLFW.Key,Union{Nothing,Int32},Function}})
-    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},VoidCallback}()
     for (key, mods, callback) in key_bindings
-        key_map[(Int32(key), mods)] = callback
+        key_map[(Int32(key), mods)] = wrap_callback(VoidCallback, callback)
     end
     return KeyListenerView(child, key_map)
 end
 
 # Multiple keys without modifiers (simple format)
 function KeyListener(child::AbstractView, key_bindings::Vector{Tuple{GLFW.Key,Function}})
-    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},Function}()
+    key_map = Dict{Tuple{Int32,Union{Nothing,Int32}},VoidCallback}()
     for (key, callback) in key_bindings
-        key_map[(Int32(key), nothing)] = callback
+        key_map[(Int32(key), nothing)] = wrap_callback(VoidCallback, callback)
     end
     return KeyListenerView(child, key_map)
 end

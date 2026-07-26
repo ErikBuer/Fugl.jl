@@ -35,6 +35,10 @@ The `test/` directory doubles as a collection of runnable demo scripts (`*_demo.
 
 The core rule: **all view structs must be immutable**. `test/test_view_immutability.jl` enforces this by reflecting over every `AbstractView` subtype — adding a `mutable struct` view fails CI. State lives outside the view tree (in user-held structs like `EditorState`, `SliderState`, `PlotState`) and is threaded through via constructor arguments and change callbacks (e.g. `on_interaction_state_change`, `on_state_change`). The UI function is re-invoked every frame to rebuild the whole view tree.
 
+### Callbacks are FunctionWrappers (src/callbacks.jl)
+
+View structs must NOT store callbacks in `::Function` fields (a test enforces this, `test/test_callback_wrappers.jl`). Type them with `VoidCallback`, `StateCallback{S}`, or an explicit `FunctionWrapper{Nothing,Tuple{...}}`, and coerce constructor input with `wrap_callback` so users keep passing plain closures. This pins each callback's signature: construction compiles the callback (no first-click JIT pause) and the call is static, which keeps the library AOT-compilable. Note `cfunction` limits: argument type positions must be `Any` or a concrete type — small unions like `Union{Int,Nothing}` are not allowed (use `Tuple{Any}`). Higher-order function *arguments* (e.g. `run`'s `ui_function`, plot `data_to_screen`) legitimately stay `::Function`.
+
 ### The view interface (src/abstract_view.jl)
 
 Every component subtypes `AbstractView` (or `SizedView` for components with intrinsic dimensions) and implements some of:

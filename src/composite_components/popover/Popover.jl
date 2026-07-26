@@ -21,7 +21,7 @@ struct PopoverView <: AbstractView
     show_delay::Float64              # Delay before showing the popover (seconds)
     hide_delay::Float64              # Delay before hiding the popover (seconds)
     state::PopoverState              # Current popover state (hover timing, visibility)
-    on_state_change::Function        # Callback for state changes
+    on_state_change::StateCallback{PopoverState}        # Callback for state changes
 end
 
 function Popover(
@@ -34,9 +34,9 @@ function Popover(
     show_delay::Float64=0.3,
     hide_delay::Float64=0.2,
     state::PopoverState=PopoverState(),
-    on_state_change::Function=(new_state) -> nothing
+    on_state_change=(new_state) -> nothing
 )::PopoverView
-    return PopoverView(wrapped_component, popover_content, Float32(popover_width), Float32(popover_height), position, style, show_delay, hide_delay, state, on_state_change)
+    return PopoverView(wrapped_component, popover_content, Float32(popover_width), Float32(popover_height), position, style, show_delay, hide_delay, state, wrap_callback(StateCallback{PopoverState}, on_state_change))
 end
 
 """

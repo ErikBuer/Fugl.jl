@@ -1,6 +1,6 @@
 struct DropAreaView <: AbstractView
     child::AbstractView
-    on_drop::Function  # Called with Vector{String} of dropped file paths
+    on_drop::FunctionWrapper{Nothing,Tuple{Vector{String}}}  # Called with Vector{String} of dropped file paths
 end
 
 """
@@ -19,12 +19,12 @@ Or with keyword argument:
 DropArea(my_component; on_drop = paths -> println(paths))
 ```
 """
-function DropArea(child::AbstractView; on_drop::Function=(_) -> nothing)
-    return DropAreaView(child, on_drop)
+function DropArea(child::AbstractView; on_drop=(_) -> nothing)
+    return DropAreaView(child, wrap_callback(FunctionWrapper{Nothing,Tuple{Vector{String}}}, on_drop))
 end
 
-function DropArea(on_drop::Function, child::AbstractView)
-    return DropAreaView(child, on_drop)
+function DropArea(on_drop, child::AbstractView)
+    return DropAreaView(child, wrap_callback(FunctionWrapper{Nothing,Tuple{Vector{String}}}, on_drop))
 end
 
 # Measurement - transparent pass-through

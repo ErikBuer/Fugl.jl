@@ -30,10 +30,12 @@ function Table(
     data::Vector{Vector{String}};
     style::TableStyle=TableStyle(),
     state::TableState=TableState(),
-    on_cell_click::Function=(row, col) -> nothing,
-    on_state_change::Function=(new_state) -> nothing
+    on_cell_click=(row, col) -> nothing,
+    on_state_change=(new_state) -> nothing
 )
-    return TableView(headers, data, style, state, on_cell_click, on_state_change)
+    return TableView(headers, data, style, state,
+        wrap_callback(FunctionWrapper{Nothing,Tuple{Int,Int}}, on_cell_click),
+        wrap_callback(StateCallback{TableState}, on_state_change))
 end
 
 """

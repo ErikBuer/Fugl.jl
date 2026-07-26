@@ -123,22 +123,24 @@ struct MultiSelectListView <: AbstractView
     options::Vector{String}
     state::MultiSelectState
     style::MultiSelectListStyle
-    on_state_change::Function
-    on_change::Function
+    on_state_change::StateCallback{MultiSelectState}
+    on_change::FunctionWrapper{Nothing,Tuple{Set{Int}}}
 end
 
 function MultiSelectList(
     options::Vector{String},
     state::MultiSelectState;
     style::MultiSelectListStyle=MultiSelectListStyle(),
-    on_state_change::Function=(new_state) -> nothing,
-    on_change::Function=(selected_indices::Set{Int}) -> nothing,
+    on_state_change=(new_state) -> nothing,
+    on_change=(selected_indices::Set{Int}) -> nothing,
 )
     n = length(options)
     row_states = _multiselect_resize_states(state.row_states, n)
     initial_state = MultiSelectState(state; row_states=row_states)
 
-    return MultiSelectListView(options, initial_state, style, on_state_change, on_change)
+    return MultiSelectListView(options, initial_state, style,
+        wrap_callback(StateCallback{MultiSelectState}, on_state_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{Set{Int}}}, on_change))
 end
 
 # DEPRECATED measure function

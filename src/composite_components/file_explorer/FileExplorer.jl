@@ -12,9 +12,9 @@ struct FileExplorerView <: AbstractView
     extension_icons::Dict{String,Char}  # e.g. Dict(".jl" => '◆', ".md" => '§')
     dir_icon::Char                      # Monochrome glyph between the arrow and a directory name
     file_icon::Char                     # Fallback glyph before a file name
-    on_state_change::Function   # (new_state::FileExplorerState) -> nothing
-    on_select::Function         # (abs_path::String, name::String, is_dir::Bool) -> nothing
-    on_open::Function           # (abs_path::String, name::String, is_dir::Bool) -> nothing
+    on_state_change::StateCallback{FileExplorerState}   # (new_state::FileExplorerState) -> nothing
+    on_select::FunctionWrapper{Nothing,Tuple{String,String,Bool}}         # (abs_path::String, name::String, is_dir::Bool) -> nothing
+    on_open::FunctionWrapper{Nothing,Tuple{String,String,Bool}}           # (abs_path::String, name::String, is_dir::Bool) -> nothing
 end
 
 """
@@ -28,11 +28,14 @@ function FileExplorer(
     extension_icons::Dict{String,Char}=Dict{String,Char}(),
     dir_icon::Char='',
     file_icon::Char='',
-    on_state_change::Function=(ns) -> nothing,
-    on_select::Function=(abs_path, name, is_dir) -> nothing,
-    on_open::Function=(abs_path, name, is_dir) -> nothing,
+    on_state_change=(ns) -> nothing,
+    on_select=(abs_path, name, is_dir) -> nothing,
+    on_open=(abs_path, name, is_dir) -> nothing,
 )
-    return FileExplorerView(state, style, extension_icons, dir_icon, file_icon, on_state_change, on_select, on_open)
+    return FileExplorerView(state, style, extension_icons, dir_icon, file_icon,
+        wrap_callback(StateCallback{FileExplorerState}, on_state_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{String,String,Bool}}, on_select),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{String,String,Bool}}, on_open))
 end
 
 function measure(view::FileExplorerView)::Tuple{Float32,Float32}

@@ -1,9 +1,9 @@
 struct FocusView <: AbstractView
     child::AbstractView
     is_focused::Bool
-    on_focus_change::Function  # Callback when focus changes: (is_focused::Bool) -> nothing
-    on_focus::Function         # Callback when focus is gained: () -> nothing
-    on_blur::Function          # Callback when focus is lost: () -> nothing
+    on_focus_change::BoolCallback  # Callback when focus changes: (is_focused::Bool) -> nothing
+    on_focus::VoidCallback         # Callback when focus is gained: () -> nothing
+    on_blur::VoidCallback          # Callback when focus is lost: () -> nothing
 end
 
 """
@@ -24,10 +24,13 @@ Focus(
 """
 function Focus(child::AbstractView;
     is_focused::Bool=false,
-    on_focus_change::Function=(focused::Bool) -> nothing,
-    on_focus::Function=() -> nothing,
-    on_blur::Function=() -> nothing)
-    return FocusView(child, is_focused, on_focus_change, on_focus, on_blur)
+    on_focus_change=(focused::Bool) -> nothing,
+    on_focus=() -> nothing,
+    on_blur=() -> nothing)
+    return FocusView(child, is_focused,
+        wrap_callback(BoolCallback, on_focus_change),
+        wrap_callback(VoidCallback, on_focus),
+        wrap_callback(VoidCallback, on_blur))
 end
 
 # Measurement functions - just pass through to child

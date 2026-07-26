@@ -11,8 +11,8 @@ struct PolarPlotView <: AbstractView
     elements::Vector{<:AbstractPlotElement}  # Using unified plot elements
     state::PolarState
     style::PolarStyle
-    on_state_change::Function
-    on_element_hover::Union{Function,Nothing}  # Callback(idx::Union{Int,Nothing}) when hover changes
+    on_state_change::StateCallback{PolarState}
+    on_element_hover::Union{FunctionWrapper{Nothing,Tuple{Any}},Nothing}  # Callback(idx::Union{Int,Nothing}) when hover changes
 end
 
 """
@@ -40,8 +40,8 @@ function PolarPlot(
     elements::Vector{<:AbstractPlotElement},
     style::PolarStyle=PolarStyle(),
     state::PolarState=PolarState(),
-    on_state_change::Function=(new_state) -> nothing;
-    on_element_hover::Union{Function,Nothing}=nothing
+    on_state_change=(new_state) -> nothing;
+    on_element_hover=nothing
 )::PolarPlotView
     # Auto-scale r_max if enabled and elements exist
     if state.auto_scale_r && !isempty(elements)
@@ -61,7 +61,9 @@ function PolarPlot(
         state = PolarState(state; r_max=max_r, auto_scale_r=false)
     end
 
-    return PolarPlotView(elements, state, style, on_state_change, on_element_hover)
+    return PolarPlotView(elements, state, style,
+        wrap_callback(StateCallback{PolarState}, on_state_change),
+        on_element_hover === nothing ? nothing : wrap_callback(FunctionWrapper{Nothing,Tuple{Any}}, on_element_hover))
 end
 
 function measure(view::PolarPlotView)::Tuple{Float32,Float32}

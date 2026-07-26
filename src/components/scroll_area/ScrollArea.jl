@@ -10,8 +10,8 @@ struct VerticalScrollAreaView <: AbstractView
     style::ScrollAreaStyle
     show_scrollbar::Bool
     invert_scroll::Bool
-    on_scroll_change::Function
-    on_click::Function
+    on_scroll_change::StateCallback{VerticalScrollState}
+    on_click::FunctionWrapper{Nothing,Tuple{Float32,Float32}}
 end
 
 """
@@ -23,8 +23,8 @@ struct HorizontalScrollAreaView <: AbstractView
     style::ScrollAreaStyle
     show_scrollbar::Bool
     invert_scroll::Bool
-    on_scroll_change::Function
-    on_click::Function
+    on_scroll_change::StateCallback{HorizontalScrollState}
+    on_click::FunctionWrapper{Nothing,Tuple{Float32,Float32}}
 end
 
 """
@@ -46,12 +46,13 @@ function VerticalScrollArea(
     style::ScrollAreaStyle=ScrollAreaStyle(),
     show_scrollbar::Bool=true,
     invert_scroll::Bool=true,
-    on_scroll_change::Function=(new_state) -> nothing,
-    on_click::Function=(x, y) -> nothing
+    on_scroll_change=(new_state) -> nothing,
+    on_click=(x, y) -> nothing
 )
     return VerticalScrollAreaView(
         content, scroll_state, style, show_scrollbar, invert_scroll,
-        on_scroll_change, on_click
+        wrap_callback(StateCallback{VerticalScrollState}, on_scroll_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{Float32,Float32}}, on_click)
     )
 end
 
@@ -74,12 +75,13 @@ function HorizontalScrollArea(
     style::ScrollAreaStyle=ScrollAreaStyle(),
     show_scrollbar::Bool=true,
     invert_scroll::Bool=true,
-    on_scroll_change::Function=(new_state) -> nothing,
-    on_click::Function=(x, y) -> nothing
+    on_scroll_change=(new_state) -> nothing,
+    on_click=(x, y) -> nothing
 )
     return HorizontalScrollAreaView(
         content, scroll_state, style, show_scrollbar, invert_scroll,
-        on_scroll_change, on_click
+        wrap_callback(StateCallback{HorizontalScrollState}, on_scroll_change),
+        wrap_callback(FunctionWrapper{Nothing,Tuple{Float32,Float32}}, on_click)
     )
 end
 

@@ -41,8 +41,8 @@ struct PlotView <: AbstractView
     elements::Vector{AbstractPlotElement}
     state::PlotState
     style::PlotStyle
-    on_state_change::Function
-    on_element_hover::Union{Function,Nothing}  # Callback(idx::Union{Int,Nothing}) when hovered element changes
+    on_state_change::StateCallback{PlotState}
+    on_element_hover::Union{FunctionWrapper{Nothing,Tuple{Any}},Nothing}  # Callback(idx::Union{Int,Nothing}) when hovered element changes
 end
 
 """
@@ -52,15 +52,17 @@ function Plot(
     elements::Vector{<:AbstractPlotElement},
     style::PlotStyle=PlotStyle(),
     state::PlotState=PlotState(),
-    on_state_change::Function=(new_state) -> nothing;
-    on_element_hover::Union{Function,Nothing}=nothing
+    on_state_change=(new_state) -> nothing;
+    on_element_hover=nothing
 )::PlotView
     # If state has no initial bounds and auto_scale is true, calculate bounds from elements
     if isnothing(state.initial_bounds) && state.auto_scale && !isempty(elements)
         calculated_bounds = calculate_bounds_from_elements(Vector{AbstractPlotElement}(elements))
         state = PlotState(state; initial_bounds=calculated_bounds)
     end
-    return PlotView(Vector{AbstractPlotElement}(elements), state, style, on_state_change, on_element_hover)
+    return PlotView(Vector{AbstractPlotElement}(elements), state, style,
+        wrap_callback(StateCallback{PlotState}, on_state_change),
+        on_element_hover === nothing ? nothing : wrap_callback(FunctionWrapper{Nothing,Tuple{Any}}, on_element_hover))
 end
 
 function measure(view::PlotView)::Tuple{Float32,Float32}

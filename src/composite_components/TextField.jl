@@ -3,10 +3,10 @@
         state::EditorState=EditorState();
         max_length::Union{Int, Nothing}=nothing,
         style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
-        on_state_change::Function=(new_state::EditorState) -> nothing,
-        on_change::Function=(new_text) -> nothing,
-        on_focus::Function=() -> nothing,
-        on_blur::Function=() -> nothing
+        on_state_change=(new_state::EditorState) -> nothing,
+        on_change=(new_text) -> nothing,
+        on_focus=() -> nothing,
+        on_blur=() -> nothing
     )
 
 Single-line form field for entering text. Supports optional length limiting.
@@ -24,10 +24,10 @@ function TextField(
     state::EditorState=EditorState();
     max_length::Union{Int,Nothing}=nothing,
     style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
-    on_state_change::Function=(new_state::EditorState) -> nothing,
-    on_change::Function=(new_text) -> nothing,
-    on_focus::Function=() -> nothing,
-    on_blur::Function=() -> nothing
+    on_state_change=(new_state::EditorState) -> nothing,
+    on_change=(new_text) -> nothing,
+    on_focus=() -> nothing,
+    on_blur=() -> nothing
 )
     height = style.text_style.size_points + 2 * style.padding + 1
 

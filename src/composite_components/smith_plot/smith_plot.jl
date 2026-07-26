@@ -179,16 +179,16 @@ struct SmithPlotView <: AbstractView
     traces::Vector{SmithTrace}
     style::SmithStyle
     state::SmithState
-    on_state_change::Function
+    on_state_change::StateCallback{SmithState}
 end
 
 function SmithPlot(
     traces::Vector{SmithTrace},
     style::SmithStyle=SmithStyle(),
     state::SmithState=SmithState(),
-    on_state_change::Function=(new_state) -> nothing
+    on_state_change=(new_state) -> nothing
 )::SmithPlotView
-    return SmithPlotView(traces, style, state, on_state_change)
+    return SmithPlotView(traces, style, state, wrap_callback(StateCallback{SmithState}, on_state_change))
 end
 
 function measure(view::SmithPlotView)::Tuple{Float32,Float32}

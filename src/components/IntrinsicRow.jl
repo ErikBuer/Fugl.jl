@@ -2,15 +2,15 @@ struct IntrinsicRowView <: AbstractView
     children::Vector{AbstractView}
     spacing::Float32 # Space between children
     reduce_spacing_on_overflow::Bool # If true, reduce spacing before clipping when space is tight
-    on_click::Function
+    on_click::VoidCallback
 end
 
-function IntrinsicRow(children::Vector{<:AbstractView}; spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
-    return IntrinsicRowView(children, spacing, reduce_spacing_on_overflow, on_click)
+function IntrinsicRow(children::Vector{<:AbstractView}; spacing=10.0, reduce_spacing_on_overflow=true, on_click=() -> nothing)
+    return IntrinsicRowView(children, spacing, reduce_spacing_on_overflow, wrap_callback(VoidCallback, on_click))
 end
 
-@inline function IntrinsicRow(children::AbstractView...; spacing=10.0, reduce_spacing_on_overflow=true, on_click::Function=() -> nothing)
-    return IntrinsicRowView(collect(AbstractView, children), spacing, reduce_spacing_on_overflow, on_click)
+@inline function IntrinsicRow(children::AbstractView...; spacing=10.0, reduce_spacing_on_overflow=true, on_click=() -> nothing)
+    return IntrinsicRowView(collect(AbstractView, children), spacing, reduce_spacing_on_overflow, wrap_callback(VoidCallback, on_click))
 end
 
 function apply_layout(view::IntrinsicRowView, x::Float32, y::Float32, width::Float32, height::Float32)

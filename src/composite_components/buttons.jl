@@ -2,9 +2,9 @@
 A button containing text only.
 """
 function TextButton(text::String;
-    on_click::Function=() -> nothing,
-    on_mouse_down::Function=() -> nothing,
-    on_mouse_up::Function=() -> nothing,
+    on_click=() -> nothing,
+    on_mouse_down=() -> nothing,
+    on_mouse_up=() -> nothing,
     container_style=ContainerStyle(padding=0.0f0),
     hover_style::Union{Nothing,ContainerStyle}=nothing,
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
@@ -13,7 +13,7 @@ function TextButton(text::String;
     text_style=TextStyle(),
     disabled_text_style::Union{Nothing,TextStyle}=nothing,
     interaction_state::Union{Nothing,InteractionState}=nothing,
-    on_interaction_state_change::Function=(new_state) -> nothing
+    on_interaction_state_change=(new_state) -> nothing
 )
     # Choose text style based on disabled state
     active_text_style = if disabled && disabled_text_style !== nothing
@@ -42,16 +42,16 @@ A button consisting of the icon only.
 """
 function IconButton(
     image_path::String;
-    on_click::Function=() -> nothing,
-    on_mouse_down::Function=() -> nothing,
-    on_mouse_up::Function=() -> nothing,
+    on_click=() -> nothing,
+    on_mouse_down=() -> nothing,
+    on_mouse_up=() -> nothing,
     container_style::Union{Nothing,ContainerStyle}=nothing,
     hover_style::Union{Nothing,ContainerStyle}=nothing,
     pressed_style::Union{Nothing,ContainerStyle}=nothing,
     disabled::Bool=false,
     disabled_style::Union{Nothing,ContainerStyle}=nothing,
     interaction_state::Union{Nothing,InteractionState}=nothing,
-    on_interaction_state_change::Function=(new_state) -> nothing
+    on_interaction_state_change=(new_state) -> nothing
 )
     # Default transparent container style if none provided
     default_container_style = container_style === nothing ? ContainerStyle(

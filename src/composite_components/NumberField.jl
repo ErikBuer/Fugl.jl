@@ -38,10 +38,10 @@ end
         state::EditorState=EditorState();
         type::Type=Float64,
         style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
-        on_state_change::Function=(new_state::EditorState) -> nothing,
-        on_change::Function=(parsed_value) -> nothing,
-        on_focus::Function=() -> nothing,
-        on_blur::Function=() -> nothing
+        on_state_change=(new_state::EditorState) -> nothing,
+        on_change=(parsed_value) -> nothing,
+        on_focus=() -> nothing,
+        on_blur=() -> nothing
     )
 
 Form field for entering numbers. New values are parsed on focus loss.
@@ -59,10 +59,10 @@ function NumberField(
     state::EditorState=EditorState();
     type::Type=Float64,
     style::TextEditorStyle=TextBoxStyle(border_width=1.0f0),
-    on_state_change::Function=(new_state::EditorState) -> nothing,
-    on_change::Function=(parsed_value) -> nothing,
-    on_focus::Function=() -> nothing,
-    on_blur::Function=() -> nothing
+    on_state_change=(new_state::EditorState) -> nothing,
+    on_change=(parsed_value) -> nothing,
+    on_focus=() -> nothing,
+    on_blur=() -> nothing
 )
     return FormattedTextField(
         state;

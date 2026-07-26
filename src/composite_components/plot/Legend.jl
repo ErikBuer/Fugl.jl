@@ -8,8 +8,8 @@ struct LegendView <: AbstractView
     spacing::Float32
     item_height::Float32
     sample_width::Float32  # Width of the visual sample (line/marker)
-    on_click::Union{Function,Nothing}  # Callback(index::Int) when legend item clicked
-    on_element_hover::Union{Function,Nothing}  # Callback(idx::Union{Int,Nothing}) when hover changes
+    on_click::Union{IntCallback,Nothing}  # Callback(index::Int) when legend item clicked
+    on_element_hover::Union{FunctionWrapper{Nothing,Tuple{Any}},Nothing}  # Callback(idx::Union{Int,Nothing}) when hover changes
 end
 
 function Legend(
@@ -19,10 +19,12 @@ function Legend(
     spacing::Float32=8.0f0,
     item_height::Float32=20.0f0,
     sample_width::Float32=30.0f0,
-    on_click::Union{Function,Nothing}=nothing,
-    on_element_hover::Union{Function,Nothing}=nothing
+    on_click=nothing,
+    on_element_hover=nothing
 )
-    return LegendView(elements, text_style, text_style_hover, spacing, item_height, sample_width, on_click, on_element_hover)
+    return LegendView(elements, text_style, text_style_hover, spacing, item_height, sample_width,
+        on_click === nothing ? nothing : wrap_callback(IntCallback, on_click),
+        on_element_hover === nothing ? nothing : wrap_callback(FunctionWrapper{Nothing,Tuple{Any}}, on_element_hover))
 end
 
 function measure(view::LegendView)::Tuple{Float32,Float32}
