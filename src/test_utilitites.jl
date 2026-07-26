@@ -29,7 +29,7 @@ end
 function screenshot(ui_function::Function, output_file::String, width::Int, height::Int)
 
     # Initialize GLFW window (offscreen context)
-    gl_window = GLFW.Window(name="Offscreen", resolution=(width, height))
+    gl_window = GLFW.Window(name="Offscreen", resolution=(width, height), visible=false)
     GLA.set_context!(gl_window)
     GLFW.MakeContextCurrent(gl_window)
 
