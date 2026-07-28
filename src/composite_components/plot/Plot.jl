@@ -655,6 +655,19 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
         end
     end
 
+    # Shift+scroll zooms the y-axis only, Alt+scroll the x-axis only (both around the cursor)
+    if (mouse_state.scroll_y != 0.0) && !is_command_key(mouse_state.modifier_keys) &&
+       (mouse_state.modifier_keys.shift || mouse_state.modifier_keys.alt)
+        mouse_x = Float32(mouse_state.x) - x
+        mouse_y = Float32(mouse_state.y) - y
+
+        if mouse_x >= 0 && mouse_x <= width && mouse_y >= 0 && mouse_y <= height
+            axis = mouse_state.modifier_keys.alt ? :x : :y
+            axis_zoom_action() = handle_scroll_zoom(view, mouse_x, mouse_y, width, height, Float32(mouse_state.scroll_y), axis)
+            return ClickResult(z, axis_zoom_action)
+        end
+    end
+
     # Check for middle mouse button drag (pan functionality)
     if mouse_state.is_dragging[MiddleButton]
         if mouse_state.drag_start_position[MiddleButton] !== nothing
@@ -677,7 +690,7 @@ function detect_click(view::PlotView, mouse_state::InputState, x::Float32, y::Fl
     return nothing
 end
 
-function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, plot_width::Float32, plot_height::Float32, scroll_y::Float32)
+function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, plot_width::Float32, plot_height::Float32, scroll_y::Float32, axis::Symbol=:both)
     # Determine zoom factor based on scroll direction
     zoom_factor = scroll_y > 0 ? 0.9f0 : 1.1f0  # Scroll up = zoom in, scroll down = zoom out
 
@@ -707,10 +720,13 @@ function handle_scroll_zoom(view::PlotView, mouse_x::Float32, mouse_y::Float32, 
     new_x_range = x_range * zoom_factor
     new_y_range = y_range * zoom_factor
 
-    new_min_x = mouse_data_x - (mouse_data_x - min_x) * zoom_factor
-    new_max_x = mouse_data_x + (max_x - mouse_data_x) * zoom_factor
-    new_min_y = mouse_data_y - (mouse_data_y - min_y) * zoom_factor
-    new_max_y = mouse_data_y + (max_y - mouse_data_y) * zoom_factor
+    # Zoom around the cursor, constrained to the requested axis (:x, :y, or :both)
+    zoom_x = axis !== :y
+    zoom_y = axis !== :x
+    new_min_x = zoom_x ? mouse_data_x - (mouse_data_x - min_x) * zoom_factor : min_x
+    new_max_x = zoom_x ? mouse_data_x + (max_x - mouse_data_x) * zoom_factor : max_x
+    new_min_y = zoom_y ? mouse_data_y - (mouse_data_y - min_y) * zoom_factor : min_y
+    new_max_y = zoom_y ? mouse_data_y + (max_y - mouse_data_y) * zoom_factor : max_y
 
     # Create new current bounds
     new_current_bounds = Rectangle(new_min_x, new_min_y, new_max_x - new_min_x, new_max_y - new_min_y)
